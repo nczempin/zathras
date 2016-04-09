@@ -13,6 +13,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -33,7 +34,7 @@ private:
   uint_fast64_t rooks = 0x0900000000000001;
   uint_fast64_t queens = 0x0000001000000080;
   uint_fast64_t kings = 0x0008000000000008;
-
+  uint_fast64_t everything = 0xffffffffffffffff;
   uint_fast64_t white = 0x09ef100000000080;
   uint_fast64_t black = 0x0000001004798449;
 
@@ -43,6 +44,7 @@ private:
   void visit_bitboard(uint_fast64_t bb, function<void(int)>) const;
   static void visualize_mailbox_board(int board[64], ostream& stream);
   void visit_mailbox_board(int board[64], void (*f)(int)) const;
+  vector<uint_fast64_t> pregenerate_hoppers(vector<int> nm);
 };
 
 #endif /* POSITION_H_ */
