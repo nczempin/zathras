@@ -7,6 +7,14 @@
 
 #include "Perft_command.h"
 
+#include <getopt.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "Position.h"
+
 Perft_command::Perft_command(shared_ptr<Command_receiver> receiver) :
     Abstract_command(receiver)
 {
@@ -61,4 +69,8 @@ void Perft_command::do_short_option(int c, string argument)
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
+  int perft_depth = 3; //TODO get this from arguments, but use a reasonable default
+  shared_ptr<Position> pp = Position::create_start_position();
+  Position p = *pp;
+  cout << p << endl;
 }
