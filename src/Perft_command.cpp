@@ -73,4 +73,6 @@ void Perft_command::execute()
   shared_ptr<Position> pp = Position::create_start_position();
   Position p = *pp;
   cout << p << endl;
+
+  p.generate_moves();
 }

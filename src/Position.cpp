@@ -6,8 +6,7 @@
  */
 
 #include "Position.h"
-
-#include <cstdint>
+#include <bitset>
 
 Position::Position()
 {
@@ -107,16 +106,6 @@ void Position::print(ostream& stream) const
 {
   // TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 
-  uint_fast64_t pawns = 0x00e7000004698400;
-  uint_fast64_t knights = 0x0000000000000040;
-  uint_fast64_t bishops = 0x0000100000100000;
-  uint_fast64_t rooks = 0x0900000000000001;
-  uint_fast64_t queens = 0x0000001000000080;
-  uint_fast64_t kings = 0x0008000000000008;
-
-  uint_fast64_t white = 0x09ef100000000089;
-  uint_fast64_t black = 0x0000001004798449;
-
   int board[64];
   for (int i = 0; i < 64; ++i) {
     board[i] = 0;
@@ -176,4 +165,22 @@ void Position::print(ostream& stream) const
   stream << "1 | . . . . R . . R |" << endl;
   stream << "  +-----------------+" << endl;
   stream << "    A B C D E F G H";
+}
+
+void Position::generate_moves()
+{
+  int km[8] =
+    { 1, 7, 8, 9, -1, -7, -8, -9 };
+  uint_fast64_t king_moves[64][64];
+  bitset<64> bs[64];
+  for (int i = 0; i < 64; ++i) {
+    for (int k : km) {
+      int candidate = k + i;
+      if (candidate >= 0 && candidate < 64) {
+        bs[i][candidate] = true;
+        //cout << "king move: " << i << ": " << candidate << endl;
+      }
+    }
+    cout << bs[i] << endl;
+  }
 }
