@@ -30,7 +30,7 @@ ostream& operator<<(ostream& stream, const Position& position)
   return stream;
 }
 
-string Position::extract_row_string(uint_fast8_t row, string set) const
+string Position::extract_row_string(uint_fast8_t row, string set)
 {
 
   string clear = " .";
@@ -45,7 +45,7 @@ string Position::extract_row_string(uint_fast8_t row, string set) const
   return retval;
 }
 
-void Position::visualize_bitboard(uint_fast64_t pawns1, ostream& stream) const
+void Position::visualize_bitboard(uint_fast64_t pawns1, ostream& stream)
 {
   stream << "  +-----------------+" << endl;
   for (int i = 0; i < 8; ++i) {
@@ -59,7 +59,7 @@ void Position::visualize_bitboard(uint_fast64_t pawns1, ostream& stream) const
   stream << "  +-----------------+" << endl;
 }
 
-void Position::visualize_mailbox_board(int board[64], ostream& stream) const
+void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {
   stream << "  +-----------------+" << endl;
   const char* symbols = ".PNBRQKpnbrqk*";
@@ -171,16 +171,37 @@ void Position::generate_moves()
 {
   int km[8] =
     { 1, 7, 8, 9, -1, -7, -8, -9 };
-  uint_fast64_t king_moves[64][64];
+  uint_fast64_t king_moves[64];
   bitset<64> bs[64];
-  for (int i = 0; i < 64; ++i) {
+  for (int i = 63; i >= 0; --i) {
+//    bs[i][i] = true; // TODO only for debugging, own square shown
+    //cout << i << ". " << i % 8 << endl;
     for (int k : km) {
       int candidate = k + i;
       if (candidate >= 0 && candidate < 64) {
         bs[i][candidate] = true;
+        if (i % 8 == 7 && candidate % 8 == 0) {
+          bs[i][candidate] = false;
+        }
+        if (i % 8 == 0 && candidate % 8 == 7) {
+          bs[i][candidate] = false;
+        }
         //cout << "king move: " << i << ": " << candidate << endl;
       }
+
     }
-    cout << bs[i] << endl;
+    unsigned long int as_int = bs[i].to_ulong();
+    king_moves[63 - i] = as_int;
+    //    cout << as_int << endl;
   }
+
+  for (int i = 0; i < 64; ++i) {
+    //  visualize_bitboard(king_moves[i], cout);
+  }
+  visualize_bitboard(white, cout);
+  visit_bitboard(white & kings, [king_moves, cout](int x) {
+    cout << "king is at " << x << endl;
+    Position::visualize_bitboard(king_moves[x], cout);
+  });
+
 }

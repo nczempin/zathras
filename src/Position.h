@@ -34,14 +34,14 @@ private:
   uint_fast64_t queens = 0x0000001000000080;
   uint_fast64_t kings = 0x0008000000000008;
 
-  uint_fast64_t white = 0x09ef100000000089;
+  uint_fast64_t white = 0x09ef100000000080;
   uint_fast64_t black = 0x0000001004798449;
 
-  string extract_row_string(uint_fast8_t row, string set) const;
-  void visualize_bitboard(uint_fast64_t bb, ostream& stream) const;
+  static string extract_row_string(uint_fast8_t row, string set);
+  static void visualize_bitboard(uint_fast64_t bb, ostream& stream);
   //using hurz = function<void(int)>;
   void visit_bitboard(uint_fast64_t bb, function<void(int)>) const;
-  void visualize_mailbox_board(int board[64], ostream& stream) const;
+  static void visualize_mailbox_board(int board[64], ostream& stream);
   void visit_mailbox_board(int board[64], void (*f)(int)) const;
 };
 
