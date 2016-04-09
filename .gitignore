@@ -1,5 +1,5 @@
 #executable name
-mygit
+zathras
 #gcc object files
 *.o
 #vi temp files
