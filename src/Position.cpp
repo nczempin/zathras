@@ -169,10 +169,32 @@ void Position::print(ostream& stream) const
 
 void Position::generate_moves()
 {
+  int nm[8] =
+    { 10, 17, 15, 6, -6, -15, -17, -10 };
+  uint_fast64_t knight_moves[64];
+  bitset<64> bs[64];
+  for (int i = 63; i >= 0; --i) {
+    for (int k : nm) {
+      int candidate = k + i;
+      if (candidate >= 0 && candidate < 64) {
+        bs[i][candidate] = true;
+        if (i % 8 >= 6 && candidate % 8 <= 1) {
+          bs[i][candidate] = false;
+        }
+        if (i % 8 <= 1 && candidate % 8 >= 6) {
+          bs[i][candidate] = false;
+        }
+       }
+
+    }
+    unsigned long int as_int = bs[i].to_ulong();
+    knight_moves[63 - i] = as_int;
+    //    cout << as_int << endl;
+  }
   int km[8] =
     { 1, 7, 8, 9, -1, -7, -8, -9 };
   uint_fast64_t king_moves[64];
-  bitset<64> bs[64];
+
   for (int i = 63; i >= 0; --i) {
 //    bs[i][i] = true; // TODO only for debugging, own square shown
     //cout << i << ". " << i % 8 << endl;
@@ -198,10 +220,10 @@ void Position::generate_moves()
   for (int i = 0; i < 64; ++i) {
     //  visualize_bitboard(king_moves[i], cout);
   }
-  visualize_bitboard(white, cout);
-  visit_bitboard(white & kings, [king_moves, cout](int x) {
-    cout << "king is at " << x << endl;
-    Position::visualize_bitboard(king_moves[x], cout);
+  visualize_bitboard(black, cout);
+  visit_bitboard(black & knights, [knight_moves, cout](int x) {
+    cout << "black knight is at " << x << endl;
+    Position::visualize_bitboard(knight_moves[x], cout);
   });
 
 }
