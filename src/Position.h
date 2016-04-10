@@ -28,16 +28,16 @@ public:
   void pregenerate_moves();
 private:
   bool white_to_move = true;
-  uint_fast64_t pawns = 0x00e7000004698400;
-  uint_fast64_t knights = 0x0000000000000040;
+  uint_fast64_t pawns = 0x008469040000e700;
+  uint_fast64_t knights = 0x4000000000000000;
   uint_fast64_t bishops = 0x0000100000100000;
-  uint_fast64_t rooks = 0x0900000000000001;
+  uint_fast64_t rooks = 0x0100000000000009;
   uint_fast64_t queens = 0x8000000010000000;
-  uint_fast64_t kings = 0x0008000000000008;
+  uint_fast64_t kings = 0x0800000000000800;
   uint_fast64_t everything = 0xffffffffffffffff;
   uint_fast64_t top_row = 0xff00000000000000;
-  uint_fast64_t white = 0x09ef100000000080;
-  uint_fast64_t black = 0x0000001004798449;
+  uint_fast64_t white = 0x800000000010ef09;
+  uint_fast64_t black = 0x4984790410000000;
 
   static string extract_row_string(uint_fast8_t row, string set);
   static void visualize_bitboard(uint_fast64_t bb, ostream& stream);

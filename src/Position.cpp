@@ -118,45 +118,45 @@ void Position::print(ostream& stream) const
 //  board[48] = 1;
 //  board[32] = 1;
   //TODO generalize (I assume with a template)
-//  visit_bitboard(white & pawns, [&board](int x) {
-//    board[x] = 1;
-//  });
-//  visit_bitboard(white & knights, [&board](int x) {
-//    board[x] = 2;
-//  });
-//  visit_bitboard(white & bishops, [&board](int x) {
-//    board[x] = 3;
-//  });
-//  visit_bitboard(white & rooks, [&board](int x) {
-//    board[x] = 4;
-//  });
-//  visit_bitboard(white & queens, [&board](int x) {
-//    board[x] = 5;
-//  });
-//  visit_bitboard(white & kings, [&board](int x) {
-//    board[x] = 6;
-//  });
-//  visit_bitboard(black & pawns, [&board](int x) {
-//    board[x] = 7;
-//  });
-//  visit_bitboard(black & knights, [&board](int x) {
-//    board[x] = 8;
-//  });
-//  visit_bitboard(black & bishops, [&board](int x) {
-//    board[x] = 9;
-//  });
-//  visit_bitboard(black & rooks, [&board](int x) {
-//    board[x] = 10;
-//  });
-//  visit_bitboard(black & queens, [&board](int x) {
-//    board[x] = 11;
-//  });
-//  visit_bitboard(black & kings, [&board](int x) {
-//    board[x] = 12;
-//  });
-//  visit_bitboard(~(black | white), [&board](int x) {
-//    board[x] = 13;
-//  });
+  visit_bitboard(white & pawns, [&board](int x) {
+    board[x] = 1;
+  });
+  visit_bitboard(white & knights, [&board](int x) {
+    board[x] = 2;
+  });
+  visit_bitboard(white & bishops, [&board](int x) {
+    board[x] = 3;
+  });
+  visit_bitboard(white & rooks, [&board](int x) {
+    board[x] = 4;
+  });
+  visit_bitboard(white & queens, [&board](int x) {
+    board[x] = 5;
+  });
+  visit_bitboard(white & kings, [&board](int x) {
+    board[x] = 6;
+  });
+  visit_bitboard(black & pawns, [&board](int x) {
+    board[x] = 7;
+  });
+  visit_bitboard(black & knights, [&board](int x) {
+    board[x] = 8;
+  });
+  visit_bitboard(black & bishops, [&board](int x) {
+    board[x] = 9;
+  });
+  visit_bitboard(black & rooks, [&board](int x) {
+    board[x] = 10;
+  });
+  visit_bitboard(black & queens, [&board](int x) {
+    board[x] = 11;
+  });
+  visit_bitboard(black & kings, [&board](int x) {
+    board[x] = 12;
+  });
+  visit_bitboard(~(black | white), [&board](int x) {
+    board[x] = 13;
+  });
 
   visualize_mailbox_board(board, stream);
 
@@ -287,47 +287,26 @@ vector<uint_fast64_t> Position::pregenerate_pawn_no_capture_moves(int start,
 {
   bitset<64> bs[64];
 
-//  for (int i = 0; i < 64; ++i) {
-//    bs[i][i] = true;
-//  }
   for (int i = start; i != 64 - start; i += direction) {
     int candidate = i + 8 * direction; // single step
     bs[i][candidate] = true;
   }
+  vector<uint_fast64_t> pawn_no_capture_moves(64);
   for (int i = start; i != stop; i += direction) {
     int candidate = i + 16 * direction; // double step
     bs[i][candidate] = true;
-    //    cout << i << ", " << direction << ": " << candidate << endl;
-//    bs[i][i] = true; //DEBUG
-  }
-//  bool done = false;
-//  int i = second_row_start;
-//  while (!done) {
-//    cout << i << ", " << direction << endl;
-//    int candidate = i + 16 * direction; // double step
-//    bs[i][candidate] = true;
-//    i -= direction;
-//    if (i == 64 - second_row_start) {
-//      done = true;
-//    }
-//  }
 
-//  for (int i = start; i != stop; i -= direction) {
-//    int candidate = i - 16 * direction; // double step
-//    cout << i << ", " << direction << ": " << candidate << endl;
-//    bs[i][candidate] = true;
-//  }
-  vector<uint_fast64_t> pawn_no_capture_moves(64);
-  for (int i = 0; i < 64; ++i) {
+    for (int i = 0; i < 64; ++i) {
 
-    unsigned long int as_int = bs[i].to_ulong();
-    cout << "(" << i << ") " << "as_int: " << hex << as_int << dec << endl;
-    cout << "(" << 63 - i << ") " << "as_int: " << hex << as_int << dec << endl;
-    pawn_no_capture_moves[i] = as_int; //TODO still not sure why I have to do it like this
+      unsigned long int as_int = bs[i].to_ulong();
+//    cout << "(" << i << ") " << "as_int: " << hex << as_int << dec << endl;
+//    cout << "(" << 63 - i << ") " << "as_int: " << hex << as_int << dec << endl;
+      pawn_no_capture_moves[i] = as_int;
+    }
   }
   return pawn_no_capture_moves;
-}
 
+}
 vector<uint_fast64_t> Position::pregenerate_white_pawn_no_capture_moves()
 {
   vector<uint_fast64_t> white_pawn_no_capture_moves =
@@ -368,9 +347,9 @@ void Position::pregenerate_moves()
 //  visit_bitboard(0xffffffffffffffff, [rook_moves, &cout](int x) {
 //    Position::visualize_bitboard(rook_moves[x], cout);
 //  });
-  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
-    Position::visualize_bitboard(queen_moves[x], cout);
-  });
+//  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
+//    Position::visualize_bitboard(queen_moves[x], cout);
+//  });
 //  visit_bitboard(0x00ffffffffffff00,
 //      [white_pawn_no_capture_moves, &cout](int x) {
 //        char column = 'a' + x % 8;
