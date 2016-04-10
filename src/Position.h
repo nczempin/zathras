@@ -8,6 +8,7 @@
 #ifndef POSITION_H_
 #define POSITION_H_
 
+#include <bitset>
 #include <cstdint>
 #include <functional>
 #include <iostream>
@@ -54,8 +55,11 @@ private:
   vector<uint_fast64_t> pregenerate_queen_moves();
   vector<uint_fast64_t> pregenerate_white_pawn_no_capture_moves();
   vector<uint_fast64_t> pregenerate_black_pawn_no_capture_moves();
-  vector<uint_fast64_t> pregenerate_pawn_no_capture_moves(int start, int stop,
-      int direction);
+  vector<uint_fast64_t> pregen_pawn_nocaps(int start, int stop, int direction);
+  vector<uint_fast64_t> pregenerate_white_pawn_capture_moves();
+  vector<uint_fast64_t> pregenerate_black_pawn_capture_moves();
+  vector<uint_fast64_t> pregen_pawn_caps(int direction);
+  void place_pawn_move(int i, int a, int direction, bitset<64> bs[64]);
 };
 
 #endif /* POSITION_H_ */

@@ -37,8 +37,8 @@ string Position::extract_row_string(uint_fast8_t row, string set)
   string retval = "";
 
   for (int i = 0; i < 8; ++i) {
-    int tmp = row & 128; // mask all but highest bit
-    row = row << 1;
+    int tmp = row & 1;
+    row = row >> 1;
     string which = tmp != 0 ? set : clear;
     retval += which;
   }
@@ -72,11 +72,11 @@ void Position::visit_bitboard(uint_fast64_t bb, function<void(int)> f) const
 
     for (int j = 0; j < 8; ++j) {
       int coord = (7 - i) * 8 + j;
-      int tmp2 = tmp & 128; // mask all but highest bit
+      int tmp2 = tmp & 1;
       if (tmp2 != 0) {
         f(coord);
       }
-      tmp = tmp << 1;
+      tmp = tmp >> 1;
     }
   }
 }
@@ -282,8 +282,53 @@ vector<uint_fast64_t> Position::pregenerate_queen_moves()
 
 }
 
-vector<uint_fast64_t> Position::pregenerate_pawn_no_capture_moves(int start,
-    int stop, int direction)
+void Position::place_pawn_move(int i, int a, int direction, bitset<64> bs[64])
+{
+  int candidate = i + a * direction;
+  //    cout << i << ": " << candidate << endl;
+  if (candidate >= 0 && candidate < 64) {
+    bs[i][candidate] = true;
+    if (i % 8 == 7 && candidate % 8 == 0) {
+      bs[i][candidate] = false;
+    }
+    if (i % 8 == 0 && candidate % 8 == 7) {
+      bs[i][candidate] = false;
+    }
+  }
+}
+
+vector<uint_fast64_t> Position::pregen_pawn_caps(int direction)
+{
+  bitset<64> bs[64];
+  vector<uint_fast64_t> pawn_capture_moves(64);
+  for (int i = 8; i < 56; ++i) {
+    //TODO not the most elegant way to refactor/extract the function
+    place_pawn_move(i, 9, direction, bs);
+    place_pawn_move(i, 7, direction, bs);
+  }
+  for (int i = 0; i < 64; ++i) {
+
+    unsigned long int as_int = bs[i].to_ulong();
+    pawn_capture_moves[i] = as_int;
+    cout << "pcm (" << i << "): " << hex << as_int << dec << endl;
+  }
+  return pawn_capture_moves;
+
+}
+vector<uint_fast64_t> Position::pregenerate_white_pawn_capture_moves()
+{
+  vector<uint_fast64_t> white_pawn_capture_moves = pregen_pawn_caps(1);
+  return white_pawn_capture_moves;
+}
+
+vector<uint_fast64_t> Position::pregenerate_black_pawn_capture_moves()
+{
+  vector<uint_fast64_t> black_pawn_capture_moves = pregen_pawn_caps(-1);
+  return black_pawn_capture_moves;
+
+}
+vector<uint_fast64_t> Position::pregen_pawn_nocaps(int start, int stop,
+    int direction)
 {
   bitset<64> bs[64];
 
@@ -309,14 +354,14 @@ vector<uint_fast64_t> Position::pregenerate_pawn_no_capture_moves(int start,
 }
 vector<uint_fast64_t> Position::pregenerate_white_pawn_no_capture_moves()
 {
-  vector<uint_fast64_t> white_pawn_no_capture_moves =
-      pregenerate_pawn_no_capture_moves(8, 16, 1);
+  vector<uint_fast64_t> white_pawn_no_capture_moves = pregen_pawn_nocaps(8, 16,
+      1);
   return white_pawn_no_capture_moves;
 }
 vector<uint_fast64_t> Position::pregenerate_black_pawn_no_capture_moves()
 {
-  vector<uint_fast64_t> black_pawn_no_capture_moves =
-      pregenerate_pawn_no_capture_moves(56, 47, -1);
+  vector<uint_fast64_t> black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47,
+      -1);
   return black_pawn_no_capture_moves;
 }
 
@@ -331,6 +376,10 @@ void Position::pregenerate_moves()
       pregenerate_white_pawn_no_capture_moves();
   vector<uint_fast64_t> black_pawn_no_capture_moves =
       pregenerate_black_pawn_no_capture_moves();
+  vector<uint_fast64_t> white_pawn_capture_moves =
+      pregenerate_white_pawn_capture_moves();
+  vector<uint_fast64_t> black_pawn_capture_moves =
+      pregenerate_black_pawn_capture_moves();
 //  for (int i = 0; i < 64; ++i) {
 //    cout << i << ". bpncm: " << black_pawn_no_capture_moves[i] << endl;
 //  }
@@ -350,6 +399,27 @@ void Position::pregenerate_moves()
 //  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
 //    Position::visualize_bitboard(queen_moves[x], cout);
 //  });
+
+  //  visit_bitboard(0x00ffffffffffff00,
+  //      [black_pawn_no_capture_moves, &cout](int x) {
+  //        char column = 'a' + x % 8;
+  //        char row = '1' + x / 8;
+  //        cout << x << " = " << column << row << endl;
+  //        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
+  //      });
+  visit_bitboard(0x00ffffffffffff00, [white_pawn_capture_moves, &cout](int x) {
+    char column = 'a' + x % 8;
+    char row = '1' + x / 8;
+    cout << x << " = " << column << row << endl;
+    Position::visualize_bitboard(white_pawn_capture_moves[x], cout);
+  });
+  visit_bitboard(0x00ffffffffffff00, [black_pawn_capture_moves, &cout](int x) {
+    char column = 'a' + x % 8;
+    char row = '1' + x / 8;
+    cout << x << " = " << column << row << endl;
+    Position::visualize_bitboard(black_pawn_capture_moves[x], cout);
+  });
+  //
 //  visit_bitboard(0x00ffffffffffff00,
 //      [white_pawn_no_capture_moves, &cout](int x) {
 //        char column = 'a' + x % 8;
@@ -357,15 +427,6 @@ void Position::pregenerate_moves()
 //        cout << x << " = " << column << row << endl;
 //        Position::visualize_bitboard(white_pawn_no_capture_moves[x], cout);
 //      });
-
-//  visit_bitboard(0x00ffffffffffff00,
-//      [black_pawn_no_capture_moves, &cout](int x) {
-//        char column = 'a' + x % 8;
-//        char row = '1' + x / 8;
-//        cout << x << " = " << column << row << endl;
-//        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
-//      });
-  //
 //  visit_bitboard(everything, [](int x) {
 //    char column = 'a' + x % 8;
 //    char row = '1' + x / 8;
