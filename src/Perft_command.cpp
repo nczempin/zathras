@@ -74,5 +74,5 @@ void Perft_command::execute()
   Position p = *pp;
   cout << p << endl;
 
-  p.generate_moves();
+  p.pregenerate_moves();
 }

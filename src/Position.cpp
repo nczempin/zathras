@@ -45,13 +45,17 @@ string Position::extract_row_string(uint_fast8_t row, string set)
   return retval;
 }
 
-void Position::visualize_bitboard(uint_fast64_t pawns1, ostream& stream)
+void Position::visualize_bitboard(uint_fast64_t bb, ostream& stream)
 {
+  //stream << "bb: " << hex << bb << dec << endl;
   stream << "  +-----------------+" << endl;
-  for (int i = 0; i < 8; ++i) {
-    int tmp = pawns1 & 0xff;
-    pawns1 = pawns1 >> 8;
-    stream << (8 - i) << " |";
+  for (int i = 7; i >= 0; --i) {
+    uint_fast64_t tmp = (bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
+    //stream << "tmp: " << hex << tmp << dec << endl;
+    //stream << "bb: " << hex << bb << dec << endl;
+    bb = bb << 8;
+    //stream << "bb: " << hex << bb << dec << endl;
+    stream << (i + 1) << " |";
     string row_string = extract_row_string(tmp, " *");
     stream << row_string;
     stream << " |" << endl;
@@ -60,6 +64,22 @@ void Position::visualize_bitboard(uint_fast64_t pawns1, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
+void Position::visit_bitboard(uint_fast64_t bb, function<void(int)> f) const
+{
+  for (int i = 0; i < 8; ++i) {
+    uint_fast64_t tmp = (bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
+    bb = bb << 8;
+
+    for (int j = 0; j < 8; ++j) {
+      int coord = (7 - i) * 8 + j;
+      int tmp2 = tmp & 128; // mask all but highest bit
+      if (tmp2 != 0) {
+        f(coord);
+      }
+      tmp = tmp << 1;
+    }
+  }
+}
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {
   stream << "  +-----------------+" << endl;
@@ -75,23 +95,6 @@ void Position::visualize_mailbox_board(int board[64], ostream& stream)
   }
   stream << "  +-----------------+" << endl;
   stream << "    A B C D E F G H" << endl;
-}
-
-void Position::visit_bitboard(uint_fast64_t bb, function<void(int)> f) const
-{
-  for (int i = 0; i < 8; ++i) {
-    int tmp = bb & 0xff;
-    bb = bb >> 8;
-
-    for (int j = 0; j < 8; ++j) {
-      int coord = (7 - i) * 8 + j;
-      int tmp2 = tmp & 128; // mask all but highest bit
-      if (tmp2 != 0) {
-        f(coord);
-      }
-      tmp = tmp << 1;
-    }
-  }
 }
 
 void Position::visit_mailbox_board(int board[64], void (*f)(int)) const
@@ -112,47 +115,48 @@ void Position::print(ostream& stream) const
   for (int i = 0; i < 64; ++i) {
     board[i] = 0;
   }
-
+//  board[48] = 1;
+//  board[32] = 1;
   //TODO generalize (I assume with a template)
-  visit_bitboard(white & pawns, [&board](int x) {
-    board[x] = 1;
-  });
-  visit_bitboard(white & knights, [&board](int x) {
-    board[x] = 2;
-  });
-  visit_bitboard(white & bishops, [&board](int x) {
-    board[x] = 3;
-  });
-  visit_bitboard(white & rooks, [&board](int x) {
-    board[x] = 4;
-  });
-  visit_bitboard(white & queens, [&board](int x) {
-    board[x] = 5;
-  });
-  visit_bitboard(white & kings, [&board](int x) {
-    board[x] = 6;
-  });
-  visit_bitboard(black & pawns, [&board](int x) {
-    board[x] = 7;
-  });
-  visit_bitboard(black & knights, [&board](int x) {
-    board[x] = 8;
-  });
-  visit_bitboard(black & bishops, [&board](int x) {
-    board[x] = 9;
-  });
-  visit_bitboard(black & rooks, [&board](int x) {
-    board[x] = 10;
-  });
-  visit_bitboard(black & queens, [&board](int x) {
-    board[x] = 11;
-  });
-  visit_bitboard(black & kings, [&board](int x) {
-    board[x] = 12;
-  });
-  visit_bitboard(~(black | white), [&board](int x) {
-    board[x] = 13;
-  });
+//  visit_bitboard(white & pawns, [&board](int x) {
+//    board[x] = 1;
+//  });
+//  visit_bitboard(white & knights, [&board](int x) {
+//    board[x] = 2;
+//  });
+//  visit_bitboard(white & bishops, [&board](int x) {
+//    board[x] = 3;
+//  });
+//  visit_bitboard(white & rooks, [&board](int x) {
+//    board[x] = 4;
+//  });
+//  visit_bitboard(white & queens, [&board](int x) {
+//    board[x] = 5;
+//  });
+//  visit_bitboard(white & kings, [&board](int x) {
+//    board[x] = 6;
+//  });
+//  visit_bitboard(black & pawns, [&board](int x) {
+//    board[x] = 7;
+//  });
+//  visit_bitboard(black & knights, [&board](int x) {
+//    board[x] = 8;
+//  });
+//  visit_bitboard(black & bishops, [&board](int x) {
+//    board[x] = 9;
+//  });
+//  visit_bitboard(black & rooks, [&board](int x) {
+//    board[x] = 10;
+//  });
+//  visit_bitboard(black & queens, [&board](int x) {
+//    board[x] = 11;
+//  });
+//  visit_bitboard(black & kings, [&board](int x) {
+//    board[x] = 12;
+//  });
+//  visit_bitboard(~(black | white), [&board](int x) {
+//    board[x] = 13;
+//  });
 
   visualize_mailbox_board(board, stream);
 
@@ -188,7 +192,7 @@ vector<uint_fast64_t> Position::pregenerate_hoppers(vector<int> hops)
     }
     unsigned long int as_int = bs[i].to_ulong();
     //cout << as_int << endl;
-    hoppers[63 - i] = as_int; //TODO still not sure why I have to do this
+    hoppers[i] = as_int;
   }
   return hoppers;
 }
@@ -217,7 +221,7 @@ vector<uint_fast64_t> Position::pregenerate_rays(int direction)
 
     }
     unsigned long int as_int = bs[i].to_ulong();
-    rays[63 - i] = as_int; //TODO still not sure why I have to do this
+    rays[i] = as_int;
 
   }
   return rays;
@@ -277,28 +281,117 @@ vector<uint_fast64_t> Position::pregenerate_queen_moves()
   return queen_moves;
 
 }
-void Position::generate_moves()
+
+vector<uint_fast64_t> Position::pregenerate_pawn_no_capture_moves(int start,
+    int stop, int direction)
+{
+  bitset<64> bs[64];
+
+//  for (int i = 0; i < 64; ++i) {
+//    bs[i][i] = true;
+//  }
+  for (int i = start; i != 64 - start; i += direction) {
+    int candidate = i + 8 * direction; // single step
+    bs[i][candidate] = true;
+  }
+  for (int i = start; i != stop; i += direction) {
+    int candidate = i + 16 * direction; // double step
+    bs[i][candidate] = true;
+    //    cout << i << ", " << direction << ": " << candidate << endl;
+//    bs[i][i] = true; //DEBUG
+  }
+//  bool done = false;
+//  int i = second_row_start;
+//  while (!done) {
+//    cout << i << ", " << direction << endl;
+//    int candidate = i + 16 * direction; // double step
+//    bs[i][candidate] = true;
+//    i -= direction;
+//    if (i == 64 - second_row_start) {
+//      done = true;
+//    }
+//  }
+
+//  for (int i = start; i != stop; i -= direction) {
+//    int candidate = i - 16 * direction; // double step
+//    cout << i << ", " << direction << ": " << candidate << endl;
+//    bs[i][candidate] = true;
+//  }
+  vector<uint_fast64_t> pawn_no_capture_moves(64);
+  for (int i = 0; i < 64; ++i) {
+
+    unsigned long int as_int = bs[i].to_ulong();
+    cout << "(" << i << ") " << "as_int: " << hex << as_int << dec << endl;
+    cout << "(" << 63 - i << ") " << "as_int: " << hex << as_int << dec << endl;
+    pawn_no_capture_moves[i] = as_int; //TODO still not sure why I have to do it like this
+  }
+  return pawn_no_capture_moves;
+}
+
+vector<uint_fast64_t> Position::pregenerate_white_pawn_no_capture_moves()
+{
+  vector<uint_fast64_t> white_pawn_no_capture_moves =
+      pregenerate_pawn_no_capture_moves(8, 16, 1);
+  return white_pawn_no_capture_moves;
+}
+vector<uint_fast64_t> Position::pregenerate_black_pawn_no_capture_moves()
+{
+  vector<uint_fast64_t> black_pawn_no_capture_moves =
+      pregenerate_pawn_no_capture_moves(56, 47, -1);
+  return black_pawn_no_capture_moves;
+}
+
+void Position::pregenerate_moves()
 {
   vector<uint_fast64_t> knight_moves = pregenerate_knight_moves();
   vector<uint_fast64_t> king_moves = pregenerate_king_moves();
   vector<uint_fast64_t> bishop_moves = pregenerate_bishop_moves();
   vector<uint_fast64_t> rook_moves = pregenerate_rook_moves();
   vector<uint_fast64_t> queen_moves = pregenerate_queen_moves();
-  visit_bitboard(0xffffffffffffffff, [knight_moves, &cout](int x) {
-    Position::visualize_bitboard(knight_moves[x], cout);
-  });
-  visit_bitboard(0xffffffffffffffff, [king_moves, &cout](int x) {
-    Position::visualize_bitboard(king_moves[x], cout);
-  });
-  visit_bitboard(0xffffffffffffffff, [bishop_moves, &cout](int x) {
-    Position::visualize_bitboard(bishop_moves[x], cout);
-  });
-  visit_bitboard(0xffffffffffffffff, [rook_moves, &cout](int x) {
-    Position::visualize_bitboard(rook_moves[x], cout);
-  });
+  vector<uint_fast64_t> white_pawn_no_capture_moves =
+      pregenerate_white_pawn_no_capture_moves();
+  vector<uint_fast64_t> black_pawn_no_capture_moves =
+      pregenerate_black_pawn_no_capture_moves();
+//  for (int i = 0; i < 64; ++i) {
+//    cout << i << ". bpncm: " << black_pawn_no_capture_moves[i] << endl;
+//  }
+
+//  visit_bitboard(0xffffffffffffffff, [knight_moves, &cout](int x) {
+//    Position::visualize_bitboard(knight_moves[x], cout);
+//  });
+//  visit_bitboard(0xffffffffffffffff, [king_moves, &cout](int x) {
+//    Position::visualize_bitboard(king_moves[x], cout);
+//  });
+//  visit_bitboard(0xffffffffffffffff, [bishop_moves, &cout](int x) {
+//    Position::visualize_bitboard(bishop_moves[x], cout);
+//  });
+//  visit_bitboard(0xffffffffffffffff, [rook_moves, &cout](int x) {
+//    Position::visualize_bitboard(rook_moves[x], cout);
+//  });
   visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
     Position::visualize_bitboard(queen_moves[x], cout);
   });
+//  visit_bitboard(0x00ffffffffffff00,
+//      [white_pawn_no_capture_moves, &cout](int x) {
+//        char column = 'a' + x % 8;
+//        char row = '1' + x / 8;
+//        cout << x << " = " << column << row << endl;
+//        Position::visualize_bitboard(white_pawn_no_capture_moves[x], cout);
+//      });
 
+//  visit_bitboard(0x00ffffffffffff00,
+//      [black_pawn_no_capture_moves, &cout](int x) {
+//        char column = 'a' + x % 8;
+//        char row = '1' + x / 8;
+//        cout << x << " = " << column << row << endl;
+//        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
+//      });
+  //
+//  visit_bitboard(everything, [](int x) {
+//    char column = 'a' + x % 8;
+//    char row = '1' + x / 8;
+//    cout << x << " = " << column << row << endl;
+//  });
+
+  cout << "done" << endl;
 }
-
