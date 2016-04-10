@@ -167,12 +167,12 @@ void Position::print(ostream& stream) const
   stream << "    A B C D E F G H";
 }
 
-vector<uint_fast64_t> Position::pregenerate_hoppers(vector<int> nm)
+vector<uint_fast64_t> Position::pregenerate_hoppers(vector<int> hops)
 {
-  vector<uint_fast64_t> knight_moves(64);
+  vector<uint_fast64_t> hoppers(64);
   bitset<64> bs[64];
   for (int i = 63; i >= 0; --i) {
-    for (int k : nm) {
+    for (int k : hops) {
       int candidate = k + i;
       if (candidate >= 0 && candidate < 64) {
         bs[i][candidate] = true;
@@ -186,11 +186,40 @@ vector<uint_fast64_t> Position::pregenerate_hoppers(vector<int> nm)
     }
     unsigned long int as_int = bs[i].to_ulong();
     //cout << as_int << endl;
-    knight_moves[63 - i] = as_int;
+    hoppers[63 - i] = as_int; //TODO still not sure why I have to do this
   }
-  return knight_moves;
+  return hoppers;
 }
 
+vector<uint_fast64_t> Position::pregenerate_rays(int direction)
+{
+  vector<uint_fast64_t> rays(64);
+  bitset<64> bs[64];
+  for (int i = 63; i >= 0; --i) {
+    for (int j = 0; j < 7; ++j) {
+      int from = i + direction * j;
+      int candidate = from + direction;
+
+      if (candidate >= 0 && candidate < 64) {
+        bs[i][candidate] = true;
+        if (from % 8 == 7 && candidate % 8 == 0) {
+          bs[i][candidate] = false;
+        }
+        if (from % 8 == 0 && candidate % 8 == 7) {
+          bs[i][candidate] = false;
+        }
+      }
+      if (!bs[i][candidate]) { // as soon as we hit an illegal target,
+        break; // the ray ends
+      }
+
+    }
+    unsigned long int as_int = bs[i].to_ulong();
+    rays[63 - i] = as_int; //TODO still not sure why I have to do this
+
+  }
+  return rays;
+}
 void Position::generate_moves()
 {
   vector<int> nm
@@ -206,5 +235,17 @@ void Position::generate_moves()
   visit_bitboard(0xffffffffffffffff, [king_moves, &cout](int x) {
     Position::visualize_bitboard(king_moves[x], cout);
   });
+  vector<uint_fast64_t> bishop_NE = pregenerate_rays(9);
+  vector<uint_fast64_t> bishop_NW = pregenerate_rays(7);
+  vector<uint_fast64_t> bishop_SE = pregenerate_rays(-9);
+  vector<uint_fast64_t> bishop_SW = pregenerate_rays(-7);
+  vector<uint_fast64_t> bishop_moves(64);
+  for (int i = 0; i < 64; ++i) {
+    bishop_moves[i] = bishop_NE[i] | bishop_NW[i] | bishop_SE[i] | bishop_SW[i];
+  }
+  visit_bitboard(0xffffffffffffffff, [bishop_moves, &cout](int x) {
+    Position::visualize_bitboard(bishop_moves[x], cout);
+  });
 
 }
+

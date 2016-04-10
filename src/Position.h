@@ -44,7 +44,8 @@ private:
   void visit_bitboard(uint_fast64_t bb, function<void(int)>) const;
   static void visualize_mailbox_board(int board[64], ostream& stream);
   void visit_mailbox_board(int board[64], void (*f)(int)) const;
-  vector<uint_fast64_t> pregenerate_hoppers(vector<int> nm);
+  vector<uint_fast64_t> pregenerate_hoppers(vector<int> jumps);
+  vector<uint_fast64_t> pregenerate_rays(int direction);
 };
 
 #endif /* POSITION_H_ */
