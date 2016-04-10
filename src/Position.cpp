@@ -252,11 +252,38 @@ vector<uint_fast64_t> Position::pregenerate_bishop_moves()
   return bishop_moves;
 }
 
+vector<uint_fast64_t> Position::pregenerate_rook_moves()
+{
+  vector<uint_fast64_t> rook_E = pregenerate_rays(1);
+  vector<uint_fast64_t> rook_W = pregenerate_rays(-1);
+  vector<uint_fast64_t> rook_S = pregenerate_rays(-8);
+  vector<uint_fast64_t> rook_N = pregenerate_rays(8);
+  vector<uint_fast64_t> rook_moves(64);
+  for (int i = 0; i < 64; ++i) {
+    rook_moves[i] = rook_E[i] | rook_W[i] | rook_S[i] | rook_N[i];
+  }
+  return rook_moves;
+
+}
+
+vector<uint_fast64_t> Position::pregenerate_queen_moves()
+{
+  vector<uint_fast64_t> bishop_moves = pregenerate_bishop_moves();
+  vector<uint_fast64_t> rook_moves = pregenerate_rook_moves();
+  vector<uint_fast64_t> queen_moves(64);
+  for (int i = 0; i < 64; ++i) {
+    queen_moves[i] = bishop_moves[i] | rook_moves[i];
+  }
+  return queen_moves;
+
+}
 void Position::generate_moves()
 {
   vector<uint_fast64_t> knight_moves = pregenerate_knight_moves();
   vector<uint_fast64_t> king_moves = pregenerate_king_moves();
   vector<uint_fast64_t> bishop_moves = pregenerate_bishop_moves();
+  vector<uint_fast64_t> rook_moves = pregenerate_rook_moves();
+  vector<uint_fast64_t> queen_moves = pregenerate_queen_moves();
   visit_bitboard(0xffffffffffffffff, [knight_moves, &cout](int x) {
     Position::visualize_bitboard(knight_moves[x], cout);
   });
@@ -265,6 +292,12 @@ void Position::generate_moves()
   });
   visit_bitboard(0xffffffffffffffff, [bishop_moves, &cout](int x) {
     Position::visualize_bitboard(bishop_moves[x], cout);
+  });
+  visit_bitboard(0xffffffffffffffff, [rook_moves, &cout](int x) {
+    Position::visualize_bitboard(rook_moves[x], cout);
+  });
+  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
+    Position::visualize_bitboard(queen_moves[x], cout);
   });
 
 }

@@ -49,6 +49,8 @@ private:
   vector<uint_fast64_t> pregenerate_knight_moves();
   vector<uint_fast64_t> pregenerate_king_moves();
   vector<uint_fast64_t> pregenerate_bishop_moves();
+  vector<uint_fast64_t> pregenerate_rook_moves();
+  vector<uint_fast64_t> pregenerate_queen_moves();
  };
 
 #endif /* POSITION_H_ */
