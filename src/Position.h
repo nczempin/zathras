@@ -46,6 +46,9 @@ private:
   void visit_mailbox_board(int board[64], void (*f)(int)) const;
   vector<uint_fast64_t> pregenerate_hoppers(vector<int> jumps);
   vector<uint_fast64_t> pregenerate_rays(int direction);
-};
+  vector<uint_fast64_t> pregenerate_knight_moves();
+  vector<uint_fast64_t> pregenerate_king_moves();
+  vector<uint_fast64_t> pregenerate_bishop_moves();
+ };
 
 #endif /* POSITION_H_ */

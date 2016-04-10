@@ -57,6 +57,7 @@ void Position::visualize_bitboard(uint_fast64_t pawns1, ostream& stream)
     stream << " |" << endl;
   }
   stream << "  +-----------------+" << endl;
+  stream << "    A B C D E F G H" << endl;
 }
 
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
@@ -73,6 +74,7 @@ void Position::visualize_mailbox_board(int board[64], ostream& stream)
     stream << " |" << endl;
   }
   stream << "  +-----------------+" << endl;
+  stream << "    A B C D E F G H" << endl;
 }
 
 void Position::visit_bitboard(uint_fast64_t bb, function<void(int)> f) const
@@ -220,21 +222,25 @@ vector<uint_fast64_t> Position::pregenerate_rays(int direction)
   }
   return rays;
 }
-void Position::generate_moves()
+
+vector<uint_fast64_t> Position::pregenerate_knight_moves()
 {
   vector<int> nm
     { 10, 17, 15, 6, -6, -15, -17, -10 };
-
   vector<uint_fast64_t> knight_moves = pregenerate_hoppers(nm);
-  visit_bitboard(0xffffffffffffffff, [knight_moves, &cout](int x) {
-    Position::visualize_bitboard(knight_moves[x], cout);
-  });
+  return knight_moves;
+}
+
+vector<uint_fast64_t> Position::pregenerate_king_moves()
+{
   vector<int> km =
     { 1, 7, 8, 9, -1, -7, -8, -9 };
   vector<uint_fast64_t> king_moves = pregenerate_hoppers(km);
-  visit_bitboard(0xffffffffffffffff, [king_moves, &cout](int x) {
-    Position::visualize_bitboard(king_moves[x], cout);
-  });
+  return king_moves;
+}
+
+vector<uint_fast64_t> Position::pregenerate_bishop_moves()
+{
   vector<uint_fast64_t> bishop_NE = pregenerate_rays(9);
   vector<uint_fast64_t> bishop_NW = pregenerate_rays(7);
   vector<uint_fast64_t> bishop_SE = pregenerate_rays(-9);
@@ -243,6 +249,20 @@ void Position::generate_moves()
   for (int i = 0; i < 64; ++i) {
     bishop_moves[i] = bishop_NE[i] | bishop_NW[i] | bishop_SE[i] | bishop_SW[i];
   }
+  return bishop_moves;
+}
+
+void Position::generate_moves()
+{
+  vector<uint_fast64_t> knight_moves = pregenerate_knight_moves();
+  vector<uint_fast64_t> king_moves = pregenerate_king_moves();
+  vector<uint_fast64_t> bishop_moves = pregenerate_bishop_moves();
+  visit_bitboard(0xffffffffffffffff, [knight_moves, &cout](int x) {
+    Position::visualize_bitboard(knight_moves[x], cout);
+  });
+  visit_bitboard(0xffffffffffffffff, [king_moves, &cout](int x) {
+    Position::visualize_bitboard(king_moves[x], cout);
+  });
   visit_bitboard(0xffffffffffffffff, [bishop_moves, &cout](int x) {
     Position::visualize_bitboard(bishop_moves[x], cout);
   });
