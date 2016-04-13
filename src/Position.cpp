@@ -7,379 +7,371 @@
 
 #include "Position.h"
 #include <bitset>
+#include <sstream>
 
-Position::Position()
-{
-  // TODO Auto-generated constructor stub
+Position::Position() {
+	// TODO Auto-generated constructor stub
 
 }
 
-Position::~Position()
-{
-  // TODO Auto-generated destructor stub
+Position::~Position() {
+	// TODO Auto-generated destructor stub
 }
 
-shared_ptr<Position> Position::create_start_position()
-{
-  shared_ptr<Position> retval(new Position());
-  return retval; //TODO this is an empty position for now
+shared_ptr<Position> Position::create_start_position() {
+	shared_ptr<Position> retval(new Position());
+	return retval; //TODO this is an empty position for now
 }
-ostream& operator<<(ostream& stream, const Position& position)
-{
-  position.print(stream);
-  return stream;
+ostream& operator<<(ostream& stream, const Position& position) {
+	position.print(stream);
+	return stream;
 }
 
-string Position::extract_row_string(uint_fast8_t row, string set)
-{
+string Position::extract_row_string(uint_fast8_t row, string set) {
 
-  string clear = " .";
-  string retval = "";
+	string clear = " .";
+	string retval = "";
 
-  for (int i = 0; i < 8; ++i) {
-    int tmp = row & 1;
-    row = row >> 1;
-    string which = tmp != 0 ? set : clear;
-    retval += which;
-  }
-  return retval;
+	for (int i = 0; i < 8; ++i) {
+		int tmp = row & 1;
+		row = row >> 1;
+		string which = tmp != 0 ? set : clear;
+		retval += which;
+	}
+	return retval;
 }
 
-void Position::visualize_bitboard(uint_fast64_t bb, ostream& stream)
-{
-  //stream << "bb: " << hex << bb << dec << endl;
-  stream << "  +-----------------+" << endl;
-  for (int i = 7; i >= 0; --i) {
-    uint_fast64_t tmp = (bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
-    //stream << "tmp: " << hex << tmp << dec << endl;
-    //stream << "bb: " << hex << bb << dec << endl;
-    bb = bb << 8;
-    //stream << "bb: " << hex << bb << dec << endl;
-    stream << (i + 1) << " |";
-    string row_string = extract_row_string(tmp, " *");
-    stream << row_string;
-    stream << " |" << endl;
-  }
-  stream << "  +-----------------+" << endl;
-  stream << "    A B C D E F G H" << endl;
+void Position::visualize_bitboard(bb my_bb, ostream& stream) {
+	//stream << "bb: " << hex << bb << dec << endl;
+	stream << "  +-----------------+" << endl;
+	for (int i = 7; i >= 0; --i) {
+		bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
+		//stream << "tmp: " << hex << tmp << dec << endl;
+		//stream << "bb: " << hex << bb << dec << endl;
+		my_bb = my_bb << 8;
+		//stream << "bb: " << hex << bb << dec << endl;
+		stream << (i + 1) << " |";
+		string row_string = extract_row_string(tmp, " *");
+		stream << row_string;
+		stream << " |" << endl;
+	}
+	stream << "  +-----------------+" << endl;
+	stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(uint_fast64_t bb, function<void(int)> f) const
-{
-  for (int i = 0; i < 8; ++i) {
-    uint_fast64_t tmp = (bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
-    bb = bb << 8;
+void Position::visit_bitboard(bb my_bb, function<void(int)> f) const {
+	for (int i = 0; i < 8; ++i) {
+		bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
+		my_bb = my_bb << 8;
 
-    for (int j = 0; j < 8; ++j) {
-      int coord = (7 - i) * 8 + j;
-      int tmp2 = tmp & 1;
-      if (tmp2 != 0) {
-        f(coord);
-      }
-      tmp = tmp >> 1;
-    }
-  }
+		for (int j = 0; j < 8; ++j) {
+			int coord = (7 - i) * 8 + j;
+			int tmp2 = tmp & 128;
+			if (tmp2 != 0) {
+				f(coord);
+			}
+			tmp = tmp << 1;
+		}
+	}
 }
-void Position::visualize_mailbox_board(int board[64], ostream& stream)
-{
-  stream << "  +-----------------+" << endl;
-  const char* symbols = ".PNBRQKpnbrqk*";
+void Position::visualize_mailbox_board(int board[64], ostream& stream) {
+	stream << "  +-----------------+" << endl;
+	const char* symbols = ".PNBRQKpnbrqk*";
+	//ostringstream  strstr;
+	for (int i = 0; i < 8; ++i) {
+		stream << (8 - i) << " |";
+		for (int j = 0; j < 8; ++j) {
+			int coord = (7 - i) * 8 + j;
+//			strstr << "coord: " << coord << ". board[coord]: " << board[coord] << endl;
+			stream << " " << symbols[board[coord]];
+		}
+		stream << " |" << endl;
+	}
+	stream << "  +-----------------+" << endl;
+	stream << "    A B C D E F G H" << endl;
 
-  for (int i = 0; i < 8; ++i) {
-    cout << (8 - i) << " |";
-    for (int j = 0; j < 8; ++j) {
-      int coord = (7 - i) * 8 + j;
-      stream << " " << symbols[board[coord]];
-    }
-    stream << " |" << endl;
-  }
-  stream << "  +-----------------+" << endl;
-  stream << "    A B C D E F G H" << endl;
-}
-
-void Position::visit_mailbox_board(int board[64], void (*f)(int)) const
-{
-  for (int i = 0; i < 8; ++i) {
-    for (int j = 0; j < 8; ++j) {
-      int coord = (7 - i) * 8 + j;
-      f(board[coord]);
-    }
-  }
+	//stream << strstr.str() << endl;
 }
 
-void Position::print(ostream& stream) const
-{
-  // TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
+void Position::visit_mailbox_board(int board[64], void (*f)(int)) const {
+	for (int i = 0; i < 8; ++i) {
+		for (int j = 0; j < 8; ++j) {
+			int coord = (7 - i) * 8 + j;
+			f(board[coord]);
+		}
+	}
+}
 
-  int board[64];
-  for (int i = 0; i < 64; ++i) {
-    board[i] = 0;
-  }
+void Position::print(ostream& stream) const {
+	// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
+
+	int board[64];
+	for (int i = 0; i < 64; ++i) {
+		board[i] = 0;
+	}
 //  board[48] = 1;
 //  board[32] = 1;
-  //TODO generalize (I assume with a template)
-  visit_bitboard(white & pawns, [&board](int x) {
-    board[x] = 1;
-  });
-  visit_bitboard(white & knights, [&board](int x) {
-    board[x] = 2;
-  });
-  visit_bitboard(white & bishops, [&board](int x) {
-    board[x] = 3;
-  });
-  visit_bitboard(white & rooks, [&board](int x) {
-    board[x] = 4;
-  });
-  visit_bitboard(white & queens, [&board](int x) {
-    board[x] = 5;
-  });
-  visit_bitboard(white & kings, [&board](int x) {
-    board[x] = 6;
-  });
-  visit_bitboard(black & pawns, [&board](int x) {
-    board[x] = 7;
-  });
-  visit_bitboard(black & knights, [&board](int x) {
-    board[x] = 8;
-  });
-  visit_bitboard(black & bishops, [&board](int x) {
-    board[x] = 9;
-  });
-  visit_bitboard(black & rooks, [&board](int x) {
-    board[x] = 10;
-  });
-  visit_bitboard(black & queens, [&board](int x) {
-    board[x] = 11;
-  });
-  visit_bitboard(black & kings, [&board](int x) {
-    board[x] = 12;
-  });
-  visit_bitboard(~(black | white), [&board](int x) {
-    board[x] = 13;
-  });
+	//TODO generalize (I assume with a template)
+	visit_bitboard(white & pawns, [&board](int x) {
+		board[x] = 1;
+	});
+	visit_bitboard(white & knights, [&board](int x) {
+		board[x] = 2;
+	});
+	visit_bitboard(white & bishops, [&board](int x) {
+		board[x] = 3;
+	});
+	visit_bitboard(white & rooks, [&board](int x) {
+		//cout << "WR: " << x << endl;
+		board[x] = 4;
+	});
+	visit_bitboard(white & queens, [&board](int x) {
+		board[x] = 5;
+	});
+	visit_bitboard(white & kings, [&board](int x) {
+		board[x] = 6;
+	});
+	visit_bitboard(black & pawns, [&board](int x) {
+		board[x] = 7;
+	});
+	visit_bitboard(black & knights, [&board](int x) {
+		board[x] = 8;
+	});
+	visit_bitboard(black & bishops, [&board](int x) {
+		board[x] = 9;
+	});
+	visit_bitboard(black & rooks, [&board](int x) {
+		board[x] = 10;
+	});
+	visit_bitboard(black & queens, [&board](int x) {
+		board[x] = 11;
+	});
+	visit_bitboard(black & kings, [&board](int x) {
+		board[x] = 12;
+	});
+	visit_bitboard(~(black | white), [&board](int x) {
+		board[x] = 13;
+	});
 
-  visualize_mailbox_board(board, stream);
+	visualize_mailbox_board(board, stream);
 
-  stream << "  +-----------------+" << endl;
-  stream << "8 | Q n . . k . . r |" << endl;
-  stream << "7 | p . . . . p . . |" << endl;
-  stream << "6 | . p p b p . . p |" << endl;
-  stream << "5 | . . . . . p . . |" << endl;
-  stream << "4 | . . . q . . . . |" << endl;
-  stream << "3 | . . . B . . . . |" << endl;
-  stream << "2 | P P P . K P P P |" << endl;
-  stream << "1 | . . . . R . . R |" << endl;
-  stream << "  +-----------------+" << endl;
-  stream << "    A B C D E F G H";
+	stream << "  +-----------------+" << endl;
+	stream << "8 | Q n . . k . . r |" << endl;
+	stream << "7 | p . . . . p . . |" << endl;
+	stream << "6 | . p p b p . . p |" << endl;
+	stream << "5 | . . . . . p . . |" << endl;
+	stream << "4 | . . . q . . . . |" << endl;
+	stream << "3 | . . . B . . . . |" << endl;
+	stream << "2 | P P P . K P P P |" << endl;
+	stream << "1 | . . . . R . . R |" << endl;
+	stream << "  +-----------------+" << endl;
+	stream << "    A B C D E F G H";
 }
 
-vector<uint_fast64_t> Position::pregenerate_hoppers(vector<int> hops)
-{
-  vector<uint_fast64_t> hoppers(64);
-  bitset<64> bs[64];
-  for (int i = 63; i >= 0; --i) {
-    for (int k : hops) {
-      int candidate = k + i;
-      if (candidate >= 0 && candidate < 64) {
-        bs[i][candidate] = true;
-        if (i % 8 >= 6 && candidate % 8 <= 1) {
-          bs[i][candidate] = false;
-        }
-        if (i % 8 <= 1 && candidate % 8 >= 6) {
-          bs[i][candidate] = false;
-        }
-      }
-    }
-    unsigned long int as_int = bs[i].to_ulong();
-    //cout << as_int << endl;
-    hoppers[i] = as_int;
-  }
-  return hoppers;
+pair<bitboard_set, bitboard_set> Position::pregenerate_hoppers(
+		vector<int> hops) {
+	bitboard_set hoppers(64);
+	bitset<64> attacking[64];
+	for (int i = 63; i >= 0; --i) {
+		for (int k : hops) {
+			int candidate = k + i;
+			if (candidate >= 0 && candidate < 64) {
+				attacking[i][candidate] = true;
+				if (i % 8 >= 6 && candidate % 8 <= 1) {
+					attacking[i][candidate] = false;
+				}
+				if (i % 8 <= 1 && candidate % 8 >= 6) {
+					attacking[i][candidate] = false;
+				}
+			}
+		}
+		unsigned long int as_int = attacking[i].to_ulong();
+		//cout << as_int << endl;
+		hoppers[i] = as_int;
+	}
+	pair<bitboard_set, bitboard_set> p(hoppers, hoppers);	//TODO
+	return p;
 }
 
-vector<uint_fast64_t> Position::pregenerate_rays(int direction)
-{
-  vector<uint_fast64_t> rays(64);
-  bitset<64> bs[64];
-  for (int i = 63; i >= 0; --i) {
-    for (int j = 0; j < 7; ++j) {
-      int from = i + direction * j;
-      int candidate = from + direction;
+pair<bitboard_set, bitboard_set> Position::pregenerate_rays(int direction) {
+	bitboard_set rays(64);
+	bitset<64> bs[64];
+	for (int i = 63; i >= 0; --i) {
+		for (int j = 0; j < 7; ++j) {
+			int from = i + direction * j;
+			int candidate = from + direction;
 
-      if (candidate >= 0 && candidate < 64) {
-        bs[i][candidate] = true;
-        if (from % 8 == 7 && candidate % 8 == 0) {
-          bs[i][candidate] = false;
-        }
-        if (from % 8 == 0 && candidate % 8 == 7) {
-          bs[i][candidate] = false;
-        }
-      }
-      if (!bs[i][candidate]) { // as soon as we hit an illegal target,
-        break; // the ray ends
-      }
+			if (candidate >= 0 && candidate < 64) {
+				bs[i][candidate] = true;
+				if (from % 8 == 7 && candidate % 8 == 0) {
+					bs[i][candidate] = false;
+				}
+				if (from % 8 == 0 && candidate % 8 == 7) {
+					bs[i][candidate] = false;
+				}
+			}
+			if (!bs[i][candidate]) { // as soon as we hit an illegal target,
+				break; // the ray ends
+			}
 
-    }
-    unsigned long int as_int = bs[i].to_ulong();
-    rays[i] = as_int;
+		}
+		unsigned long int as_int = bs[i].to_ulong();
+		rays[i] = as_int;
 
-  }
-  return rays;
+	}
+	pair<bitboard_set, bitboard_set> p(rays, rays);
+	return p;
 }
 
-vector<uint_fast64_t> Position::pregenerate_knight_moves()
-{
-  vector<int> nm
-    { 10, 17, 15, 6, -6, -15, -17, -10 };
-  vector<uint_fast64_t> knight_moves = pregenerate_hoppers(nm);
-  return knight_moves;
+pair<bitboard_set, bitboard_set> Position::pregenerate_knight_moves() {
+	vector<int> nm { 10, 17, 15, 6, -6, -15, -17, -10 };
+	bitboard_set knight_moves = pregenerate_hoppers(nm).first;
+	pair<bitboard_set, bitboard_set> p(knight_moves, knight_moves);
+	return p;
 }
 
-vector<uint_fast64_t> Position::pregenerate_king_moves()
-{
-  vector<int> km =
-    { 1, 7, 8, 9, -1, -7, -8, -9 };
-  vector<uint_fast64_t> king_moves = pregenerate_hoppers(km);
-  return king_moves;
+pair<bitboard_set, bitboard_set> Position::pregenerate_king_moves() {
+	vector<int> km = { 1, 7, 8, 9, -1, -7, -8, -9 };
+	bitboard_set king_moves = pregenerate_hoppers(km).first;
+	pair<bitboard_set, bitboard_set> p(king_moves, king_moves);
+	return p;
 }
 
-vector<uint_fast64_t> Position::pregenerate_bishop_moves()
-{
-  vector<uint_fast64_t> bishop_NE = pregenerate_rays(9);
-  vector<uint_fast64_t> bishop_NW = pregenerate_rays(7);
-  vector<uint_fast64_t> bishop_SE = pregenerate_rays(-9);
-  vector<uint_fast64_t> bishop_SW = pregenerate_rays(-7);
-  vector<uint_fast64_t> bishop_moves(64);
-  for (int i = 0; i < 64; ++i) {
-    bishop_moves[i] = bishop_NE[i] | bishop_NW[i] | bishop_SE[i] | bishop_SW[i];
-  }
-  return bishop_moves;
+pair<bitboard_set, bitboard_set> Position::pregenerate_bishop_moves() {
+	pair<bitboard_set, bitboard_set> bishop_NE = pregenerate_rays(9);
+	pair<bitboard_set, bitboard_set> bishop_NW = pregenerate_rays(7);
+	pair<bitboard_set, bitboard_set> bishop_SE = pregenerate_rays(-9);
+	pair<bitboard_set, bitboard_set> bishop_SW = pregenerate_rays(-7);
+	bitboard_set bishop_moves(64);
+	for (int i = 0; i < 64; ++i) {
+		bishop_moves[i] = bishop_NE.first[i] | bishop_NW.first[i]
+				| bishop_SE.first[i] | bishop_SW.first[i];
+	}
+	pair<bitboard_set, bitboard_set> p(bishop_moves, bishop_moves);
+	return p;
 }
 
-vector<uint_fast64_t> Position::pregenerate_rook_moves()
-{
-  vector<uint_fast64_t> rook_E = pregenerate_rays(1);
-  vector<uint_fast64_t> rook_W = pregenerate_rays(-1);
-  vector<uint_fast64_t> rook_S = pregenerate_rays(-8);
-  vector<uint_fast64_t> rook_N = pregenerate_rays(8);
-  vector<uint_fast64_t> rook_moves(64);
-  for (int i = 0; i < 64; ++i) {
-    rook_moves[i] = rook_E[i] | rook_W[i] | rook_S[i] | rook_N[i];
-  }
-  return rook_moves;
-
+pair<bitboard_set, bitboard_set> Position::pregenerate_rook_moves() {
+	pair<bitboard_set, bitboard_set> rook_E = pregenerate_rays(1);
+	pair<bitboard_set, bitboard_set> rook_W = pregenerate_rays(-1);
+	pair<bitboard_set, bitboard_set> rook_S = pregenerate_rays(-8);
+	pair<bitboard_set, bitboard_set> rook_N = pregenerate_rays(8);
+	bitboard_set rook_moves(64);
+	for (int i = 0; i < 64; ++i) {
+		rook_moves[i] = rook_E.first[i] | rook_W.first[i] | rook_S.first[i]
+				| rook_N.first[i];
+	}
+	pair<bitboard_set, bitboard_set> p(rook_moves, rook_moves);
+	return p;
 }
 
-vector<uint_fast64_t> Position::pregenerate_queen_moves()
-{
-  vector<uint_fast64_t> bishop_moves = pregenerate_bishop_moves();
-  vector<uint_fast64_t> rook_moves = pregenerate_rook_moves();
-  vector<uint_fast64_t> queen_moves(64);
-  for (int i = 0; i < 64; ++i) {
-    queen_moves[i] = bishop_moves[i] | rook_moves[i];
-  }
-  return queen_moves;
-
+pair<bitboard_set, bitboard_set> Position::pregenerate_queen_moves() {
+	pair<bitboard_set, bitboard_set> bishop_moves = pregenerate_bishop_moves();
+	pair<bitboard_set, bitboard_set> rook_moves = pregenerate_rook_moves();
+	bitboard_set queen_moves(64);
+	for (int i = 0; i < 64; ++i) {
+		queen_moves[i] = bishop_moves.first[i] | rook_moves.first[i];
+	}
+	pair<bitboard_set, bitboard_set> p(queen_moves, queen_moves);
+	return p;
 }
 
-void Position::place_pawn_move(int i, int a, int direction, bitset<64> bs[64])
-{
-  int candidate = i + a * direction;
-  //    cout << i << ": " << candidate << endl;
-  if (candidate >= 0 && candidate < 64) {
-    bs[i][candidate] = true;
-    if (i % 8 == 7 && candidate % 8 == 0) {
-      bs[i][candidate] = false;
-    }
-    if (i % 8 == 0 && candidate % 8 == 7) {
-      bs[i][candidate] = false;
-    }
-  }
+void Position::place_pawn_move(int from, int steps, int direction,
+		bitset<64> bs[64]) {
+	int candidate = from + steps * direction;
+	//    cout << i << ": " << candidate << endl;
+	if (candidate >= 0 && candidate < 64) {
+		bs[from][candidate] = true;
+		if (from % 8 == 7 && candidate % 8 == 0) {
+			bs[from][candidate] = false;
+		}
+		if (from % 8 == 0 && candidate % 8 == 7) {
+			bs[from][candidate] = false;
+		}
+	}
 }
 
-vector<uint_fast64_t> Position::pregen_pawn_caps(int direction)
-{
-  bitset<64> bs[64];
-  vector<uint_fast64_t> pawn_capture_moves(64);
-  for (int i = 8; i < 56; ++i) {
-    //TODO not the most elegant way to refactor/extract the function
-    place_pawn_move(i, 9, direction, bs);
-    place_pawn_move(i, 7, direction, bs);
-  }
-  for (int i = 0; i < 64; ++i) {
+pair<bitboard_set, bitboard_set> Position::pregen_pawn_caps(int direction) {
+	bitset<64> bs[64];
+	bitboard_set pawn_capture_moves(64);
+	for (int i = 8; i < 56; ++i) {
+		//TODO not the most elegant way to refactor/extract the function
+		place_pawn_move(i, 9, direction, bs);
+		place_pawn_move(i, 7, direction, bs);
+	}
+	for (int i = 0; i < 64; ++i) {
 
-    unsigned long int as_int = bs[i].to_ulong();
-    pawn_capture_moves[i] = as_int;
-    cout << "pcm (" << i << "): " << hex << as_int << dec << endl;
-  }
-  return pawn_capture_moves;
+		unsigned long int as_int = bs[i].to_ulong();
+		pawn_capture_moves[i] = as_int;
+		//cout << "pcm (" << i << "): " << hex << as_int << dec << endl;
+	}
+	pair<bitboard_set, bitboard_set> p(pawn_capture_moves, pawn_capture_moves);
+	return p;
+}
+pair<bitboard_set, bitboard_set> Position::pregenerate_white_pawn_capture_moves() {
+	pair<bitboard_set, bitboard_set> white_pawn_capture_moves =
+			pregen_pawn_caps(1);
+	return white_pawn_capture_moves;
+}
+
+pair<bitboard_set, bitboard_set> Position::pregenerate_black_pawn_capture_moves() {
+	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
+			pregen_pawn_caps(-1);
+	return black_pawn_capture_moves;
 
 }
-vector<uint_fast64_t> Position::pregenerate_white_pawn_capture_moves()
-{
-  vector<uint_fast64_t> white_pawn_capture_moves = pregen_pawn_caps(1);
-  return white_pawn_capture_moves;
-}
+bitboard_set Position::pregen_pawn_nocaps(int start, int stop, int direction) {
+	bitset<64> bs[64];
 
-vector<uint_fast64_t> Position::pregenerate_black_pawn_capture_moves()
-{
-  vector<uint_fast64_t> black_pawn_capture_moves = pregen_pawn_caps(-1);
-  return black_pawn_capture_moves;
+	for (int i = start; i != 64 - start; i += direction) {
+		int candidate = i + 8 * direction; // single step
+		bs[i][candidate] = true;
+	}
+	bitboard_set pawn_no_capture_moves(64);
+	for (int i = start; i != stop; i += direction) {
+		int candidate = i + 16 * direction; // double step
+		bs[i][candidate] = true;
 
-}
-vector<uint_fast64_t> Position::pregen_pawn_nocaps(int start, int stop,
-    int direction)
-{
-  bitset<64> bs[64];
+		for (int i = 0; i < 64; ++i) {
 
-  for (int i = start; i != 64 - start; i += direction) {
-    int candidate = i + 8 * direction; // single step
-    bs[i][candidate] = true;
-  }
-  vector<uint_fast64_t> pawn_no_capture_moves(64);
-  for (int i = start; i != stop; i += direction) {
-    int candidate = i + 16 * direction; // double step
-    bs[i][candidate] = true;
-
-    for (int i = 0; i < 64; ++i) {
-
-      unsigned long int as_int = bs[i].to_ulong();
+			unsigned long int as_int = bs[i].to_ulong();
 //    cout << "(" << i << ") " << "as_int: " << hex << as_int << dec << endl;
 //    cout << "(" << 63 - i << ") " << "as_int: " << hex << as_int << dec << endl;
-      pawn_no_capture_moves[i] = as_int;
-    }
-  }
-  return pawn_no_capture_moves;
+			pawn_no_capture_moves[i] = as_int;
+		}
+	}
+	return pawn_no_capture_moves;
 
 }
-vector<uint_fast64_t> Position::pregenerate_white_pawn_no_capture_moves()
-{
-  vector<uint_fast64_t> white_pawn_no_capture_moves = pregen_pawn_nocaps(8, 16,
-      1);
-  return white_pawn_no_capture_moves;
+bitboard_set Position::pregenerate_white_pawn_no_capture_moves() {
+	bitboard_set white_pawn_no_capture_moves = pregen_pawn_nocaps(8, 16, 1);
+	return white_pawn_no_capture_moves;
 }
-vector<uint_fast64_t> Position::pregenerate_black_pawn_no_capture_moves()
-{
-  vector<uint_fast64_t> black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47,
-      -1);
-  return black_pawn_no_capture_moves;
+bitboard_set Position::pregenerate_black_pawn_no_capture_moves() {
+	bitboard_set black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47, -1);
+	return black_pawn_no_capture_moves;
 }
 
-void Position::pregenerate_moves()
-{
-  vector<uint_fast64_t> knight_moves = pregenerate_knight_moves();
-  vector<uint_fast64_t> king_moves = pregenerate_king_moves();
-  vector<uint_fast64_t> bishop_moves = pregenerate_bishop_moves();
-  vector<uint_fast64_t> rook_moves = pregenerate_rook_moves();
-  vector<uint_fast64_t> queen_moves = pregenerate_queen_moves();
-  vector<uint_fast64_t> white_pawn_no_capture_moves =
-      pregenerate_white_pawn_no_capture_moves();
-  vector<uint_fast64_t> black_pawn_no_capture_moves =
-      pregenerate_black_pawn_no_capture_moves();
-  vector<uint_fast64_t> white_pawn_capture_moves =
-      pregenerate_white_pawn_capture_moves();
-  vector<uint_fast64_t> black_pawn_capture_moves =
-      pregenerate_black_pawn_capture_moves();
+void Position::print_square(int x) {
+	char column = 'a' + x % 8;
+	char row = '1' + x / 8;
+	cout << x << " = " << column << row << endl;
+}
+
+void Position::pregenerate_moves() {
+	pair<bitboard_set, bitboard_set> knight_moves = pregenerate_knight_moves();
+	pair<bitboard_set, bitboard_set> king_moves = pregenerate_king_moves();
+	pair<bitboard_set, bitboard_set> bishop_moves = pregenerate_bishop_moves();
+	pair<bitboard_set, bitboard_set> rook_moves = pregenerate_rook_moves();
+	pair<bitboard_set, bitboard_set> queen_moves = pregenerate_queen_moves();
+	bitboard_set white_pawn_no_capture_moves =
+			pregenerate_white_pawn_no_capture_moves();
+	bitboard_set black_pawn_no_capture_moves =
+			pregenerate_black_pawn_no_capture_moves();
+	pair<bitboard_set, bitboard_set> white_pawn_capture_moves =
+			pregenerate_white_pawn_capture_moves();
+	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
+			pregenerate_black_pawn_capture_moves();
 //  for (int i = 0; i < 64; ++i) {
 //    cout << i << ". bpncm: " << black_pawn_no_capture_moves[i] << endl;
 //  }
@@ -393,33 +385,38 @@ void Position::pregenerate_moves()
 //  visit_bitboard(0xffffffffffffffff, [bishop_moves, &cout](int x) {
 //    Position::visualize_bitboard(bishop_moves[x], cout);
 //  });
-//  visit_bitboard(0xffffffffffffffff, [rook_moves, &cout](int x) {
-//    Position::visualize_bitboard(rook_moves[x], cout);
-//  });
+//	visit_bitboard(0xffffffffffffffff, [rook_moves, &cout](int x) {
+//		print_square(x);
+//		Position::visualize_bitboard(rook_moves.first[x], cout);
+//	});
 //  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
 //    Position::visualize_bitboard(queen_moves[x], cout);
 //  });
 
-  //  visit_bitboard(0x00ffffffffffff00,
-  //      [black_pawn_no_capture_moves, &cout](int x) {
-  //        char column = 'a' + x % 8;
-  //        char row = '1' + x / 8;
-  //        cout << x << " = " << column << row << endl;
-  //        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
-  //      });
-  visit_bitboard(0x00ffffffffffff00, [white_pawn_capture_moves, &cout](int x) {
-    char column = 'a' + x % 8;
-    char row = '1' + x / 8;
-    cout << x << " = " << column << row << endl;
-    Position::visualize_bitboard(white_pawn_capture_moves[x], cout);
-  });
-  visit_bitboard(0x00ffffffffffff00, [black_pawn_capture_moves, &cout](int x) {
-    char column = 'a' + x % 8;
-    char row = '1' + x / 8;
-    cout << x << " = " << column << row << endl;
-    Position::visualize_bitboard(black_pawn_capture_moves[x], cout);
-  });
-  //
+	//  visit_bitboard(0x00ffffffffffff00,
+	//      [black_pawn_no_capture_moves, &cout](int x) {
+	//        char column = 'a' + x % 8;
+	//        char row = '1' + x / 8;
+	//        cout << x << " = " << column << row << endl;
+	//        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
+	//      });
+//	bitboard_set white_pawn_capture_moves_from = white_pawn_capture_moves.first;
+//	visit_bitboard(0x00ffffffffffff00,
+//			[white_pawn_capture_moves_from](int x) {
+//				char column = 'a' + x % 8;
+//				char row = '1' + x / 8;
+//				cout << x << " = " << column << row << endl;
+//				Position::visualize_bitboard(white_pawn_capture_moves_from[x], cout);
+//			});
+//	bitboard_set black_pawn_capture_moves_from = black_pawn_capture_moves.first;
+//	visit_bitboard(0x00ffffffffffff00,
+//			[black_pawn_capture_moves_from](int x) {
+//				char column = 'a' + x % 8;
+//				char row = '1' + x / 8;
+//				cout << x << " = " << column << row << endl;
+//				Position::visualize_bitboard(black_pawn_capture_moves_from[x], cout);
+//			});
+	//
 //  visit_bitboard(0x00ffffffffffff00,
 //      [white_pawn_no_capture_moves, &cout](int x) {
 //        char column = 'a' + x % 8;
@@ -433,5 +430,5 @@ void Position::pregenerate_moves()
 //    cout << x << " = " << column << row << endl;
 //  });
 
-  cout << "done" << endl;
+	cout << "done" << endl;
 }
