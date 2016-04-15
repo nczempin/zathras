@@ -60,7 +60,7 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream) {
 	stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(bb my_bb, function<void(int)> f){
+void Position::visit_bitboard(bb my_bb, function<void(int)> f) {
 	for (int i = 0; i < 8; ++i) {
 		bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
 		my_bb = my_bb << 8;
@@ -213,17 +213,21 @@ pair<bitboard_set, bitboard_set> Position::pregenerate_rays(int direction) {
 		for (int j = 0; j < 7; ++j) {
 			int from = i + direction * j;
 			int candidate = from + direction;
+			int file_from = i % 8;
+			int file_to = candidate % 8;
+			int rank_to = candidate / 8;
+			int to = 7 - file_to + rank_to * 8;
 
 			if (candidate >= 0 && candidate < 64) {
-				bs[i][candidate] = true;
+				setSquare(bs[i], to);
 				if (from % 8 == 7 && candidate % 8 == 0) {
-					bs[i][candidate] = false;
+					clearSquare(bs[i], to);
 				}
 				if (from % 8 == 0 && candidate % 8 == 7) {
-					bs[i][candidate] = false;
+					clearSquare(bs[i], to);
 				}
 			}
-			if (!bs[i][candidate]) { // as soon as we hit an illegal target,
+			if (!bs[i][to]) { // as soon as we hit an illegal target,
 				break; // the ray ends
 			}
 		}
@@ -364,6 +368,17 @@ void Position::print_square(int x) {
 	cout << x << " = " << column << row << endl;
 }
 
+void Position::display_all_moves(
+		const pair<bitboard_set, bitboard_set>& moves) {
+	visit_bitboard(0xffffffffffffffff, [moves](int x) {
+		print_square(x);
+		Position::visualize_bitboard(moves.first[x], cout);
+		Position::visit_bitboard(moves.first[x],[](int y) {
+					Position::print_square(y);
+				});
+	});
+}
+
 void Position::pregenerate_moves() {
 	pair<bitboard_set, bitboard_set> knight_moves = pregenerate_knight_moves();
 	pair<bitboard_set, bitboard_set> king_moves = pregenerate_king_moves();
@@ -378,27 +393,7 @@ void Position::pregenerate_moves() {
 			pregenerate_white_pawn_capture_moves();
 	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
 			pregenerate_black_pawn_capture_moves();
-//  for (int i = 0; i < 64; ++i) {
-//    cout << i << ". bpncm: " << black_pawn_no_capture_moves[i] << endl;
-//  }
-
-	visit_bitboard(0xffffffffffffffff, [knight_moves](int x) {
-		print_square(x);
-		Position::visualize_bitboard(knight_moves.first[x], cout);
-		Position::visit_bitboard(knight_moves.first[x],[](int y) {
-					Position::print_square(y);
-				});
-	});
-//  visit_bitboard(0xffffffffffffffff, [king_moves, &cout](int x) {
-//    Position::visualize_bitboard(king_moves[x], cout);
-//  });
-//  visit_bitboard(0xffffffffffffffff, [bishop_moves, &cout](int x) {
-//    Position::visualize_bitboard(bishop_moves[x], cout);
-//  });
-//	visit_bitboard(0xffffffffffffffff, [rook_moves, &cout](int x) {
-//		print_square(x);
-//		Position::visualize_bitboard(rook_moves.first[x], cout);
-//	});
+	display_all_moves(queen_moves);
 //  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
 //    Position::visualize_bitboard(queen_moves[x], cout);
 //  });
