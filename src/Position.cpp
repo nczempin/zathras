@@ -110,9 +110,6 @@ void Position::print(ostream& stream) const {
 	for (int i = 0; i < 64; ++i) {
 		board[i] = 0;
 	}
-//  board[48] = 1;
-//  board[32] = 1;
-	//TODO generalize (I assume with a template)
 	visit_bitboard(white & pawns, [&board](int x) {
 		board[x] = 1;
 	});
@@ -213,7 +210,6 @@ pair<bitboard_set, bitboard_set> Position::pregenerate_rays(int direction) {
 		for (int j = 0; j < 7; ++j) {
 			int from = i + direction * j;
 			int candidate = from + direction;
-			int file_from = i % 8;
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
 			int to = 7 - file_to + rank_to * 8;
@@ -294,7 +290,6 @@ pair<bitboard_set, bitboard_set> Position::pregenerate_queen_moves() {
 void Position::place_pawn_move(int from, int steps, int direction,
 		bitset<64> bs[64]) {
 	int candidate = from + steps * direction;
-	int file_from = from % 8;
 	int file_to = candidate % 8;
 	int rank_to = candidate / 8;
 	int to = 7 - file_to + rank_to * 8;
@@ -371,7 +366,7 @@ bitboard_set Position::pregenerate_black_pawn_no_capture_moves() {
 	return black_pawn_no_capture_moves;
 }
 
-void Position::print_square(int x) {
+void Position::print_square(int x) { //TODO separate the printing from the generating
 	char column = 'a' + x % 8;
 	char row = '1' + x / 8;
 	cout << x << " = " << column << row << endl;
@@ -402,46 +397,4 @@ void Position::pregenerate_moves() {
 	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
 			pregenerate_black_pawn_capture_moves();
 	display_all_moves(black_pawn_capture_moves.first);
-//  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
-//    Position::visualize_bitboard(queen_moves[x], cout);
-//  });
-
-//  visit_bitboard(0x00ffffffffffff00,
-//      [black_pawn_no_capture_moves, &cout](int x) {
-//        char column = 'a' + x % 8;
-//        char row = '1' + x / 8;
-//        cout << x << " = " << column << row << endl;
-//        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
-//      });
-//	bitboard_set white_pawn_capture_moves_from = white_pawn_capture_moves.first;
-//	visit_bitboard(0x00ffffffffffff00,
-//			[white_pawn_capture_moves_from](int x) {
-//				char column = 'a' + x % 8;
-//				char row = '1' + x / 8;
-//				cout << x << " = " << column << row << endl;
-//				Position::visualize_bitboard(white_pawn_capture_moves_from[x], cout);
-//			});
-//	bitboard_set black_pawn_capture_moves_from = black_pawn_capture_moves.first;
-//	visit_bitboard(0x00ffffffffffff00,
-//			[black_pawn_capture_moves_from](int x) {
-//				char column = 'a' + x % 8;
-//				char row = '1' + x / 8;
-//				cout << x << " = " << column << row << endl;
-//				Position::visualize_bitboard(black_pawn_capture_moves_from[x], cout);
-//			});
-//
-//  visit_bitboard(0x00ffffffffffff00,
-//      [white_pawn_no_capture_moves, &cout](int x) {
-//        char column = 'a' + x % 8;
-//        char row = '1' + x / 8;
-//        cout << x << " = " << column << row << endl;
-//        Position::visualize_bitboard(white_pawn_no_capture_moves[x], cout);
-//      });
-//  visit_bitboard(everything, [](int x) {
-//    char column = 'a' + x % 8;
-//    char row = '1' + x / 8;
-//    cout << x << " = " << column << row << endl;
-//  });
-
-	cout << "done" << endl;
 }
