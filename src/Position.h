@@ -49,9 +49,9 @@ private:
 
 	static string extract_row_string(uint_fast8_t row, string set);
 	static void visualize_bitboard(bb my_bb, ostream& stream);
-	void visit_bitboard(bb my_bb, function<void(int)>) const;
+	static void visit_bitboard(bb my_bb, function<void(int)>);
 	static void visualize_mailbox_board(int board[64], ostream& stream);
-	void visit_mailbox_board(int board[64], void (*visitor)(int)) const;
+	static void visit_mailbox_board(int board[64], void (*visitor)(int));
 	pair<bitboard_set, bitboard_set> pregenerate_hoppers(vector<int> jumps);
 	pair<bitboard_set, bitboard_set> pregenerate_rays(int direction);
 	pair<bitboard_set, bitboard_set> pregenerate_knight_moves();
@@ -66,7 +66,9 @@ private:
 	pair<bitboard_set, bitboard_set> pregenerate_black_pawn_capture_moves();
 	pair<bitboard_set, bitboard_set> pregen_pawn_caps(int direction);
 	void place_pawn_move(int from, int steps, int direction, bitset<64> bs[64]);
-	void print_square(int x);
+	static void print_square(int x);
+	void setSquare(bitset<64>& bs, int to);
+	void clearSquare(bitset<64>& bs, int to);
 };
 
 #endif /* POSITION_H_ */

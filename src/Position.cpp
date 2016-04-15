@@ -8,6 +8,7 @@
 #include "Position.h"
 #include <bitset>
 #include <sstream>
+#include <iomanip>
 
 Position::Position() {
 	// TODO Auto-generated constructor stub
@@ -33,8 +34,8 @@ string Position::extract_row_string(uint_fast8_t row, string set) {
 	string retval = "";
 
 	for (int i = 0; i < 8; ++i) {
-		int tmp = row & 1;
-		row = row >> 1;
+		int tmp = row & 128;
+		row = row << 1;
 		string which = tmp != 0 ? set : clear;
 		retval += which;
 	}
@@ -59,7 +60,7 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream) {
 	stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(bb my_bb, function<void(int)> f) const {
+void Position::visit_bitboard(bb my_bb, function<void(int)> f){
 	for (int i = 0; i < 8; ++i) {
 		bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
 		my_bb = my_bb << 8;
@@ -93,7 +94,7 @@ void Position::visualize_mailbox_board(int board[64], ostream& stream) {
 	//stream << strstr.str() << endl;
 }
 
-void Position::visit_mailbox_board(int board[64], void (*f)(int)) const {
+void Position::visit_mailbox_board(int board[64], void (*f)(int)) {
 	for (int i = 0; i < 8; ++i) {
 		for (int j = 0; j < 8; ++j) {
 			int coord = (7 - i) * 8 + j;
@@ -123,8 +124,8 @@ void Position::print(ostream& stream) const {
 	});
 	visit_bitboard(white & rooks, [&board](int x) {
 		//cout << "WR: " << x << endl;
-		board[x] = 4;
-	});
+			board[x] = 4;
+		});
 	visit_bitboard(white & queens, [&board](int x) {
 		board[x] = 5;
 	});
@@ -168,31 +169,43 @@ void Position::print(ostream& stream) const {
 	stream << "    A B C D E F G H";
 }
 
+void Position::setSquare(bitset<64>& bs, int to) {
+	bs[to] = true;
+}
+
+void Position::clearSquare(bitset<64>& bs, int to) {
+	bs[to] = false;
+}
+
 pair<bitboard_set, bitboard_set> Position::pregenerate_hoppers(
 		vector<int> hops) {
-	bitboard_set hoppers(64);
+	bitboard_set hoppers_attacking(64);
 	bitset<64> attacking[64];
-	for (int i = 63; i >= 0; --i) {
+	for (int i = 0; i < 64; ++i) {
 		for (int k : hops) {
 			int candidate = k + i;
 			if (candidate >= 0 && candidate < 64) {
-				attacking[i][candidate] = true;
-				if (i % 8 >= 6 && candidate % 8 <= 1) {
-					attacking[i][candidate] = false;
+				int file_from = i % 8;
+				int file_to = candidate % 8;
+				int rank_to = candidate / 8;
+				int to = 7 - file_to + rank_to * 8;
+				setSquare(attacking[i], to);
+				if (file_from >= 6 && file_to <= 1) {
+					clearSquare(attacking[i], to);
 				}
-				if (i % 8 <= 1 && candidate % 8 >= 6) {
-					attacking[i][candidate] = false;
+				if (file_from <= 1 && file_to >= 6) {
+					clearSquare(attacking[i], to);
 				}
 			}
 		}
-		unsigned long int as_int = attacking[i].to_ulong();
-		//cout << as_int << endl;
-		hoppers[i] = as_int;
 	}
-	pair<bitboard_set, bitboard_set> p(hoppers, hoppers);	//TODO
+	// collect them all
+	for (int i = 0; i < 64; ++i) {
+		hoppers_attacking[i] = attacking[i].to_ulong();
+	}
+	pair<bitboard_set, bitboard_set> p(hoppers_attacking, hoppers_attacking);
 	return p;
 }
-
 pair<bitboard_set, bitboard_set> Position::pregenerate_rays(int direction) {
 	bitboard_set rays(64);
 	bitset<64> bs[64];
@@ -213,11 +226,9 @@ pair<bitboard_set, bitboard_set> Position::pregenerate_rays(int direction) {
 			if (!bs[i][candidate]) { // as soon as we hit an illegal target,
 				break; // the ray ends
 			}
-
 		}
 		unsigned long int as_int = bs[i].to_ulong();
 		rays[i] = as_int;
-
 	}
 	pair<bitboard_set, bitboard_set> p(rays, rays);
 	return p;
@@ -300,10 +311,8 @@ pair<bitboard_set, bitboard_set> Position::pregen_pawn_caps(int direction) {
 		place_pawn_move(i, 7, direction, bs);
 	}
 	for (int i = 0; i < 64; ++i) {
-
 		unsigned long int as_int = bs[i].to_ulong();
 		pawn_capture_moves[i] = as_int;
-		//cout << "pcm (" << i << "): " << hex << as_int << dec << endl;
 	}
 	pair<bitboard_set, bitboard_set> p(pawn_capture_moves, pawn_capture_moves);
 	return p;
@@ -333,10 +342,7 @@ bitboard_set Position::pregen_pawn_nocaps(int start, int stop, int direction) {
 		bs[i][candidate] = true;
 
 		for (int i = 0; i < 64; ++i) {
-
 			unsigned long int as_int = bs[i].to_ulong();
-//    cout << "(" << i << ") " << "as_int: " << hex << as_int << dec << endl;
-//    cout << "(" << 63 - i << ") " << "as_int: " << hex << as_int << dec << endl;
 			pawn_no_capture_moves[i] = as_int;
 		}
 	}
@@ -376,9 +382,13 @@ void Position::pregenerate_moves() {
 //    cout << i << ". bpncm: " << black_pawn_no_capture_moves[i] << endl;
 //  }
 
-//  visit_bitboard(0xffffffffffffffff, [knight_moves, &cout](int x) {
-//    Position::visualize_bitboard(knight_moves[x], cout);
-//  });
+	visit_bitboard(0xffffffffffffffff, [knight_moves](int x) {
+		print_square(x);
+		Position::visualize_bitboard(knight_moves.first[x], cout);
+		Position::visit_bitboard(knight_moves.first[x],[](int y) {
+					Position::print_square(y);
+				});
+	});
 //  visit_bitboard(0xffffffffffffffff, [king_moves, &cout](int x) {
 //    Position::visualize_bitboard(king_moves[x], cout);
 //  });
@@ -393,13 +403,13 @@ void Position::pregenerate_moves() {
 //    Position::visualize_bitboard(queen_moves[x], cout);
 //  });
 
-	//  visit_bitboard(0x00ffffffffffff00,
-	//      [black_pawn_no_capture_moves, &cout](int x) {
-	//        char column = 'a' + x % 8;
-	//        char row = '1' + x / 8;
-	//        cout << x << " = " << column << row << endl;
-	//        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
-	//      });
+//  visit_bitboard(0x00ffffffffffff00,
+//      [black_pawn_no_capture_moves, &cout](int x) {
+//        char column = 'a' + x % 8;
+//        char row = '1' + x / 8;
+//        cout << x << " = " << column << row << endl;
+//        Position::visualize_bitboard(black_pawn_no_capture_moves[x], cout);
+//      });
 //	bitboard_set white_pawn_capture_moves_from = white_pawn_capture_moves.first;
 //	visit_bitboard(0x00ffffffffffff00,
 //			[white_pawn_capture_moves_from](int x) {
@@ -416,7 +426,7 @@ void Position::pregenerate_moves() {
 //				cout << x << " = " << column << row << endl;
 //				Position::visualize_bitboard(black_pawn_capture_moves_from[x], cout);
 //			});
-	//
+//
 //  visit_bitboard(0x00ffffffffffff00,
 //      [white_pawn_no_capture_moves, &cout](int x) {
 //        char column = 'a' + x % 8;
