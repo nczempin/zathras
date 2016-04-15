@@ -294,14 +294,18 @@ pair<bitboard_set, bitboard_set> Position::pregenerate_queen_moves() {
 void Position::place_pawn_move(int from, int steps, int direction,
 		bitset<64> bs[64]) {
 	int candidate = from + steps * direction;
-	//    cout << i << ": " << candidate << endl;
+	int file_from = from % 8;
+	int file_to = candidate % 8;
+	int rank_to = candidate / 8;
+	int to = 7 - file_to + rank_to * 8;
+
 	if (candidate >= 0 && candidate < 64) {
-		bs[from][candidate] = true;
+		setSquare(bs[from], to);
 		if (from % 8 == 7 && candidate % 8 == 0) {
-			bs[from][candidate] = false;
+			clearSquare(bs[from], to);
 		}
 		if (from % 8 == 0 && candidate % 8 == 7) {
-			bs[from][candidate] = false;
+			clearSquare(bs[from], to);
 		}
 	}
 }
@@ -338,17 +342,22 @@ bitboard_set Position::pregen_pawn_nocaps(int start, int stop, int direction) {
 
 	for (int i = start; i != 64 - start; i += direction) {
 		int candidate = i + 8 * direction; // single step
-		bs[i][candidate] = true;
+		int file_to = candidate % 8;
+		int rank_to = candidate / 8;
+		int to = 7 - file_to + rank_to * 8;
+		setSquare(bs[i], to);
 	}
 	bitboard_set pawn_no_capture_moves(64);
 	for (int i = start; i != stop; i += direction) {
 		int candidate = i + 16 * direction; // double step
-		bs[i][candidate] = true;
-
-		for (int i = 0; i < 64; ++i) {
-			unsigned long int as_int = bs[i].to_ulong();
-			pawn_no_capture_moves[i] = as_int;
-		}
+		int file_to = candidate % 8;
+		int rank_to = candidate / 8;
+		int to = 7 - file_to + rank_to * 8;
+		setSquare(bs[i], to);
+	}
+	for (int i = 0; i < 64; ++i) {
+		unsigned long int as_int = bs[i].to_ulong();
+		pawn_no_capture_moves[i] = as_int;
 	}
 	return pawn_no_capture_moves;
 
@@ -368,12 +377,11 @@ void Position::print_square(int x) {
 	cout << x << " = " << column << row << endl;
 }
 
-void Position::display_all_moves(
-		const pair<bitboard_set, bitboard_set>& moves) {
+void Position::display_all_moves(const bitboard_set& moves) {
 	visit_bitboard(0xffffffffffffffff, [moves](int x) {
 		print_square(x);
-		Position::visualize_bitboard(moves.first[x], cout);
-		Position::visit_bitboard(moves.first[x],[](int y) {
+		Position::visualize_bitboard(moves[x], cout);
+		Position::visit_bitboard(moves[x],[](int y) {
 					Position::print_square(y);
 				});
 	});
@@ -393,7 +401,7 @@ void Position::pregenerate_moves() {
 			pregenerate_white_pawn_capture_moves();
 	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
 			pregenerate_black_pawn_capture_moves();
-	display_all_moves(queen_moves);
+	display_all_moves(black_pawn_capture_moves.first);
 //  visit_bitboard(0xffffffffffffffff, [queen_moves, &cout](int x) {
 //    Position::visualize_bitboard(queen_moves[x], cout);
 //  });

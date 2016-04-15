@@ -22,7 +22,6 @@ typedef uint_fast64_t bb;
 
 typedef vector<uint_fast64_t> bitboard_set;
 
-
 class Position {
 public:
 	Position();
@@ -52,7 +51,8 @@ private:
 	static void visit_bitboard(bb my_bb, function<void(int)>);
 	static void visualize_mailbox_board(int board[64], ostream& stream);
 	static void visit_mailbox_board(int board[64], void (*visitor)(int));
-	static pair<bitboard_set, bitboard_set> pregenerate_hoppers(vector<int> jumps);
+	static pair<bitboard_set, bitboard_set> pregenerate_hoppers(
+			vector<int> jumps);
 	static pair<bitboard_set, bitboard_set> pregenerate_rays(int direction);
 	static pair<bitboard_set, bitboard_set> pregenerate_knight_moves();
 	static pair<bitboard_set, bitboard_set> pregenerate_king_moves();
@@ -65,11 +65,12 @@ private:
 	static pair<bitboard_set, bitboard_set> pregenerate_white_pawn_capture_moves();
 	static pair<bitboard_set, bitboard_set> pregenerate_black_pawn_capture_moves();
 	static pair<bitboard_set, bitboard_set> pregen_pawn_caps(int direction);
-	static void place_pawn_move(int from, int steps, int direction, bitset<64> bs[64]);
+	static void place_pawn_move(int from, int steps, int direction,
+			bitset<64> bs[64]);
 	static void print_square(int x);
 	static void setSquare(bitset<64>& bs, int to);
 	static void clearSquare(bitset<64>& bs, int to);
-	void display_all_moves(const pair<bitboard_set, bitboard_set>& moves);
+	void display_all_moves(const bitboard_set& moves);
 };
 
 #endif /* POSITION_H_ */
