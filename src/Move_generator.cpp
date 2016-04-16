@@ -12,7 +12,6 @@
 #include <vector>
 #include "Position.h"
 
-
 Move_generator::Move_generator() {
 	// TODO Auto-generated constructor stub
 
@@ -136,19 +135,6 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_queen_moves() {
 }
 
 void Move_generator::pregenerate_moves() {
-	pair<bitboard_set, bitboard_set> knight_moves = pregenerate_knight_moves();
-	pair<bitboard_set, bitboard_set> king_moves = pregenerate_king_moves();
-	pair<bitboard_set, bitboard_set> bishop_moves = pregenerate_bishop_moves();
-	pair<bitboard_set, bitboard_set> rook_moves = pregenerate_rook_moves();
-	pair<bitboard_set, bitboard_set> queen_moves = pregenerate_queen_moves();
-	bitboard_set white_pawn_no_capture_moves =
-			pregenerate_white_pawn_no_capture_moves();
-	bitboard_set black_pawn_no_capture_moves =
-			pregenerate_black_pawn_no_capture_moves();
-	pair<bitboard_set, bitboard_set> white_pawn_capture_moves =
-			pregenerate_white_pawn_capture_moves();
-	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
-			pregenerate_black_pawn_capture_moves();
 }
 
 pair<bitboard_set, bitboard_set> Move_generator::pregen_pawn_caps(
@@ -235,7 +221,12 @@ void Move_generator::generate_moves(Position position) {
 	bitboard_set pieces = position.getPieceBitboards();
 	bb white_pawns = pieces[1] & pieces[7];
 	Position::visualize_bitboard(white_pawns, cout);
-	Position::visit_bitboard(white_pawns, [position](int x){
-		position.print_square(x);
+	Position::visit_bitboard(white_pawns, [this,position](int x) {
+		string from = position.mailboxIndexToSquare(x);
+		bb moves = white_pawn_no_capture_moves[x];
+		Position::visit_bitboard(moves,[moves,position, from](int y) {
+					string to = position.mailboxIndexToSquare(y);
+					cout << from << to << endl;
+				});
 	});
 }

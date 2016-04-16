@@ -11,8 +11,14 @@
 #include <iomanip>
 
 Position::Position() {
-	// TODO Auto-generated constructor stub
-
+	pawns = 0x008469040000e700;
+	knights = 0x4000000000000000;
+	bishops = 0x0000100000100000;
+	rooks = 0x0100000000000009;
+	queens = 0x8000000010000000;
+	kings = 0x0800000000000800;
+	white = 0x800000000010ef09;
+	black = 0x4984790410000000;
 }
 
 Position::~Position() {
@@ -43,7 +49,7 @@ string Position::extract_row_string(uint_fast8_t row, string set) {
 }
 
 void Position::visualize_bitboard(bb my_bb, ostream& stream) {
-	//stream << "bb: " << hex << bb << dec << endl;
+	stream << "bb: " << hex << my_bb << dec << endl;
 	stream << "  +-----------------+" << endl;
 	for (int i = 7; i >= 0; --i) {
 		bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
@@ -174,10 +180,19 @@ void Position::clearSquare(bitset<64>& bs, int to) {
 	bs[to] = false;
 }
 
-void Position::print_square(int x) { //TODO separate the printing from the generating
+string Position::mailboxIndexToSquare(int x) {
+	//TODO separate the printing from the generating
 	char column = 'a' + x % 8;
+	string columnString(1, column);
 	char row = '1' + x / 8;
-	cout << x << " = " << column << row << endl;
+	string rowString(1, row);
+	string square = columnString + rowString;
+	return square;
+}
+
+void Position::print_square(int x) { //TODO separate the printing from the generating
+	string square = mailboxIndexToSquare(x);
+	cout << x << " = " << square << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves) {

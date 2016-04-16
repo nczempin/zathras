@@ -18,7 +18,7 @@
 
 using namespace std;
 
-typedef uint_fast64_t bb;
+typedef uint64_t  bb;
 
 typedef vector<bb> bitboard_set;
 
@@ -37,6 +37,7 @@ public:
 	static void visualize_mailbox_board(int board[64], ostream& stream);
 	static void visit_mailbox_board(int board[64], void (*visitor)(int));
 	static void print_square(int x);
+	static string mailboxIndexToSquare(int x);
 private:
 	bool white_to_move = true;
 	bb everything = 0xffffffffffffffff;
