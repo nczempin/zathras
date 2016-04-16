@@ -7,7 +7,11 @@
 
 #include "Move_generator.h"
 
+#include <bitset>
+#include <utility>
+#include <vector>
 #include "Position.h"
+
 
 Move_generator::Move_generator() {
 	// TODO Auto-generated constructor stub
@@ -227,5 +231,11 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves() {
 	bitboard_set black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47, -1);
 	return black_pawn_no_capture_moves;
 }
-void Move_generator::generate_moves() {
+void Move_generator::generate_moves(Position position) {
+	bitboard_set pieces = position.getPieceBitboards();
+	bb white_pawns = pieces[1] & pieces[7];
+	Position::visualize_bitboard(white_pawns, cout);
+	Position::visit_bitboard(white_pawns, [position](int x){
+		position.print_square(x);
+	});
 }

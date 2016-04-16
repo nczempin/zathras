@@ -189,3 +189,17 @@ void Position::display_all_moves(const bitboard_set& moves) {
 				});
 	});
 }
+
+bitboard_set Position::getPieceBitboards() {
+	bitboard_set retval(8);
+	//TODO figure out what to do with [0]
+	retval[1] = pawns;
+	retval[2] = knights;
+	retval[3] = bishops;
+	retval[4] = rooks;
+	retval[5] = queens;
+	retval[6] = kings;
+	retval[7] = white;
+	retval[8] = black;
+	return retval;
+}

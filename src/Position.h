@@ -20,7 +20,7 @@ using namespace std;
 
 typedef uint_fast64_t bb;
 
-typedef vector<uint_fast64_t> bitboard_set;
+typedef vector<bb> bitboard_set;
 
 class Position {
 public:
@@ -31,6 +31,12 @@ public:
 	void print(ostream& stream) const;
 	static void setSquare(bitset<64>& bs, int to);
 	static void clearSquare(bitset<64>& bs, int to);
+	bitboard_set getPieceBitboards();
+	static void visualize_bitboard(bb my_bb, ostream& stream);
+	static void visit_bitboard(bb my_bb, function<void(int)>);
+	static void visualize_mailbox_board(int board[64], ostream& stream);
+	static void visit_mailbox_board(int board[64], void (*visitor)(int));
+	static void print_square(int x);
 private:
 	bool white_to_move = true;
 	bb everything = 0xffffffffffffffff;
@@ -48,11 +54,6 @@ private:
 	// end of test position
 
 	static string extract_row_string(uint_fast8_t row, string set);
-	static void visualize_bitboard(bb my_bb, ostream& stream);
-	static void visit_bitboard(bb my_bb, function<void(int)>);
-	static void visualize_mailbox_board(int board[64], ostream& stream);
-	static void visit_mailbox_board(int board[64], void (*visitor)(int));
-	static void print_square(int x);
 	static void display_all_moves(const bitboard_set& moves);
 };
 

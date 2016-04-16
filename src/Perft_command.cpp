@@ -68,6 +68,6 @@ void Perft_command::execute() {
 
 	Move_generator mg;
 	mg.pregenerate_moves();
-	mg.generate_moves();
+	mg.generate_moves(p);
 
 }

@@ -15,7 +15,7 @@ public:
 	Move_generator();
 	virtual ~Move_generator();
 	static void pregenerate_moves();
-	void generate_moves();
+	void generate_moves(Position position);
 private:
 	static pair<bitboard_set, bitboard_set> pregenerate_rays(int direction);
 	static pair<bitboard_set, bitboard_set> pregenerate_knight_moves();
