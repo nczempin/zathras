@@ -48,7 +48,8 @@ private:
 			pregenerate_white_pawn_capture_moves();
 	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
 			pregenerate_black_pawn_capture_moves();
-
+	void visit_moves(const bb sub_position, const bitboard_set all_moves,
+			const Position position, function<void(int, int)> f);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

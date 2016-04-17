@@ -220,11 +220,18 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves() {
 
 void Move_generator::print_moves(const bb sub_position,
 		const bitboard_set all_moves, const Position position) {
-	Position::visit_bitboard(sub_position, [all_moves, position](int x) {
-		string from = position.mailboxIndexToSquare(x);
-		Position::visit_bitboard(all_moves[x], [position, from](int y) {
-					string to = position.mailboxIndexToSquare(y);
-					cout << from << to << endl;
+	visit_moves(sub_position,all_moves, position, [](int x, int y) {
+		string from = Position::mailboxIndexToSquare(x);
+		string to = Position::mailboxIndexToSquare(y);
+		cout << from << to << endl;
+	});
+}
+void Move_generator::visit_moves(const bb sub_position,
+		const bitboard_set all_moves, const Position position,
+		function<void(int, int)> f) {
+	Position::visit_bitboard(sub_position, [all_moves, position, f](int x) {
+		Position::visit_bitboard(all_moves[x], [position, x, f](int y) {
+					f(x, y);
 				}
 		);
 	});
@@ -246,4 +253,9 @@ void Move_generator::generate_moves(Position position) {
 	print_moves(white_rooks, rook_moves.first, position);
 	print_moves(white_queens, queen_moves.first, position);
 	print_moves(white_kings, king_moves.first, position);
+//	visit_moves(white_kings, king_moves.first, position, [](int x, int y) {
+//		string from = Position::mailboxIndexToSquare(x);
+//		string to = Position::mailboxIndexToSquare(y);
+//		cout << from << to << endl;
+//	});
 }
