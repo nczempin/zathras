@@ -220,7 +220,7 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves() {
 
 void Move_generator::print_moves(const bb sub_position,
 		const bitboard_set all_moves, const Position position) {
-	visit_moves(sub_position,all_moves, position, [](int x, int y) {
+	visit_moves(sub_position, all_moves, position, [](int x, int y) {
 		string from = Position::mailboxIndexToSquare(x);
 		string to = Position::mailboxIndexToSquare(y);
 		cout << from << to << endl;
@@ -253,9 +253,27 @@ void Move_generator::generate_moves(Position position) {
 	print_moves(white_rooks, rook_moves.first, position);
 	print_moves(white_queens, queen_moves.first, position);
 	print_moves(white_kings, king_moves.first, position);
-//	visit_moves(white_kings, king_moves.first, position, [](int x, int y) {
-//		string from = Position::mailboxIndexToSquare(x);
-//		string to = Position::mailboxIndexToSquare(y);
-//		cout << from << to << endl;
-//	});
+	int i = 0;
+	visit_moves(white_pawns, white_pawn_no_capture_moves, position, [&i](int x, int y) {
+		++i;
+	});
+	visit_moves(white_pawns, white_pawn_capture_moves.first, position, [&i](int x, int y) {
+		++i;
+	});
+	visit_moves(white_knights, knight_moves.first, position, [&i](int x, int y) {
+		++i;
+	});
+	visit_moves(white_bishops, bishop_moves.first, position, [&i](int x, int y) {
+		++i;
+	});
+	visit_moves(white_rooks, rook_moves.first, position, [&i](int x, int y) {
+		++i;
+	});
+	visit_moves(white_queens, queen_moves.first, position, [&i](int x, int y) {
+		++i;
+	});
+	visit_moves(white_kings, king_moves.first, position, [&i](int x, int y) {
+		++i;
+	});
+	cout << "move count: " << i << endl;
 }
