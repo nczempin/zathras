@@ -49,12 +49,14 @@ private:
 	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
 			pregenerate_black_pawn_capture_moves();
 	void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
-			const Position position, function<void(int, int)> f);
-	void visit_moves(const bb sub_position, const bitboard_set all_moves,
-			const Position position, function<void(int, int)> f,
+			function<void(int, int)> f);
+	void visit_capture_moves(const bb sub_position,
+			const bitboard_set all_moves, function<void(int, int)> f,
 			bb other_colour);
 	void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
-			const Position position, function<void(int, int)> f, bb occupied);
+			function<void(int, int)> f, bb occupied, bool white_to_move);
+	static bb filter_occupied_squares(bool white_to_move, bb occupied,
+			const bitboard_set& all_moves, int x);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

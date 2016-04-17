@@ -220,15 +220,15 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves() {
 
 void Move_generator::print_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, const Position position) {
-	visit_moves_raw(sub_position, all_moves, position, [](int x, int y) {
+	visit_moves_raw(sub_position, all_moves, [](int x, int y) {
 		string from = Position::mailboxIndexToSquare(x);
 		string to = Position::mailboxIndexToSquare(y);
 		cout << from << to << endl;
 	});
 }
-void Move_generator::visit_moves(const bb sub_position,
-		const bitboard_set all_moves, const Position position,
-		function<void(int, int)> f, bb other_colour) {
+void Move_generator::visit_capture_moves(const bb sub_position,
+		const bitboard_set all_moves, function<void(int, int)> f,
+		bb other_colour) {
 	Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
 		bb raw_moves = all_moves[x];
 		bb moves = raw_moves & other_colour;
@@ -239,8 +239,7 @@ void Move_generator::visit_moves(const bb sub_position,
 	});
 }
 void Move_generator::visit_moves_raw(const bb sub_position,
-		const bitboard_set all_moves, const Position position,
-		function<void(int, int)> f) {
+		const bitboard_set all_moves, function<void(int, int)> f) {
 	Position::visit_bitboard(sub_position, [all_moves, f](int x) {
 		Position::visit_bitboard(all_moves[x], [x, f](int y) {
 					f(x, y);
@@ -248,31 +247,40 @@ void Move_generator::visit_moves_raw(const bb sub_position,
 		);
 	});
 }
+
+bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
+		const bitboard_set& all_moves, int x) {
+	//TODO simplify the distinction between white's move and black's move
+	const bb jump_over =
+			white_to_move ? Position::third_row : Position::sixth_row;
+	bb jump_over_occupied = jump_over & occupied;
+	bb jump_over_occupants_shifted =
+			white_to_move ? jump_over_occupied << 8 : jump_over_occupied >> 8;
+	bb all_moves_from_here = all_moves[x];
+	const bb jump_onto =
+			white_to_move ? Position::fourth_row : Position::fifth_row;
+	bb all_moves_to_fifth =
+			(x >= 48 && x < 56) ? all_moves_from_here & jump_onto : 0;
+	bb all_moves_to_fourth =
+			(x >= 8 && x < 16) ? all_moves_from_here & jump_onto : 0;
+	bb all_moves_to_jump =
+			white_to_move ? all_moves_to_fourth : all_moves_to_fifth;
+	bb filter_out = all_moves_to_jump & jump_over_occupants_shifted;
+	bb moves = (all_moves_from_here & ~occupied) & ~filter_out;
+	return moves;
+}
+
 void Move_generator::visit_pawn_nocaps(const bb sub_position,
-		const bitboard_set all_moves, const Position position,
-		function<void(int, int)> f, bb occupied) {
-	Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
-		bb sixthRow = Position::sixth_row & occupied;
-		//Position::visualize_bitboard(occupied, cout);
-		//Position::visualize_bitboard(Position::sixth_row, cout);
-		//Position::visualize_bitboard(sixthRow, cout);
-		bb sixth_occupants_shifted = (sixthRow >> 8);
-		//Position::visualize_bitboard(sixth_occupants_shifted, cout);
-			bb all_moves_from_here = all_moves[x];
-			//cout << "all from "<< Position::mailboxIndexToSquare(x) << endl;
-			//Position::visualize_bitboard(all_moves_from_here, cout);
-			bb all_moves_to_fifth = (x>=48&&x<56)?all_moves_from_here & Position::fifth_row:0;
-			bb filter_out = all_moves_to_fifth & sixth_occupants_shifted;
-			bb moves = (all_moves_from_here & ~occupied) & ~filter_out;
-			//cout << "filter these jumps out." << endl;
-			//Position::visualize_bitboard(filter_out, cout);
-			//cout << "left with" << endl;
-			//Position::visualize_bitboard(moves, cout);
-			Position::visit_bitboard(moves, [x, f](int y) {
-						f(x, y);
-					}
-			);
-		});
+		const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
+		bool white_to_move) {
+	Position::visit_bitboard(sub_position,
+			[all_moves, f, occupied, white_to_move](int x) {
+				bb moves = filter_occupied_squares(white_to_move, occupied, all_moves, x);
+				Position::visit_bitboard(moves, [x, f](int y) {
+							f(x, y);
+						}
+				);
+			});
 }
 
 void Move_generator::generate_moves(Position position) {
@@ -284,7 +292,6 @@ void Move_generator::generate_moves(Position position) {
 	bb white_queens = pieces[5] & pieces[7];
 	bb white_kings = pieces[6] & pieces[7];
 	bb black_pawns = pieces[1] & pieces[8];
-	cout << "Raw moves (white to move):" << endl;
 //	print_moves_raw(white_pawns, white_pawn_no_capture_moves, position);
 //	print_moves_raw(white_pawns, white_pawn_capture_moves.first, position);
 //	print_moves_raw(white_knights, knight_moves.first, position);
@@ -293,22 +300,20 @@ void Move_generator::generate_moves(Position position) {
 //	print_moves_raw(white_queens, queen_moves.first, position);
 //	print_moves_raw(white_kings, king_moves.first, position);
 	int i = 0;
-	visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, position,
-			[&i](int x, int y) {
-				string from = Position::mailboxIndexToSquare(x);
-				string to = Position::mailboxIndexToSquare(y);
-				cout << from << to << endl;
-				++i;
-			}, pieces[7] | pieces[8]);
-//	visit_moves(white_pawns, white_pawn_capture_moves.first, position, [&i](int x, int y) {
-//		++i;
-//	}, pieces[8]);
-//	visit_moves(black_pawns, black_pawn_capture_moves.first, position, [&i](int x, int y) {
-//		string from = Position::mailboxIndexToSquare(x);
-//		string to = Position::mailboxIndexToSquare(y);
-//		cout << from << to << endl;
-//	++i;
-//	}, pieces[7]);
+	function<void(int, int)> f = [&i](int x, int y) {
+		string from = Position::mailboxIndexToSquare(x);
+		string to = Position::mailboxIndexToSquare(y);
+		cout << from << to << endl;
+		++i;
+	};
+//	visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
+//			pieces[7] | pieces[8]);
+//	visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
+//			pieces[7]);
+	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+			pieces[7] | pieces[8], true);
+	visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+			pieces[8]);
 //	visit_moves_raw(white_knights, knight_moves.first, position, [&i](int x, int y) {
 //		++i;
 //	});

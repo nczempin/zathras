@@ -41,6 +41,7 @@ public:
 	static const bb everything = 		0xffffffffffffffff;
 	static const bb top_row = 			0xff00000000000000;
 	static const bb third_row = 		0x0000000000ff0000;
+	static const bb fourth_row = 		0x00000000ff000000;
 	static const bb fifth_row = 		0x000000ff00000000;
 	static const bb sixth_row = 		0x0000ff0000000000;
 	static const bb both_third_rows = 	0x0000ff0000ff0000;
