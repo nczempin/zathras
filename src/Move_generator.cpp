@@ -238,6 +238,19 @@ void Move_generator::visit_capture_moves(const bb sub_position,
 		);
 	});
 }
+void Move_generator::visit_non_capture_moves(const bb sub_position,
+		const bitboard_set all_moves, function<void(int, int)> f,
+		bb other_colour) {
+	Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
+		bb raw_moves = all_moves[x];
+		bb moves = raw_moves &  ~other_colour;
+		Position::visit_bitboard(moves, [x, f](int y) {
+					f(x, y);
+				}
+		);
+	});
+}
+
 void Move_generator::visit_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, function<void(int, int)> f) {
 	Position::visit_bitboard(sub_position, [all_moves, f](int x) {
@@ -292,13 +305,11 @@ void Move_generator::generate_moves(Position position) {
 	bb white_queens = pieces[5] & pieces[7];
 	bb white_kings = pieces[6] & pieces[7];
 	bb black_pawns = pieces[1] & pieces[8];
-//	print_moves_raw(white_pawns, white_pawn_no_capture_moves, position);
-//	print_moves_raw(white_pawns, white_pawn_capture_moves.first, position);
-//	print_moves_raw(white_knights, knight_moves.first, position);
-//	print_moves_raw(white_bishops, bishop_moves.first, position);
-//	print_moves_raw(white_rooks, rook_moves.first, position);
-//	print_moves_raw(white_queens, queen_moves.first, position);
-//	print_moves_raw(white_kings, king_moves.first, position);
+	bb black_knights = pieces[2] & pieces[8];
+	bb black_bishops = pieces[3] & pieces[8];
+	bb black_rooks = pieces[4] & pieces[8];
+	bb black_queens = pieces[5] & pieces[8];
+	bb black_kings = pieces[6] & pieces[8];
 	int i = 0;
 	function<void(int, int)> f = [&i](int x, int y) {
 		string from = Position::mailboxIndexToSquare(x);
@@ -310,10 +321,12 @@ void Move_generator::generate_moves(Position position) {
 //			pieces[7] | pieces[8]);
 //	visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
 //			pieces[7]);
-	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
-			pieces[7] | pieces[8], true);
-	visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
-			pieces[8]);
+//	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+//			pieces[7] | pieces[8], true);
+	//visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
+	//visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
+	//visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
+	visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
 //	visit_moves_raw(white_knights, knight_moves.first, position, [&i](int x, int y) {
 //		++i;
 //	});
