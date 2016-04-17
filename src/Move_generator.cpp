@@ -277,13 +277,13 @@ bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
 		const bitboard_set& all_moves, int x) {
 	//TODO simplify the distinction between white's move and black's move
 	const bb jump_over =
-			white_to_move ? Position::third_row : Position::sixth_row;
+			white_to_move ? Position::BB_RANK3 : Position::BB_RANK6;
 	bb jump_over_occupied = jump_over & occupied;
 	bb jump_over_occupants_shifted =
 			white_to_move ? jump_over_occupied << 8 : jump_over_occupied >> 8;
 	bb all_moves_from_here = all_moves[x];
 	const bb jump_onto =
-			white_to_move ? Position::fourth_row : Position::fifth_row;
+			white_to_move ? Position::BB_RANK4 : Position::BB_RANK5;
 	bb all_moves_to_fifth =
 			(x >= 48 && x < 56) ? all_moves_from_here & jump_onto : 0;
 	bb all_moves_to_fourth =
