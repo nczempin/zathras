@@ -250,6 +250,18 @@ void Move_generator::visit_non_capture_moves(const bb sub_position,
 		);
 	});
 }
+void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
+		const bitboard_set all_moves, function<void(int, int)> f,
+		bb other_colour) {
+	Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
+		bb raw_moves = all_moves[x];
+		bb moves = raw_moves &  ~other_colour;
+		Position::visit_bitboard(moves, [x, f](int y) {
+					f(x, y);
+				}
+		);
+	});
+}
 
 void Move_generator::visit_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, function<void(int, int)> f) {
@@ -326,21 +338,8 @@ void Move_generator::generate_moves(Position position) {
 	//visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
 	//visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
 	//visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
-	visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
-//	visit_moves_raw(white_knights, knight_moves.first, position, [&i](int x, int y) {
-//		++i;
-//	});
-//	visit_moves_raw(white_bishops, bishop_moves.first, position, [&i](int x, int y) {
-//		++i;
-//	});
-//	visit_moves_raw(white_rooks, rook_moves.first, position, [&i](int x, int y) {
-//		++i;
-//	});
-//	visit_moves_raw(white_queens, queen_moves.first, position, [&i](int x, int y) {
-//		++i;
-//	});
-//	visit_moves_raw(white_kings, king_moves.first, position, [&i](int x, int y) {
-//		++i;
-//	});
+	//visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
+	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f, pieces[7]);
+
 	cout << "move count: " << i << endl;
 }

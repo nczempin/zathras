@@ -56,6 +56,9 @@ private:
 	void visit_non_capture_moves(const bb sub_position,
 			const bitboard_set all_moves, function<void(int, int)> f,
 			bb other_colour);
+	void visit_non_capture_ray_moves(const bb sub_position,
+			const bitboard_set all_moves, function<void(int, int)> f,
+			bb other_colour);
 	void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
 			function<void(int, int)> f, bb occupied, bool white_to_move);
 	static bb filter_occupied_squares(bool white_to_move, bb occupied,
