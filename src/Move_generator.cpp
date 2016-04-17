@@ -252,12 +252,27 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
 		const bitboard_set all_moves, const Position position,
 		function<void(int, int)> f, bb occupied) {
 	Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
-		bb moves = all_moves[x] & ~occupied;
-		Position::visit_bitboard(moves, [x, f](int y) {
-					f(x, y);
-				}
-		);
-	});
+		bb sixthRow = Position::sixth_row & occupied;
+		//Position::visualize_bitboard(occupied, cout);
+		//Position::visualize_bitboard(Position::sixth_row, cout);
+		//Position::visualize_bitboard(sixthRow, cout);
+		bb sixth_occupants_shifted = (sixthRow >> 8);
+		//Position::visualize_bitboard(sixth_occupants_shifted, cout);
+			bb all_moves_from_here = all_moves[x];
+			//cout << "all from "<< Position::mailboxIndexToSquare(x) << endl;
+			//Position::visualize_bitboard(all_moves_from_here, cout);
+			bb all_moves_to_fifth = (x>=48&&x<56)?all_moves_from_here & Position::fifth_row:0;
+			bb filter_out = all_moves_to_fifth & sixth_occupants_shifted;
+			bb moves = (all_moves_from_here & ~occupied) & ~filter_out;
+			//cout << "filter these jumps out." << endl;
+			//Position::visualize_bitboard(filter_out, cout);
+			//cout << "left with" << endl;
+			//Position::visualize_bitboard(moves, cout);
+			Position::visit_bitboard(moves, [x, f](int y) {
+						f(x, y);
+					}
+			);
+		});
 }
 
 void Move_generator::generate_moves(Position position) {

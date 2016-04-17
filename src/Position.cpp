@@ -11,14 +11,14 @@
 #include <iomanip>
 
 Position::Position() {
-	pawns = 0x008469040002e700;
+	pawns = 0x0084e9040002e700;
 	knights = 0x4000000000000000;
 	bishops = 0x0000100000100000;
 	rooks = 0x0100000000000009;
 	queens = 0x8000000010000000;
 	kings = 0x0800000000000800;
 	white = 0x800000000010ef09;
-	black = 0x4984790410020000;
+	black = 0x4984f90410020000;
 }
 
 Position::~Position() {

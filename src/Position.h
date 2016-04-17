@@ -38,10 +38,14 @@ public:
 	static void visit_mailbox_board(int board[64], void (*visitor)(int));
 	static void print_square(int x);
 	static string mailboxIndexToSquare(int x);
+	static const bb everything = 		0xffffffffffffffff;
+	static const bb top_row = 			0xff00000000000000;
+	static const bb third_row = 		0x0000000000ff0000;
+	static const bb fifth_row = 		0x000000ff00000000;
+	static const bb sixth_row = 		0x0000ff0000000000;
+	static const bb both_third_rows = 	0x0000ff0000ff0000;
 private:
 	bool white_to_move = true;
-	bb everything = 0xffffffffffffffff;
-	bb top_row = 0xff00000000000000;
 
 	// test position
 	bb pawns;
