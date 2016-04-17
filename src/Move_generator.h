@@ -33,6 +33,8 @@ private:
 			vector<int> jumps);
 	static void place_pawn_move(int from, int steps, int direction,
 			bitset<64> bs[64]);
+	void print_moves(bb ppp, bitboard_set mmm, Position position);
+
 	pair<bitboard_set, bitboard_set> knight_moves = pregenerate_knight_moves();
 	pair<bitboard_set, bitboard_set> king_moves = pregenerate_king_moves();
 	pair<bitboard_set, bitboard_set> bishop_moves = pregenerate_bishop_moves();

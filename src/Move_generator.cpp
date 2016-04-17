@@ -217,16 +217,33 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves() {
 	bitboard_set black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47, -1);
 	return black_pawn_no_capture_moves;
 }
+
+void Move_generator::print_moves(const bb sub_position,
+		const bitboard_set all_moves, const Position position) {
+	Position::visit_bitboard(sub_position, [all_moves, position](int x) {
+		string from = position.mailboxIndexToSquare(x);
+		Position::visit_bitboard(all_moves[x], [position, from](int y) {
+					string to = position.mailboxIndexToSquare(y);
+					cout << from << to << endl;
+				}
+		);
+	});
+}
+
 void Move_generator::generate_moves(Position position) {
 	bitboard_set pieces = position.getPieceBitboards();
 	bb white_pawns = pieces[1] & pieces[7];
-	Position::visualize_bitboard(white_pawns, cout);
-	Position::visit_bitboard(white_pawns, [this,position](int x) {
-		string from = position.mailboxIndexToSquare(x);
-		bb moves = white_pawn_no_capture_moves[x];
-		Position::visit_bitboard(moves,[moves,position, from](int y) {
-					string to = position.mailboxIndexToSquare(y);
-					cout << from << to << endl;
-				});
-	});
+	bb white_knights = pieces[2] & pieces[7];
+	bb white_bishops = pieces[3] & pieces[7];
+	bb white_rooks = pieces[4] & pieces[7];
+	bb white_queens = pieces[5] & pieces[7];
+	bb white_kings = pieces[6] & pieces[7];
+	cout << "Raw moves (white to move):" << endl;
+	print_moves(white_pawns, white_pawn_no_capture_moves, position);
+	print_moves(white_pawns, white_pawn_capture_moves.first, position);
+	print_moves(white_knights, knight_moves.first, position);
+	print_moves(white_bishops, bishop_moves.first, position);
+	print_moves(white_rooks, rook_moves.first, position);
+	print_moves(white_queens, queen_moves.first, position);
+	print_moves(white_kings, king_moves.first, position);
 }
