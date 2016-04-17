@@ -33,7 +33,7 @@ private:
 			vector<int> jumps);
 	static void place_pawn_move(int from, int steps, int direction,
 			bitset<64> bs[64]);
-	void print_moves(bb ppp, bitboard_set mmm, Position position);
+	void print_moves_raw(bb ppp, bitboard_set mmm, Position position);
 
 	pair<bitboard_set, bitboard_set> knight_moves = pregenerate_knight_moves();
 	pair<bitboard_set, bitboard_set> king_moves = pregenerate_king_moves();
@@ -48,8 +48,9 @@ private:
 			pregenerate_white_pawn_capture_moves();
 	pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
 			pregenerate_black_pawn_capture_moves();
-	void visit_moves(const bb sub_position, const bitboard_set all_moves,
-			const Position position, function<void(int, int)> f);
+	void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
+			const Position position, function<void(int, int)> f);void visit_moves(const bb sub_position, const bitboard_set all_moves,
+			const Position position, function<void(int, int)> f, bb other_colour);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

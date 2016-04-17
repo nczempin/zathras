@@ -44,14 +44,14 @@ private:
 	bb top_row = 0xff00000000000000;
 
 	// test position
-	bb pawns = 0x008469040000e700;
-	bb knights = 0x4000000000000000;
-	bb bishops = 0x0000100000100000;
-	bb rooks = 0x0100000000000009;
-	bb queens = 0x8000000010000000;
-	bb kings = 0x0800000000000800;
-	bb white = 0x800000000010ef09;
-	bb black = 0x4984790410000000;
+	bb pawns;
+	bb knights;
+	bb bishops;
+	bb rooks;
+	bb queens;
+	bb kings;
+	bb white;
+	bb black;
 	// end of test position
 
 	static string extract_row_string(uint_fast8_t row, string set);

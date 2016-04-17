@@ -11,14 +11,14 @@
 #include <iomanip>
 
 Position::Position() {
-	pawns = 0x008469040000e700;
+	pawns = 0x008469040002e700;
 	knights = 0x4000000000000000;
 	bishops = 0x0000100000100000;
 	rooks = 0x0100000000000009;
 	queens = 0x8000000010000000;
 	kings = 0x0800000000000800;
 	white = 0x800000000010ef09;
-	black = 0x4984790410000000;
+	black = 0x4984790410020000;
 }
 
 Position::~Position() {
@@ -165,7 +165,7 @@ void Position::print(ostream& stream) const {
 	stream << "6 | . p p b p . . p |" << endl;
 	stream << "5 | . . . . . p . . |" << endl;
 	stream << "4 | . . . q . . . . |" << endl;
-	stream << "3 | . . . B . . . . |" << endl;
+	stream << "3 | . . . B . . p . |" << endl;
 	stream << "2 | P P P . K P P P |" << endl;
 	stream << "1 | . . . . R . . R |" << endl;
 	stream << "  +-----------------+" << endl;

@@ -218,15 +218,27 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves() {
 	return black_pawn_no_capture_moves;
 }
 
-void Move_generator::print_moves(const bb sub_position,
+void Move_generator::print_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, const Position position) {
-	visit_moves(sub_position, all_moves, position, [](int x, int y) {
+	visit_moves_raw(sub_position, all_moves, position, [](int x, int y) {
 		string from = Position::mailboxIndexToSquare(x);
 		string to = Position::mailboxIndexToSquare(y);
 		cout << from << to << endl;
 	});
 }
 void Move_generator::visit_moves(const bb sub_position,
+		const bitboard_set all_moves, const Position position,
+		function<void(int, int)> f, bb other_colour) {
+	Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
+		bb raw_moves = all_moves[x];
+		bb moves = raw_moves & other_colour;
+		Position::visit_bitboard(moves, [x, f](int y) {
+					f(x, y);
+				}
+		);
+	});
+}
+void Move_generator::visit_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, const Position position,
 		function<void(int, int)> f) {
 	Position::visit_bitboard(sub_position, [all_moves, position, f](int x) {
@@ -246,34 +258,34 @@ void Move_generator::generate_moves(Position position) {
 	bb white_queens = pieces[5] & pieces[7];
 	bb white_kings = pieces[6] & pieces[7];
 	cout << "Raw moves (white to move):" << endl;
-	print_moves(white_pawns, white_pawn_no_capture_moves, position);
-	print_moves(white_pawns, white_pawn_capture_moves.first, position);
-	print_moves(white_knights, knight_moves.first, position);
-	print_moves(white_bishops, bishop_moves.first, position);
-	print_moves(white_rooks, rook_moves.first, position);
-	print_moves(white_queens, queen_moves.first, position);
-	print_moves(white_kings, king_moves.first, position);
+//	print_moves_raw(white_pawns, white_pawn_no_capture_moves, position);
+//	print_moves_raw(white_pawns, white_pawn_capture_moves.first, position);
+//	print_moves_raw(white_knights, knight_moves.first, position);
+//	print_moves_raw(white_bishops, bishop_moves.first, position);
+//	print_moves_raw(white_rooks, rook_moves.first, position);
+//	print_moves_raw(white_queens, queen_moves.first, position);
+//	print_moves_raw(white_kings, king_moves.first, position);
 	int i = 0;
-	visit_moves(white_pawns, white_pawn_no_capture_moves, position, [&i](int x, int y) {
+	visit_moves_raw(white_pawns, white_pawn_no_capture_moves, position, [&i](int x, int y) {
 		++i;
 	});
 	visit_moves(white_pawns, white_pawn_capture_moves.first, position, [&i](int x, int y) {
 		++i;
-	});
-	visit_moves(white_knights, knight_moves.first, position, [&i](int x, int y) {
-		++i;
-	});
-	visit_moves(white_bishops, bishop_moves.first, position, [&i](int x, int y) {
-		++i;
-	});
-	visit_moves(white_rooks, rook_moves.first, position, [&i](int x, int y) {
-		++i;
-	});
-	visit_moves(white_queens, queen_moves.first, position, [&i](int x, int y) {
-		++i;
-	});
-	visit_moves(white_kings, king_moves.first, position, [&i](int x, int y) {
-		++i;
-	});
+	}, pieces[8]);
+//	visit_moves_raw(white_knights, knight_moves.first, position, [&i](int x, int y) {
+//		++i;
+//	});
+//	visit_moves_raw(white_bishops, bishop_moves.first, position, [&i](int x, int y) {
+//		++i;
+//	});
+//	visit_moves_raw(white_rooks, rook_moves.first, position, [&i](int x, int y) {
+//		++i;
+//	});
+//	visit_moves_raw(white_queens, queen_moves.first, position, [&i](int x, int y) {
+//		++i;
+//	});
+//	visit_moves_raw(white_kings, king_moves.first, position, [&i](int x, int y) {
+//		++i;
+//	});
 	cout << "move count: " << i << endl;
 }
