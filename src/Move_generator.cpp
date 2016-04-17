@@ -241,8 +241,19 @@ void Move_generator::visit_moves(const bb sub_position,
 void Move_generator::visit_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, const Position position,
 		function<void(int, int)> f) {
-	Position::visit_bitboard(sub_position, [all_moves, position, f](int x) {
-		Position::visit_bitboard(all_moves[x], [position, x, f](int y) {
+	Position::visit_bitboard(sub_position, [all_moves, f](int x) {
+		Position::visit_bitboard(all_moves[x], [x, f](int y) {
+					f(x, y);
+				}
+		);
+	});
+}
+void Move_generator::visit_pawn_nocaps(const bb sub_position,
+		const bitboard_set all_moves, const Position position,
+		function<void(int, int)> f, bb occupied) {
+	Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
+		bb moves = all_moves[x] & ~occupied;
+		Position::visit_bitboard(moves, [x, f](int y) {
 					f(x, y);
 				}
 		);
@@ -257,6 +268,7 @@ void Move_generator::generate_moves(Position position) {
 	bb white_rooks = pieces[4] & pieces[7];
 	bb white_queens = pieces[5] & pieces[7];
 	bb white_kings = pieces[6] & pieces[7];
+	bb black_pawns = pieces[1] & pieces[8];
 	cout << "Raw moves (white to move):" << endl;
 //	print_moves_raw(white_pawns, white_pawn_no_capture_moves, position);
 //	print_moves_raw(white_pawns, white_pawn_capture_moves.first, position);
@@ -266,12 +278,22 @@ void Move_generator::generate_moves(Position position) {
 //	print_moves_raw(white_queens, queen_moves.first, position);
 //	print_moves_raw(white_kings, king_moves.first, position);
 	int i = 0;
-	visit_moves_raw(white_pawns, white_pawn_no_capture_moves, position, [&i](int x, int y) {
-		++i;
-	});
-	visit_moves(white_pawns, white_pawn_capture_moves.first, position, [&i](int x, int y) {
-		++i;
-	}, pieces[8]);
+	visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, position,
+			[&i](int x, int y) {
+				string from = Position::mailboxIndexToSquare(x);
+				string to = Position::mailboxIndexToSquare(y);
+				cout << from << to << endl;
+				++i;
+			}, pieces[7] | pieces[8]);
+//	visit_moves(white_pawns, white_pawn_capture_moves.first, position, [&i](int x, int y) {
+//		++i;
+//	}, pieces[8]);
+//	visit_moves(black_pawns, black_pawn_capture_moves.first, position, [&i](int x, int y) {
+//		string from = Position::mailboxIndexToSquare(x);
+//		string to = Position::mailboxIndexToSquare(y);
+//		cout << from << to << endl;
+//	++i;
+//	}, pieces[7]);
 //	visit_moves_raw(white_knights, knight_moves.first, position, [&i](int x, int y) {
 //		++i;
 //	});

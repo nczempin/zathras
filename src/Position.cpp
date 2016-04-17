@@ -159,17 +159,6 @@ void Position::print(ostream& stream) const {
 
 	visualize_mailbox_board(board, stream);
 
-	stream << "  +-----------------+" << endl;
-	stream << "8 | Q n . . k . . r |" << endl;
-	stream << "7 | p . . . . p . . |" << endl;
-	stream << "6 | . p p b p . . p |" << endl;
-	stream << "5 | . . . . . p . . |" << endl;
-	stream << "4 | . . . q . . . . |" << endl;
-	stream << "3 | . . . B . . p . |" << endl;
-	stream << "2 | P P P . K P P P |" << endl;
-	stream << "1 | . . . . R . . R |" << endl;
-	stream << "  +-----------------+" << endl;
-	stream << "    A B C D E F G H";
 }
 
 void Position::setSquare(bitset<64>& bs, int to) {
