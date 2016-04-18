@@ -250,25 +250,76 @@ void Move_generator::visit_non_capture_moves(const bb sub_position,
 		);
 	});
 }
-bool on_same_file(int x, int y) {
+static bool on_same_file(int x, int y) {
 	return (x % 8) == (y % 8);
 }
-bool on_same_rank(int x, int y) {
+static bool on_same_rank(int x, int y) {
 	return (x / 8) == (y / 8);
 }
-bool on_same_diagonal(int x, int y) {
+static bool on_same_diagonal(int x, int y) {
 	throw 342; //TODO implement this once we get to bishops
 }
 
 bool Move_generator::is_anything_between(int x, int y, bb occupied) {
+	if (x == y) {
+		return false;
+	}
 	//TODO this can be done much more elegantly and much more efficiently
 	if (on_same_file(x, y)) {
 		cout << "same file: " << Position::mailboxIndexToSquare(x) << ", "
 				<< Position::mailboxIndexToSquare(y) << endl;
+		//again with the elegance
+		int smaller = x;
+		int larger = y;
+		if (y < x) {
+			smaller = y;
+			larger = x;
+		}
+		int diff = larger - smaller;
+		if (diff == 8) {
+			return false;
+		}
+		// evil magic numbers
+		bitset<64> between = 0;
+		int file = 7 - (smaller % 8);
+		int rank = smaller / 8;
+		for (int i = 8; i <= diff; i += 8) {
+			int btwn = i + file + rank * 8;
+			cout << "setting " << Position::mailboxIndexToSquare(smaller + i)
+					<< endl;
+			Position::setSquare(between, btwn); //TODO: probably can use a break statement
+		}
+		bb intersection = between.to_ulong() & occupied;
+		cout << "intersection: " << hex << between.to_ulong() << ". "
+				<< occupied << ": " << intersection << dec << endl;
+		return intersection != 0;
 	} else if (on_same_rank(x, y)) {
-		cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
-				<< Position::mailboxIndexToSquare(y) << endl;
-
+//		cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
+//				<< Position::mailboxIndexToSquare(y) << endl;
+		//again with the elegance
+		int smaller = x;
+		int larger = y;
+		if (y < x) {
+			smaller = y;
+			larger = x;
+		}
+		int rank = x / 8;
+		int diff = larger - smaller;
+		if (diff == 1) {
+			return false;
+		}
+		// evil magic numbers
+		bitset<64> between = 0;
+		for (int i = 1; i < diff; ++i) {
+			int btwn = 7 - (i + smaller);
+//			cout << "setting: " << Position::mailboxIndexToSquare(7 - btwn)
+//					<< endl;
+			Position::setSquare(between, btwn + rank * 8);
+		}
+		bb intersection = between.to_ulong() & occupied;
+//		cout << "intersection: " << hex << between.to_ulong() << ". "
+//				<< occupied << ": " << intersection << dec << endl;
+		return intersection != 0;
 	} else if (!on_same_diagonal(x, y)) {
 
 		// invalid state
@@ -374,8 +425,10 @@ void Move_generator::generate_moves(Position position) {
 	//visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
 	//visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
 	//visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
-	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
+	visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
 			pieces[7] | pieces[8]);
-
+	visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
+			pieces[7] | pieces[8]);
+	Position::visualize_bitboard(rook_moves.first[27], cout);
 	cout << "move count: " << i << endl;
 }
