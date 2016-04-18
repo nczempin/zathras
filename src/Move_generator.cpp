@@ -250,8 +250,36 @@ void Move_generator::visit_non_capture_moves(const bb sub_position,
 		);
 	});
 }
+bool on_same_file(int x, int y) {
+	return (x % 8) == (y % 8);
+}
+bool on_same_rank(int x, int y) {
+	return (x / 8) == (y / 8);
+}
+bool on_same_diagonal(int x, int y) {
+	throw 342; //TODO implement this once we get to bishops
+}
 
 bool Move_generator::is_anything_between(int x, int y, bb occupied) {
+	//TODO this can be done much more elegantly and much more efficiently
+	if (on_same_file(x, y)) {
+		cout << "same file: " << Position::mailboxIndexToSquare(x) << ", "
+				<< Position::mailboxIndexToSquare(y) << endl;
+	} else if (on_same_rank(x, y)) {
+		cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
+				<< Position::mailboxIndexToSquare(y) << endl;
+
+	} else if (!on_same_diagonal(x, y)) {
+
+		// invalid state
+		throw 567; //TODO proper exception
+	}
+	//shouldn't switch between bb and bitset<64>
+	bitset<64> x_bs = 0;
+	Position::setSquare(x_bs, x);
+	bitset<64> y_bs = 0;
+	Position::setSquare(y_bs, x);
+
 	return false;
 }
 

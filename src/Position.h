@@ -38,6 +38,7 @@ public:
 	static void visit_mailbox_board(int board[64], void (*visitor)(int)); // TODO convert to c++11
 	static void print_square(int x);
 	static string mailboxIndexToSquare(int x);
+	//TODO a separate Bitboard (helper) class is probably best
 	static const bb BB_FULL_BOARD = 		0xffffffffffffffff;
 	static const bb BB_RANK8 = 			0xff00000000000000;
 	static const bb BB_RANK3 = 		0x0000000000ff0000;
