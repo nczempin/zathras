@@ -243,21 +243,28 @@ void Move_generator::visit_non_capture_moves(const bb sub_position,
 		bb other_colour) {
 	Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
 		bb raw_moves = all_moves[x];
-		bb moves = raw_moves &  ~other_colour;
+		bb moves = raw_moves & ~other_colour;
 		Position::visit_bitboard(moves, [x, f](int y) {
 					f(x, y);
 				}
 		);
 	});
 }
+
+bool Move_generator::is_anything_between(int x, int y, bb occupied) {
+	return false;
+}
+
 void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
-		const bitboard_set all_moves, function<void(int, int)> f,
-		bb other_colour) {
-	Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
+		const bitboard_set all_moves, function<void(int, int)> f, bb occupied) {
+	Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
 		bb raw_moves = all_moves[x];
-		bb moves = raw_moves &  ~other_colour;
-		Position::visit_bitboard(moves, [x, f](int y) {
-					f(x, y);
+		bb moves = raw_moves & ~occupied;
+		Position::visit_bitboard(moves, [x, f, occupied](int y) {
+					bool b = is_anything_between(x, y, occupied);
+					if (!b) {
+						f(x, y);
+					}
 				}
 		);
 	});
@@ -339,7 +346,8 @@ void Move_generator::generate_moves(Position position) {
 	//visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
 	//visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
 	//visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
-	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f, pieces[7]);
+	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
+			pieces[7] | pieces[8]);
 
 	cout << "move count: " << i << endl;
 }

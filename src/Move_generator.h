@@ -62,6 +62,7 @@ private:
       function<void(int, int)> f, bb occupied, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,
       const bitboard_set& all_moves, int x);
+	static bool is_anything_between(int x, int y, bb occupied);
 };
 
 #endif /* MOVE_GENERATOR_H_ */
