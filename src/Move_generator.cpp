@@ -375,6 +375,24 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
 			);
 		});
 }
+void Move_generator::visit_capture_ray_moves(const bb sub_position,
+		const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
+		bb other_colour) {
+	Position::visit_bitboard(sub_position,
+			[all_moves, f, occupied, other_colour](int x) {
+				bb raw_moves = all_moves[x];
+				bb moves = raw_moves & other_colour;
+				//Position::visualize_bitboard(moves, cout);
+				Position::visit_bitboard(moves, [x, f, occupied](int y) {
+							//cout << "anything between? " << x << ", " << y << endl;
+							bool b = is_anything_between(x, y, occupied);
+							if (!b) {
+								f(x, y);
+							}
+						}
+				);
+			});
+}
 
 void Move_generator::visit_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, function<void(int, int)> f) {
@@ -443,29 +461,37 @@ void Move_generator::generate_moves(Position position) {
 		++i;
 	};
 	cout << "Black pseudo-legal moves:" << endl;
-	visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
-			pieces[7] | pieces[8], false);
-	visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
-			pieces[7]);
-
-	visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
-	visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
-	visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
-			pieces[7] | pieces[8]);
-	visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
-			pieces[7] | pieces[8]);
+//	visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
+//			pieces[7] | pieces[8], false);
+//	visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
+//			pieces[7]);
+//
+//	visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
+//	visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
+//	visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
+//			pieces[7] | pieces[8]);
+//	visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
+//			pieces[7] | pieces[8]);
+	visit_capture_ray_moves(black_queens, rook_moves.first, f,
+			pieces[7] | pieces[8], pieces[7]);
+	visit_capture_ray_moves(black_rooks, rook_moves.first, f,
+			pieces[7] | pieces[8], pieces[7]);
 	cout << "black move count: " << i << endl;
 	i = 0;
 	cout << endl << "White pseudo-legal moves:" << endl;
-	visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
-			pieces[8]);
-	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
-			pieces[7] | pieces[8], true);
-	visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
-	visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
-	visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
-			pieces[7] | pieces[8]);
-	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
-			pieces[7] | pieces[8]);
+//	visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+//			pieces[8]);
+//	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+//			pieces[7] | pieces[8], true);
+//	visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
+//	visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
+//	visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
+//			pieces[7] | pieces[8]);
+//	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
+//			pieces[7] | pieces[8]);
+	visit_capture_ray_moves(white_queens, rook_moves.first, f,
+			pieces[7] | pieces[8], pieces[8]);
+	visit_capture_ray_moves(white_rooks, rook_moves.first, f,
+			pieces[7] | pieces[8], pieces[8]);
 	cout << "white move count: " << i << endl;
 }
