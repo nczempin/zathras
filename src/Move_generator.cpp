@@ -514,12 +514,16 @@ void Move_generator::generate_moves(Position position)
 //			pieces[7] | pieces[8]);
 //	visit_capture_ray_moves(black_queens, rook_moves.first, f,
 //			pieces[7] | pieces[8], pieces[7]);
-//	visit_capture_ray_moves(black_rooks, rook_moves.first, f,
-//			pieces[7] | pieces[8], pieces[7]);
-  visit_non_capture_ray_moves(black_bishops, bishop_moves.first, f,
-      pieces[7] | pieces[8]);
-  visit_non_capture_ray_moves(black_queens, bishop_moves.first, f,
-      pieces[7] | pieces[8]);
+  //  visit_capture_ray_moves(black_rooks, rook_moves.first, f,
+  //      pieces[7] | pieces[8], pieces[7]);
+  visit_capture_ray_moves(black_bishops, bishop_moves.first, f,
+      pieces[7] | pieces[8], pieces[7]);
+  visit_capture_ray_moves(black_queens, bishop_moves.first, f,
+      pieces[7] | pieces[8], pieces[7]);
+//  visit_non_capture_ray_moves(black_bishops, bishop_moves.first, f,
+//      pieces[7] | pieces[8]);
+//  visit_non_capture_ray_moves(black_queens, bishop_moves.first, f,
+//      pieces[7] | pieces[8]);
   cout << "black move count: " << i << endl;
   i = 0;
   cout << endl << "White pseudo-legal moves:" << endl;
@@ -537,11 +541,13 @@ void Move_generator::generate_moves(Position position)
 //			pieces[7] | pieces[8], pieces[8]);
 //	visit_capture_ray_moves(white_rooks, rook_moves.first, f,
 //			pieces[7] | pieces[8], pieces[8]);
-//	visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
-//			pieces[7] | pieces[8], pieces[8]);
-  visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
-      pieces[7] | pieces[8]);
-  visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
-      pieces[7] | pieces[8]);
+  visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
+      pieces[7] | pieces[8], pieces[8]);
+  visit_capture_ray_moves(white_queens, bishop_moves.first, f,
+      pieces[7] | pieces[8], pieces[8]);
+//  visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
+//      pieces[7] | pieces[8]);
+//  visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
+//      pieces[7] | pieces[8]);
   cout << "white move count: " << i << endl;
 }
