@@ -22,14 +22,16 @@ Move_generator::~Move_generator() {
 }
 
 int Move_generator::set_square(int file_to, int rank_to, bitset<64>& bbs) {
-	int to = 7 - file_to + rank_to * 8;
-	Position::set_square(bbs, to);
+	int to_twisted = 7 - file_to + rank_to * 8;
+	int to = file_to + rank_to * 8;
+	Position::set_square(bbs, to_twisted);
 	return to;
 }
 
 int Move_generator::clear_square(int file_to, int rank_to, bitset<64>& bbs) {
-	int to = 7 - file_to + rank_to * 8;
-	Position::clear_square(bbs, to);
+	int to_twisted = 7 - file_to + rank_to * 8;
+	int to = file_to + rank_to * 8;
+	Position::clear_square(bbs, to_twisted);
 	return to;
 }
 
@@ -78,13 +80,12 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_hoppers(
 				int file_from = i % 8;
 				int file_to = candidate % 8;
 				int rank_to = candidate / 8;
-				int to = 7 - file_to + rank_to * 8;
-				Position::set_square(attacking[i], to);
+				set_square(file_to, rank_to, attacking[i]);
 				if (file_from >= 6 && file_to <= 1) {
-					Position::clear_square(attacking[i], to);
+					clear_square(file_to, rank_to, attacking[i]);
 				}
 				if (file_from <= 1 && file_to >= 6) {
-					Position::clear_square(attacking[i], to);
+					clear_square(file_to, rank_to, attacking[i]);
 				}
 			}
 		}
@@ -185,15 +186,15 @@ void Move_generator::place_pawn_move(int from, int steps, int direction,
 	int candidate = from + steps * direction;
 	int file_to = candidate % 8;
 	int rank_to = candidate / 8;
-	int to = 7 - file_to + rank_to * 8;
+//	int to = 7 - file_to + rank_to * 8;
 
 	if (candidate >= 0 && candidate < 64) {
-		Position::set_square(bs[from], to);
+		set_square(file_to, rank_to, bs[from]);
 		if (from % 8 == 7 && candidate % 8 == 0) {
-			Position::clear_square(bs[from], to);
+			clear_square(file_to, rank_to, bs[from]);
 		}
 		if (from % 8 == 0 && candidate % 8 == 7) {
-			Position::clear_square(bs[from], to);
+			clear_square(file_to, rank_to, bs[from]);
 		}
 	}
 }
@@ -206,16 +207,14 @@ bitboard_set Move_generator::pregen_pawn_nocaps(int start, int stop,
 		int candidate = i + 8 * direction; // single step
 		int file_to = candidate % 8;
 		int rank_to = candidate / 8;
-		int to = 7 - file_to + rank_to * 8;
-		Position::set_square(bs[i], to);
+		set_square(file_to, rank_to, bs[i]);
 	}
 	bitboard_set pawn_no_capture_moves(64);
 	for (int i = start; i != stop; i += direction) {
 		int candidate = i + 16 * direction; // double step
 		int file_to = candidate % 8;
 		int rank_to = candidate / 8;
-		int to = 7 - file_to + rank_to * 8;
-		Position::set_square(bs[i], to);
+		set_square(file_to, rank_to, bs[i]);
 	}
 	for (int i = 0; i < 64; ++i) {
 		unsigned long int as_int = bs[i].to_ulong();
@@ -281,8 +280,8 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 	}
 	//TODO this can be done much more elegantly and much more efficiently
 	if (on_same_file(x, y)) {
-		cout << "same file: " << Position::mailboxIndexToSquare(x) << ", "
-				<< Position::mailboxIndexToSquare(y) << endl;
+//		cout << "same file: " << Position::mailboxIndexToSquare(x) << ", "
+//				<< Position::mailboxIndexToSquare(y) << endl;
 		//again with the elegance
 		int smaller = x;
 		int larger = y;
@@ -296,21 +295,21 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 		}
 		// evil magic numbers
 		bitset<64> between = 0;
-		int file = 7 - (smaller % 8);
+		int file = smaller % 8;
 		int rank = smaller / 8;
-		for (int i = 8; i <= diff; i += 8) {
-			int btwn = i + file + rank * 8;
-			cout << "setting " << Position::mailboxIndexToSquare(smaller + i)
-					<< endl;
-			Position::set_square(between, btwn); //TODO: probably can use a break statement
+		for (int i = 1; i < diff / 8; ++i) {
+			int rank_to = rank + i;
+			set_square(file, rank_to, between);
+			int to = file + rank_to * 8;
+			//cout << "setting " << Position::mailboxIndexToSquare(to) << endl;
 		}
 		bb intersection = between.to_ulong() & occupied;
-		cout << "intersection: " << hex << between.to_ulong() << ". "
-				<< occupied << ": " << intersection << dec << endl;
+		//cout << "intersection: " << hex << between.to_ulong() << ". "
+		//	<< occupied << ": " << intersection << dec << endl;
 		return intersection != 0;
 	} else if (on_same_rank(x, y)) {
-		cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
-				<< Position::mailboxIndexToSquare(y) << endl;
+		//cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
+		//<< Position::mailboxIndexToSquare(y) << endl;
 		//again with the elegance
 		int smaller = x;
 		int larger = y;
@@ -322,25 +321,25 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 		int file = smaller % 8;
 		int diff = larger - smaller;
 		if (diff == 1) {
-			cout << "diff = 1" << endl;
+			//cout << "diff = 1" << endl;
 			return false;
 		}
 		// evil magic numbers
 		bitset<64> between = 0;
 		for (int i = 1; i < diff; ++i) {
 			int btwn = (7 - (file + i)) + rank * 8;
-			cout << "btwn: " << btwn << ": "
-					<< Position::mailboxIndexToSquare(btwn) << endl;
+			//cout << "btwn: " << btwn << ": "
+			//<< Position::mailboxIndexToSquare(btwn) << endl;
 
-			cout << "setting: " << Position::mailboxIndexToSquare(btwn) << endl;
-			cout << "file, rank: " << (file + i) << ", " << rank << endl;
+			//cout << "setting: " << Position::mailboxIndexToSquare(btwn) << endl;
+			//cout << "file, rank: " << (file + i) << ", " << rank << endl;
 			int to = set_square(file + i, rank, between);
-			cout << "to: " << to << " - " << Position::mailboxIndexToSquare(to)
-					<< endl;
+			//cout << "to: " << to << " - " << Position::mailboxIndexToSquare(to)
+			//	<< endl;
 		}
 		bb intersection = between.to_ulong() & occupied;
-		cout << "intersection: " << hex << between.to_ulong() << ". "
-				<< occupied << ": " << intersection << dec << endl;
+		//cout << "intersection: " << hex << between.to_ulong() << ". "
+		//<< occupied << ": " << intersection << dec << endl;
 		return intersection != 0;
 	} else if (!on_same_diagonal(x, y)) {
 
@@ -349,10 +348,14 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 	}
 //shouldn't switch between bb and bitset<64>
 	bitset<64> x_bs = 0;
-	Position::set_square(x_bs, x);
+	int x_rank = x / 8;
+	int x_file = x % 8;
+	set_square(x_file, x_rank, x_bs);
 	bitset<64> y_bs = 0;
-	Position::set_square(y_bs, x);
-
+	int y_rank = y / 8;
+	int y_file = y % 8;
+	set_square(y_file, y_rank, y_bs);
+//Hmm, what am I doing with these?
 	return false;
 }
 
@@ -361,16 +364,16 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
 	Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
 		bb raw_moves = all_moves[x];
 		bb moves = raw_moves & ~occupied;
-		Position::visualize_bitboard(moves, cout);
-		Position::visit_bitboard(moves, [x, f, occupied](int y) {
-					cout << "anything between? " << x << ", " << y << endl;
-					bool b = is_anything_between(x, y, occupied);
-					if (!b) {
-						f(x, y);
+		//Position::visualize_bitboard(moves, cout);
+			Position::visit_bitboard(moves, [x, f, occupied](int y) {
+						//cout << "anything between? " << x << ", " << y << endl;
+						bool b = is_anything_between(x, y, occupied);
+						if (!b) {
+							f(x, y);
+						}
 					}
-				}
-		);
-	});
+			);
+		});
 }
 
 void Move_generator::visit_moves_raw(const bb sub_position,
@@ -443,16 +446,21 @@ void Move_generator::generate_moves(Position position) {
 //			pieces[7] | pieces[8]);
 //	visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
 //			pieces[7]);
+//	visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+//			pieces[8]);
 //	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
 //			pieces[7] | pieces[8], true);
 //visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
 //visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
-//visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
-//visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
-	visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
-			pieces[7] | pieces[8]);
+	visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+			pieces[8]);
+	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+			pieces[7] | pieces[8], true);
+	visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
+	visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
 	visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
 			pieces[7] | pieces[8]);
-	Position::visualize_bitboard(rook_moves.first[27], cout);
-	cout << "move count: " << i << endl;
+	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
+			pieces[7] | pieces[8]);
+	cout << "white move count: " << i << endl;
 }

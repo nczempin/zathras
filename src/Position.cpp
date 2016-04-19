@@ -170,7 +170,6 @@ void Position::clear_square(bitset<64>& bs, int to) {
 }
 
 string Position::mailboxIndexToSquare(int x) {
-	//TODO separate the printing from the generating
 	char column = 'a' + x % 8;
 	string columnString(1, column);
 	char row = '1' + x / 8;
@@ -179,7 +178,7 @@ string Position::mailboxIndexToSquare(int x) {
 	return square;
 }
 
-void Position::print_square(int x) { //TODO separate the printing from the generating
+void Position::print_square(int x) {
 	string square = mailboxIndexToSquare(x);
 	cout << x << " = " << square << endl;
 }
