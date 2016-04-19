@@ -161,11 +161,11 @@ void Position::print(ostream& stream) const {
 
 }
 
-void Position::setSquare(bitset<64>& bs, int to) {
+void Position::set_square(bitset<64>& bs, int to) {
 	bs[to] = true;
 }
 
-void Position::clearSquare(bitset<64>& bs, int to) {
+void Position::clear_square(bitset<64>& bs, int to) {
 	bs[to] = false;
 }
 

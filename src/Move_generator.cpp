@@ -20,32 +20,47 @@ Move_generator::Move_generator() {
 Move_generator::~Move_generator() {
 	// TODO Auto-generated destructor stub
 }
+
+int Move_generator::set_square(int file_to, int rank_to, bitset<64>& bbs) {
+	int to = 7 - file_to + rank_to * 8;
+	Position::set_square(bbs, to);
+	return to;
+}
+
+int Move_generator::clear_square(int file_to, int rank_to, bitset<64>& bbs) {
+	int to = 7 - file_to + rank_to * 8;
+	Position::clear_square(bbs, to);
+	return to;
+}
+
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_rays(
 		int direction) {
 	bitboard_set rays(64);
 	bitset<64> bs[64];
 	for (int i = 63; i >= 0; --i) {
+		bitset<64> bbs = bs[i];
 		for (int j = 0; j < 7; ++j) {
 			int from = i + direction * j;
 			int candidate = from + direction;
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
-			int to = 7 - file_to + rank_to * 8;
+			const int to = 7 - file_to + rank_to * 8;
 
 			if (candidate >= 0 && candidate < 64) {
-				Position::setSquare(bs[i], to);
+				set_square(file_to, rank_to, bbs);
 				if (from % 8 == 7 && candidate % 8 == 0) {
-					Position::clearSquare(bs[i], to);
+					clear_square(file_to, rank_to, bbs);
 				}
 				if (from % 8 == 0 && candidate % 8 == 7) {
-					Position::clearSquare(bs[i], to);
+					clear_square(file_to, rank_to, bbs);
 				}
 			}
-			if (!bs[i][to]) { // as soon as we hit an illegal target,
+			if (!bbs[to]) { // as soon as we hit an illegal target,
 				break; // the ray ends
 			}
 		}
-		unsigned long int as_int = bs[i].to_ulong();
+
+		unsigned long int as_int = bbs.to_ulong();
 		rays[i] = as_int;
 	}
 	pair<bitboard_set, bitboard_set> p(rays, rays);
@@ -64,12 +79,12 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_hoppers(
 				int file_to = candidate % 8;
 				int rank_to = candidate / 8;
 				int to = 7 - file_to + rank_to * 8;
-				Position::setSquare(attacking[i], to);
+				Position::set_square(attacking[i], to);
 				if (file_from >= 6 && file_to <= 1) {
-					Position::clearSquare(attacking[i], to);
+					Position::clear_square(attacking[i], to);
 				}
 				if (file_from <= 1 && file_to >= 6) {
-					Position::clearSquare(attacking[i], to);
+					Position::clear_square(attacking[i], to);
 				}
 			}
 		}
@@ -173,12 +188,12 @@ void Move_generator::place_pawn_move(int from, int steps, int direction,
 	int to = 7 - file_to + rank_to * 8;
 
 	if (candidate >= 0 && candidate < 64) {
-		Position::setSquare(bs[from], to);
+		Position::set_square(bs[from], to);
 		if (from % 8 == 7 && candidate % 8 == 0) {
-			Position::clearSquare(bs[from], to);
+			Position::clear_square(bs[from], to);
 		}
 		if (from % 8 == 0 && candidate % 8 == 7) {
-			Position::clearSquare(bs[from], to);
+			Position::clear_square(bs[from], to);
 		}
 	}
 }
@@ -192,7 +207,7 @@ bitboard_set Move_generator::pregen_pawn_nocaps(int start, int stop,
 		int file_to = candidate % 8;
 		int rank_to = candidate / 8;
 		int to = 7 - file_to + rank_to * 8;
-		Position::setSquare(bs[i], to);
+		Position::set_square(bs[i], to);
 	}
 	bitboard_set pawn_no_capture_moves(64);
 	for (int i = start; i != stop; i += direction) {
@@ -200,7 +215,7 @@ bitboard_set Move_generator::pregen_pawn_nocaps(int start, int stop,
 		int file_to = candidate % 8;
 		int rank_to = candidate / 8;
 		int to = 7 - file_to + rank_to * 8;
-		Position::setSquare(bs[i], to);
+		Position::set_square(bs[i], to);
 	}
 	for (int i = 0; i < 64; ++i) {
 		unsigned long int as_int = bs[i].to_ulong();
@@ -287,7 +302,7 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 			int btwn = i + file + rank * 8;
 			cout << "setting " << Position::mailboxIndexToSquare(smaller + i)
 					<< endl;
-			Position::setSquare(between, btwn); //TODO: probably can use a break statement
+			Position::set_square(between, btwn); //TODO: probably can use a break statement
 		}
 		bb intersection = between.to_ulong() & occupied;
 		cout << "intersection: " << hex << between.to_ulong() << ". "
@@ -314,7 +329,7 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 			int btwn = 7 - (i + smaller);
 //			cout << "setting: " << Position::mailboxIndexToSquare(7 - btwn)
 //					<< endl;
-			Position::setSquare(between, btwn + rank * 8);
+			Position::set_square(between, btwn + rank * 8);
 		}
 		bb intersection = between.to_ulong() & occupied;
 //		cout << "intersection: " << hex << between.to_ulong() << ". "
@@ -327,9 +342,9 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 	}
 	//shouldn't switch between bb and bitset<64>
 	bitset<64> x_bs = 0;
-	Position::setSquare(x_bs, x);
+	Position::set_square(x_bs, x);
 	bitset<64> y_bs = 0;
-	Position::setSquare(y_bs, x);
+	Position::set_square(y_bs, x);
 
 	return false;
 }

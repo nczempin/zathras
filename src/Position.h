@@ -30,8 +30,8 @@ public:
 
 	friend ostream& operator<<(ostream& stream, const Position& position);
 	void print(ostream& stream) const;
-	static void setSquare(bitset<64>& bs, int to);
-	static void clearSquare(bitset<64>& bs, int to);
+	static void set_square(bitset<64>& bs, int to);
+	static void clear_square(bitset<64>& bs, int to);
 	static void visualize_bitboard(bb my_bb, ostream& stream);
 	static void visit_bitboard(bb my_bb, square_visitor);
 	static void visualize_mailbox_board(int board[64], ostream& stream);
