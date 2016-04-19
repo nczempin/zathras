@@ -271,13 +271,32 @@ static bool on_same_rank(int x, int y) {
 	return (x / 8) == (y / 8);
 }
 static bool on_same_diagonal(int x, int y) {
-	throw 342; //TODO implement this once we get to bishops
+	int smaller = x;
+	int larger = y;
+	if (y < x) {
+		smaller = y;
+		larger = x;
+	}
+	cout << "smaller: " << smaller << endl;
+	int diff = larger - smaller;
+	cout << "diff: " << diff << endl;
+	if (diff % 9 == 0) {
+		cout << "clean into 9" << endl;
+		return true;
+	} else if (diff % 7 == 0) {
+		cout << "clean into 7" << endl;
+		return true;
+	}
+	cout << "nope" << endl;
+	return false;
 }
 
 bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 	if (x == y) {
 		return false;
 	}
+	cout << "anything between: " << Position::mailboxIndexToSquare(x) << ", "
+			<< Position::mailboxIndexToSquare(y) << endl;
 	//TODO this can be done much more elegantly and much more efficiently
 	if (on_same_file(x, y)) {
 //		cout << "same file: " << Position::mailboxIndexToSquare(x) << ", "
@@ -366,7 +385,7 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
 		bb moves = raw_moves & ~occupied;
 		//Position::visualize_bitboard(moves, cout);
 			Position::visit_bitboard(moves, [x, f, occupied](int y) {
-						//cout << "anything between? " << x << ", " << y << endl;
+						cout << "anything between? " << x << ", " << y << endl;
 						bool b = is_anything_between(x, y, occupied);
 						if (!b) {
 							f(x, y);
@@ -472,10 +491,10 @@ void Move_generator::generate_moves(Position position) {
 //			pieces[7] | pieces[8]);
 //	visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
 //			pieces[7] | pieces[8]);
-	visit_capture_ray_moves(black_queens, rook_moves.first, f,
-			pieces[7] | pieces[8], pieces[7]);
-	visit_capture_ray_moves(black_rooks, rook_moves.first, f,
-			pieces[7] | pieces[8], pieces[7]);
+//	visit_capture_ray_moves(black_queens, rook_moves.first, f,
+//			pieces[7] | pieces[8], pieces[7]);
+//	visit_capture_ray_moves(black_rooks, rook_moves.first, f,
+//			pieces[7] | pieces[8], pieces[7]);
 	cout << "black move count: " << i << endl;
 	i = 0;
 	cout << endl << "White pseudo-legal moves:" << endl;
@@ -489,9 +508,13 @@ void Move_generator::generate_moves(Position position) {
 //			pieces[7] | pieces[8]);
 //	visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
 //			pieces[7] | pieces[8]);
-	visit_capture_ray_moves(white_queens, rook_moves.first, f,
-			pieces[7] | pieces[8], pieces[8]);
-	visit_capture_ray_moves(white_rooks, rook_moves.first, f,
-			pieces[7] | pieces[8], pieces[8]);
+	//	visit_capture_ray_moves(white_queens, rook_moves.first, f,
+	//			pieces[7] | pieces[8], pieces[8]);
+	//	visit_capture_ray_moves(white_rooks, rook_moves.first, f,
+	//			pieces[7] | pieces[8], pieces[8]);
+//	visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
+//			pieces[7] | pieces[8], pieces[8]);
+	visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
+			pieces[7] | pieces[8]);
 	cout << "white move count: " << i << endl;
 }
