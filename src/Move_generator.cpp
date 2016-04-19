@@ -309,8 +309,8 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 				<< occupied << ": " << intersection << dec << endl;
 		return intersection != 0;
 	} else if (on_same_rank(x, y)) {
-//		cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
-//				<< Position::mailboxIndexToSquare(y) << endl;
+		cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
+				<< Position::mailboxIndexToSquare(y) << endl;
 		//again with the elegance
 		int smaller = x;
 		int larger = y;
@@ -318,29 +318,36 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied) {
 			smaller = y;
 			larger = x;
 		}
-		int rank = x / 8;
+		int rank = smaller / 8;
+		int file = smaller % 8;
 		int diff = larger - smaller;
 		if (diff == 1) {
+			cout << "diff = 1" << endl;
 			return false;
 		}
 		// evil magic numbers
 		bitset<64> between = 0;
 		for (int i = 1; i < diff; ++i) {
-			int btwn = 7 - (i + smaller);
-//			cout << "setting: " << Position::mailboxIndexToSquare(7 - btwn)
-//					<< endl;
-			Position::set_square(between, btwn + rank * 8);
+			int btwn = (7 - (file + i)) + rank * 8;
+			cout << "btwn: " << btwn << ": "
+					<< Position::mailboxIndexToSquare(btwn) << endl;
+
+			cout << "setting: " << Position::mailboxIndexToSquare(btwn) << endl;
+			cout << "file, rank: " << (file + i) << ", " << rank << endl;
+			int to = set_square(file + i, rank, between);
+			cout << "to: " << to << " - " << Position::mailboxIndexToSquare(to)
+					<< endl;
 		}
 		bb intersection = between.to_ulong() & occupied;
-//		cout << "intersection: " << hex << between.to_ulong() << ". "
-//				<< occupied << ": " << intersection << dec << endl;
+		cout << "intersection: " << hex << between.to_ulong() << ". "
+				<< occupied << ": " << intersection << dec << endl;
 		return intersection != 0;
 	} else if (!on_same_diagonal(x, y)) {
 
 		// invalid state
 		throw 567; //TODO proper exception
 	}
-	//shouldn't switch between bb and bitset<64>
+//shouldn't switch between bb and bitset<64>
 	bitset<64> x_bs = 0;
 	Position::set_square(x_bs, x);
 	bitset<64> y_bs = 0;
@@ -354,7 +361,9 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
 	Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
 		bb raw_moves = all_moves[x];
 		bb moves = raw_moves & ~occupied;
+		Position::visualize_bitboard(moves, cout);
 		Position::visit_bitboard(moves, [x, f, occupied](int y) {
+					cout << "anything between? " << x << ", " << y << endl;
 					bool b = is_anything_between(x, y, occupied);
 					if (!b) {
 						f(x, y);
@@ -376,7 +385,7 @@ void Move_generator::visit_moves_raw(const bb sub_position,
 
 bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
 		const bitboard_set& all_moves, int x) {
-	//TODO simplify the distinction between white's move and black's move
+//TODO simplify the distinction between white's move and black's move
 	const bb jump_over =
 			white_to_move ? Position::BB_RANK3 : Position::BB_RANK6;
 	bb jump_over_occupied = jump_over & occupied;
@@ -436,10 +445,10 @@ void Move_generator::generate_moves(Position position) {
 //			pieces[7]);
 //	visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
 //			pieces[7] | pieces[8], true);
-	//visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
-	//visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
-	//visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
-	//visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
+//visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
+//visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
+//visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
+//visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
 	visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
 			pieces[7] | pieces[8]);
 	visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
