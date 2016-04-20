@@ -40,6 +40,37 @@ bool is_digit(const char c)
 {
   return '0' <= c && c <= '9';
 }
+int Position::set_square(int file_to, int rank_to, bitset<64>& bbs)
+{
+  int to_twisted = 7 - file_to + rank_to * 8;
+  int to = file_to + rank_to * 8;
+  Position::set_square(bbs, to_twisted);
+  return to;
+}
+
+int Position::clear_square(int file_to, int rank_to, bitset<64>& bbs)
+{
+  int to_twisted = 7 - file_to + rank_to * 8;
+  int to = file_to + rank_to * 8;
+  Position::clear_square(bbs, to_twisted);
+  return to;
+}
+int Position::set_square(int file_to, int rank_to, bb& bbs)
+{
+  int to_twisted = 7 - file_to + rank_to * 8;
+  int to = file_to + rank_to * 8;
+  Position::set_square(bbs, to_twisted);
+  return to;
+}
+
+int Position::clear_square(int file_to, int rank_to, bb& bbs)
+{
+  int to_twisted = 7 - file_to + rank_to * 8;
+  int to = file_to + rank_to * 8;
+  Position::clear_square(bbs, to_twisted);
+  return to;
+}
+
 shared_ptr<Position> Position::create_position(const string& fen)
 {
   shared_ptr<Position> start_position(new Position());
@@ -61,7 +92,7 @@ shared_ptr<Position> Position::create_position(const string& fen)
         cout << "non-digit!" << endl;
         switch (c) {
         case 'P':
-          //Move_generator::set_square(f, r, start_position->pawns);
+          set_square(f, r, start_position->pawns);
           break;
         }
       }
@@ -224,6 +255,20 @@ void Position::set_square(bitset<64>& bs, int to)
 void Position::clear_square(bitset<64>& bs, int to)
 {
   bs[to] = false;
+}
+void Position::set_square(bb& b, int to)
+{
+  bitset<64> bs(b);
+  bs[to] = true;
+  b = bs.to_ulong();
+}
+
+void Position::clear_square(bb& b, int to)
+{
+  bitset<64> bs(b);
+  bs[to] = false;
+  b = bs.to_ulong();
+
 }
 
 string Position::mailboxIndexToSquare(int x)

@@ -22,7 +22,7 @@ Move_generator::~Move_generator()
 {
   // TODO Auto-generated destructor stub
 }
-
+//TODO move these outside
 int Move_generator::set_square(int file_to, int rank_to, bitset<64>& bbs)
 {
   int to_twisted = 7 - file_to + rank_to * 8;
