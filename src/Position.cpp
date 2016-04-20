@@ -6,32 +6,68 @@
  */
 
 #include "Position.h"
-#include <bitset>
 #include <sstream>
-#include <iomanip>
+#include <string>
+#include <sstream>
+#include <vector>
 
 Position::Position()
 {
   // TODO Auto-generated constructor stub
-
 }
 
 Position::~Position()
 {
   // TODO Auto-generated destructor stub
 }
+vector<string> &split(const string &s, char delim, vector<string> &elems)
+{
+  stringstream ss(s);
+  string item;
+  while (getline(ss, item, delim)) {
+    elems.push_back(item);
+  }
+  return elems;
+}
 
+vector<string> split(const string &s, char delim)
+{
+  vector<string> elems;
+  split(s, delim, elems);
+  return elems;
+}
+bool is_digit(const char c)
+{
+  return '0' <= c && c <= '9';
+}
 shared_ptr<Position> Position::create_position(const string& fen)
 {
   shared_ptr<Position> start_position(new Position());
-  start_position->pawns = 0;
-  start_position->knights = 0;
-  start_position->bishops = 0;
-  start_position->rooks = 0;
-  start_position->queens = 0;
-  start_position->kings = 0;
-  start_position->white = 0;
-  start_position->black = 0;
+  vector<string> split_fen = split(fen, ' ');
+  string fen_board = split_fen[0];
+  cout << "board: " << fen_board << endl;
+  vector<string> ranks = split(fen_board, '/');
+  int r = 8;
+  for (auto &rank : ranks) {
+    int f = 0;
+    cout << "rank: " << rank << endl;
+    for (auto &c : rank) {
+      cout << "c: " << c << endl;
+      if (is_digit(c)) {
+        cout << "digit!" << endl;
+        int digit = c - '0'; //convert from ascii
+        cout << "skip " << digit << " squares" << endl; //TODO actually do this
+      } else {
+        cout << "non-digit!" << endl;
+        switch (c) {
+        case 'P':
+          //Move_generator::set_square(f, r, start_position->pawns);
+          break;
+        }
+      }
+    }
+  }
+
   return start_position;  //TODO this is an empty position for now
 }
 
@@ -61,7 +97,6 @@ string Position::extract_row_string(uint_fast8_t row, string set)
   }
   return retval;
 }
-
 
 void Position::visualize_bitboard(bb my_bb, ostream& stream)
 {
@@ -128,78 +163,83 @@ void Position::visit_mailbox_board(int board[64], void (*f)(int))
   }
 }
 
-void Position::print(ostream& stream) const {
-	// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
+void Position::print(ostream& stream) const
+{
+  // TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 
-	int board[64];
-	for (int i = 0; i < 64; ++i) {
-		board[i] = 0;
-	}
-	visit_bitboard(white & pawns, [&board](int x) {
-		board[x] = 1;
-	});
-	visit_bitboard(white & knights, [&board](int x) {
-		board[x] = 2;
-	});
-	visit_bitboard(white & bishops, [&board](int x) {
-		board[x] = 3;
-	});
-	visit_bitboard(white & rooks, [&board](int x) {
-		//cout << "WR: " << x << endl;
-			board[x] = 4;
-		});
-	visit_bitboard(white & queens, [&board](int x) {
-		board[x] = 5;
-	});
-	visit_bitboard(white & kings, [&board](int x) {
-		board[x] = 6;
-	});
-	visit_bitboard(black & pawns, [&board](int x) {
-		board[x] = 7;
-	});
-	visit_bitboard(black & knights, [&board](int x) {
-		board[x] = 8;
-	});
-	visit_bitboard(black & bishops, [&board](int x) {
-		board[x] = 9;
-	});
-	visit_bitboard(black & rooks, [&board](int x) {
-		board[x] = 10;
-	});
-	visit_bitboard(black & queens, [&board](int x) {
-		board[x] = 11;
-	});
-	visit_bitboard(black & kings, [&board](int x) {
-		board[x] = 12;
-	});
-	visit_bitboard(~(black | white), [&board](int x) {
-		board[x] = 13;
-	});
+  int board[64];
+  for (int i = 0; i < 64; ++i) {
+    board[i] = 0;
+  }
+  visit_bitboard(white & pawns, [&board](int x) {
+    board[x] = 1;
+  });
+  visit_bitboard(white & knights, [&board](int x) {
+    board[x] = 2;
+  });
+  visit_bitboard(white & bishops, [&board](int x) {
+    board[x] = 3;
+  });
+  visit_bitboard(white & rooks, [&board](int x) {
+    //cout << "WR: " << x << endl;
+      board[x] = 4;
+    });
+  visit_bitboard(white & queens, [&board](int x) {
+    board[x] = 5;
+  });
+  visit_bitboard(white & kings, [&board](int x) {
+    board[x] = 6;
+  });
+  visit_bitboard(black & pawns, [&board](int x) {
+    board[x] = 7;
+  });
+  visit_bitboard(black & knights, [&board](int x) {
+    board[x] = 8;
+  });
+  visit_bitboard(black & bishops, [&board](int x) {
+    board[x] = 9;
+  });
+  visit_bitboard(black & rooks, [&board](int x) {
+    board[x] = 10;
+  });
+  visit_bitboard(black & queens, [&board](int x) {
+    board[x] = 11;
+  });
+  visit_bitboard(black & kings, [&board](int x) {
+    board[x] = 12;
+  });
+  visit_bitboard(~(black | white), [&board](int x) {
+    board[x] = 13;
+  });
 
-	visualize_mailbox_board(board, stream);
+  visualize_mailbox_board(board, stream);
 
 }
 
-void Position::set_square(bitset<64>& bs, int to) {
-	bs[to] = true;
+void Position::set_square(bitset<64>& bs, int to)
+{
+  bs[to] = true;
 }
 
-void Position::clear_square(bitset<64>& bs, int to) {
-	bs[to] = false;
+void Position::clear_square(bitset<64>& bs, int to)
+{
+  bs[to] = false;
 }
 
-string Position::mailboxIndexToSquare(int x) {
-	char column = 'a' + x % 8;
-	string columnString(1, column);
-	char row = '1' + x / 8;
-	string rowString(1, row);
-	string square = columnString + rowString;
-	return square;
+string Position::mailboxIndexToSquare(int x)
+{
+  char column = 'a' + x % 8;
+  string columnString(1, column);
+  char row = '1' + x / 8;
+  string rowString(1, row);
+  string square = columnString + rowString;
+  return square;
 }
 
-void Position::print_square(int x) {
-	string square = mailboxIndexToSquare(x);
-	cout << x << " = " << square << endl;
+void Position::print_square(int x)
+{
+  string square = mailboxIndexToSquare(x);
+  cout << x << " = " << square << endl;
 
 }
 
@@ -214,16 +254,17 @@ void Position::display_all_moves(const bitboard_set& moves)
   });
 }
 
-bitboard_set Position::getPieceBitboards() {
-	bitboard_set retval(8);
-	//TODO figure out what to do with [0]
-	retval[1] = pawns;
-	retval[2] = knights;
-	retval[3] = bishops;
-	retval[4] = rooks;
-	retval[5] = queens;
-	retval[6] = kings;
-	retval[7] = white;
-	retval[8] = black;
-	return retval;
+bitboard_set Position::getPieceBitboards()
+{
+  bitboard_set retval(8);
+  //TODO figure out what to do with [0]
+  retval[1] = pawns;
+  retval[2] = knights;
+  retval[3] = bishops;
+  retval[4] = rooks;
+  retval[5] = queens;
+  retval[6] = kings;
+  retval[7] = white;
+  retval[8] = black;
+  return retval;
 }

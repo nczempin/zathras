@@ -18,7 +18,7 @@
 
 using namespace std;
 
-typedef uint64_t  bb;
+typedef uint_fast64_t bb;
 
 typedef vector<bb> bitboard_set;
 typedef function<void(int)> square_visitor;
@@ -61,7 +61,7 @@ private:
 
 	static string extract_row_string(uint_fast8_t row, string set);
 	static void display_all_moves(const bitboard_set& moves);
-  shared_ptr<Position> create_position(const string& fen);
-};
+  static shared_ptr<Position> create_position(const string& fen);
+ };
 
 #endif /* POSITION_H_ */
