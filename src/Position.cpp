@@ -142,8 +142,9 @@ shared_ptr<Position> Position::create_position(const string& fen)
           set_square(f, r, start_position->black);
           break;
         }
+        ++f;
+
       }
-      ++f;
     }
     --r;
   }
@@ -154,7 +155,8 @@ shared_ptr<Position> Position::create_position(const string& fen)
 shared_ptr<Position> Position::create_start_position()
 {
   shared_ptr<Position> start_position = create_position(
-      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+  //"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -");
   return start_position;
 }
 ostream& operator<<(ostream& stream, const Position& position)
