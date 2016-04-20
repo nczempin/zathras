@@ -16,13 +16,20 @@
 #include <string>
 #include <vector>
 #include "typedefs.h"
+#include "Move.h"
 using namespace std;
-
 
 class Position {
 public:
   Position();
   virtual ~Position();
+
+  void make_move(Move move)
+  {
+  }
+  void unmake_move(Move move)
+  {
+  }
 
   friend ostream& operator<<(ostream& stream, const Position& position);
   void print(ostream& stream) const;

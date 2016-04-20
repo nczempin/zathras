@@ -65,16 +65,22 @@ void Perft_command::do_short_option(int c, string argument)
   }
 }
 
+int Perft_command::perft(int depth)
+{
+  return 1; //TODO dummy for now
+}
+
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
-  int perft_depth = 3; //TODO get this from arguments, but use a reasonable default
+  int depth = 1; //TODO get this from arguments, but use a reasonable default
   shared_ptr<Position> pp = Position::create_start_position();
   Position p = *pp;
   cout << p << endl;
 
   Move_generator mg;
   mg.pregenerate_moves();
+
   vector<Move> moves = mg.generate_moves(p);
   for (auto &move : moves) {
     bb from = move.get_from();
@@ -86,7 +92,15 @@ void Perft_command::execute()
     Position::visit_bitboard(to, [](int x) {
       cout << Position::mailboxIndexToSquare(x);
     });
-    cout << endl;
+    cout << ": ";
+
+    p.make_move(move);
+
+    int perft_result = perft(depth - 1);
+    cout << perft_result << endl;
+//    int per = perft(depth -1);
+    p.unmake_move(move);
+    // cout << endl;
   }
-  cout << moves.size() << endl;
+  cout << endl << "Perft result: " << moves.size() << endl;
 }

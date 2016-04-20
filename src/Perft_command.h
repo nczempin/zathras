@@ -22,6 +22,8 @@ public:
   void do_long_option(bool flag, string name, string argument);
   void do_short_option(int c, string argument);
 
+private:
+  int perft(int depth);
 };
 
 #endif /* PERFT_COMMAND_H_ */
