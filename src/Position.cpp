@@ -82,16 +82,16 @@ shared_ptr<Position> Position::create_position(const string& fen)
   for (auto &rank : ranks) {
     int f = 0;
     for (auto &c : rank) {
-      cout << "r: " << r << endl;
-      cout << "f: " << f << endl;
-      cout << "c: " << c << endl;
+//      cout << "r: " << r << endl;
+//      cout << "f: " << f << endl;
+//      cout << "c: " << c << endl;
       if (is_digit(c)) {
-        cout << "digit!" << endl;
+        //      cout << "digit!" << endl;
         int digit = c - '0'; //convert from ascii
-        cout << "skip " << digit << " squares" << endl; //TODO actually do this
+        //    cout << "skip " << digit << " squares" << endl; //TODO actually do this
         f += digit;
       } else {
-        cout << "non-digit!" << endl;
+        //  cout << "non-digit!" << endl;
         switch (c) {
         case 'P':
           set_square(f, r, start_position->pawns);
