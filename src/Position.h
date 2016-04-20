@@ -30,14 +30,15 @@ public:
 
 	friend ostream& operator<<(ostream& stream, const Position& position);
 	void print(ostream& stream) const;
-	static void setSquare(bitset<64>& bs, int to);
-	static void clearSquare(bitset<64>& bs, int to);
+	static void set_square(bitset<64>& bs, int to);
+	static void clear_square(bitset<64>& bs, int to);
 	static void visualize_bitboard(bb my_bb, ostream& stream);
 	static void visit_bitboard(bb my_bb, square_visitor);
 	static void visualize_mailbox_board(int board[64], ostream& stream);
 	static void visit_mailbox_board(int board[64], void (*visitor)(int)); // TODO convert to c++11
 	static void print_square(int x);
 	static string mailboxIndexToSquare(int x);
+	//TODO a separate Bitboard (helper) class is probably best
 	static const bb BB_FULL_BOARD = 		0xffffffffffffffff;
 	static const bb BB_RANK8 = 			0xff00000000000000;
 	static const bb BB_RANK3 = 		0x0000000000ff0000;

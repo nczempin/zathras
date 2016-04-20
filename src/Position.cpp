@@ -11,14 +11,14 @@
 #include <iomanip>
 
 Position::Position() {
-	pawns = 0x0084e9040002e700;
-	knights = 0x4000000000000000;
-	bishops = 0x0000100000100000;
-	rooks = 0x0100000000000009;
-	queens = 0x8000000010000000;
-	kings = 0x0800000000000800;
-	white = 0x800000000010ef09;
-	black = 0x4984f90410020000;
+	pawns = 	0x0084a9040002e700;
+	knights = 	0x4000000000000000;
+	bishops = 	0x0000100000100000;
+	rooks = 	0x0100000000000009;
+	queens =	0x8000000010000000;
+	kings = 	0x0800000000000800;
+	white = 	0x800000000010ef09;
+	black = 	0x4984b90410020000;
 }
 
 Position::~Position() {
@@ -161,16 +161,15 @@ void Position::print(ostream& stream) const {
 
 }
 
-void Position::setSquare(bitset<64>& bs, int to) {
+void Position::set_square(bitset<64>& bs, int to) {
 	bs[to] = true;
 }
 
-void Position::clearSquare(bitset<64>& bs, int to) {
+void Position::clear_square(bitset<64>& bs, int to) {
 	bs[to] = false;
 }
 
 string Position::mailboxIndexToSquare(int x) {
-	//TODO separate the printing from the generating
 	char column = 'a' + x % 8;
 	string columnString(1, column);
 	char row = '1' + x / 8;
@@ -179,7 +178,7 @@ string Position::mailboxIndexToSquare(int x) {
 	return square;
 }
 
-void Position::print_square(int x) { //TODO separate the printing from the generating
+void Position::print_square(int x) {
 	string square = mailboxIndexToSquare(x);
 	cout << x << " = " << square << endl;
 }
