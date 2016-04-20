@@ -15,11 +15,11 @@ Position::Position()
 {
   // TODO Auto-generated constructor stub
 }
-
-Position::~Position()
-{
-  // TODO Auto-generated destructor stub
-}
+//
+//Position::~Position()
+//{
+//  // TODO Auto-generated destructor stub
+//}
 vector<string> &split(const string &s, char delim, vector<string> &elems)
 {
   stringstream ss(s);
@@ -71,9 +71,9 @@ int Position::clear_square(int file_to, int rank_to, bb& bbs)
   return to;
 }
 
-shared_ptr<Position> Position::create_position(const string& fen)
+Position Position::create_position(const string& fen)
 {
-  shared_ptr<Position> start_position(new Position());
+  Position start_position;
   vector<string> split_fen = split(fen, ' ');
   string fen_board = split_fen[0];
   cout << "board: " << fen_board << endl;
@@ -94,53 +94,58 @@ shared_ptr<Position> Position::create_position(const string& fen)
         //  cout << "non-digit!" << endl;
         switch (c) {
         case 'P':
-          set_square(f, r, start_position->pawns);
-          set_square(f, r, start_position->white);
+          set_square(f, r, start_position.pawns);
+          set_square(f, r, start_position.white);
           break;
         case 'N':
-          set_square(f, r, start_position->knights);
-          set_square(f, r, start_position->white);
+          set_square(f, r, start_position.knights);
+          set_square(f, r, start_position.white);
           break;
         case 'B':
-          set_square(f, r, start_position->bishops);
-          set_square(f, r, start_position->white);
+          set_square(f, r, start_position.bishops);
+          set_square(f, r, start_position.white);
           break;
         case 'R':
-          set_square(f, r, start_position->rooks);
-          set_square(f, r, start_position->white);
+          set_square(f, r, start_position.rooks);
+          set_square(f, r, start_position.white);
           break;
         case 'Q':
-          set_square(f, r, start_position->queens);
-          set_square(f, r, start_position->white);
+          set_square(f, r, start_position.queens);
+          set_square(f, r, start_position.white);
           break;
         case 'K':
-          set_square(f, r, start_position->kings);
-          set_square(f, r, start_position->white);
+          set_square(f, r, start_position.kings);
+          set_square(f, r, start_position.white);
           break;
         case 'p':
-          set_square(f, r, start_position->pawns);
-          set_square(f, r, start_position->black);
+          set_square(f, r, start_position.pawns);
+          set_square(f, r, start_position.black);
           break;
         case 'n':
-          set_square(f, r, start_position->knights);
-          set_square(f, r, start_position->black);
+          set_square(f, r, start_position.knights);
+          set_square(f, r, start_position.black);
           break;
         case 'b':
-          set_square(f, r, start_position->bishops);
-          set_square(f, r, start_position->black);
+          set_square(f, r, start_position.bishops);
+          set_square(f, r, start_position.black);
           break;
         case 'r':
-          set_square(f, r, start_position->rooks);
-          set_square(f, r, start_position->black);
+          set_square(f, r, start_position.rooks);
+          set_square(f, r, start_position.black);
+          cout << "rooks: " << hex << start_position.rooks << dec << endl;
+          cout << "black: " << hex << start_position.black << dec << endl;
           break;
         case 'q':
-          set_square(f, r, start_position->queens);
-          set_square(f, r, start_position->black);
+          set_square(f, r, start_position.queens);
+          set_square(f, r, start_position.black);
           break;
         case 'k':
-          set_square(f, r, start_position->kings);
-          set_square(f, r, start_position->black);
+          set_square(f, r, start_position.kings);
+          set_square(f, r, start_position.black);
           break;
+        default:
+          cerr << "unknown symbol: " << c << endl;
+          throw 483;
         }
         ++f;
 
@@ -148,15 +153,15 @@ shared_ptr<Position> Position::create_position(const string& fen)
     }
     --r;
   }
-
-  return start_position;  //TODO this is an empty position for now
+  cout << "generated: " << endl << (start_position) << endl;
+  return start_position;
 }
 
-shared_ptr<Position> Position::create_start_position()
+Position Position::create_start_position()
 {
-  shared_ptr<Position> start_position = create_position(
-  //"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-      "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -");
+  Position start_position = create_position(
+      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+  // "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -");
   return start_position;
 }
 ostream& operator<<(ostream& stream, const Position& position)
@@ -352,15 +357,24 @@ void Position::display_all_moves(const bitboard_set& moves)
 
 bitboard_set Position::getPieceBitboards()
 {
-  bitboard_set retval(8);
+  bitboard_set retval;
   //TODO figure out what to do with [0]
-  retval[1] = pawns;
-  retval[2] = knights;
-  retval[3] = bishops;
-  retval[4] = rooks;
-  retval[5] = queens;
-  retval[6] = kings;
-  retval[7] = white;
-  retval[8] = black;
+  retval.push_back(0);
+  bb p = pawns;
+  bb n = knights;
+  bb b = bishops;
+  bb r = rooks;
+  bb q = queens;
+  bb k = kings;
+  bb wh = white;
+  bb bl = black;
+  retval.push_back(p);
+  retval.push_back(n);
+  retval.push_back(b);
+  retval.push_back(r);
+  retval.push_back(q);
+  retval.push_back(k);
+  retval.push_back(wh);
+  retval.push_back(bl);
   return retval;
 }

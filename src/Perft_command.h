@@ -10,9 +10,11 @@
 
 #include "Abstract_command.h"
 #include "Command_receiver.h"
+#include "Position.h"
+#include "Move_generator.h"
+#include <memory>
 
-class Perft_command: public Abstract_command
-{
+class Perft_command: public Abstract_command {
 public:
   Perft_command(shared_ptr<Command_receiver> receiver);
   virtual ~Perft_command();
@@ -24,6 +26,8 @@ public:
 
 private:
   int perft(int depth);
+  Position p;
+  Move_generator mg;
 };
 
 #endif /* PERFT_COMMAND_H_ */

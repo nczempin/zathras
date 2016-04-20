@@ -22,7 +22,7 @@ using namespace std;
 class Position {
 public:
   Position();
-  virtual ~Position();
+//  virtual ~Position();
 
   void make_move(Move move)
   {
@@ -56,22 +56,22 @@ public:
   static const bb BB_RANK5 = 0x000000ff00000000;
   static const bb BB_RANK6 = 0x0000ff0000000000;
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
-  static shared_ptr<Position> create_start_position();
+  static Position create_start_position();
   bitboard_set getPieceBitboards();
 private:
   bool white_to_move = true;
-  bb pawns;
-  bb knights;
-  bb bishops;
-  bb rooks;
-  bb queens;
-  bb kings;
-  bb white;
-  bb black;
+  bb pawns = 0;
+  bb knights = 0;
+  bb bishops = 0;
+  bb rooks = 0;
+  bb queens = 0;
+  bb kings = 0;
+  bb white = 0;
+  bb black = 0;
 
   static string extract_row_string(uint_fast8_t row, string set);
   static void display_all_moves(const bitboard_set& moves);
-  static shared_ptr<Position> create_position(const string& fen);
+  static Position create_position(const string& fen);
 };
 
 #endif /* POSITION_H_ */

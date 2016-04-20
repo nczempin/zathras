@@ -14,8 +14,7 @@
 
 Move_generator::Move_generator()
 {
-  // TODO Auto-generated constructor stub
-
+  cout << "hello from mg cons" << endl;
 }
 
 Move_generator::~Move_generator()
@@ -513,7 +512,13 @@ void Move_generator::visit_moves(const bitboard_set& pieces,
 
 vector<Move> Move_generator::generate_moves(Position position)
 {
+  //cout << "mggm" << endl;
+  cout.flush();
   bitboard_set pieces = position.getPieceBitboards();
+//  for (auto &bb : pieces) {
+//    cout << "piece: " << hex << bb << dec << endl;
+//  }
+  //cout << "after getpp" << endl;
   int i = 0;
   function<void(int, int)> display_moves = [](int x, int y) {
     string from = Position::mailboxIndexToSquare(x);
@@ -524,22 +529,26 @@ vector<Move> Move_generator::generate_moves(Position position)
     ++i;
   };
   vector<Move> moves;
-  function<void(int, int)> collect_moves = [&moves](int x, int y) {
-    bb from(0);
-    Position::set_square(from, x);
-    bb to(0);
-    Position::set_square(to, y);
-    Move m (from, to);
-    moves.push_back(m);
-  };
+  function<void(int, int)> collect_moves =
+      [&moves, display_moves](int x, int y) {
+        bb from(0);
+        Position::set_square(from, x);
+        bb to(0);
+        Position::set_square(to, y);
+        Move m (from, to);
+ //       cout << "Move: " << hex << m.get_from() << ", " << m.get_to() << dec << endl;
+//        cout.flush();
+        moves.push_back(m);
+        //display_moves(x, y);
+      };
 
 //  cout << "Black pseudo-legal moves:" << endl;
-  bb black_pawns = pieces[1] & pieces[8];
-  bb black_knights = pieces[2] & pieces[8];
-  bb black_bishops = pieces[3] & pieces[8];
-  bb black_rooks = pieces[4] & pieces[8];
-  bb black_queens = pieces[5] & pieces[8];
-  bb black_kings = pieces[6] & pieces[8];
+//  bb black_pawns = pieces[1] & pieces[8];
+//  bb black_knights = pieces[2] & pieces[8];
+//  bb black_bishops = pieces[3] & pieces[8];
+//  bb black_rooks = pieces[4] & pieces[8];
+//  bb black_queens = pieces[5] & pieces[8];
+//  bb black_kings = pieces[6] & pieces[8];
 //	visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
 //			pieces[7] | pieces[8], false);
 //	visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
@@ -567,6 +576,7 @@ vector<Move> Move_generator::generate_moves(Position position)
   i = 0;
   // cout << endl << "White pseudo-legal moves:" << endl;
   visit_moves(pieces, collect_moves);
-//  cout << "white move count: " << i << endl;
+
+  //cout << "white move count: " << moves.size() << endl;
   return moves;
 }

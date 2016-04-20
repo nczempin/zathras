@@ -12,7 +12,6 @@
 #include "Command.h"
 #include "Perft_command.h"
 
-
 using namespace std;
 
 void print_usage()
@@ -35,13 +34,13 @@ void hopt(shared_ptr<Abstract_command> command, int c, int option_index,
   }
 }
 
-void handle_options(shared_ptr<Abstract_command> command, int argc, char* argv[])
+void handle_options(shared_ptr<Abstract_command> command, int argc,
+    char* argv[])
 {
   int c;
   while (1) {
     vector<option> long_options1 = command->get_long_options();
-    long_options1.push_back(
-      { 0, 0, 0, 0 }); // for handling the options
+    long_options1.push_back( { 0, 0, 0, 0 }); // for handling the options
     option* long_options = &long_options1[0];
     /* getopt_long stores the option index here. */
     int option_index = 0;
@@ -56,20 +55,19 @@ void handle_options(shared_ptr<Abstract_command> command, int argc, char* argv[]
   }
 }
 
-shared_ptr<Abstract_command> determine_command(shared_ptr<Command_receiver> receiver, int argc,
-    char* argv[])
+shared_ptr<Abstract_command> determine_command(
+    shared_ptr<Command_receiver> receiver, int argc, char* argv[])
 {
   if (argc == 1) {
     print_usage();
     throw 1;
   }
   string searching_for(argv[1]);
-  vector<string> commands =
-    { "perft" };
+  vector<string> commands = { "perft" };
   auto it = find(begin(commands), end(commands), searching_for);
   if (it == end(commands)) {
-    cout << "zathras: '" << argv[1]
-        << "' is not a zathras command." /*"See 'zathras --help'."*/ << endl;
+    cout << "zathras: '" << argv[1] << "' is not a zathras command."
+        /*"See 'zathras --help'."*/<< endl;
     throw 1;
   }
   int pos = it - commands.begin();
@@ -80,14 +78,14 @@ shared_ptr<Abstract_command> determine_command(shared_ptr<Command_receiver> rece
   case 0:
     command = new Perft_command(receiver);
     break;
-/*
-  case 1:
-    command = new Cat_file(mygit);
-    break;
-  case 2:
-    command = new Rev_parse(mygit);
-    break;
-*/
+    /*
+     case 1:
+     command = new Cat_file(mygit);
+     break;
+     case 2:
+     command = new Rev_parse(mygit);
+     break;
+     */
   default:
     throw -7; //TODO
 
@@ -124,5 +122,6 @@ int main(int argc, char* argv[])
   } catch (int n) {
     return n; //TODO more sophisticated exception handling
   }
+  cout << "done" << endl;
   return 0;
 }

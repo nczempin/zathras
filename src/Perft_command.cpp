@@ -67,40 +67,54 @@ void Perft_command::do_short_option(int c, string argument)
 
 int Perft_command::perft(int depth)
 {
-  return 1; //TODO dummy for now
+  //cout << "p-depth = " << depth << endl;
+//  cout.flush();
+  //cout << "b4 mggm" << endl;
+  vector<Move> moves = mg.generate_moves(p);
+  //cout << "moves.size(): " << moves.size() << endl;
+//    cout.flush();
+  int total_result = 0;
+  for (auto &move : moves) {
+    //p->make_move(move);
+//      cout << "per move" << endl;
+//      cout.flush();
+    if (depth == 1) {
+      ++total_result;
+    } else {
+      int perft_result = perft(depth - 1);
+      total_result += perft_result;
+    }
+    //p->unmake_move(move);
+  }
+//   cout << "perft_done" << endl;
+  return total_result;
 }
 
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
-  int depth = 1; //TODO get this from arguments, but use a reasonable default
-  shared_ptr<Position> pp = Position::create_start_position();
-  Position p = *pp;
-  cout << p << endl;
+  int depth = 2; //TODO get this from arguments, but use a reasonable default
+  p = Position::create_start_position();
+  cout << (p) << endl;
 
-  Move_generator mg;
   mg.pregenerate_moves();
 
+  ///////////////////////////////
+
   vector<Move> moves = mg.generate_moves(p);
+  int total_result = 0;
   for (auto &move : moves) {
     bb from = move.get_from();
     bb to = move.get_to();
 
-    Position::visit_bitboard(from, [](int x) {
-      cout << Position::mailboxIndexToSquare(x);
-    });
-    Position::visit_bitboard(to, [](int x) {
-      cout << Position::mailboxIndexToSquare(x);
-    });
-    cout << ": ";
-
-    p.make_move(move);
+    //p->make_move(move);
 
     int perft_result = perft(depth - 1);
-    cout << perft_result << endl;
+    total_result += perft_result;
+    // cout << "pr: " << perft_result << endl;
 //    int per = perft(depth -1);
-    p.unmake_move(move);
+    //p->unmake_move(move);
     // cout << endl;
   }
-  cout << endl << "Perft result: " << moves.size() << endl;
+  cout << endl << "Perft result: " << total_result << endl;
 }
