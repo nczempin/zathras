@@ -78,25 +78,74 @@ shared_ptr<Position> Position::create_position(const string& fen)
   string fen_board = split_fen[0];
   cout << "board: " << fen_board << endl;
   vector<string> ranks = split(fen_board, '/');
-  int r = 8;
+  int r = 7;
   for (auto &rank : ranks) {
     int f = 0;
-    cout << "rank: " << rank << endl;
     for (auto &c : rank) {
+      cout << "r: " << r << endl;
+      cout << "f: " << f << endl;
       cout << "c: " << c << endl;
       if (is_digit(c)) {
         cout << "digit!" << endl;
         int digit = c - '0'; //convert from ascii
         cout << "skip " << digit << " squares" << endl; //TODO actually do this
+        f += digit;
       } else {
         cout << "non-digit!" << endl;
         switch (c) {
         case 'P':
           set_square(f, r, start_position->pawns);
+          set_square(f, r, start_position->white);
+          break;
+        case 'N':
+          set_square(f, r, start_position->knights);
+          set_square(f, r, start_position->white);
+          break;
+        case 'B':
+          set_square(f, r, start_position->bishops);
+          set_square(f, r, start_position->white);
+          break;
+        case 'R':
+          set_square(f, r, start_position->rooks);
+          set_square(f, r, start_position->white);
+          break;
+        case 'Q':
+          set_square(f, r, start_position->queens);
+          set_square(f, r, start_position->white);
+          break;
+        case 'K':
+          set_square(f, r, start_position->kings);
+          set_square(f, r, start_position->white);
+          break;
+        case 'p':
+          set_square(f, r, start_position->pawns);
+          set_square(f, r, start_position->black);
+          break;
+        case 'n':
+          set_square(f, r, start_position->knights);
+          set_square(f, r, start_position->black);
+          break;
+        case 'b':
+          set_square(f, r, start_position->bishops);
+          set_square(f, r, start_position->black);
+          break;
+        case 'r':
+          set_square(f, r, start_position->rooks);
+          set_square(f, r, start_position->black);
+          break;
+        case 'q':
+          set_square(f, r, start_position->queens);
+          set_square(f, r, start_position->black);
+          break;
+        case 'k':
+          set_square(f, r, start_position->kings);
+          set_square(f, r, start_position->black);
           break;
         }
       }
+      ++f;
     }
+    --r;
   }
 
   return start_position;  //TODO this is an empty position for now
