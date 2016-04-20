@@ -64,7 +64,6 @@ shared_ptr<Position> Position::create_position(const string& fen)
           //Move_generator::set_square(f, r, start_position->pawns);
           break;
         }
-
       }
     }
   }
