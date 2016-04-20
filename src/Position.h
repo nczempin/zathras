@@ -15,13 +15,9 @@
 #include <memory>
 #include <string>
 #include <vector>
-
+#include "typedefs.h"
 using namespace std;
 
-typedef uint_fast64_t bb;
-
-typedef vector<bb> bitboard_set;
-typedef function<void(int)> square_visitor;
 
 class Position {
 public:
