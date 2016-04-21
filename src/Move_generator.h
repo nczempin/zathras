@@ -49,18 +49,33 @@ private:
       pregenerate_white_pawn_capture_moves();
   pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
       pregenerate_black_pawn_capture_moves();
+  static const int PAWN = 1;
+  static const int KNIGHT = 2;
+  static const int BISHOP = 3;
+  static const int ROOK = 4;
+  static const int QUEEN = 5;
+  static const int KING = 6;
+  static const int WHITE_PAWN = 1;
+  static const int WHITE_KNIGHT = 2;
+  static const int WHITE_BISHOP = 3;
+  static const int WHITE_ROOK = 4;
+  static const int WHITE_QUEEN = 5;
+  static const int WHITE_KING = 6;
+  static const int WHITE = 7;
   void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
-      move_visitor f);
+      move_visitor f, int moving);
   void visit_capture_moves(const bb sub_position, const bitboard_set all_moves,
-      move_visitor f, bb other_colour);
+      move_visitor f, bb other_colour, int moving);
   void visit_non_capture_moves(const bb sub_position,
-      const bitboard_set all_moves, move_visitor f, bb other_colour);
+      const bitboard_set all_moves, move_visitor f, bb other_colour,
+      int moving);
   void visit_non_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, move_visitor f, bb occupied);
+      const bitboard_set all_moves, move_visitor f, bb occupied,
+      bool white_to_move);
 
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
-      bb other_colour);
+      bb other_colour, bool white_to_move);
   void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
       move_visitor f, bb occupied, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,

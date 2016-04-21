@@ -55,6 +55,12 @@ public:
   static Position create_start_position();
   bitboard_set getPieceBitboards();
   int determine_piece(int pc);
+
+  bool is_white_to_move() const
+  {
+    return white_to_move;
+  }
+
 private:
   bool white_to_move = true;
   bb pawns = 0;
