@@ -70,9 +70,7 @@ private:
       const bitboard_set all_moves, move_visitor f, bb other_colour,
       int moving);
   void visit_non_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, move_visitor f, bb occupied,
-      bool white_to_move);
-
+      const bitboard_set all_moves, move_visitor f, bb occupied, int moving);
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
       bb other_colour, bool white_to_move);

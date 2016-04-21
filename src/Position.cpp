@@ -383,6 +383,15 @@ void Position::make_move(Move move)
   bb from = move.get_from();
   bb to = move.get_to();
   int moving = move.get_moving_piece();
+  int taken = move.get_taken_piece();
+  // potentially remove captured piece from board
+  // add moving piece to new position
+  // remove moving piece from previous position
+  // TODO turned promoted pawn into new piece
+  // TODO update en passant square
+  // TODO update castling rights
+  // TODO update 3 repetitions
+  // TODO update 50 moves
 }
 void Position::unmake_move(Move move)
 {
@@ -390,9 +399,12 @@ void Position::unmake_move(Move move)
   bb to = move.get_to();
   int moving = move.get_moving_piece();
   int taken = move.get_taken_piece();
-}
-
-int Position::determine_piece(int pc)
-{
-  return 1; //TODO, obviously
+  // reinstate captured piece
+  // add moving piece to new position
+  // remove moving piece from previous position
+  // TODO transform promoted piece back into pawn
+  // TODO update en passant square
+  // TODO update castling rights
+  // TODO update 3 repetitions
+  // TODO update 50 moves
 }

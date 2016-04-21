@@ -54,7 +54,6 @@ public:
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
   static Position create_start_position();
   bitboard_set getPieceBitboards();
-  int determine_piece(int pc);
 
   bool is_white_to_move() const
   {
