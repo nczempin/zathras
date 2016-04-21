@@ -62,6 +62,9 @@ private:
   static const int WHITE_QUEEN = 5;
   static const int WHITE_KING = 6;
   static const int WHITE = 7;
+  static const int BLACK = 8;
+  bitboard_set pieces;
+
   void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
       move_visitor f, int moving);
   void visit_capture_moves(const bb sub_position, const bitboard_set all_moves,
@@ -73,15 +76,15 @@ private:
       const bitboard_set all_moves, move_visitor f, bb occupied, int moving);
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
-      bb other_colour, bool white_to_move);
+      bb other_colour, int moving);
   void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
-      move_visitor f, bb occupied, bool white_to_move);
+      move_visitor f, bb occupied, int moving, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,
       const bitboard_set& all_moves, int x);
   static bool is_anything_between(int x, int y, bb occupied);
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
-  void visit_moves(const bitboard_set& pieces, move_visitor count_moves);
+  void visit_moves(move_visitor count_moves);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

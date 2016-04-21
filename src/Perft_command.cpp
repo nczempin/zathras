@@ -93,7 +93,7 @@ int Perft_command::perft(int depth)
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
-  int depth = 5; //TODO get this from arguments, but use a reasonable default
+  int depth = 4; //TODO get this from arguments, but use a reasonable default
   p = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << (p) << endl;

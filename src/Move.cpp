@@ -7,11 +7,12 @@
 
 #include "Move.h"
 
-Move::Move(int piece, bb from, bb to, int captured) :
+Move::Move(int piece, bb from, bb to, int captured = 0) :
     from(from), to(to), moving(piece), taken(captured)
 {
-  // TODO Auto-generated constructor stub
-
+  if (piece == 0) {
+    throw 45;
+  }
 }
 
 Move::~Move()

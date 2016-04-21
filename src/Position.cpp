@@ -159,8 +159,10 @@ Position Position::create_position(const string& fen)
 
 Position Position::create_start_position()
 {
-  Position start_position = create_position(
-      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+//  const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  const char* p =
+      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";
+  Position start_position = create_position(p);
   // "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -");
   return start_position;
 }
@@ -383,7 +385,14 @@ void Position::make_move(Move move)
   bb from = move.get_from();
   bb to = move.get_to();
   int moving = move.get_moving_piece();
+//  if (moving != 0) {
+//    cout << "moving: " << moving << endl;
+//  }
   int taken = move.get_taken_piece();
+  if (taken != 0) {
+    cout << "taken: " << taken << endl;
+  }
+
   // potentially remove captured piece from board
   // add moving piece to new position
   // remove moving piece from previous position
@@ -398,7 +407,14 @@ void Position::unmake_move(Move move)
   bb from = move.get_from();
   bb to = move.get_to();
   int moving = move.get_moving_piece();
+//  if (moving != 0) {
+//    cout << "moving: " << moving << endl;
+//  }
+
   int taken = move.get_taken_piece();
+  if (taken != 0) {
+    cout << "taken: " << taken << endl;
+  }
   // reinstate captured piece
   // add moving piece to new position
   // remove moving piece from previous position
