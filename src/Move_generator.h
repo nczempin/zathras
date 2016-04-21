@@ -50,27 +50,25 @@ private:
   pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
       pregenerate_black_pawn_capture_moves();
   void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
-      function<void(int, int)> f);
+      move_visitor f);
   void visit_capture_moves(const bb sub_position, const bitboard_set all_moves,
-      function<void(int, int)> f, bb other_colour);
+      move_visitor f, bb other_colour);
   void visit_non_capture_moves(const bb sub_position,
-      const bitboard_set all_moves, function<void(int, int)> f,
-      bb other_colour);
+      const bitboard_set all_moves, move_visitor f, bb other_colour);
   void visit_non_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, function<void(int, int)> f, bb occupied);
+      const bitboard_set all_moves, move_visitor f, bb occupied);
 
   void visit_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
+      const bitboard_set all_moves, move_visitor f, bb occupied,
       bb other_colour);
   void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
-      function<void(int, int)> f, bb occupied, bool white_to_move);
+      move_visitor f, bb occupied, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,
       const bitboard_set& all_moves, int x);
   static bool is_anything_between(int x, int y, bb occupied);
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
-  void visit_moves(const bitboard_set& pieces,
-      const function<void(int, int)>& count_moves);
+  void visit_moves(const bitboard_set& pieces, move_visitor count_moves);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

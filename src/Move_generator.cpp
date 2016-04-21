@@ -14,7 +14,6 @@
 
 Move_generator::Move_generator()
 {
-  cout << "hello from mg cons" << endl;
 }
 
 Move_generator::~Move_generator()
@@ -251,35 +250,35 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves()
 void Move_generator::print_moves_raw(const bb sub_position,
     const bitboard_set all_moves, const Position position)
 {
-  visit_moves_raw(sub_position, all_moves, [](int x, int y) {
+  visit_moves_raw(sub_position, all_moves, [](int pc, int x, int y, int cpt) {
     string from = Position::mailboxIndexToSquare(x);
     string to = Position::mailboxIndexToSquare(y);
     cout << from << to << endl;
   });
 }
 void Move_generator::visit_capture_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb other_colour)
+    const bitboard_set all_moves, move_visitor f, bb other_colour)
 {
   Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
     bb raw_moves = all_moves[x];
     bb moves = raw_moves & other_colour;
     Position::visit_bitboard(moves, [x, f](int y) {
-          f(x, y);
-        }
-    );
-  });
+          f(0, x, y, 0); //TODO get the 0 values from somewhere
+    }
+);
+});
 }
 void Move_generator::visit_non_capture_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb other_colour)
+    const bitboard_set all_moves, move_visitor f, bb other_colour)
 {
   Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
     bb raw_moves = all_moves[x];
     bb moves = raw_moves & ~other_colour;
     Position::visit_bitboard(moves, [x, f](int y) {
-          f(x, y);
-        }
-    );
-  });
+          f(0, x, y, 0); //TODO get the 0 values from somewhere
+    }
+);
+});
 }
 static bool on_same_file(int x, int y)
 {
@@ -329,8 +328,6 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
   int file = smaller % 8;
   int diff = larger - smaller;
   if (on_same_file(x, y)) {
-//		cout << "same file: " << Position::mailboxIndexToSquare(x) << ", "
-//				<< Position::mailboxIndexToSquare(y) << endl;
     if (diff == 8) {
       return false;
     }
@@ -397,7 +394,7 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
 }
 
 void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb occupied)
+    const bitboard_set all_moves, move_visitor f, bb occupied)
 {
   Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
     bb raw_moves = all_moves[x];
@@ -405,15 +402,14 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
     Position::visit_bitboard(moves, [x, f, occupied](int y) {
           bool b = is_anything_between(x, y, occupied);
           if (!b) {
-            f(x, y);
-          }
-        }
-    );
-  });
+            f(0, x, y, 0); //TODO get the 0 values from somewhere
+    }
+  }
+);
+});
 }
 void Move_generator::visit_capture_ray_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
-    bb other_colour)
+    const bitboard_set all_moves, move_visitor f, bb occupied, bb other_colour)
 {
   Position::visit_bitboard(sub_position,
       [all_moves, f, occupied, other_colour](int x) {
@@ -424,7 +420,7 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
               //cout << "anything between? " << x << ", " << y << endl;
               bool b = is_anything_between(x, y, occupied);
               if (!b) {
-                f(x, y);
+                f(0, x, y, 0); //TODO get the 0 values from somewhere
               }
             }
         );
@@ -432,14 +428,14 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
 }
 
 void Move_generator::visit_moves_raw(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f)
+    const bitboard_set all_moves, move_visitor f)
 {
   Position::visit_bitboard(sub_position, [all_moves, f](int x) {
     Position::visit_bitboard(all_moves[x], [x, f](int y) {
-          f(x, y);
-        }
-    );
-  });
+          f(0, x, y, 0); //TODO get the 0 values from somewhere
+    }
+);
+});
 }
 
 bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
@@ -464,21 +460,20 @@ bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
 }
 
 void Move_generator::visit_pawn_nocaps(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
+    const bitboard_set all_moves, move_visitor f, bb occupied,
     bool white_to_move)
 {
   Position::visit_bitboard(sub_position,
       [all_moves, f, occupied, white_to_move](int x) {
         bb moves = filter_occupied_squares(white_to_move, occupied, all_moves, x);
         Position::visit_bitboard(moves, [x, f](int y) {
-              f(x, y);
+              f(0, x, y, 0); //TODO get the 0 values from somewhere
             }
         );
       });
 }
 
-void Move_generator::visit_moves(const bitboard_set& pieces,
-    const function<void(int, int)>& f)
+void Move_generator::visit_moves(const bitboard_set& pieces, move_visitor f)
 {
   bb white_pawns = pieces[1] & pieces[7];
   bb white_knights = pieces[2] & pieces[7];
@@ -510,15 +505,9 @@ void Move_generator::visit_moves(const bitboard_set& pieces,
       pieces[7] | pieces[8]);
 }
 
-vector<Move> Move_generator::generate_moves(Position position)
+vector<Move> Move_generator::generate_moves(Position p)
 {
-  //cout << "mggm" << endl;
-  cout.flush();
-  bitboard_set pieces = position.getPieceBitboards();
-//  for (auto &bb : pieces) {
-//    cout << "piece: " << hex << bb << dec << endl;
-//  }
-  //cout << "after getpp" << endl;
+  bitboard_set pieces = p.getPieceBitboards();
   int i = 0;
   function<void(int, int)> display_moves = [](int x, int y) {
     string from = Position::mailboxIndexToSquare(x);
@@ -529,15 +518,13 @@ vector<Move> Move_generator::generate_moves(Position position)
     ++i;
   };
   vector<Move> moves;
-  function<void(int, int)> collect_moves =
-      [&moves, display_moves](int x, int y) {
-        bb from(0);
-        Position::set_square(from, x);
-        bb to(0);
-        Position::set_square(to, y);
-        Move m (from, to);
- //       cout << "Move: " << hex << m.get_from() << ", " << m.get_to() << dec << endl;
-//        cout.flush();
+  function<void(int, int, int, int)> collect_moves =
+      [&moves, &p](int moving, int from, int to, int captured) {
+        bb bb_from(0);
+        Position::set_square(bb_from, from);
+        bb bb_to(0);
+        Position::set_square(bb_to, to);
+        Move m (moving, from, to, captured);
         moves.push_back(m);
         //display_moves(x, y);
       };

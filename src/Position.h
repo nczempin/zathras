@@ -22,14 +22,10 @@ using namespace std;
 class Position {
 public:
   Position();
-//  virtual ~Position();
+  virtual ~Position();
 
-  void make_move(Move move)
-  {
-  }
-  void unmake_move(Move move)
-  {
-  }
+  void make_move(Move move);
+  void unmake_move(Move move);
 
   friend ostream& operator<<(ostream& stream, const Position& position);
   void print(ostream& stream) const;
@@ -58,6 +54,7 @@ public:
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
   static Position create_start_position();
   bitboard_set getPieceBitboards();
+  int determine_piece(int pc);
 private:
   bool white_to_move = true;
   bb pawns = 0;

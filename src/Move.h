@@ -12,7 +12,7 @@
 
 class Move {
 public:
-  Move(bb from, bb to);
+  Move(int piece, bb from, bb to, int captured);
   virtual ~Move();
   bb get_from()
   {
@@ -22,9 +22,32 @@ public:
   {
     return to;
   }
+
+  int get_moving_piece() const
+  {
+    return moving;
+  }
+
+  void set_moving_piece(int moving)
+  {
+    this->moving = moving;
+  }
+
+  int get_taken_piece() const
+  {
+    return taken;
+  }
+
+  void set_taken_piece(int taken)
+  {
+    this->taken = taken;
+  }
+
 private:
   bb from;
   bb to;
+  int moving;
+  int taken;
 };
 
 #endif /* MOVE_H_ */

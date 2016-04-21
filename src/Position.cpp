@@ -16,10 +16,10 @@ Position::Position()
   // TODO Auto-generated constructor stub
 }
 //
-//Position::~Position()
-//{
-//  // TODO Auto-generated destructor stub
-//}
+Position::~Position()
+{
+  // TODO Auto-generated destructor stub
+}
 vector<string> &split(const string &s, char delim, vector<string> &elems)
 {
   stringstream ss(s);
@@ -132,8 +132,8 @@ Position Position::create_position(const string& fen)
         case 'r':
           set_square(f, r, start_position.rooks);
           set_square(f, r, start_position.black);
-          cout << "rooks: " << hex << start_position.rooks << dec << endl;
-          cout << "black: " << hex << start_position.black << dec << endl;
+//          cout << "rooks: " << hex << start_position.rooks << dec << endl;
+//          cout << "black: " << hex << start_position.black << dec << endl;
           break;
         case 'q':
           set_square(f, r, start_position.queens);
@@ -377,4 +377,22 @@ bitboard_set Position::getPieceBitboards()
   retval.push_back(wh);
   retval.push_back(bl);
   return retval;
+}
+void Position::make_move(Move move)
+{
+  bb from = move.get_from();
+  bb to = move.get_to();
+  int moving = move.get_moving_piece();
+}
+void Position::unmake_move(Move move)
+{
+  bb from = move.get_from();
+  bb to = move.get_to();
+  int moving = move.get_moving_piece();
+  int taken = move.get_taken_piece();
+}
+
+int Position::determine_piece(int pc)
+{
+  return 1; //TODO, obviously
 }

@@ -107,13 +107,13 @@ void Perft_command::execute()
     bb from = move.get_from();
     bb to = move.get_to();
 
-    //p->make_move(move);
+    p.make_move(move);
 
     int perft_result = perft(depth - 1);
     total_result += perft_result;
     // cout << "pr: " << perft_result << endl;
 //    int per = perft(depth -1);
-    //p->unmake_move(move);
+    p.unmake_move(move);
     // cout << endl;
   }
   cout << endl << "Perft result: " << total_result << endl;

@@ -7,8 +7,8 @@
 
 #include "Move.h"
 
-Move::Move(bb from, bb to) :
-    from(from), to(to)
+Move::Move(int piece, bb from, bb to, int captured) :
+    from(from), to(to), moving(piece), taken(captured)
 {
   // TODO Auto-generated constructor stub
 
