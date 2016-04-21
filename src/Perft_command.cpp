@@ -67,6 +67,9 @@ void Perft_command::do_short_option(int c, string argument)
 
 int Perft_command::perft(int depth)
 {
+  if (depth == 0) {
+    return 1;
+  }
   //cout << "p-depth = " << depth << endl;
 //  cout.flush();
   //cout << "b4 mggm" << endl;
@@ -93,7 +96,7 @@ int Perft_command::perft(int depth)
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
-  int depth = 4; //TODO get this from arguments, but use a reasonable default
+  int depth = 1; //TODO get this from arguments, but use a reasonable default
   p = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << (p) << endl;

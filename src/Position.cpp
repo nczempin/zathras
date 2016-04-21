@@ -10,6 +10,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 Position::Position()
 {
@@ -320,13 +321,19 @@ void Position::set_square(bb& b, int to)
   bs[to] = true;
   b = bs.to_ulong();
 }
+bool Position::is_set_square(bb& b, int to)
+{
+  int t2 = (to / 8) * 8 + (7 - (to % 8));
+  uint64_t ttt = 1L << (t2);
+  bb aaa = b & ttt;
+  return aaa != 0;
+}
 
 void Position::clear_square(bb& b, int to)
 {
   bitset<64> bs(b);
   bs[to] = false;
   b = bs.to_ulong();
-
 }
 
 string Position::mailboxIndexToSquare(int x)
@@ -384,13 +391,15 @@ void Position::make_move(Move move)
 {
   bb from = move.get_from();
   bb to = move.get_to();
-  int moving = move.get_moving_piece();
-//  if (moving != 0) {
-//    cout << "moving: " << moving << endl;
-//  }
   int taken = move.get_taken_piece();
   if (taken != 0) {
-    cout << "taken: " << taken << endl;
+    cout << "taking: " << taken << endl;
+    cout << mailboxIndexToSquare(from) << "-" << mailboxIndexToSquare(to)
+        << endl;
+    int moving = move.get_moving_piece();
+    if (moving != 0) {
+      cout << "moving: " << moving << endl;
+    }
   }
 
   // potentially remove captured piece from board
@@ -406,14 +415,16 @@ void Position::unmake_move(Move move)
 {
   bb from = move.get_from();
   bb to = move.get_to();
-  int moving = move.get_moving_piece();
-//  if (moving != 0) {
-//    cout << "moving: " << moving << endl;
-//  }
 
   int taken = move.get_taken_piece();
   if (taken != 0) {
-    cout << "taken: " << taken << endl;
+    cout << "untaken: " << taken << endl;
+    cout << mailboxIndexToSquare(from) << "-" << mailboxIndexToSquare(to)
+        << endl;
+    int moving = move.get_moving_piece();
+    if (moving != 0) {
+      cout << "unmoving: " << moving << endl;
+    }
   }
   // reinstate captured piece
   // add moving piece to new position

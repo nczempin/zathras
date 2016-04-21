@@ -85,6 +85,7 @@ private:
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
   void visit_moves(move_visitor count_moves);
+  int find_captured_piece(int y);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

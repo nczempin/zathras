@@ -32,6 +32,7 @@ public:
   static void set_square(bitset<64>& bs, int to);
   static void clear_square(bitset<64>& bs, int to);
   static void set_square(bb& bs, int to);
+  static bool is_set_square(bb& bs, int to);
   static void clear_square(bb& bs, int to);
 
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);

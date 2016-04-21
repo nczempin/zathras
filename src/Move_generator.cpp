@@ -259,16 +259,28 @@ void Move_generator::print_moves_raw(const bb sub_position,
     cout << from << to << endl;
   }, position.is_white_to_move());
 }
+
+int Move_generator::find_captured_piece(int y)
+{
+  int captured = 0;
+  for (int i = 1; i < 7; ++i)
+    if (Position::is_set_square(pieces[i], y)) {
+      captured = i;
+      break;
+    }
+  return captured;
+}
+
 void Move_generator::visit_capture_moves(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, bb other_colour, int moving)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, other_colour, moving](int x) {
+      [this, all_moves, f, other_colour, moving](int x) {
         bb raw_moves = all_moves[x];
         bb moves = raw_moves & other_colour;
-        Position::visit_bitboard(moves, [x, f, moving](int y) {
-              int captured = -45; //piece_at(y);
-              f(moving, x, y, captured);//TODO get the captured piece from somewhere
+        Position::visit_bitboard(moves, [this, x, f, moving](int y) {
+              int captured = find_captured_piece(y);
+              f(moving, x, y, captured);
             }
         );
       });
@@ -302,17 +314,12 @@ static int determine_diagonal(int x, int y)
     smaller = y;
     larger = x;
   }
-//cout << "smaller: " << smaller << endl;
   int diff = larger - smaller;
-//cout << "diff: " << diff << endl;
   if (diff % 9 == 0) {
-    //cout << "clean into 9" << endl;
     return 1;
   } else if (diff % 7 == 0) {
-    //cout << "clean into 7" << endl;
     return -1;
   }
-//cout << "nope" << endl;
   return 0;
 }
 
@@ -406,14 +413,14 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
     int moving)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, occupied, other_colour, moving](int x) {
+      [this, all_moves, f, occupied, other_colour, moving](int x) {
         bb raw_moves = all_moves[x];
         bb moves = raw_moves & other_colour;
-        Position::visit_bitboard(moves, [x, f, occupied, moving](int y) {
+        Position::visit_bitboard(moves, [this, x, f, occupied, moving](int y) {
               bool b = is_anything_between(x, y, occupied);
               if (!b) {
-                int captured = -99;
-                f(moving, x, y, captured); //TODO get the captured piece from somewhere
+                int captured = find_captured_piece(y);
+                f(moving, x, y, captured);
               }
             }
         );
@@ -470,6 +477,8 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
 
 void Move_generator::visit_moves(move_visitor f)
 {
+
+  //TODO generalize, obviously
   bb white_pawns = pieces[PAWN] & pieces[WHITE];
   bb white_knights = pieces[KNIGHT] & pieces[WHITE];
   bb white_bishops = pieces[BISHOP] & pieces[WHITE];
@@ -481,8 +490,11 @@ void Move_generator::visit_moves(move_visitor f)
       WHITE_PAWN);
   visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
       pieces[WHITE] | pieces[8], WHITE_PAWN, white_to_move);
+  visit_capture_moves(white_knights, knight_moves.first, f, pieces[8],
+      WHITE_KNIGHT);
   visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7],
       WHITE_KNIGHT);
+  visit_capture_moves(white_kings, king_moves.first, f, pieces[8], WHITE_KING);
   visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7],
       WHITE_KING);
   visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
