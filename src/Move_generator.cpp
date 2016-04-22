@@ -255,8 +255,8 @@ void Move_generator::print_moves_raw(const bb sub_position,
     const bitboard_set all_moves, const Position position)
 {
   visit_moves_raw(sub_position, all_moves, [](int pc, int x, int y, int cpt) {
-    string from = Square::mailboxIndexToSquare(x);
-    string to = Square::mailboxIndexToSquare(y);
+    string from = Square::mailbox_index_to_square(x);
+    string to = Square::mailbox_index_to_square(y);
     cout << from << to << endl;
   }, position.is_white_to_move());
 }
@@ -521,8 +521,8 @@ vector<Move> Move_generator::generate_moves(Position p)
   pieces = p.getPieceBitboards();
   int i = 0;
   function<void(int, int)> display_moves = [](int x, int y) {
-    string from = Square::mailboxIndexToSquare(x);
-    string to = Square::mailboxIndexToSquare(y);
+    string from = Square::mailbox_index_to_square(x);
+    string to = Square::mailbox_index_to_square(y);
     cout << from << to << endl;
   };
   function<void(int, int)> count_moves = [&i](int x, int y) {

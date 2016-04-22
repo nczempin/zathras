@@ -16,7 +16,7 @@ public:
   Square();
   virtual ~Square();
   static void print_square(int square);
-  static string mailboxIndexToSquare(int square);
+  static string mailbox_index_to_square(int square);
 
 };
 

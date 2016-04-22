@@ -10,6 +10,8 @@
 
 #include "typedefs.h"
 #include "Square.h"
+#include <string>
+using namespace std;
 
 class Move {
 public:
@@ -25,8 +27,15 @@ public:
   }
   string to_string()
   {
-    string retval = Square::mailboxIndexToSquare(from)
-        + Square::mailboxIndexToSquare(to);
+    static const string pieces("- NBRQK");
+    char p = pieces[moving];
+    string moving_string = string(1, p);
+    string retval = moving_string + Square::mailbox_index_to_square(from);
+    retval += taken ? "x" : "-";
+    retval += Square::mailbox_index_to_square(to);
+    if (true || taken) {
+      retval += " (" + string(1, pieces[taken]) + ")";
+    }
     return retval;
   }
   int get_moving_piece() const

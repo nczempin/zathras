@@ -23,12 +23,12 @@ Square::~Square()
 
 void Square::print_square(int x)
 {
-  string square = mailboxIndexToSquare(x);
+  string square = mailbox_index_to_square(x);
   cout << x << " = " << square << endl;
 
 }
 
-string Square::mailboxIndexToSquare(int x)
+string Square::mailbox_index_to_square(int x)
 {
   char column = 'a' + x % 8;
   string columnString(1, column);

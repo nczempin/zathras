@@ -378,8 +378,8 @@ void Position::make_move(Move move)
   int taken = move.get_taken_piece();
   if (taken != 0) {
     cout << "taking: " << taken << endl;
-    cout << Square::mailboxIndexToSquare(from) << "-"
-        << Square::mailboxIndexToSquare(to) << endl;
+    cout << Square::mailbox_index_to_square(from) << "-"
+        << Square::mailbox_index_to_square(to) << endl;
     int moving = move.get_moving_piece();
     if (moving != 0) {
       cout << "moving: " << moving << endl;
@@ -403,7 +403,7 @@ void Position::unmake_move(Move move)
   int taken = move.get_taken_piece();
   if (taken != 0) {
     cout << "untaken: " << taken << endl;
-    cout << Square::mailboxIndexToSquare(from) << "-" << Square::mailboxIndexToSquare(to)
+    cout << Square::mailbox_index_to_square(from) << "-" << Square::mailbox_index_to_square(to)
         << endl;
     int moving = move.get_moving_piece();
     if (moving != 0) {
