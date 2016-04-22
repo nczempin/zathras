@@ -6,6 +6,7 @@
  */
 
 #include "Position.h"
+#include "Square.h"
 #include <sstream>
 #include <string>
 #include <sstream>
@@ -160,9 +161,9 @@ Position Position::create_position(const string& fen)
 
 Position Position::create_start_position()
 {
-//  const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-  const char* p =
-      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";
+  const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+//  const char* p =
+//      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";
   Position start_position = create_position(p);
   // "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -");
   return start_position;
@@ -336,30 +337,13 @@ void Position::clear_square(bb& b, int to)
   b = bs.to_ulong();
 }
 
-string Position::mailboxIndexToSquare(int x)
-{
-  char column = 'a' + x % 8;
-  string columnString(1, column);
-  char row = '1' + x / 8;
-  string rowString(1, row);
-  string square = columnString + rowString;
-  return square;
-}
-
-void Position::print_square(int x)
-{
-  string square = mailboxIndexToSquare(x);
-  cout << x << " = " << square << endl;
-
-}
-
 void Position::display_all_moves(const bitboard_set& moves)
 {
   visit_bitboard(0xffffffffffffffff, [moves](int x) {
-    print_square(x);
+    Square::print_square(x);
     Position::visualize_bitboard(moves[x], cout);
     Position::visit_bitboard(moves[x],[](int y) {
-          Position::print_square(y);
+          Square::print_square(y);
         });
   });
 }
@@ -394,8 +378,8 @@ void Position::make_move(Move move)
   int taken = move.get_taken_piece();
   if (taken != 0) {
     cout << "taking: " << taken << endl;
-    cout << mailboxIndexToSquare(from) << "-" << mailboxIndexToSquare(to)
-        << endl;
+    cout << Square::mailboxIndexToSquare(from) << "-"
+        << Square::mailboxIndexToSquare(to) << endl;
     int moving = move.get_moving_piece();
     if (moving != 0) {
       cout << "moving: " << moving << endl;
@@ -419,7 +403,7 @@ void Position::unmake_move(Move move)
   int taken = move.get_taken_piece();
   if (taken != 0) {
     cout << "untaken: " << taken << endl;
-    cout << mailboxIndexToSquare(from) << "-" << mailboxIndexToSquare(to)
+    cout << Square::mailboxIndexToSquare(from) << "-" << Square::mailboxIndexToSquare(to)
         << endl;
     int moving = move.get_moving_piece();
     if (moving != 0) {

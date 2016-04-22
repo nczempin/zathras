@@ -9,6 +9,7 @@
 #define MOVE_H_
 
 #include "typedefs.h"
+#include "Square.h"
 
 class Move {
 public:
@@ -22,7 +23,12 @@ public:
   {
     return to;
   }
-
+  string to_string()
+  {
+    string retval = Square::mailboxIndexToSquare(from)
+        + Square::mailboxIndexToSquare(to);
+    return retval;
+  }
   int get_moving_piece() const
   {
     return moving;

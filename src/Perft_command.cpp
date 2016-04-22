@@ -110,9 +110,10 @@ void Perft_command::execute()
   for (auto &move : moves) {
 
     p.make_move(move);
+    string s = move.to_string();
 
     int perft_result = perft(depth - 1);
-
+    cout << s << ": " << perft_result << endl;
     total_result += perft_result;
     p.unmake_move(move);
     // cout << endl;
