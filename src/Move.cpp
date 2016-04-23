@@ -6,9 +6,9 @@
  */
 
 #include "Move.h"
-//#include <iostream>
+#include <iostream>
 
-//using namespace std;
+using namespace std;
 
 Move::Move(int piece, bb from, bb to, int captured = 0) :
     from(from), to(to), moving(piece), taken(captured)
@@ -38,9 +38,9 @@ string Move::to_string() const
   char p = pieces[moving > 0 ? moving : -moving];
   string moving_string = string(1, p);
   string retval = moving_string + Square::mailbox_index_to_square(from);
-  retval += taken ? "x" : "-";
+  retval += (taken != 0) ? "x" : "-";
   retval += Square::mailbox_index_to_square(to);
-  if (true || taken) {
+  if (taken) {
     retval += " (" + string(1, pieces[taken]) + ")";
   }
   return retval;

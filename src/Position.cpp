@@ -121,6 +121,8 @@ Position Position::create_position(const string& fen)
 {
   Position start_position;
   vector<string> split_fen = split(fen, ' ');
+  string to_move = split_fen[1];
+  start_position.white_to_move = to_move == "w" ? true : false;
   string fen_board = split_fen[0];
   //cout << "board: " << fen_board << endl;
   vector<string> ranks = split(fen_board, '/');
@@ -385,10 +387,63 @@ bitboard_set Position::getPieceBitboards()
   retval.push_back(bl);
   return retval;
 }
+
+static bool determine_colour(int piece)
+{
+  return piece > 0; // makes == 0 black, deal with it
+}
+
+static int determine_piece(int piece)
+{
+  if (piece > 0) {
+    return piece;
+  } else {
+    return -piece;
+  }
+}
 void Position::make_move(Move move)
 {
   bb from = move.get_from();
   bb to = move.get_to();
+
+  int taken = move.get_taken_piece();
+  if (taken != 0) {
+    //cout << "taken: " << taken << endl;
+    bool colour = determine_colour(taken);
+    if (colour) {
+      clear_bit(white, to);
+    } else {
+      clear_bit(black, to);
+    }
+    int p = determine_piece(taken);
+    switch (p) {
+    case 1:
+      clear_bit(pawns, to);
+      break;
+    case 2:
+      clear_bit(knights, to);
+      break;
+    case 3:
+      clear_bit(bishops, to);
+      break;
+    case 4:
+      clear_bit(rooks, to);
+      break;
+    case 5:
+      clear_bit(queens, to);
+      break;
+    case 6:
+      clear_bit(kings, to);
+      break;
+    default:
+      cerr << "??" << p << endl;
+      throw p;
+    }
+
+//    cout << "taking: " << taken << endl;
+//    cout << Square::mailbox_index_to_square(from) << "-"
+//        << Square::mailbox_index_to_square(to) << endl;
+  }
   int moving = move.get_moving_piece();
   if (white_to_move) {
     switch (moving) {
@@ -477,25 +532,12 @@ void Position::make_move(Move move)
       break;
     }
   }
-  int taken = move.get_taken_piece();
-  if (taken != 0) {
-    cout << "taking: " << taken << endl;
-    cout << Square::mailbox_index_to_square(from) << "-"
-        << Square::mailbox_index_to_square(to) << endl;
-    if (moving != 0) {
-      cout << "moving: " << moving << endl;
-    }
-  }
 
-  // potentially remove captured piece from board
-  // add moving piece to new position
-  // remove moving piece from previous position
-
-  // TODO turned promoted pawn into new piece
-  // TODO update en passant square
-  // TODO update castling rights
-  // TODO update 3 repetitions
-  // TODO update 50 moves
+// TODO turned promoted pawn into new piece
+// TODO update en passant square
+// TODO update castling rights
+// TODO update 3 repetitions
+// TODO update 50 moves
   white_to_move = !white_to_move;
 }
 void Position::unmake_move(Move move)
@@ -504,7 +546,6 @@ void Position::unmake_move(Move move)
   bb to = move.get_to();
 
   int moving = move.get_moving_piece();
-  int taken = move.get_taken_piece();
   white_to_move = !white_to_move;
   if (white_to_move) {
     switch (moving) {
@@ -593,21 +634,46 @@ void Position::unmake_move(Move move)
       break;
     }
   }
+
+  int taken = move.get_taken_piece();
   if (taken != 0) {
-    cout << "untaken: " << taken << endl;
-    cout << Square::mailbox_index_to_square(from) << "-"
-        << Square::mailbox_index_to_square(to) << endl;
-    if (moving != 0) {
-      cout << "unmoving: " << moving << endl;
+    //cout << "untaken: " << taken << endl;
+    bool colour = determine_colour(taken);
+    if (colour) {
+      set_bit(white, to);
+    } else {
+      set_bit(black, to);
     }
+    int p = determine_piece(taken);
+    switch (p) {
+    case 1:
+      set_bit(pawns, to);
+      break;
+    case 2:
+      set_bit(knights, to);
+      break;
+    case 3:
+      set_bit(bishops, to);
+      break;
+    case 4:
+      set_bit(rooks, to);
+      break;
+    case 5:
+      set_bit(queens, to);
+      break;
+    case 6:
+      set_bit(kings, to);
+      break;
+    default:
+      cerr << "??" << p << endl;
+      throw p;
+    }
+    // cout << *this << endl;
   }
-  // reinstate captured piece
-  // add moving piece to new position
-  // remove moving piece from previous position
-  // TODO transform promoted piece back into pawn
-  // TODO update en passant square
-  // TODO update castling rights
-  // TODO update 3 repetitions
-  // TODO update 50 moves
+// TODO transform promoted piece back into pawn
+// TODO update en passant square
+// TODO update castling rights
+// TODO update 3 repetitions
+// TODO update 50 moves
 
 }
