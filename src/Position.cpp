@@ -43,6 +43,49 @@ bool is_digit(const char c)
 {
   return '0' <= c && c <= '9';
 }
+
+void Position::set_square(bitset<64>& bs, int to)
+{
+  bs[to] = true;
+}
+
+void Position::clear_square(bitset<64>& bs, int to)
+{
+  bs[to] = false;
+}
+void Position::set_square(bb& b, int to)
+{
+  bitset<64> bs(b);
+  bs[to] = true;
+  b = bs.to_ulong();
+}
+void Position::clear_square(bb& b, int to)
+{
+  bitset<64> bs(b);
+  bs[to] = false;
+  b = bs.to_ulong();
+}
+void Position::set_bit(bb& b, int to)
+{
+  int rank = to / 8;
+  int file = (to % 8);
+  set_square(file, rank, b);
+}
+void Position::clear_bit(bb& b, int to)
+{
+  int rank = to / 8;
+  int file =  (to % 8);
+  clear_square(file, rank, b);
+}
+
+bool Position::is_set_square(bb& b, int to)
+{
+  int t2 = (to / 8) * 8 + (7 - (to % 8));
+  uint64_t ttt = 1L << (t2);
+  bb aaa = b & ttt;
+  return aaa != 0;
+}
+
 int Position::set_square(int file_to, int rank_to, bitset<64>& bbs)
 {
   int to_twisted = 7 - file_to + rank_to * 8;
@@ -58,18 +101,18 @@ int Position::clear_square(int file_to, int rank_to, bitset<64>& bbs)
   Position::clear_square(bbs, to_twisted);
   return to;
 }
-int Position::set_square(int file_to, int rank_to, bb& bbs)
+int Position::set_square(int file, int rank, bb& bbs)
 {
-  int to_twisted = 7 - file_to + rank_to * 8;
-  int to = file_to + rank_to * 8;
+  int to_twisted = 7 - file + rank * 8;
+  int to = file + rank * 8;
   Position::set_square(bbs, to_twisted);
   return to;
 }
 
-int Position::clear_square(int file_to, int rank_to, bb& bbs)
+int Position::clear_square(int file, int rank, bb& bbs)
 {
-  int to_twisted = 7 - file_to + rank_to * 8;
-  int to = file_to + rank_to * 8;
+  int to_twisted = 7 - file + rank * 8;
+  int to = file + rank * 8;
   Position::clear_square(bbs, to_twisted);
   return to;
 }
@@ -308,36 +351,6 @@ void Position::print(ostream& stream) const
 
 }
 
-void Position::set_square(bitset<64>& bs, int to)
-{
-  bs[to] = true;
-}
-
-void Position::clear_square(bitset<64>& bs, int to)
-{
-  bs[to] = false;
-}
-void Position::set_square(bb& b, int to)
-{
-  bitset<64> bs(b);
-  bs[to] = true;
-  b = bs.to_ulong();
-}
-bool Position::is_set_square(bb& b, int to)
-{
-  int t2 = (to / 8) * 8 + (7 - (to % 8));
-  uint64_t ttt = 1L << (t2);
-  bb aaa = b & ttt;
-  return aaa != 0;
-}
-
-void Position::clear_square(bb& b, int to)
-{
-  bitset<64> bs(b);
-  bs[to] = false;
-  b = bs.to_ulong();
-}
-
 void Position::display_all_moves(const bitboard_set& moves)
 {
   visit_bitboard(0xffffffffffffffff, [moves](int x) {
@@ -379,6 +392,16 @@ void Position::make_move(Move move)
   int moving = move.get_moving_piece();
   switch (moving) {
   case Piece::WHITE_PAWN:
+    set_bit(pawns, to);
+    set_bit(white, to);
+    clear_bit(pawns, from);
+    clear_bit(white, from);
+    break;
+  case Piece::WHITE_KNIGHT:
+    set_bit(knights, to);
+    set_bit(white, to);
+    clear_bit(knights, from);
+    clear_bit(white, from);
     break;
   default:
     break;
@@ -408,12 +431,28 @@ void Position::unmake_move(Move move)
   bb from = move.get_from();
   bb to = move.get_to();
 
+  int moving = move.get_moving_piece();
   int taken = move.get_taken_piece();
+  switch (moving) {
+  case Piece::WHITE_PAWN:
+    set_bit(pawns, from);
+    set_bit(white, from);
+    clear_bit(pawns, to);
+    clear_bit(white, to);
+    break;
+  case Piece::WHITE_KNIGHT:
+    set_bit(knights, from);
+    set_bit(white, from);
+    clear_bit(knights, to);
+    clear_bit(white, to);
+    break;
+  default:
+    break;
+  }
   if (taken != 0) {
     cout << "untaken: " << taken << endl;
     cout << Square::mailbox_index_to_square(from) << "-"
         << Square::mailbox_index_to_square(to) << endl;
-    int moving = move.get_moving_piece();
     if (moving != 0) {
       cout << "unmoving: " << moving << endl;
     }
