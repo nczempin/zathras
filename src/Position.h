@@ -62,9 +62,9 @@ public:
   {
     return white_to_move;
   }
-
+  bool white_to_move = true; //TODO for now
 private:
-  bool white_to_move = true;
+
   bb pawns = 0;
   bb knights = 0;
   bb bishops = 0;

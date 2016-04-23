@@ -74,7 +74,7 @@ void Position::set_bit(bb& b, int to)
 void Position::clear_bit(bb& b, int to)
 {
   int rank = to / 8;
-  int file =  (to % 8);
+  int file = (to % 8);
   clear_square(file, rank, b);
 }
 
@@ -348,7 +348,7 @@ void Position::print(ostream& stream) const
   });
 
   visualize_mailbox_board(board, stream);
-
+  cout << "wtm: " << white_to_move << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves)
@@ -390,21 +390,43 @@ void Position::make_move(Move move)
   bb from = move.get_from();
   bb to = move.get_to();
   int moving = move.get_moving_piece();
-  switch (moving) {
-  case Piece::WHITE_PAWN:
-    set_bit(pawns, to);
-    set_bit(white, to);
-    clear_bit(pawns, from);
-    clear_bit(white, from);
-    break;
-  case Piece::WHITE_KNIGHT:
-    set_bit(knights, to);
-    set_bit(white, to);
-    clear_bit(knights, from);
-    clear_bit(white, from);
-    break;
-  default:
-    break;
+  if (white_to_move) {
+    switch (moving) {
+    case Piece::WHITE_PAWN:
+      set_bit(pawns, to);
+      set_bit(white, to);
+      clear_bit(pawns, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_KNIGHT:
+      set_bit(knights, to);
+      set_bit(white, to);
+      clear_bit(knights, from);
+      clear_bit(white, from);
+      break;
+    default:
+      throw moving;
+      break;
+    }
+  } else {
+    switch (moving) {
+    case Piece::BLACK_PAWN:
+      set_bit(pawns, to);
+      set_bit(black, to);
+      clear_bit(pawns, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_KNIGHT:
+      set_bit(knights, to);
+      set_bit(black, to);
+      clear_bit(knights, from);
+      clear_bit(black, from);
+      break;
+    default:
+      cerr << "unexpected piece: " << moving << endl;
+      throw -moving;
+      break;
+    }
   }
   int taken = move.get_taken_piece();
   if (taken != 0) {
@@ -425,6 +447,7 @@ void Position::make_move(Move move)
   // TODO update castling rights
   // TODO update 3 repetitions
   // TODO update 50 moves
+  white_to_move = !white_to_move;
 }
 void Position::unmake_move(Move move)
 {
@@ -433,21 +456,46 @@ void Position::unmake_move(Move move)
 
   int moving = move.get_moving_piece();
   int taken = move.get_taken_piece();
-  switch (moving) {
-  case Piece::WHITE_PAWN:
+  white_to_move = !white_to_move;
+  if (white_to_move) {
+    switch (moving) {
+    case Piece::WHITE_PAWN:
+      set_bit(pawns, from);
+      set_bit(white, from);
+      clear_bit(pawns, to);
+      clear_bit(white, to);
+      break;
+    case Piece::WHITE_KNIGHT:
+      set_bit(knights, from);
+      set_bit(white, from);
+      clear_bit(knights, to);
+      clear_bit(white, to);
+      break;
+    default:
+      cerr << "unexpected white piece: " << moving << endl;
+      throw moving;
+      break;
+    }
+  } else {
+    switch (moving) {
+    cout << "*************moving: " << moving << endl;
+  case Piece::BLACK_PAWN:
     set_bit(pawns, from);
-    set_bit(white, from);
+    set_bit(black, from);
     clear_bit(pawns, to);
-    clear_bit(white, to);
+    clear_bit(black, to);
     break;
-  case Piece::WHITE_KNIGHT:
+  case Piece::BLACK_KNIGHT:
     set_bit(knights, from);
-    set_bit(white, from);
+    set_bit(black, from);
     clear_bit(knights, to);
-    clear_bit(white, to);
+    clear_bit(black, to);
     break;
   default:
+    cerr << "unexpected black piece: " << moving << endl;
+    throw -moving;
     break;
+    }
   }
   if (taken != 0) {
     cout << "untaken: " << taken << endl;
@@ -465,4 +513,5 @@ void Position::unmake_move(Move move)
   // TODO update castling rights
   // TODO update 3 repetitions
   // TODO update 50 moves
+
 }

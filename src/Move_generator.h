@@ -71,7 +71,7 @@ private:
   static bool is_anything_between(int x, int y, bb occupied);
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
-  void visit_moves(move_visitor count_moves);
+  void visit_moves(move_visitor count_moves, Position p);
   int find_captured_piece(int y);
 };
 

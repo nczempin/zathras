@@ -479,7 +479,7 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
       });
 }
 
-void Move_generator::visit_moves(move_visitor f)
+void Move_generator::visit_moves(move_visitor f, Position p)
 {
 
   //TODO generalize, obviously
@@ -489,36 +489,85 @@ void Move_generator::visit_moves(move_visitor f)
   bb white_rooks = pieces[Piece::ROOK] & pieces[Piece::WHITE];
   bb white_queens = pieces[Piece::QUEEN] & pieces[Piece::WHITE];
   bb white_kings = pieces[Piece::KING] & pieces[Piece::WHITE];
-  bool white_to_move = true; //TODO get from position or from caller
-  visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f, pieces[8],
-      Piece::WHITE_PAWN);
-  visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
-      pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_PAWN,
-      white_to_move);
-  visit_capture_moves(white_knights, knight_moves.first, f,
-      pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
-  visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7],
-      Piece::WHITE_KNIGHT);
-  visit_capture_moves(white_kings, king_moves.first, f, pieces[8],
-      Piece::WHITE_KING);
-  visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7],
-      Piece::WHITE_KING);
-  visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_QUEEN);
-  visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_ROOK);
-  visit_capture_ray_moves(white_queens, rook_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_QUEEN);
-  visit_capture_ray_moves(white_rooks, rook_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_ROOK);
-  visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_BISHOP);
-  visit_capture_ray_moves(white_queens, bishop_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_QUEEN);
-  visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_BISHOP);
-  visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
-      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_QUEEN);
+  bb black_pawns = pieces[Piece::PAWN] & pieces[Piece::BLACK];
+  bb black_knights = pieces[Piece::KNIGHT] & pieces[Piece::BLACK];
+  bb black_bishops = pieces[Piece::BISHOP] & pieces[Piece::BLACK];
+  bb black_rooks = pieces[Piece::ROOK] & pieces[Piece::BLACK];
+  bb black_queens = pieces[Piece::QUEEN] & pieces[Piece::BLACK];
+  bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
+  ///
+
+  bool white_to_move = p.white_to_move;
+  if (white_to_move) {
+    visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+        pieces[Piece::BLACK], Piece::WHITE_PAWN);
+    visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_PAWN,
+        white_to_move);
+    visit_capture_moves(white_knights, knight_moves.first, f,
+        pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
+    visit_non_capture_moves(white_knights, knight_moves.first, f,
+        pieces[Piece::WHITE], Piece::WHITE_KNIGHT);
+    visit_capture_moves(white_kings, king_moves.first, f, pieces[Piece::BLACK],
+        Piece::WHITE_KING);
+    visit_non_capture_moves(white_kings, king_moves.first, f,
+        pieces[Piece::WHITE], Piece::WHITE_KING);
+    visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_ROOK);
+    visit_capture_ray_moves(white_queens, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_QUEEN);
+    visit_capture_ray_moves(white_rooks, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_ROOK);
+    visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_BISHOP);
+    visit_capture_ray_moves(white_queens, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_BISHOP);
+    visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
+  } else {
+    visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
+        pieces[Piece::WHITE], Piece::BLACK_PAWN);
+    visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_PAWN,
+        white_to_move);
+    visit_capture_moves(black_knights, knight_moves.first, f,
+        pieces[Piece::WHITE], Piece::BLACK_KNIGHT);
+    visit_non_capture_moves(black_knights, knight_moves.first, f,
+        pieces[Piece::BLACK], Piece::BLACK_KNIGHT);
+    visit_capture_moves(black_kings, king_moves.first, f, pieces[Piece::WHITE],
+        Piece::BLACK_KING);
+    visit_non_capture_moves(black_kings, king_moves.first, f,
+        pieces[Piece::BLACK], Piece::BLACK_KING);
+    visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+    visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_ROOK);
+    visit_capture_ray_moves(black_queens, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_QUEEN);
+    visit_capture_ray_moves(black_rooks, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_ROOK);
+    visit_capture_ray_moves(black_bishops, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_BISHOP);
+    visit_capture_ray_moves(black_queens, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_QUEEN);
+    visit_non_capture_ray_moves(black_bishops, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_BISHOP);
+    visit_non_capture_ray_moves(black_queens, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+
+  }
 }
 
 vector<Move> Move_generator::generate_moves(Position p)
@@ -545,7 +594,8 @@ vector<Move> Move_generator::generate_moves(Position p)
         Position::set_square(bb_to, to);
         Move m (moving, from, to, captured);
         moves.push_back(m);
-        //display_moves(x, y);
+        //cout << from << " -> " << to << endl;
+        //cout << m.to_string() << endl;
       };
 
 //  cout << "Black pseudo-legal moves:" << endl;
@@ -581,7 +631,7 @@ vector<Move> Move_generator::generate_moves(Position p)
 // cout << "black move count: " << i << endl;
   i = 0;
 // cout << endl << "White pseudo-legal moves:" << endl;
-  visit_moves(collect_moves);
+  visit_moves(collect_moves, p);
 
 //cout << "white move count: " << moves.size() << endl;
   return moves;

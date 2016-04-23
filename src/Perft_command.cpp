@@ -80,7 +80,10 @@ int Perft_command::perft(int depth)
 //    cout.flush();
   int total_result = 0;
   for (auto &move : moves) {
-    //p->make_move(move);
+    p.make_move(move);
+//    cout << "after make_move:" << endl;
+//    cout << p << endl;
+
 //      cout << "per move" << endl;
 //      cout.flush();
     if (depth == 1) {
@@ -89,7 +92,9 @@ int Perft_command::perft(int depth)
       int perft_result = perft(depth - 1);
       total_result += perft_result;
     }
-    //p->unmake_move(move);
+    p.unmake_move(move);
+//    cout << "after unmake_move:" << endl;
+//    cout << p << endl;
   }
 //   cout << "perft_done" << endl;
   return total_result;
@@ -98,7 +103,7 @@ int Perft_command::perft(int depth)
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
-  int depth = 1; //TODO get this from arguments, but use a reasonable default
+  int depth = 2; //TODO get this from arguments, but use a reasonable default
   p = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << p << endl;
@@ -110,19 +115,19 @@ void Perft_command::execute()
   vector<Move> moves = mg.generate_moves(p);
   int total_result = 0;
   for (auto &move : moves) {
-
-    p.make_move(move);
     string s = move.to_string();
 
+   // cout << s << ": " << endl;
+
+    p.make_move(move);
+//    cout << "after make_move:" << endl;
+//    cout << p << endl;
     int perft_result = perft(depth - 1);
     cout << s << ": " << perft_result << endl;
-    cout << "after make_move:" << endl;
-    cout << p << endl;
-
     total_result += perft_result;
     p.unmake_move(move);
-    cout << "after unmake_move:" << endl;
-    cout << p << endl;
- }
+//    cout << "after unmake_move:" << endl;
+//    cout << p << endl;
+  }
   cout << endl << "Perft result: " << total_result << endl;
 }
