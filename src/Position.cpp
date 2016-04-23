@@ -7,6 +7,7 @@
 
 #include "Position.h"
 #include "Square.h"
+#include "Piece.h"
 #include <sstream>
 #include <string>
 #include <sstream>
@@ -78,7 +79,7 @@ Position Position::create_position(const string& fen)
   Position start_position;
   vector<string> split_fen = split(fen, ' ');
   string fen_board = split_fen[0];
-  cout << "board: " << fen_board << endl;
+  //cout << "board: " << fen_board << endl;
   vector<string> ranks = split(fen_board, '/');
   int r = 7;
   for (auto &rank : ranks) {
@@ -155,7 +156,7 @@ Position Position::create_position(const string& fen)
     }
     --r;
   }
-  cout << "generated: " << endl << (start_position) << endl;
+  // cout << "generated: " << endl << (start_position) << endl;
   return start_position;
 }
 
@@ -375,12 +376,18 @@ void Position::make_move(Move move)
 {
   bb from = move.get_from();
   bb to = move.get_to();
+  int moving = move.get_moving_piece();
+  switch (moving) {
+  case Piece::WHITE_PAWN:
+    break;
+  default:
+    break;
+  }
   int taken = move.get_taken_piece();
   if (taken != 0) {
     cout << "taking: " << taken << endl;
     cout << Square::mailbox_index_to_square(from) << "-"
         << Square::mailbox_index_to_square(to) << endl;
-    int moving = move.get_moving_piece();
     if (moving != 0) {
       cout << "moving: " << moving << endl;
     }
@@ -389,6 +396,7 @@ void Position::make_move(Move move)
   // potentially remove captured piece from board
   // add moving piece to new position
   // remove moving piece from previous position
+
   // TODO turned promoted pawn into new piece
   // TODO update en passant square
   // TODO update castling rights
@@ -403,8 +411,8 @@ void Position::unmake_move(Move move)
   int taken = move.get_taken_piece();
   if (taken != 0) {
     cout << "untaken: " << taken << endl;
-    cout << Square::mailbox_index_to_square(from) << "-" << Square::mailbox_index_to_square(to)
-        << endl;
+    cout << Square::mailbox_index_to_square(from) << "-"
+        << Square::mailbox_index_to_square(to) << endl;
     int moving = move.get_moving_piece();
     if (moving != 0) {
       cout << "unmoving: " << moving << endl;

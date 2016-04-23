@@ -43,7 +43,9 @@ string Perft_command::get_short_options()
 }
 vector<option> Perft_command::get_long_options()
 {
-  vector<option> retval = { { "textconv", no_argument, 0, 0 } };
+  vector<option> retval =
+    {
+      { "textconv", no_argument, 0, 0 } };
   return retval;
 }
 
@@ -99,7 +101,7 @@ void Perft_command::execute()
   int depth = 1; //TODO get this from arguments, but use a reasonable default
   p = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
-  cout << (p) << endl;
+  cout << p << endl;
 
   mg.pregenerate_moves();
 
@@ -114,9 +116,13 @@ void Perft_command::execute()
 
     int perft_result = perft(depth - 1);
     cout << s << ": " << perft_result << endl;
+    cout << "after make_move:" << endl;
+    cout << p << endl;
+
     total_result += perft_result;
     p.unmake_move(move);
-    // cout << endl;
-  }
+    cout << "after unmake_move:" << endl;
+    cout << p << endl;
+ }
   cout << endl << "Perft result: " << total_result << endl;
 }

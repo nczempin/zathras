@@ -12,6 +12,7 @@
 #include <vector>
 #include "Position.h"
 #include "Square.h"
+#include "Piece.h"
 
 Move_generator::Move_generator()
 {
@@ -85,10 +86,10 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_hoppers(
         int file_to = candidate % 8;
         int rank_to = candidate / 8;
         set_square(file_to, rank_to, attacking[i]);
-        if (file_from >= 6 && file_to <= WHITE_PAWN) {
+        if (file_from >= 6 && file_to <= 1) {
           clear_square(file_to, rank_to, attacking[i]);
         }
-        if (file_from <= WHITE_PAWN && file_to >= 6) {
+        if (file_from <= 1 && file_to >= 6) {
           clear_square(file_to, rank_to, attacking[i]);
         }
       }
@@ -103,7 +104,8 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_hoppers(
 }
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_knight_moves()
 {
-  vector<int> nm { 10, 17, 15, 6, -6, -15, -17, -10 };
+  vector<int> nm
+    { 10, 17, 15, 6, -6, -15, -17, -10 };
   bitboard_set knight_moves = pregenerate_hoppers(nm).first;
   pair<bitboard_set, bitboard_set> p(knight_moves, knight_moves);
   return p;
@@ -111,7 +113,8 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_knight_moves()
 
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_king_moves()
 {
-  vector<int> km = { WHITE_PAWN, 7, 8, 9, -WHITE_PAWN, -7, -8, -9 };
+  vector<int> km =
+    { 1, 7, 8, 9, -1, -7, -8, -9 };
   bitboard_set king_moves = pregenerate_hoppers(km).first;
   pair<bitboard_set, bitboard_set> p(king_moves, king_moves);
   return p;
@@ -134,8 +137,8 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_bishop_moves()
 
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_rook_moves()
 {
-  pair<bitboard_set, bitboard_set> rook_E = pregenerate_rays(WHITE_PAWN);
-  pair<bitboard_set, bitboard_set> rook_W = pregenerate_rays(-WHITE_PAWN);
+  pair<bitboard_set, bitboard_set> rook_E = pregenerate_rays(1);
+  pair<bitboard_set, bitboard_set> rook_W = pregenerate_rays(-1);
   pair<bitboard_set, bitboard_set> rook_S = pregenerate_rays(-8);
   pair<bitboard_set, bitboard_set> rook_N = pregenerate_rays(8);
   bitboard_set rook_moves(64);
@@ -183,14 +186,14 @@ pair<bitboard_set, bitboard_set> Move_generator::pregen_pawn_caps(int direction)
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_white_pawn_capture_moves()
 {
   pair<bitboard_set, bitboard_set> white_pawn_capture_moves = pregen_pawn_caps(
-      WHITE_PAWN);
+      Piece::WHITE_PAWN);
   return white_pawn_capture_moves;
 }
 
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_black_pawn_capture_moves()
 {
   pair<bitboard_set, bitboard_set> black_pawn_capture_moves = pregen_pawn_caps(
-      -WHITE_PAWN);
+      Piece::BLACK_PAWN);
   return black_pawn_capture_moves;
 
 }
@@ -241,13 +244,13 @@ bitboard_set Move_generator::pregen_pawn_nocaps(int start, int stop,
 bitboard_set Move_generator::pregenerate_white_pawn_no_capture_moves()
 {
   bitboard_set white_pawn_no_capture_moves = pregen_pawn_nocaps(8, 16,
-      WHITE_PAWN);
+      Piece::WHITE_PAWN);
   return white_pawn_no_capture_moves;
 }
 bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves()
 {
   bitboard_set black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47,
-      -WHITE_PAWN);
+      Piece::BLACK_PAWN);
   return black_pawn_no_capture_moves;
 }
 
@@ -345,7 +348,7 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
     }
     // evil magic numbers
     bitset<64> between = 0;
-    for (int i = WHITE_PAWN; i < diff / 8; ++i) {
+    for (int i = 1; i < diff / 8; ++i) {
       int rank_to = rank + i;
       set_square(file, rank_to, between);
       int to = file + rank_to * 8;
@@ -355,13 +358,13 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
     return intersection != 0;
   } else if (on_same_rank(x, y)) {
     //again with the elegance
-    if (diff == WHITE_PAWN) {
+    if (diff == 1) {
       //cout << "diff = 1" << endl;
       return false;
     }
     // evil magic numbers
     bitset<64> between = 0;
-    for (int i = WHITE_PAWN; i < diff; ++i) {
+    for (int i = 1; i < diff; ++i) {
 
       int to = set_square(file + i, rank, between);
     }
@@ -378,12 +381,12 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
   }
   bitset<64> between = 0;
   int rank_larger = larger / 8;
-  int i = WHITE_PAWN;
+  int i = 1;
   while (rank + i < rank_larger) {
-    if (diagonal == -WHITE_PAWN && file + i * diagonal % 8 == 7) {
+    if (diagonal == -1 && file + i * diagonal % 8 == 7) {
       break;
     }
-    if (diagonal == WHITE_PAWN && rank + i * diagonal % 8 == 0) {
+    if (diagonal == 1 && rank + i * diagonal % 8 == 0) {
       break;
     }
     int to = set_square(file + i * diagonal, rank + i, between);
@@ -480,40 +483,42 @@ void Move_generator::visit_moves(move_visitor f)
 {
 
   //TODO generalize, obviously
-  bb white_pawns = pieces[PAWN] & pieces[WHITE];
-  bb white_knights = pieces[KNIGHT] & pieces[WHITE];
-  bb white_bishops = pieces[BISHOP] & pieces[WHITE];
-  bb white_rooks = pieces[ROOK] & pieces[WHITE];
-  bb white_queens = pieces[QUEEN] & pieces[WHITE];
-  bb white_kings = pieces[KING] & pieces[WHITE];
+  bb white_pawns = pieces[Piece::PAWN] & pieces[Piece::WHITE];
+  bb white_knights = pieces[Piece::KNIGHT] & pieces[Piece::WHITE];
+  bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
+  bb white_rooks = pieces[Piece::ROOK] & pieces[Piece::WHITE];
+  bb white_queens = pieces[Piece::QUEEN] & pieces[Piece::WHITE];
+  bb white_kings = pieces[Piece::KING] & pieces[Piece::WHITE];
   bool white_to_move = true; //TODO get from position or from caller
   visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f, pieces[8],
-      WHITE_PAWN);
+      Piece::WHITE_PAWN);
   visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
-      pieces[WHITE] | pieces[8], WHITE_PAWN, white_to_move);
-  visit_capture_moves(white_knights, knight_moves.first, f, pieces[8],
-      WHITE_KNIGHT);
+      pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_PAWN,
+      white_to_move);
+  visit_capture_moves(white_knights, knight_moves.first, f,
+      pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
   visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7],
-      WHITE_KNIGHT);
-  visit_capture_moves(white_kings, king_moves.first, f, pieces[8], WHITE_KING);
+      Piece::WHITE_KNIGHT);
+  visit_capture_moves(white_kings, king_moves.first, f, pieces[8],
+      Piece::WHITE_KING);
   visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7],
-      WHITE_KING);
+      Piece::WHITE_KING);
   visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
-      pieces[WHITE] | pieces[8], WHITE_QUEEN);
+      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_QUEEN);
   visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
-      pieces[WHITE] | pieces[8], WHITE_ROOK);
+      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_ROOK);
   visit_capture_ray_moves(white_queens, rook_moves.first, f,
-      pieces[WHITE] | pieces[8], pieces[8], WHITE_QUEEN);
+      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_QUEEN);
   visit_capture_ray_moves(white_rooks, rook_moves.first, f,
-      pieces[WHITE] | pieces[8], pieces[8], WHITE_ROOK);
+      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_ROOK);
   visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
-      pieces[WHITE] | pieces[8], pieces[8], WHITE_BISHOP);
+      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_BISHOP);
   visit_capture_ray_moves(white_queens, bishop_moves.first, f,
-      pieces[WHITE] | pieces[8], pieces[8], WHITE_QUEEN);
+      pieces[Piece::WHITE] | pieces[8], pieces[8], Piece::WHITE_QUEEN);
   visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
-      pieces[WHITE] | pieces[8], WHITE_BISHOP);
+      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_BISHOP);
   visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
-      pieces[WHITE] | pieces[8], WHITE_QUEEN);
+      pieces[Piece::WHITE] | pieces[8], Piece::WHITE_QUEEN);
 }
 
 vector<Move> Move_generator::generate_moves(Position p)
