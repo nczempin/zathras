@@ -117,7 +117,7 @@ void Perft_command::execute()
   for (auto &move : moves) {
     string s = move.to_string();
 
-   // cout << s << ": " << endl;
+    // cout << s << ": " << endl;
 
     p.make_move(move);
 //    cout << "after make_move:" << endl;

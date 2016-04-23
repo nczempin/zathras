@@ -404,7 +404,32 @@ void Position::make_move(Move move)
       clear_bit(knights, from);
       clear_bit(white, from);
       break;
+    case Piece::WHITE_BISHOP:
+      set_bit(bishops, to);
+      set_bit(white, to);
+      clear_bit(bishops, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_ROOK:
+      set_bit(rooks, to);
+      set_bit(white, to);
+      clear_bit(rooks, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_QUEEN:
+      set_bit(queens, to);
+      set_bit(white, to);
+      clear_bit(queens, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_KING:
+      set_bit(kings, to);
+      set_bit(white, to);
+      clear_bit(kings, from);
+      clear_bit(white, from);
+      break;
     default:
+      cerr << "unexpected white piece: " << moving << endl;
       throw moving;
       break;
     }
@@ -422,8 +447,32 @@ void Position::make_move(Move move)
       clear_bit(knights, from);
       clear_bit(black, from);
       break;
+    case Piece::BLACK_BISHOP:
+      set_bit(bishops, to);
+      set_bit(black, to);
+      clear_bit(bishops, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_ROOK:
+      set_bit(rooks, to);
+      set_bit(black, to);
+      clear_bit(rooks, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_QUEEN:
+      set_bit(queens, to);
+      set_bit(black, to);
+      clear_bit(queens, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_KING:
+      set_bit(kings, to);
+      set_bit(black, to);
+      clear_bit(kings, from);
+      clear_bit(black, from);
+      break;
     default:
-      cerr << "unexpected piece: " << moving << endl;
+      cerr << "unexpected black piece: " << moving << endl;
       throw -moving;
       break;
     }
@@ -460,16 +509,40 @@ void Position::unmake_move(Move move)
   if (white_to_move) {
     switch (moving) {
     case Piece::WHITE_PAWN:
-      set_bit(pawns, from);
-      set_bit(white, from);
       clear_bit(pawns, to);
       clear_bit(white, to);
+      set_bit(pawns, from);
+      set_bit(white, from);
       break;
     case Piece::WHITE_KNIGHT:
-      set_bit(knights, from);
-      set_bit(white, from);
       clear_bit(knights, to);
       clear_bit(white, to);
+      set_bit(knights, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_BISHOP:
+      clear_bit(bishops, to);
+      clear_bit(white, to);
+      set_bit(bishops, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_ROOK:
+      clear_bit(rooks, to);
+      clear_bit(white, to);
+      set_bit(rooks, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_QUEEN:
+      clear_bit(queens, to);
+      clear_bit(white, to);
+      set_bit(queens, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_KING:
+      clear_bit(kings, to);
+      clear_bit(white, to);
+      set_bit(kings, from);
+      set_bit(white, from);
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
@@ -478,23 +551,46 @@ void Position::unmake_move(Move move)
     }
   } else {
     switch (moving) {
-    cout << "*************moving: " << moving << endl;
-  case Piece::BLACK_PAWN:
-    set_bit(pawns, from);
-    set_bit(black, from);
-    clear_bit(pawns, to);
-    clear_bit(black, to);
-    break;
-  case Piece::BLACK_KNIGHT:
-    set_bit(knights, from);
-    set_bit(black, from);
-    clear_bit(knights, to);
-    clear_bit(black, to);
-    break;
-  default:
-    cerr << "unexpected black piece: " << moving << endl;
-    throw -moving;
-    break;
+    case Piece::BLACK_PAWN:
+      clear_bit(pawns, to);
+      clear_bit(black, to);
+      set_bit(pawns, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_KNIGHT:
+      clear_bit(knights, to);
+      clear_bit(black, to);
+      set_bit(knights, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_BISHOP:
+      clear_bit(bishops, to);
+      clear_bit(black, to);
+      set_bit(bishops, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_ROOK:
+      clear_bit(rooks, to);
+      clear_bit(black, to);
+      set_bit(rooks, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_QUEEN:
+      clear_bit(queens, to);
+      clear_bit(black, to);
+      set_bit(queens, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_KING:
+      clear_bit(kings, to);
+      clear_bit(black, to);
+      set_bit(kings, from);
+      set_bit(black, from);
+      break;
+    default:
+      cerr << "unexpected black piece: " << moving << endl;
+      throw -moving;
+      break;
     }
   }
   if (taken != 0) {
