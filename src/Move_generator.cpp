@@ -679,6 +679,15 @@ bool Move_generator::is_in_check(Position p, bool side)
   } else {
     Position::visit_bitboard(p.kings & p.black, f);
   }
+  for (auto &move : capture_moves) {
+    uint8_t t = move.get_to();
+    if (t == king_pos) {
+      retval = true;
+      cout << "check: " << move.to_string() << endl;
+      break;
+    }
+  }
+
   cout << "king_pos= " << king_pos << endl;
   cout << "in check: " << retval << endl;
   return retval;
