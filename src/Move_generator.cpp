@@ -495,8 +495,9 @@ void Move_generator::visit_moves(move_visitor f, Position p)
 vector<Move> Move_generator::generate_moves(Position p)
 {
   pieces = p.getPieceBitboards();
-  vector<Move> moves;
+  static vector<Move> moves;
   moves.reserve(50);
+  moves.clear();
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
       [&moves, &p](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
         Move m (moving, from, to, captured);
