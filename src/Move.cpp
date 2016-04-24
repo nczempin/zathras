@@ -11,7 +11,7 @@
 using namespace std;
 
 Move::Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured = 0) :
-    from(from), to(to), moving(piece), taken(captured)
+    from(from), to(to), moving(piece), captured(captured)
 {
 }
 
@@ -26,14 +26,16 @@ uint8_t Move::get_to() const
 string Move::to_string() const
 {
   //cout << moving << " " << from << " " << " " << to << " " << taken << endl;
-  static const string pieces("- NBRQK");
+  static const string pieces("-PNBRQK");
   char p = pieces[moving > 0 ? moving : -moving];
   string moving_string = string(1, p);
   string retval = moving_string + Square::mailbox_index_to_square(from);
-  retval += (taken != 0) ? "x" : "-";
+  retval += (captured != 0) ? "x" : "-";
   retval += Square::mailbox_index_to_square(to);
-  if (taken) {
-    retval += " (" + string(1, pieces[taken]) + ")";
+  if (captured) {
+    const signed char captured_abs = captured > 0 ? captured : -captured;
+    string captured_string = string(1, pieces[captured_abs]);
+    retval += " (" + captured_string + ")";
   }
   return retval;
 }
@@ -49,10 +51,10 @@ void Move::set_moving_piece(int8_t moving)
 
 int8_t Move::get_taken_piece() const
 {
-  return taken;
+  return captured;
 }
 
 void Move::set_taken_piece(int8_t taken)
 {
-  this->taken = taken;
+  this->captured = taken;
 }

@@ -18,6 +18,8 @@ public:
   virtual ~Move_generator();
   static void pregenerate_moves();
   vector<Move> generate_moves(Position position);
+  vector<Move> generate_capture_moves(Position position);
+  bool is_in_check(Position p, bool side);
 private:
   static pair<bitboard_set, bitboard_set> pregenerate_rays(int direction);
   static pair<bitboard_set, bitboard_set> pregenerate_knight_moves();

@@ -30,7 +30,7 @@ private:
   uint8_t from;
   uint8_t to;
   int8_t moving;
-  int8_t taken;
+  int8_t captured;
 };
 
 #endif /* MOVE_H_ */

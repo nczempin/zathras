@@ -64,10 +64,10 @@ public:
   {
     return white_to_move;
   }
-  bool white_to_move = true; //TODO for now
+  bool white_to_move = true; //TODO public for now
   static Position create_position(const string& fen);
-private:
 
+  //public for now
   bb pawns = 0;
   bb knights = 0;
   bb bishops = 0;
@@ -76,6 +76,7 @@ private:
   bb kings = 0;
   bb white = 0;
   bb black = 0;
+private:
 
   static string extract_row_string(uint_fast8_t row, string set);
   static void display_all_moves(const bitboard_set& moves);
