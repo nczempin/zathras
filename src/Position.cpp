@@ -208,10 +208,7 @@ Position Position::create_position(const string& fen)
 Position Position::create_start_position()
 {
   const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-//  const char* p =
-//      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";
   Position start_position = create_position(p);
-  // "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -");
   return start_position;
 }
 ostream& operator<<(ostream& stream, const Position& position)
@@ -254,21 +251,49 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(bb my_bb, function<void(int)> f)
+void Position::visit_bitboard(const bb my_bb, function<void(int)> f)
 {
-  for (int i = 0; i < 8; ++i) {
-    bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
-    my_bb = my_bb << 8;
+  bb tmp = my_bb;
+//  uint8_t tmp2 = 0;
+  int coord = 0;
+//  bb masked = 0;
+  size_t file = 7;
+  size_t rank_offset = 0;
 
-    for (int j = 0; j < 8; ++j) {
-      int coord = (7 - i) * 8 + j;
-      int tmp2 = tmp & 128;
-      if (tmp2 != 0) {
-        f(coord);
-      }
-      tmp = tmp << 1;
+  while (true) {
+//    cout << hex << tmp << dec << endl;
+    coord = file + rank_offset;
+//    cout << "coord, file, rank_offset: " << coord << ", " << file << ", "
+//        << rank_offset << endl;
+    if (tmp & 0x1) {
+      f(coord);
     }
+    if (file == 0) {
+      file = 7;
+      rank_offset += 8;
+      if (rank_offset >= 64) {
+        break;
+      }
+    } else {
+      --file;
+    }
+    tmp = tmp >> 1;
   }
+//  for (size_t i = 0; i < 8; ++i) {
+//    //masked = my_bb & 0xff00000000000000;
+//    tmp = my_bb >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
+//    tmp = tmp & 0xff;
+//    my_bb = my_bb << 8;
+//
+//    for (size_t j = 0; j < 8; ++j) {
+//      coord = (7 - i) * 8 + j;
+//      tmp2 = tmp & 128;
+//      if (tmp2 == 128) {
+//        f(coord);
+//      }
+//      tmp = tmp << 1;
+//    }
+//  }
 }
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {

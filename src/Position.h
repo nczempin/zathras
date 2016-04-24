@@ -30,6 +30,9 @@ public:
 
   friend ostream& operator<<(ostream& stream, const Position& position);
   void print(ostream& stream) const;
+  static Position create_start_position();
+
+  //TODO move; probably to Square class
   static void set_square(bitset<64>& bs, int to);
   static void clear_square(bitset<64>& bs, int to);
   static void set_square(bb& bs, int to);
@@ -37,11 +40,11 @@ public:
   static void clear_square(bb& bs, int to);
   static void set_bit(bb& bs, int to);
   static void clear_bit(bb& bs, int to);
-
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
   static int set_square(int file_to, int rank_to, bb& bbs);
   static int clear_square(int file_to, int rank_to, bb& bbs);
+
   static void visualize_bitboard(bb my_bb, ostream& stream);
   static void visit_bitboard(bb my_bb, square_visitor);
   static void visualize_mailbox_board(int board[64], ostream& stream);
@@ -55,7 +58,6 @@ public:
   static const bb BB_RANK5 = 0x000000ff00000000;
   static const bb BB_RANK6 = 0x0000ff0000000000;
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
-  static Position create_start_position();
   bitboard_set getPieceBitboards();
 
   bool is_white_to_move() const
@@ -63,6 +65,7 @@ public:
     return white_to_move;
   }
   bool white_to_move = true; //TODO for now
+  static Position create_position(const string& fen);
 private:
 
   bb pawns = 0;
@@ -76,7 +79,7 @@ private:
 
   static string extract_row_string(uint_fast8_t row, string set);
   static void display_all_moves(const bitboard_set& moves);
-  static Position create_position(const string& fen);
+
 };
 
 #endif /* POSITION_H_ */
