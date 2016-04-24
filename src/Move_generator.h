@@ -11,7 +11,8 @@
 #include "Position.h"
 #include "Move.h"
 
-class Move_generator {
+class Move_generator
+{
 public:
   Move_generator();
   virtual ~Move_generator();
@@ -49,28 +50,29 @@ private:
       pregenerate_white_pawn_capture_moves();
   pair<bitboard_set, bitboard_set> black_pawn_capture_moves =
       pregenerate_black_pawn_capture_moves();
-  void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
-      function<void(int, int)> f);
-  void visit_capture_moves(const bb sub_position, const bitboard_set all_moves,
-      function<void(int, int)> f, bb other_colour);
-  void visit_non_capture_moves(const bb sub_position,
-      const bitboard_set all_moves, function<void(int, int)> f,
-      bb other_colour);
-  void visit_non_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, function<void(int, int)> f, bb occupied);
+  bitboard_set pieces;
 
+  void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
+      move_visitor f, int moving);
+  void visit_capture_moves(const bb sub_position, const bitboard_set all_moves,
+      const move_visitor f, const bb other_colour, const int8_t moving);
+  void visit_non_capture_moves(const bb sub_position,
+      const bitboard_set all_moves, move_visitor f, bb other_colour,
+      int moving);
+  void visit_non_capture_ray_moves(const bb sub_position,
+      const bitboard_set all_moves, move_visitor f, bb occupied, int moving);
   void visit_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
-      bb other_colour);
+      const bitboard_set all_moves, move_visitor f, bb occupied,
+      bb other_colour, int moving);
   void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
-      function<void(int, int)> f, bb occupied, bool white_to_move);
+      move_visitor f, bb occupied, int moving, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,
       const bitboard_set& all_moves, int x);
   static bool is_anything_between(int x, int y, bb occupied);
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
-  void visit_moves(const bitboard_set& pieces,
-      const function<void(int, int)>& count_moves);
+  void visit_moves(move_visitor count_moves, Position p);
+  int find_captured_piece(int y);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

@@ -66,7 +66,7 @@ shared_ptr<Abstract_command> determine_command(
   vector<string> commands = { "perft" };
   auto it = find(begin(commands), end(commands), searching_for);
   if (it == end(commands)) {
-    cout << "zathras: '" << argv[1] << "' is not a zathras command."
+    cout << "zathras: '" << argv[1] << "' not the one, not the one."
         /*"See 'zathras --help'."*/<< endl;
     throw 1;
   }

@@ -6,20 +6,23 @@
  */
 
 #include "Position.h"
+#include "Square.h"
+#include "Piece.h"
 #include <sstream>
 #include <string>
 #include <sstream>
 #include <vector>
+#include <iomanip>
 
 Position::Position()
 {
   // TODO Auto-generated constructor stub
 }
 //
-//Position::~Position()
-//{
-//  // TODO Auto-generated destructor stub
-//}
+Position::~Position()
+{
+  // TODO Auto-generated destructor stub
+}
 vector<string> &split(const string &s, char delim, vector<string> &elems)
 {
   stringstream ss(s);
@@ -40,6 +43,49 @@ bool is_digit(const char c)
 {
   return '0' <= c && c <= '9';
 }
+
+void Position::set_square(bitset<64>& bs, int to)
+{
+  bs[to] = true;
+}
+
+void Position::clear_square(bitset<64>& bs, int to)
+{
+  bs[to] = false;
+}
+void Position::set_square(bb& b, int to)
+{
+  bitset<64> bs(b);
+  bs[to] = true;
+  b = bs.to_ulong();
+}
+void Position::clear_square(bb& b, int to)
+{
+  bitset<64> bs(b);
+  bs[to] = false;
+  b = bs.to_ulong();
+}
+void Position::set_bit(bb& b, int to)
+{
+  int rank = to / 8;
+  int file = (to % 8);
+  set_square(file, rank, b);
+}
+void Position::clear_bit(bb& b, int to)
+{
+  int rank = to / 8;
+  int file = (to % 8);
+  clear_square(file, rank, b);
+}
+
+bool Position::is_set_square(bb& b, int to)
+{
+  int t2 = (to / 8) * 8 + (7 - (to % 8));
+  uint64_t ttt = 1L << (t2);
+  bb aaa = b & ttt;
+  return aaa != 0;
+}
+
 int Position::set_square(int file_to, int rank_to, bitset<64>& bbs)
 {
   int to_twisted = 7 - file_to + rank_to * 8;
@@ -55,18 +101,18 @@ int Position::clear_square(int file_to, int rank_to, bitset<64>& bbs)
   Position::clear_square(bbs, to_twisted);
   return to;
 }
-int Position::set_square(int file_to, int rank_to, bb& bbs)
+int Position::set_square(int file, int rank, bb& bbs)
 {
-  int to_twisted = 7 - file_to + rank_to * 8;
-  int to = file_to + rank_to * 8;
+  int to_twisted = 7 - file + rank * 8;
+  int to = file + rank * 8;
   Position::set_square(bbs, to_twisted);
   return to;
 }
 
-int Position::clear_square(int file_to, int rank_to, bb& bbs)
+int Position::clear_square(int file, int rank, bb& bbs)
 {
-  int to_twisted = 7 - file_to + rank_to * 8;
-  int to = file_to + rank_to * 8;
+  int to_twisted = 7 - file + rank * 8;
+  int to = file + rank * 8;
   Position::clear_square(bbs, to_twisted);
   return to;
 }
@@ -75,8 +121,10 @@ Position Position::create_position(const string& fen)
 {
   Position start_position;
   vector<string> split_fen = split(fen, ' ');
+  string to_move = split_fen[1];
+  start_position.white_to_move = to_move == "w" ? true : false;
   string fen_board = split_fen[0];
-  cout << "board: " << fen_board << endl;
+  //cout << "board: " << fen_board << endl;
   vector<string> ranks = split(fen_board, '/');
   int r = 7;
   for (auto &rank : ranks) {
@@ -132,8 +180,8 @@ Position Position::create_position(const string& fen)
         case 'r':
           set_square(f, r, start_position.rooks);
           set_square(f, r, start_position.black);
-          cout << "rooks: " << hex << start_position.rooks << dec << endl;
-          cout << "black: " << hex << start_position.black << dec << endl;
+//          cout << "rooks: " << hex << start_position.rooks << dec << endl;
+//          cout << "black: " << hex << start_position.black << dec << endl;
           break;
         case 'q':
           set_square(f, r, start_position.queens);
@@ -153,15 +201,14 @@ Position Position::create_position(const string& fen)
     }
     --r;
   }
-  cout << "generated: " << endl << (start_position) << endl;
+  // cout << "generated: " << endl << (start_position) << endl;
   return start_position;
 }
 
 Position Position::create_start_position()
 {
-  Position start_position = create_position(
-      "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-  // "2rr3k/pp3pp1/1nnqbN1p/3pN3/2pP4/2P3Q1/PPB4P/R4RK1 w - -");
+  const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+  Position start_position = create_position(p);
   return start_position;
 }
 ostream& operator<<(ostream& stream, const Position& position)
@@ -204,27 +251,34 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(bb my_bb, function<void(int)> f)
+void Position::visit_bitboard(const bb my_bb, const function<void(int)> f)
 {
-  for (int i = 0; i < 8; ++i) {
-    bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
-    my_bb = my_bb << 8;
-
-    for (int j = 0; j < 8; ++j) {
-      int coord = (7 - i) * 8 + j;
-      int tmp2 = tmp & 128;
-      if (tmp2 != 0) {
-        f(coord);
-      }
-      tmp = tmp << 1;
+  static uint8_t lookup[] =
+    { 7, 6, 5, 4, 3, 2, 1, 0, //
+      15, 14, 13, 12, 11, 10, 9, 8, //
+      23, 22, 21, 20, 19, 18, 17, 16, //
+      31, 30, 29, 28, 27, 26, 25, 24, //
+      39, 38, 37, 36, 35, 34, 33, 32, //
+      47, 46, 45, 44, 43, 42, 41, 40, //
+      55, 54, 53, 52, 51, 50, 49, 48, //
+      63, 62, 61, 60, 59, 58, 57, 56 };
+  bb tmp = my_bb;
+  bb t = 0;
+  size_t coord = 0;
+  for (int i = 0; i < 64; ++i) {
+    t = tmp & 0x01;
+    if (t) {
+      coord = lookup[i];
+      f(coord);
     }
+    tmp = tmp >> 1;
   }
 }
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {
   stream << "  +-----------------+" << endl;
   const char* symbols = ".PNBRQKpnbrqk*";
-  //ostringstream  strstr;
+//ostringstream  strstr;
   for (int i = 0; i < 8; ++i) {
     stream << (8 - i) << " |";
     for (int j = 0; j < 8; ++j) {
@@ -237,7 +291,7 @@ void Position::visualize_mailbox_board(int board[64], ostream& stream)
   stream << "  +-----------------+" << endl;
   stream << "    A B C D E F G H" << endl;
 
-  //stream << strstr.str() << endl;
+//stream << strstr.str() << endl;
 }
 
 void Position::visit_mailbox_board(int board[64], void (*f)(int))
@@ -252,7 +306,7 @@ void Position::visit_mailbox_board(int board[64], void (*f)(int))
 
 void Position::print(ostream& stream) const
 {
-  // TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
+// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 
   int board[64];
   for (int i = 0; i < 64; ++i) {
@@ -300,57 +354,16 @@ void Position::print(ostream& stream) const
   });
 
   visualize_mailbox_board(board, stream);
-
-}
-
-void Position::set_square(bitset<64>& bs, int to)
-{
-  bs[to] = true;
-}
-
-void Position::clear_square(bitset<64>& bs, int to)
-{
-  bs[to] = false;
-}
-void Position::set_square(bb& b, int to)
-{
-  bitset<64> bs(b);
-  bs[to] = true;
-  b = bs.to_ulong();
-}
-
-void Position::clear_square(bb& b, int to)
-{
-  bitset<64> bs(b);
-  bs[to] = false;
-  b = bs.to_ulong();
-
-}
-
-string Position::mailboxIndexToSquare(int x)
-{
-  char column = 'a' + x % 8;
-  string columnString(1, column);
-  char row = '1' + x / 8;
-  string rowString(1, row);
-  string square = columnString + rowString;
-  return square;
-}
-
-void Position::print_square(int x)
-{
-  string square = mailboxIndexToSquare(x);
-  cout << x << " = " << square << endl;
-
+  cout << "wtm: " << white_to_move << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves)
 {
   visit_bitboard(0xffffffffffffffff, [moves](int x) {
-    print_square(x);
+    Square::print_square(x);
     Position::visualize_bitboard(moves[x], cout);
     Position::visit_bitboard(moves[x],[](int y) {
-          Position::print_square(y);
+          Square::print_square(y);
         });
   });
 }
@@ -358,7 +371,7 @@ void Position::display_all_moves(const bitboard_set& moves)
 bitboard_set Position::getPieceBitboards()
 {
   bitboard_set retval;
-  //TODO figure out what to do with [0]
+//TODO figure out what to do with [0]
   retval.push_back(0);
   bb p = pawns;
   bb n = knights;
@@ -377,4 +390,293 @@ bitboard_set Position::getPieceBitboards()
   retval.push_back(wh);
   retval.push_back(bl);
   return retval;
+}
+
+static bool determine_colour(int piece)
+{
+  return piece > 0; // makes == 0 black, deal with it
+}
+
+static int8_t determine_piece(int8_t piece)
+{
+  if (piece > 0) {
+    return piece;
+  } else {
+    return -piece;
+  }
+}
+void Position::make_move(Move move)
+{
+  uint8_t from = move.get_from();
+  uint8_t to = move.get_to();
+
+  int8_t taken = move.get_taken_piece();
+  if (taken != 0) {
+    bool colour = determine_colour(taken);
+    if (colour) {
+      clear_bit(white, to);
+    } else {
+      clear_bit(black, to);
+    }
+    int8_t p = determine_piece(taken);
+    switch (p) {
+    case 1:
+      clear_bit(pawns, to);
+      break;
+    case 2:
+      clear_bit(knights, to);
+      break;
+    case 3:
+      clear_bit(bishops, to);
+      break;
+    case 4:
+      clear_bit(rooks, to);
+      break;
+    case 5:
+      clear_bit(queens, to);
+      break;
+    case 6:
+      clear_bit(kings, to);
+      break;
+    default:
+      cerr << "mm??" << p << endl;
+      throw p;
+    }
+
+//    cout << "taking: " << taken << endl;
+//    cout << Square::mailbox_index_to_square(from) << "-"
+//        << Square::mailbox_index_to_square(to) << endl;
+  }
+  int8_t moving = move.get_moving_piece();
+  if (white_to_move) {
+    switch (moving) {
+    case Piece::WHITE_PAWN:
+      set_bit(pawns, to);
+      set_bit(white, to);
+      clear_bit(pawns, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_KNIGHT:
+      set_bit(knights, to);
+      set_bit(white, to);
+      clear_bit(knights, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_BISHOP:
+      set_bit(bishops, to);
+      set_bit(white, to);
+      clear_bit(bishops, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_ROOK:
+      set_bit(rooks, to);
+      set_bit(white, to);
+      clear_bit(rooks, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_QUEEN:
+      set_bit(queens, to);
+      set_bit(white, to);
+      clear_bit(queens, from);
+      clear_bit(white, from);
+      break;
+    case Piece::WHITE_KING:
+      set_bit(kings, to);
+      set_bit(white, to);
+      clear_bit(kings, from);
+      clear_bit(white, from);
+      break;
+    default:
+      cerr << "unexpected white piece: " << moving << endl;
+      throw moving;
+      break;
+    }
+  } else {
+    switch (moving) {
+    case Piece::BLACK_PAWN:
+      set_bit(pawns, to);
+      set_bit(black, to);
+      clear_bit(pawns, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_KNIGHT:
+      set_bit(knights, to);
+      set_bit(black, to);
+      clear_bit(knights, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_BISHOP:
+      set_bit(bishops, to);
+      set_bit(black, to);
+      clear_bit(bishops, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_ROOK:
+      set_bit(rooks, to);
+      set_bit(black, to);
+      clear_bit(rooks, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_QUEEN:
+      set_bit(queens, to);
+      set_bit(black, to);
+      clear_bit(queens, from);
+      clear_bit(black, from);
+      break;
+    case Piece::BLACK_KING:
+      set_bit(kings, to);
+      set_bit(black, to);
+      clear_bit(kings, from);
+      clear_bit(black, from);
+      break;
+    default:
+      cerr << "unexpected black piece: " << moving << endl;
+      throw -moving;
+      break;
+    }
+  }
+
+// TODO turned promoted pawn into new piece
+// TODO update en passant square
+// TODO update castling rights
+// TODO update 3 repetitions
+// TODO update 50 moves
+  white_to_move = !white_to_move;
+}
+void Position::unmake_move(Move move)
+{
+  uint8_t from = move.get_from();
+  uint8_t to = move.get_to();
+
+  int8_t moving = move.get_moving_piece();
+  white_to_move = !white_to_move;
+  if (white_to_move) {
+    switch (moving) {
+    case Piece::WHITE_PAWN:
+      clear_bit(pawns, to);
+      clear_bit(white, to);
+      set_bit(pawns, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_KNIGHT:
+      clear_bit(knights, to);
+      clear_bit(white, to);
+      set_bit(knights, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_BISHOP:
+      clear_bit(bishops, to);
+      clear_bit(white, to);
+      set_bit(bishops, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_ROOK:
+      clear_bit(rooks, to);
+      clear_bit(white, to);
+      set_bit(rooks, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_QUEEN:
+      clear_bit(queens, to);
+      clear_bit(white, to);
+      set_bit(queens, from);
+      set_bit(white, from);
+      break;
+    case Piece::WHITE_KING:
+      clear_bit(kings, to);
+      clear_bit(white, to);
+      set_bit(kings, from);
+      set_bit(white, from);
+      break;
+    default:
+      cerr << "unexpected white piece: " << moving << endl;
+      throw moving;
+      break;
+    }
+  } else {
+    switch (moving) {
+    case Piece::BLACK_PAWN:
+      clear_bit(pawns, to);
+      clear_bit(black, to);
+      set_bit(pawns, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_KNIGHT:
+      clear_bit(knights, to);
+      clear_bit(black, to);
+      set_bit(knights, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_BISHOP:
+      clear_bit(bishops, to);
+      clear_bit(black, to);
+      set_bit(bishops, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_ROOK:
+      clear_bit(rooks, to);
+      clear_bit(black, to);
+      set_bit(rooks, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_QUEEN:
+      clear_bit(queens, to);
+      clear_bit(black, to);
+      set_bit(queens, from);
+      set_bit(black, from);
+      break;
+    case Piece::BLACK_KING:
+      clear_bit(kings, to);
+      clear_bit(black, to);
+      set_bit(kings, from);
+      set_bit(black, from);
+      break;
+    default:
+      cerr << "unexpected black piece: " << moving << endl;
+      throw -moving;
+      break;
+    }
+  }
+
+  int8_t taken = move.get_taken_piece();
+  if (taken != 0) {
+    //cout << "untaken: " << taken << endl;
+    bool colour = determine_colour(taken);
+    if (colour) {
+      set_bit(white, to);
+    } else {
+      set_bit(black, to);
+    }
+    int8_t p = determine_piece(taken);
+    switch (p) {
+    case 1:
+      set_bit(pawns, to);
+      break;
+    case 2:
+      set_bit(knights, to);
+      break;
+    case 3:
+      set_bit(bishops, to);
+      break;
+    case 4:
+      set_bit(rooks, to);
+      break;
+    case 5:
+      set_bit(queens, to);
+      break;
+    case 6:
+      set_bit(kings, to);
+      break;
+    default:
+      cerr << "un??" << p << endl;
+      throw p;
+    }
+    // cout << *this << endl;
+  }
+// TODO transform promoted piece back into pawn
+// TODO update en passant square
+// TODO update castling rights
+// TODO update 3 repetitions
+// TODO update 50 moves
+
 }

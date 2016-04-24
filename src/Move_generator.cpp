@@ -11,10 +11,11 @@
 #include <utility>
 #include <vector>
 #include "Position.h"
+#include "Square.h"
+#include "Piece.h"
 
 Move_generator::Move_generator()
 {
-  cout << "hello from mg cons" << endl;
 }
 
 Move_generator::~Move_generator()
@@ -103,7 +104,8 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_hoppers(
 }
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_knight_moves()
 {
-  vector<int> nm { 10, 17, 15, 6, -6, -15, -17, -10 };
+  vector<int> nm
+    { 10, 17, 15, 6, -6, -15, -17, -10 };
   bitboard_set knight_moves = pregenerate_hoppers(nm).first;
   pair<bitboard_set, bitboard_set> p(knight_moves, knight_moves);
   return p;
@@ -111,7 +113,8 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_knight_moves()
 
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_king_moves()
 {
-  vector<int> km = { 1, 7, 8, 9, -1, -7, -8, -9 };
+  vector<int> km =
+    { 1, 7, 8, 9, -1, -7, -8, -9 };
   bitboard_set king_moves = pregenerate_hoppers(km).first;
   pair<bitboard_set, bitboard_set> p(king_moves, king_moves);
   return p;
@@ -161,6 +164,7 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_queen_moves()
 
 void Move_generator::pregenerate_moves()
 {
+  //TODO for now this is done statically on first load
 }
 
 pair<bitboard_set, bitboard_set> Move_generator::pregen_pawn_caps(int direction)
@@ -182,14 +186,14 @@ pair<bitboard_set, bitboard_set> Move_generator::pregen_pawn_caps(int direction)
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_white_pawn_capture_moves()
 {
   pair<bitboard_set, bitboard_set> white_pawn_capture_moves = pregen_pawn_caps(
-      1);
+      Piece::WHITE_PAWN);
   return white_pawn_capture_moves;
 }
 
 pair<bitboard_set, bitboard_set> Move_generator::pregenerate_black_pawn_capture_moves()
 {
   pair<bitboard_set, bitboard_set> black_pawn_capture_moves = pregen_pawn_caps(
-      -1);
+      Piece::BLACK_PAWN);
   return black_pawn_capture_moves;
 
 }
@@ -239,47 +243,72 @@ bitboard_set Move_generator::pregen_pawn_nocaps(int start, int stop,
 }
 bitboard_set Move_generator::pregenerate_white_pawn_no_capture_moves()
 {
-  bitboard_set white_pawn_no_capture_moves = pregen_pawn_nocaps(8, 16, 1);
+  bitboard_set white_pawn_no_capture_moves = pregen_pawn_nocaps(8, 16,
+      Piece::WHITE_PAWN);
   return white_pawn_no_capture_moves;
 }
 bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves()
 {
-  bitboard_set black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47, -1);
+  bitboard_set black_pawn_no_capture_moves = pregen_pawn_nocaps(56, 47,
+      Piece::BLACK_PAWN);
   return black_pawn_no_capture_moves;
 }
 
 void Move_generator::print_moves_raw(const bb sub_position,
     const bitboard_set all_moves, const Position position)
 {
-  visit_moves_raw(sub_position, all_moves, [](int x, int y) {
-    string from = Position::mailboxIndexToSquare(x);
-    string to = Position::mailboxIndexToSquare(y);
+  visit_moves_raw(sub_position, all_moves, [](int pc, int x, int y, int cpt) {
+    string from = Square::mailbox_index_to_square(x);
+    string to = Square::mailbox_index_to_square(y);
     cout << from << to << endl;
-  });
+  }, position.is_white_to_move());
 }
-void Move_generator::visit_capture_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb other_colour)
+
+int Move_generator::find_captured_piece(int y)
 {
-  Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
-    bb raw_moves = all_moves[x];
-    bb moves = raw_moves & other_colour;
-    Position::visit_bitboard(moves, [x, f](int y) {
-          f(x, y);
-        }
-    );
-  });
+  //cout << "looking for captured piece at: " << y << endl;
+  int captured = 0;
+  for (int i = 1; i < 7; ++i)
+    if (Position::is_set_square(pieces[i], y)) {
+      captured = i;
+      if (Position::is_set_square(pieces[8], y)) { //black
+        captured = -i;
+      }
+      break;
+    }
+  //cout << "found: " << captured << endl;
+  return captured;
+}
+
+void Move_generator::visit_capture_moves(const bb sub_position,
+    const bitboard_set all_moves, const move_visitor f, const bb other_colour,
+    const int8_t moving)
+{
+  //cout << "visit capture moves" << endl;
+  Position::visit_bitboard(sub_position,
+      [this, all_moves, f, other_colour, moving](int x) {
+        bb raw_moves = all_moves[x];
+        bb moves = raw_moves & other_colour;
+        Position::visit_bitboard(moves, [this, x, f, moving](int y) {
+              int8_t captured = find_captured_piece(y);
+
+              f(moving, x, y, captured);
+            }
+        );
+      });
 }
 void Move_generator::visit_non_capture_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb other_colour)
+    const bitboard_set all_moves, move_visitor f, bb other_colour, int moving)
 {
-  Position::visit_bitboard(sub_position, [all_moves, f, other_colour](int x) {
-    bb raw_moves = all_moves[x];
-    bb moves = raw_moves & ~other_colour;
-    Position::visit_bitboard(moves, [x, f](int y) {
-          f(x, y);
-        }
-    );
-  });
+  Position::visit_bitboard(sub_position,
+      [all_moves, f, other_colour, moving](int x) {
+        bb raw_moves = all_moves[x];
+        bb moves = raw_moves & ~other_colour;
+        Position::visit_bitboard(moves, [x, f, moving](int y) {
+              f(moving, x, y, 0);
+            }
+        );
+      });
 }
 static bool on_same_file(int x, int y)
 {
@@ -297,17 +326,12 @@ static int determine_diagonal(int x, int y)
     smaller = y;
     larger = x;
   }
-  //cout << "smaller: " << smaller << endl;
   int diff = larger - smaller;
-  //cout << "diff: " << diff << endl;
   if (diff % 9 == 0) {
-    //cout << "clean into 9" << endl;
     return 1;
   } else if (diff % 7 == 0) {
-    //cout << "clean into 7" << endl;
     return -1;
   }
-  //cout << "nope" << endl;
   return 0;
 }
 
@@ -316,9 +340,7 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
   if (x == y) {
     return false;
   }
-//  cout << "anything between: " << Position::mailboxIndexToSquare(x) << ", "
-//      << Position::mailboxIndexToSquare(y) << endl;
-  //TODO this can be done much more elegantly and much more efficiently
+//TODO this can be done much more elegantly and much more efficiently
   int smaller = x;
   int larger = y;
   if (y < x) {
@@ -329,12 +351,10 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
   int file = smaller % 8;
   int diff = larger - smaller;
   if (on_same_file(x, y)) {
-//		cout << "same file: " << Position::mailboxIndexToSquare(x) << ", "
-//				<< Position::mailboxIndexToSquare(y) << endl;
     if (diff == 8) {
       return false;
     }
-    // evil magic numbers
+// evil magic numbers
     bitset<64> between = 0;
     for (int i = 1; i < diff / 8; ++i) {
       int rank_to = rank + i;
@@ -343,30 +363,20 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
       //cout << "setting " << Position::mailboxIndexToSquare(to) << endl;
     }
     bb intersection = between.to_ulong() & occupied;
-    //cout << "intersection: " << hex << between.to_ulong() << ". "
-    //	<< occupied << ": " << intersection << dec << endl;
     return intersection != 0;
   } else if (on_same_rank(x, y)) {
-    //cout << "same rank: " << Position::mailboxIndexToSquare(x) << ", "
-    //<< Position::mailboxIndexToSquare(y) << endl;
-    //again with the elegance
+//again with the elegance
     if (diff == 1) {
       //cout << "diff = 1" << endl;
       return false;
     }
-    // evil magic numbers
+// evil magic numbers
     bitset<64> between = 0;
     for (int i = 1; i < diff; ++i) {
 
-      //cout << "setting: " << Position::mailboxIndexToSquare(btwn) << endl;
-      //cout << "file, rank: " << (file + i) << ", " << rank << endl;
       int to = set_square(file + i, rank, between);
-      //cout << "to: " << to << " - " << Position::mailboxIndexToSquare(to)
-      //	<< endl;
     }
     bb intersection = between.to_ulong() & occupied;
-    //cout << "intersection: " << hex << between.to_ulong() << ". "
-    //<< occupied << ": " << intersection << dec << endl;
     return intersection != 0;
   }
   int diagonal = determine_diagonal(x, y);
@@ -391,40 +401,38 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
     ++i;
   }
   bb intersection = between.to_ulong() & occupied;
-  //cout << "intersection: " << hex << between.to_ulong() << ". "
-  //<< occupied << ": " << intersection << dec << endl;
   return intersection != 0;
 }
 
 void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb occupied)
-{
-  Position::visit_bitboard(sub_position, [all_moves, f, occupied](int x) {
-    bb raw_moves = all_moves[x];
-    bb moves = raw_moves & ~occupied;
-    Position::visit_bitboard(moves, [x, f, occupied](int y) {
-          bool b = is_anything_between(x, y, occupied);
-          if (!b) {
-            f(x, y);
-          }
-        }
-    );
-  });
-}
-void Move_generator::visit_capture_ray_moves(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
-    bb other_colour)
+    const bitboard_set all_moves, move_visitor f, bb occupied, int moving)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, occupied, other_colour](int x) {
+      [all_moves, f, occupied, moving](int x) {
         bb raw_moves = all_moves[x];
-        bb moves = raw_moves & other_colour;
-        //Position::visualize_bitboard(moves, cout);
-        Position::visit_bitboard(moves, [x, f, occupied](int y) {
-              //cout << "anything between? " << x << ", " << y << endl;
+        bb moves = raw_moves & ~occupied;
+        Position::visit_bitboard(moves, [x, f, occupied, moving](int y) {
               bool b = is_anything_between(x, y, occupied);
               if (!b) {
-                f(x, y);
+                f(moving, x, y, 0);
+              }
+            }
+        );
+      });
+}
+void Move_generator::visit_capture_ray_moves(const bb sub_position,
+    const bitboard_set all_moves, move_visitor f, bb occupied, bb other_colour,
+    int moving)
+{
+  Position::visit_bitboard(sub_position,
+      [this, all_moves, f, occupied, other_colour, moving](int x) {
+        bb raw_moves = all_moves[x];
+        bb moves = raw_moves & other_colour;
+        Position::visit_bitboard(moves, [this, x, f, occupied, moving](int y) {
+              bool b = is_anything_between(x, y, occupied);
+              if (!b) {
+                int captured = find_captured_piece(y);
+                f(moving, x, y, captured);
               }
             }
         );
@@ -432,14 +440,16 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
 }
 
 void Move_generator::visit_moves_raw(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f)
+    const bitboard_set all_moves, move_visitor f, int moving)
 {
-  Position::visit_bitboard(sub_position, [all_moves, f](int x) {
-    Position::visit_bitboard(all_moves[x], [x, f](int y) {
-          f(x, y);
-        }
-    );
-  });
+
+  Position::visit_bitboard(sub_position, [all_moves, f, moving](int x) {
+    Position::visit_bitboard(all_moves[x], [x, f, moving](int y) {
+          int captured = -98;
+          f(moving, x, y, captured); //TODO get the captured piece from somewhere
+    }
+);
+});
 }
 
 bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
@@ -464,119 +474,119 @@ bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
 }
 
 void Move_generator::visit_pawn_nocaps(const bb sub_position,
-    const bitboard_set all_moves, function<void(int, int)> f, bb occupied,
+    const bitboard_set all_moves, move_visitor f, bb occupied, int moving,
     bool white_to_move)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, occupied, white_to_move](int x) {
+      [all_moves, f, occupied, moving, white_to_move](int x) {
         bb moves = filter_occupied_squares(white_to_move, occupied, all_moves, x);
-        Position::visit_bitboard(moves, [x, f](int y) {
-              f(x, y);
+        Position::visit_bitboard(moves, [x, f, moving](int y) {
+              f(moving, x, y, 0);
             }
         );
       });
 }
 
-void Move_generator::visit_moves(const bitboard_set& pieces,
-    const function<void(int, int)>& f)
+void Move_generator::visit_moves(move_visitor f, Position p)
 {
-  bb white_pawns = pieces[1] & pieces[7];
-  bb white_knights = pieces[2] & pieces[7];
-  bb white_bishops = pieces[3] & pieces[7];
-  bb white_rooks = pieces[4] & pieces[7];
-  bb white_queens = pieces[5] & pieces[7];
-  bb white_kings = pieces[6] & pieces[7];
-  visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
-      pieces[8]);
-  visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
-      pieces[7] | pieces[8], true);
-  visit_non_capture_moves(white_knights, knight_moves.first, f, pieces[7]);
-  visit_non_capture_moves(white_kings, king_moves.first, f, pieces[7]);
-  visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
-      pieces[7] | pieces[8]);
-  visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
-      pieces[7] | pieces[8]);
-  visit_capture_ray_moves(white_queens, rook_moves.first, f,
-      pieces[7] | pieces[8], pieces[8]);
-  visit_capture_ray_moves(white_rooks, rook_moves.first, f,
-      pieces[7] | pieces[8], pieces[8]);
-  visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
-      pieces[7] | pieces[8], pieces[8]);
-  visit_capture_ray_moves(white_queens, bishop_moves.first, f,
-      pieces[7] | pieces[8], pieces[8]);
-  visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
-      pieces[7] | pieces[8]);
-  visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
-      pieces[7] | pieces[8]);
+
 }
 
-vector<Move> Move_generator::generate_moves(Position position)
+vector<Move> Move_generator::generate_moves(Position p)
 {
-  //cout << "mggm" << endl;
-  cout.flush();
-  bitboard_set pieces = position.getPieceBitboards();
-//  for (auto &bb : pieces) {
-//    cout << "piece: " << hex << bb << dec << endl;
-//  }
-  //cout << "after getpp" << endl;
-  int i = 0;
-  function<void(int, int)> display_moves = [](int x, int y) {
-    string from = Position::mailboxIndexToSquare(x);
-    string to = Position::mailboxIndexToSquare(y);
-    cout << from << to << endl;
-  };
-  function<void(int, int)> count_moves = [&i](int x, int y) {
-    ++i;
-  };
-  vector<Move> moves;
-  function<void(int, int)> collect_moves =
-      [&moves, display_moves](int x, int y) {
-        bb from(0);
-        Position::set_square(from, x);
-        bb to(0);
-        Position::set_square(to, y);
-        Move m (from, to);
- //       cout << "Move: " << hex << m.get_from() << ", " << m.get_to() << dec << endl;
-//        cout.flush();
+  pieces = p.getPieceBitboards();
+  static vector<Move> moves;
+  moves.reserve(50);
+  moves.clear();
+  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
+      [&moves, &p](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+        Move m (moving, from, to, captured);
         moves.push_back(m);
-        //display_moves(x, y);
       };
 
-//  cout << "Black pseudo-legal moves:" << endl;
-//  bb black_pawns = pieces[1] & pieces[8];
-//  bb black_knights = pieces[2] & pieces[8];
-//  bb black_bishops = pieces[3] & pieces[8];
-//  bb black_rooks = pieces[4] & pieces[8];
-//  bb black_queens = pieces[5] & pieces[8];
-//  bb black_kings = pieces[6] & pieces[8];
-//	visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
-//			pieces[7] | pieces[8], false);
-//	visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
-//			pieces[7]);
-//
-//	visit_non_capture_moves(black_knights, knight_moves.first, f, pieces[8]);
-//	visit_non_capture_moves(black_kings, king_moves.first, f, pieces[8]);
-//	visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
-//			pieces[7] | pieces[8]);
-//	visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
-//			pieces[7] | pieces[8]);
-//	visit_capture_ray_moves(black_queens, rook_moves.first, f,
-//			pieces[7] | pieces[8], pieces[7]);
-  //  visit_capture_ray_moves(black_rooks, rook_moves.first, f,
-  //      pieces[7] | pieces[8], pieces[7]);
-//  visit_capture_ray_moves(black_bishops, bishop_moves.first, f,
-//      pieces[7] | pieces[8], pieces[7]);
-//  visit_capture_ray_moves(black_queens, bishop_moves.first, f,
-//      pieces[7] | pieces[8], pieces[7]);
-//  visit_non_capture_ray_moves(black_bishops, bishop_moves.first, f,
-//      pieces[7] | pieces[8]);
-//  visit_non_capture_ray_moves(black_queens, bishop_moves.first, f,
-//      pieces[7] | pieces[8]);
-  // cout << "black move count: " << i << endl;
-  i = 0;
-  // cout << endl << "White pseudo-legal moves:" << endl;
-  visit_moves(pieces, collect_moves);
+  //TODO generalize, obviously
+  bb white_pawns = pieces[Piece::PAWN] & pieces[Piece::WHITE];
+  bb white_knights = pieces[Piece::KNIGHT] & pieces[Piece::WHITE];
+  bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
+  bb white_rooks = pieces[Piece::ROOK] & pieces[Piece::WHITE];
+  bb white_queens = pieces[Piece::QUEEN] & pieces[Piece::WHITE];
+  bb white_kings = pieces[Piece::KING] & pieces[Piece::WHITE];
+  bb black_pawns = pieces[Piece::PAWN] & pieces[Piece::BLACK];
+  bb black_knights = pieces[Piece::KNIGHT] & pieces[Piece::BLACK];
+  bb black_bishops = pieces[Piece::BISHOP] & pieces[Piece::BLACK];
+  bb black_rooks = pieces[Piece::ROOK] & pieces[Piece::BLACK];
+  bb black_queens = pieces[Piece::QUEEN] & pieces[Piece::BLACK];
+  bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
+  ///
 
-  //cout << "white move count: " << moves.size() << endl;
+  if (p.white_to_move) {
+    // cout << "capturing with white pawns" << endl;
+    visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+        pieces[Piece::BLACK], Piece::WHITE_PAWN);
+    visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_PAWN, true);
+    visit_capture_moves(white_knights, knight_moves.first, f,
+        pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
+    visit_non_capture_moves(white_knights, knight_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
+    visit_capture_moves(white_kings, king_moves.first, f, pieces[Piece::BLACK],
+        Piece::WHITE_KING);
+    visit_non_capture_moves(white_kings, king_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KING);
+    visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_ROOK);
+    visit_capture_ray_moves(white_queens, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_QUEEN);
+    visit_capture_ray_moves(white_rooks, rook_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_ROOK);
+    visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_BISHOP);
+    visit_capture_ray_moves(white_queens, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_BISHOP);
+    visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
+  } else {
+    visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
+        pieces[Piece::WHITE], Piece::BLACK_PAWN);
+    visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_PAWN, false);
+    visit_capture_moves(black_knights, knight_moves.first, f,
+        pieces[Piece::WHITE], Piece::BLACK_KNIGHT);
+    visit_non_capture_moves(black_knights, knight_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KNIGHT);
+    visit_capture_moves(black_kings, king_moves.first, f, pieces[Piece::WHITE],
+        Piece::BLACK_KING);
+    visit_non_capture_moves(black_kings, king_moves.first, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KING);
+    visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+    visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_ROOK);
+    visit_capture_ray_moves(black_queens, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_QUEEN);
+    visit_capture_ray_moves(black_rooks, rook_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_ROOK);
+    visit_capture_ray_moves(black_bishops, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_BISHOP);
+    visit_capture_ray_moves(black_queens, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_QUEEN);
+    visit_non_capture_ray_moves(black_bishops, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_BISHOP);
+    visit_non_capture_ray_moves(black_queens, bishop_moves.first, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+
+  }
   return moves;
 }
