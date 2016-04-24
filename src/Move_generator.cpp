@@ -286,26 +286,35 @@ void Move_generator::visit_capture_moves(const bb sub_position,
 {
   //cout << "visit capture moves" << endl;
   Position::visit_bitboard(sub_position,
-      [this, all_moves, f, other_colour, moving](int x) {
-        bb raw_moves = all_moves[x];
+      [this, all_moves, f, other_colour, moving](uint8_t from) {
+        bb raw_moves = all_moves[from];
         bb moves = raw_moves & other_colour;
-        Position::visit_bitboard(moves, [this, x, f, moving](int y) {
-              int8_t captured = find_captured_piece(y);
+        Position::visit_bitboard(moves, [this, from, f, moving](uint8_t to) {
+              if (p.white_to_move && moving <= 0) {
+                cerr << "wrong mover: " << moving << endl;
+                throw from;
+              }
+              if (!p.white_to_move && moving >= 0) {
+                cerr << "wrong mover: "<< moving << endl;
+                throw from;
+              }
 
-              f(moving, x, y, captured);
+              int8_t captured = find_captured_piece(to);
+
+              f(moving, from, to, captured);
             }
         );
       });
 }
 void Move_generator::visit_non_capture_moves(const bb sub_position,
-    const bitboard_set all_moves, move_visitor f, bb other_colour, int moving)
+    const bitboard_set all_moves, move_visitor f, bb other_colour, int8_t moving)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, other_colour, moving](int x) {
-        bb raw_moves = all_moves[x];
+      [all_moves, f, other_colour, moving](uint8_t from) {
+        bb raw_moves = all_moves[from];
         bb moves = raw_moves & ~other_colour;
-        Position::visit_bitboard(moves, [x, f, moving](int y) {
-              f(moving, x, y, 0);
+        Position::visit_bitboard(moves, [from, f, moving](uint8_t to) {
+              f(moving, from, to, 0);
             }
         );
       });
@@ -474,7 +483,7 @@ bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
 }
 
 void Move_generator::visit_pawn_nocaps(const bb sub_position,
-    const bitboard_set all_moves, move_visitor f, bb occupied, int moving,
+    const bitboard_set all_moves, move_visitor f, bb occupied, int8_t moving,
     bool white_to_move)
 {
   Position::visit_bitboard(sub_position,
@@ -487,18 +496,21 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
       });
 }
 
-void Move_generator::visit_moves(move_visitor f, Position p)
-{
-
-}
-vector<Move> Move_generator::generate_capture_moves(Position p)
+vector<Move> Move_generator::generate_capture_moves()
 {
   pieces = p.getPieceBitboards();
-  static vector<Move> moves;
-  moves.reserve(50);
+  vector<Move> moves;
   moves.clear();
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
-      [&moves, &p](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+      [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+        if (p.white_to_move && moving <= 0) {
+          cerr << "wrong mover: " << moving << endl;
+          throw from;
+        }
+        if (!p.white_to_move && moving >= 0) {
+          cerr << "wrong mover: "<< moving << endl;
+          throw from;
+        }
         Move m (moving, from, to, captured);
         moves.push_back(m);
       };
@@ -562,14 +574,22 @@ vector<Move> Move_generator::generate_capture_moves(Position p)
   return moves;
 }
 
-vector<Move> Move_generator::generate_moves(Position p)
+vector<Move> Move_generator::generate_moves()
 {
   pieces = p.getPieceBitboards();
-  static vector<Move> moves;
-  moves.reserve(50);
+  vector<Move> moves;
   moves.clear();
-  static function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
-      [&moves](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+  cout << "should be 0: " << moves.size() << endl;
+  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
+      [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+        if (p.white_to_move && moving <= 0) {
+          cerr << "wrong mover: " << moving << endl;
+          throw from;
+        }
+        if (!p.white_to_move && moving >= 0) {
+          cerr << "wrong mover: "<< moving << endl;
+          throw from;
+        }
         Move m (moving, from, to, captured);
         moves.push_back(m);
       };
@@ -589,6 +609,7 @@ vector<Move> Move_generator::generate_moves(Position p)
   bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
   ///
 
+  cout << "generating, wtm: " << p.white_to_move << endl;
   if (p.white_to_move) {
     // cout << "capturing with white pawns" << endl;
     visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
@@ -599,8 +620,8 @@ vector<Move> Move_generator::generate_moves(Position p)
         pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
     visit_non_capture_moves(white_knights, knight_moves.first, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
-    visit_capture_moves(white_kings, king_moves.first, f, pieces[Piece::BLACK],
-        Piece::WHITE_KING);
+//    visit_capture_moves(p, white_kings, king_moves.first, f,
+//        pieces[Piece::BLACK], Piece::WHITE_KING);
     visit_non_capture_moves(white_kings, king_moves.first, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KING);
     visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
@@ -624,56 +645,57 @@ vector<Move> Move_generator::generate_moves(Position p)
     visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
   } else {
-    visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
-        pieces[Piece::WHITE], Piece::BLACK_PAWN);
-    visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_PAWN, false);
-    visit_capture_moves(black_knights, knight_moves.first, f,
-        pieces[Piece::WHITE], Piece::BLACK_KNIGHT);
-    visit_non_capture_moves(black_knights, knight_moves.first, f,
-        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KNIGHT);
-    visit_capture_moves(black_kings, king_moves.first, f, pieces[Piece::WHITE],
-        Piece::BLACK_KING);
+//    visit_capture_moves(p, black_pawns, black_pawn_capture_moves.first, f,
+//        pieces[Piece::WHITE], Piece::BLACK_PAWN);
+//    visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_PAWN, false);
+//    visit_capture_moves(p, black_knights, knight_moves.first, f,
+//        pieces[Piece::WHITE], Piece::BLACK_KNIGHT);
+//    visit_non_capture_moves(black_knights, knight_moves.first, f,
+//        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KNIGHT);
+//    visit_capture_moves(p, black_kings, king_moves.first, f,
+//        pieces[Piece::WHITE], Piece::BLACK_KING);
     visit_non_capture_moves(black_kings, king_moves.first, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KING);
-    visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
-    visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_ROOK);
-    visit_capture_ray_moves(black_queens, rook_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
-        Piece::BLACK_QUEEN);
-    visit_capture_ray_moves(black_rooks, rook_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
-        Piece::BLACK_ROOK);
-    visit_capture_ray_moves(black_bishops, bishop_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
-        Piece::BLACK_BISHOP);
-    visit_capture_ray_moves(black_queens, bishop_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
-        Piece::BLACK_QUEEN);
-    visit_non_capture_ray_moves(black_bishops, bishop_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_BISHOP);
-    visit_non_capture_ray_moves(black_queens, bishop_moves.first, f,
-        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+//    visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+//    visit_non_capture_ray_moves(black_rooks, rook_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_ROOK);
+//    visit_capture_ray_moves(black_queens, rook_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+//        Piece::BLACK_QUEEN);
+//    visit_capture_ray_moves(black_rooks, rook_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+//        Piece::BLACK_ROOK);
+//    visit_capture_ray_moves(black_bishops, bishop_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+//        Piece::BLACK_BISHOP);
+//    visit_capture_ray_moves(black_queens, bishop_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+//        Piece::BLACK_QUEEN);
+//    visit_non_capture_ray_moves(black_bishops, bishop_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_BISHOP);
+//    visit_non_capture_ray_moves(black_queens, bishop_moves.first, f,
+//        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
 
   }
+  cout << "after: " << moves.size() << endl;
   return moves;
 }
-bool Move_generator::is_in_check(Position p, bool side)
+bool Move_generator::is_in_check(bool side)
 {
   bool retval = false;
   cout << "checking for side: " << (side ? "white" : "black") << endl;
   cout << "to move: " << (p.white_to_move ? "white" : "black") << endl;
 
   //TODO this is only the naive way of doing this, it needs to be much more efficient
-  vector<Move> capture_moves = generate_capture_moves(p);
+  vector<Move> capture_moves = generate_capture_moves();
   int king_pos = 0;
   static function<void(int)> f = [&king_pos](int square) {
     king_pos = square;
   };
-  cout << hex << p.kings << "... " << (p.kings & p.white) << dec << endl;
-  cout << hex << p.kings << "... " << (p.kings & p.black) << dec << endl;
+//  cout << hex << p.kings << "... " << (p.kings & p.white) << dec << endl;
+//  cout << hex << p.kings << "... " << (p.kings & p.black) << dec << endl;
   if (side) {
     Position::visit_bitboard(p.kings & p.white, f);
   } else {
@@ -688,7 +710,7 @@ bool Move_generator::is_in_check(Position p, bool side)
     }
   }
 
-  cout << "king_pos= " << king_pos << endl;
-  cout << "in check: " << retval << endl;
+//  cout << "king_pos= " << king_pos << endl;
+//  cout << "in check: " << retval << endl;
   return retval;
 }

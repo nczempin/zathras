@@ -27,6 +27,7 @@ public:
 
   void set_taken_piece(int8_t taken);
 private:
+  Move();
   uint8_t from;
   uint8_t to;
   int8_t moving;

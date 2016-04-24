@@ -17,7 +17,7 @@ using namespace std;
 typedef uint_fast64_t bb;
 
 typedef vector<bb> bitboard_set;
-typedef function<void(int)> square_visitor;
+typedef function<void(uint8_t)> square_visitor;
 typedef function<void(int8_t, uint8_t, uint8_t, int8_t)> move_visitor;
 
 #endif /* TYPEDEFS_H_ */

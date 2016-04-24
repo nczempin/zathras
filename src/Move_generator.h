@@ -17,10 +17,11 @@ public:
   Move_generator();
   virtual ~Move_generator();
   static void pregenerate_moves();
-  vector<Move> generate_moves(Position position);
-  vector<Move> generate_capture_moves(Position position);
-  bool is_in_check(Position p, bool side);
+  vector<Move> generate_moves();
+  vector<Move> generate_capture_moves();
+  bool is_in_check(bool side);
 private:
+  Position p;
   static pair<bitboard_set, bitboard_set> pregenerate_rays(int direction);
   static pair<bitboard_set, bitboard_set> pregenerate_knight_moves();
   static pair<bitboard_set, bitboard_set> pregenerate_king_moves();
@@ -60,20 +61,20 @@ private:
       const move_visitor f, const bb other_colour, const int8_t moving);
   void visit_non_capture_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb other_colour,
-      int moving);
+      int8_t moving);
   void visit_non_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied, int moving);
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
       bb other_colour, int moving);
   void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
-      move_visitor f, bb occupied, int moving, bool white_to_move);
+      move_visitor f, bb occupied, int8_t moving, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,
       const bitboard_set& all_moves, int x);
   static bool is_anything_between(int x, int y, bb occupied);
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
-  void visit_moves(move_visitor count_moves, Position p);
+  void visit_moves(move_visitor count_moves);
   int find_captured_piece(int y);
 };
 

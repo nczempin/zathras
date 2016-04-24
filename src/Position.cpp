@@ -251,7 +251,7 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(const bb my_bb, const function<void(int)> f)
+void Position::visit_bitboard(const bb my_bb, const square_visitor f)
 {
   static uint8_t lookup[] =
     { 7, 6, 5, 4, 3, 2, 1, 0, //
@@ -264,7 +264,7 @@ void Position::visit_bitboard(const bb my_bb, const function<void(int)> f)
       63, 62, 61, 60, 59, 58, 57, 56 };
   bb tmp = my_bb;
   bb t = 0;
-  size_t coord = 0;
+  uint8_t coord = 0;
   for (int i = 0; i < 64; ++i) {
     t = tmp & 0x01;
     if (t) {
@@ -448,6 +448,11 @@ void Position::make_move(Move move)
 //        << Square::mailbox_index_to_square(to) << endl;
   }
   int8_t moving = move.get_moving_piece();
+  int8_t moving_abs = moving > 0 ? moving : -moving;
+  if (moving_abs > 6 || moving_abs == 0) {
+    cerr << "invalid move created: moving piece: " << moving << endl;
+    throw moving_abs;
+  }
   if (white_to_move) {
     switch (moving) {
     case Piece::WHITE_PAWN:
@@ -488,6 +493,7 @@ void Position::make_move(Move move)
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
+      cerr.flush();
       throw moving;
       break;
     }
@@ -680,5 +686,4 @@ void Position::unmake_move(Move move)
 // TODO update 50 moves
 
 }
-
 

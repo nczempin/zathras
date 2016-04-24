@@ -10,9 +10,22 @@
 
 using namespace std;
 
-Move::Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured = 0) :
-    from(from), to(to), moving(piece), captured(captured)
+Move::Move(int8_t moving, uint8_t from, uint8_t to, int8_t captured = 0) :
+    from(from), to(to), moving(moving), captured(captured)
 {
+  int8_t moving_abs = moving > 0 ? moving : -moving;
+  if (moving_abs > 6) {
+    cerr << "invalid move created: moving piece: " << moving << endl;
+    throw moving_abs;
+  }
+  int8_t captured_abs = captured > 0 ? captured : -captured;
+  if (captured_abs > 6) {
+    if (moving_abs > 6) {
+      cerr << "invalid move created: captured piece: " << captured << endl;
+      throw captured_abs;
+    }
+
+  }
 }
 
 uint8_t Move::get_from()
@@ -46,6 +59,16 @@ int8_t Move::get_moving_piece() const
 
 void Move::set_moving_piece(int8_t moving)
 {
+  int8_t moving_abs = moving > 0 ? moving : -moving;
+  if (moving_abs > 6 || moving_abs == 0) {
+    cerr << "invalid move created: moving piece: " << moving << endl;
+    throw moving_abs;
+  }
+  int8_t captured_abs = captured > 0 ? captured : -captured;
+  if (captured_abs > 6) {
+    cerr << "invalid move created: captured piece: " << captured << endl;
+    throw captured_abs;
+  }
   this->moving = moving;
 }
 
@@ -56,5 +79,15 @@ int8_t Move::get_taken_piece() const
 
 void Move::set_taken_piece(int8_t taken)
 {
+  int8_t moving_abs = moving > 0 ? moving : -moving;
+  if (moving_abs > 6 || moving_abs == 0) {
+    cerr << "invalid move created: moving piece: " << moving << endl;
+    throw moving_abs;
+  }
+  int8_t captured_abs = captured > 0 ? captured : -captured;
+  if (captured_abs > 6) {
+    cerr << "invalid move created: captured piece: " << captured << endl;
+    throw captured_abs;
+  }
   this->captured = taken;
 }
