@@ -55,7 +55,7 @@ private:
   void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
       move_visitor f, int moving);
   void visit_capture_moves(const bb sub_position, const bitboard_set all_moves,
-      move_visitor f, bb other_colour, int moving);
+      const move_visitor f, const bb other_colour, const int8_t moving);
   void visit_non_capture_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb other_colour,
       int moving);

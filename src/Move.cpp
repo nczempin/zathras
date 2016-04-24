@@ -10,24 +10,16 @@
 
 using namespace std;
 
-Move::Move(int piece, bb from, bb to, int captured = 0) :
+Move::Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured = 0) :
     from(from), to(to), moving(piece), taken(captured)
 {
-  if (piece == 0) {
-    throw 45;
-  }
 }
 
-Move::~Move()
-{
-  // TODO Auto-generated destructor stub
-}
-
-bb Move::get_from()
+uint8_t Move::get_from()
 {
   return from;
 }
-bb Move::get_to() const
+uint8_t Move::get_to() const
 {
   return to;
 }
@@ -45,22 +37,22 @@ string Move::to_string() const
   }
   return retval;
 }
-int Move::get_moving_piece() const
+int8_t Move::get_moving_piece() const
 {
   return moving;
 }
 
-void Move::set_moving_piece(int moving)
+void Move::set_moving_piece(int8_t moving)
 {
   this->moving = moving;
 }
 
-int Move::get_taken_piece() const
+int8_t Move::get_taken_piece() const
 {
   return taken;
 }
 
-void Move::set_taken_piece(int taken)
+void Move::set_taken_piece(int8_t taken)
 {
   this->taken = taken;
 }

@@ -251,55 +251,34 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(const bb my_bb, function<void(int)> f)
+void Position::visit_bitboard(const bb my_bb, const function<void(int)> f)
 {
+  static uint8_t lookup[] =
+    { 7, 6, 5, 4, 3, 2, 1, 0, //
+      15, 14, 13, 12, 11, 10, 9, 8, //
+      23, 22, 21, 20, 19, 18, 17, 16, //
+      31, 30, 29, 28, 27, 26, 25, 24, //
+      39, 38, 37, 36, 35, 34, 33, 32, //
+      47, 46, 45, 44, 43, 42, 41, 40, //
+      55, 54, 53, 52, 51, 50, 49, 48, //
+      63, 62, 61, 60, 59, 58, 57, 56 };
   bb tmp = my_bb;
-//  uint8_t tmp2 = 0;
-  int coord = 0;
-//  bb masked = 0;
-  size_t file = 7;
-  size_t rank_offset = 0;
-
-  while (true) {
-//    cout << hex << tmp << dec << endl;
-    coord = file + rank_offset;
-//    cout << "coord, file, rank_offset: " << coord << ", " << file << ", "
-//        << rank_offset << endl;
-    if (tmp & 0x1) {
+  bb t = 0;
+  size_t coord = 0;
+  for (int i = 0; i < 64; ++i) {
+    t = tmp & 0x01;
+    if (t) {
+      coord = lookup[i];
       f(coord);
-    }
-    if (file == 0) {
-      file = 7;
-      rank_offset += 8;
-      if (rank_offset >= 64) {
-        break;
-      }
-    } else {
-      --file;
     }
     tmp = tmp >> 1;
   }
-//  for (size_t i = 0; i < 8; ++i) {
-//    //masked = my_bb & 0xff00000000000000;
-//    tmp = my_bb >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
-//    tmp = tmp & 0xff;
-//    my_bb = my_bb << 8;
-//
-//    for (size_t j = 0; j < 8; ++j) {
-//      coord = (7 - i) * 8 + j;
-//      tmp2 = tmp & 128;
-//      if (tmp2 == 128) {
-//        f(coord);
-//      }
-//      tmp = tmp << 1;
-//    }
-//  }
 }
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {
   stream << "  +-----------------+" << endl;
   const char* symbols = ".PNBRQKpnbrqk*";
-  //ostringstream  strstr;
+//ostringstream  strstr;
   for (int i = 0; i < 8; ++i) {
     stream << (8 - i) << " |";
     for (int j = 0; j < 8; ++j) {
@@ -312,7 +291,7 @@ void Position::visualize_mailbox_board(int board[64], ostream& stream)
   stream << "  +-----------------+" << endl;
   stream << "    A B C D E F G H" << endl;
 
-  //stream << strstr.str() << endl;
+//stream << strstr.str() << endl;
 }
 
 void Position::visit_mailbox_board(int board[64], void (*f)(int))
@@ -327,7 +306,7 @@ void Position::visit_mailbox_board(int board[64], void (*f)(int))
 
 void Position::print(ostream& stream) const
 {
-  // TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
+// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 
   int board[64];
   for (int i = 0; i < 64; ++i) {
@@ -392,7 +371,7 @@ void Position::display_all_moves(const bitboard_set& moves)
 bitboard_set Position::getPieceBitboards()
 {
   bitboard_set retval;
-  //TODO figure out what to do with [0]
+//TODO figure out what to do with [0]
   retval.push_back(0);
   bb p = pawns;
   bb n = knights;
@@ -418,7 +397,7 @@ static bool determine_colour(int piece)
   return piece > 0; // makes == 0 black, deal with it
 }
 
-static int determine_piece(int piece)
+static int8_t determine_piece(int8_t piece)
 {
   if (piece > 0) {
     return piece;
@@ -428,19 +407,18 @@ static int determine_piece(int piece)
 }
 void Position::make_move(Move move)
 {
-  bb from = move.get_from();
-  bb to = move.get_to();
+  uint8_t from = move.get_from();
+  uint8_t to = move.get_to();
 
-  int taken = move.get_taken_piece();
+  int8_t taken = move.get_taken_piece();
   if (taken != 0) {
-    //cout << "taken: " << taken << endl;
     bool colour = determine_colour(taken);
     if (colour) {
       clear_bit(white, to);
     } else {
       clear_bit(black, to);
     }
-    int p = determine_piece(taken);
+    int8_t p = determine_piece(taken);
     switch (p) {
     case 1:
       clear_bit(pawns, to);
@@ -461,7 +439,7 @@ void Position::make_move(Move move)
       clear_bit(kings, to);
       break;
     default:
-      cerr << "??" << p << endl;
+      cerr << "mm??" << p << endl;
       throw p;
     }
 
@@ -469,7 +447,7 @@ void Position::make_move(Move move)
 //    cout << Square::mailbox_index_to_square(from) << "-"
 //        << Square::mailbox_index_to_square(to) << endl;
   }
-  int moving = move.get_moving_piece();
+  int8_t moving = move.get_moving_piece();
   if (white_to_move) {
     switch (moving) {
     case Piece::WHITE_PAWN:
@@ -567,10 +545,10 @@ void Position::make_move(Move move)
 }
 void Position::unmake_move(Move move)
 {
-  bb from = move.get_from();
-  bb to = move.get_to();
+  uint8_t from = move.get_from();
+  uint8_t to = move.get_to();
 
-  int moving = move.get_moving_piece();
+  int8_t moving = move.get_moving_piece();
   white_to_move = !white_to_move;
   if (white_to_move) {
     switch (moving) {
@@ -660,7 +638,7 @@ void Position::unmake_move(Move move)
     }
   }
 
-  int taken = move.get_taken_piece();
+  int8_t taken = move.get_taken_piece();
   if (taken != 0) {
     //cout << "untaken: " << taken << endl;
     bool colour = determine_colour(taken);
@@ -669,7 +647,7 @@ void Position::unmake_move(Move move)
     } else {
       set_bit(black, to);
     }
-    int p = determine_piece(taken);
+    int8_t p = determine_piece(taken);
     switch (p) {
     case 1:
       set_bit(pawns, to);
@@ -690,7 +668,7 @@ void Position::unmake_move(Move move)
       set_bit(kings, to);
       break;
     default:
-      cerr << "??" << p << endl;
+      cerr << "un??" << p << endl;
       throw p;
     }
     // cout << *this << endl;

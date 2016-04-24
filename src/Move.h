@@ -16,22 +16,21 @@ using namespace std;
 class Move
 {
 public:
-  Move(int piece, bb from, bb to, int captured);
-  virtual ~Move();
-  bb get_from();
-  bb get_to() const;
+  Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured);
+  uint8_t get_from();
+  uint8_t get_to() const;
   string to_string() const;
-  int get_moving_piece() const;
+  int8_t get_moving_piece() const;
 
-  void set_moving_piece(int moving);
-  int get_taken_piece() const;
+  void set_moving_piece(int8_t moving);
+  int8_t get_taken_piece() const;
 
-  void set_taken_piece(int taken);
+  void set_taken_piece(int8_t taken);
 private:
-  bb from;
-  bb to;
-  int moving;
-  int taken;
+  uint8_t from;
+  uint8_t to;
+  int8_t moving;
+  int8_t taken;
 };
 
 #endif /* MOVE_H_ */

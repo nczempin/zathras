@@ -281,7 +281,8 @@ int Move_generator::find_captured_piece(int y)
 }
 
 void Move_generator::visit_capture_moves(const bb sub_position,
-    const bitboard_set all_moves, move_visitor f, bb other_colour, int moving)
+    const bitboard_set all_moves, const move_visitor f, const bb other_colour,
+    const int8_t moving)
 {
   //cout << "visit capture moves" << endl;
   Position::visit_bitboard(sub_position,
@@ -289,7 +290,7 @@ void Move_generator::visit_capture_moves(const bb sub_position,
         bb raw_moves = all_moves[x];
         bb moves = raw_moves & other_colour;
         Position::visit_bitboard(moves, [this, x, f, moving](int y) {
-              int captured = find_captured_piece(y);
+              int8_t captured = find_captured_piece(y);
 
               f(moving, x, y, captured);
             }
@@ -489,7 +490,20 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
 void Move_generator::visit_moves(move_visitor f, Position p)
 {
 
-//TODO generalize, obviously
+}
+
+vector<Move> Move_generator::generate_moves(Position p)
+{
+  pieces = p.getPieceBitboards();
+  vector<Move> moves;
+  moves.reserve(50);
+  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
+      [&moves, &p](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+        Move m (moving, from, to, captured);
+        moves.push_back(m);
+      };
+
+  //TODO generalize, obviously
   bb white_pawns = pieces[Piece::PAWN] & pieces[Piece::WHITE];
   bb white_knights = pieces[Piece::KNIGHT] & pieces[Piece::WHITE];
   bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
@@ -502,7 +516,7 @@ void Move_generator::visit_moves(move_visitor f, Position p)
   bb black_rooks = pieces[Piece::ROOK] & pieces[Piece::BLACK];
   bb black_queens = pieces[Piece::QUEEN] & pieces[Piece::BLACK];
   bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
-///
+  ///
 
   if (p.white_to_move) {
     // cout << "capturing with white pawns" << endl;
@@ -573,36 +587,5 @@ void Move_generator::visit_moves(move_visitor f, Position p)
         pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
 
   }
-}
-
-vector<Move> Move_generator::generate_moves(Position p)
-{
-  pieces = p.getPieceBitboards();
-  int i = 0;
-  function<void(int, int)> display_moves = [](int x, int y) {
-    string from = Square::mailbox_index_to_square(x);
-    string to = Square::mailbox_index_to_square(y);
-    cout << from << to << endl;
-  };
-  function<void(int, int)> count_moves = [&i](int x, int y) {
-    ++i;
-  };
-  vector<Move> moves;
-  function<void(int, int, int, int)> collect_moves =
-      [&moves, &p](int moving, int from, int to, int captured) {
-        if (moving == 0) {
-          throw -1;
-        }
-        bb bb_from(0);
-        Position::set_square(bb_from, from);
-        bb bb_to(0);
-        Position::set_square(bb_to, to);
-        Move m (moving, from, to, captured);
-        moves.push_back(m);
-        //cout << from << " -> " << to << endl;
-        //cout << m.to_string() << endl;
-      };
-
-  visit_moves(collect_moves, p);
   return moves;
 }
