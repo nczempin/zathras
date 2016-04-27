@@ -15,45 +15,72 @@
 #include <memory>
 #include <string>
 #include <vector>
-
+#include "typedefs.h"
+#include "Move.h"
 using namespace std;
 
-typedef uint_fast64_t bb;
-
-typedef vector<uint_fast64_t> bitboard_set;
-
-class Position {
+class Position
+{
 public:
-	Position();
-	virtual ~Position();
-	static shared_ptr<Position> create_start_position();
-	friend ostream& operator<<(ostream& stream, const Position& position);
-	void print(ostream& stream) const;
-	static void setSquare(bitset<64>& bs, int to);
-	static void clearSquare(bitset<64>& bs, int to);
+  Position();
+  virtual ~Position();
+
+  void make_move(Move move);
+  void unmake_move(Move move);
+
+  friend ostream& operator<<(ostream& stream, const Position& position);
+  void print(ostream& stream) const;
+  static Position create_start_position();
+
+  //TODO move; probably to Square class
+  static void set_square(bitset<64>& bs, int to);
+  static void clear_square(bitset<64>& bs, int to);
+  static void set_square(bb& bs, int to);
+  static bool is_set_square(bb& bs, int to);
+  static void clear_square(bb& bs, int to);
+  static void set_bit(bb& bs, int to);
+  static void clear_bit(bb& bs, int to);
+  static int set_square(int file_to, int rank_to, bitset<64>& bbs);
+  static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
+  static int set_square(int file_to, int rank_to, bb& bbs);
+  static int clear_square(int file_to, int rank_to, bb& bbs);
+
+  static void visualize_bitboard(bb my_bb, ostream& stream);
+  static void visit_bitboard(const bb my_bb, const square_visitor);
+  static void visualize_mailbox_board(int board[64], ostream& stream);
+  static void visit_mailbox_board(int board[64], void (*visitor)(int)); // TODO convert to c++11
+  //static void print_square(int x);
+  //TODO a separate Bitboard (helper) class is probably best
+  static const bb BB_FULL_BOARD = 0xffffffffffffffff;
+  static const bb BB_RANK8 = 0xff00000000000000;
+  static const bb BB_RANK3 = 0x0000000000ff0000;
+  static const bb BB_RANK4 = 0x00000000ff000000;
+  static const bb BB_RANK5 = 0x000000ff00000000;
+  static const bb BB_RANK6 = 0x0000ff0000000000;
+  static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
+  bitboard_set getPieceBitboards();
+
+  bool is_white_to_move() const
+  {
+    return white_to_move;
+  }
+  bool white_to_move = true; //TODO public for now
+  static Position create_position(const string& fen);
+
+  //public for now
+  bb pawns = 0;
+  bb knights = 0;
+  bb bishops = 0;
+  bb rooks = 0;
+  bb queens = 0;
+  bb kings = 0;
+  bb white = 0;
+  bb black = 0;
 private:
-	bool white_to_move = true;
-	bb everything = 0xffffffffffffffff;
-	bb top_row = 0xff00000000000000;
 
-	// test position
-	bb pawns = 0x008469040000e700;
-	bb knights = 0x4000000000000000;
-	bb bishops = 0x0000100000100000;
-	bb rooks = 0x0100000000000009;
-	bb queens = 0x8000000010000000;
-	bb kings = 0x0800000000000800;
-	bb white = 0x800000000010ef09;
-	bb black = 0x4984790410000000;
-	// end of test position
+  static string extract_row_string(uint_fast8_t row, string set);
+  static void display_all_moves(const bitboard_set& moves);
 
-	static string extract_row_string(uint_fast8_t row, string set);
-	static void visualize_bitboard(bb my_bb, ostream& stream);
-	static void visit_bitboard(bb my_bb, function<void(int)>);
-	static void visualize_mailbox_board(int board[64], ostream& stream);
-	static void visit_mailbox_board(int board[64], void (*visitor)(int));
-	static void print_square(int x);
-	static void display_all_moves(const bitboard_set& moves);
 };
 
 #endif /* POSITION_H_ */

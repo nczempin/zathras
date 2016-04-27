@@ -1,5 +1,7 @@
 #executable name
 zathras
+#cygwin app crashes
+*.stackdump
 #gcc object files
 *.o
 #vi temp files
