@@ -26,6 +26,9 @@ public:
   int8_t get_taken_piece() const;
 
   void set_taken_piece(int8_t taken);
+  void set_from(uint8_t from);
+  void set_to(uint8_t to);
+
 private:
   Move();
   uint8_t from;

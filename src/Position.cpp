@@ -254,6 +254,43 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "  +-----------------+" << endl;
   stream << "    A B C D E F G H" << endl;
 }
+
+//These processor instructions work only for 64-bit processors
+#ifdef _MSC_VER
+#include <intrin.h>
+#ifdef _WIN64
+#pragma intrinsic(_BitScanForward64)
+#pragma intrinsic(_BitScanReverse64)
+#define USING_INTRINSICS
+#endif
+#elif defined(__GNUC__) && defined(__LP64__)
+#define U64 bb
+static inline unsigned char _BitScanForward64(unsigned long* Index, U64 Mask)
+{
+  U64 Ret;
+  __asm__
+  (
+      "bsfq %[Mask], %[Ret]"
+      :[Ret] "=r" (Ret)
+      :[Mask] "mr" (Mask)
+  );
+  *Index = (unsigned long) Ret;
+  return Mask ? 1 : 0;
+}
+static inline unsigned char _BitScanReverse64(unsigned long* Index, U64 Mask)
+{
+  U64 Ret;
+  __asm__
+  (
+      "bsrq %[Mask], %[Ret]"
+      :[Ret] "=r" (Ret)
+      :[Mask] "mr" (Mask)
+  );
+  *Index = (unsigned long) Ret;
+  return Mask ? 1 : 0;
+}
+#define USING_INTRINSICS
+#endif
 void Position::visit_bitboard(const bb my_bb, const square_visitor f)
 {
   static uint8_t lookup[] =

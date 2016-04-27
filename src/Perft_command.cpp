@@ -71,7 +71,8 @@ int Perft_command::perft(int depth)
   if (depth == 0) {
     return 1;
   }
-  vector<Move> moves = mg.generate_moves(pp);
+  Move_container move_container = mg.generate_moves(pp, depth);
+  vector<Move> moves = move_container.get_moves();
   //  if (depth == 1) {
 //    return moves.size();
 //  }
@@ -116,7 +117,8 @@ void Perft_command::execute()
   int total_result = 0;
   //cout << "b4 gen" << endl;
   pp = make_shared<Position>(position);
-  vector<Move> moves = mg.generate_moves(pp);
+  Move_container move_container = mg.generate_moves(pp, depth);
+  vector<Move> moves = move_container.get_moves();
   //cout << "after gen" << endl;
   size_t size = moves.size();
 //  cout << "moves.size: " << size << endl;

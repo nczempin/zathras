@@ -577,7 +577,8 @@ vector<Move> Move_generator::generate_capture_moves()
   return moves;
 }
 
-vector<Move> Move_generator::generate_moves(shared_ptr<Position> position)
+Move_container Move_generator::generate_moves(shared_ptr<Position> position,
+    size_t depth)
 {
   p = position;
 //  cout << p->white_to_move << endl;
@@ -586,21 +587,33 @@ vector<Move> Move_generator::generate_moves(shared_ptr<Position> position)
 //  for (auto &piece : pieces) {
 //    cout << piece << endl;
 //  }
-  vector<Move> moves;
-  moves.clear();
+//  size_t bunch = 35;
+//  size_t next_max = bunch;
+//  int i = 0;
+
+  Move_container moves = Move_container::get(depth);
+  //moves.reserve(35);
+  moves.reset();
   // cout << "should be 0: " << moves.size() << endl;
-  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
+  move_visitor f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-        if (p->white_to_move && moving <= 0) {
-          cerr << "wrong mover: " << moving << endl;
-          throw from;
-        }
-        if (!p->white_to_move && moving >= 0) {
-          cerr << "wrong mover: "<< moving << endl;
-          throw from;
-        }
-        Move m (moving, from, to, captured);
-        moves.push_back(m);
+//        if (p->white_to_move && moving <= 0) {
+//          cerr << "wrong mover: " << moving << endl;
+//          throw from;
+//        }
+//        if (!p->white_to_move && moving >= 0) {
+//          cerr << "wrong mover: "<< moving << endl;
+//          throw from;
+//        }
+        moves.add_move(moving, from, to, captured);
+        //       if (i >= next_max) {
+//          moves.resize(next_max+bunch);
+//        }
+//        moves[i].set_moving_piece(moving);
+//        moves[i].set_taken_piece(captured);
+//        moves[i].set_from(from);
+//        moves[i].set_to(to);
+//        ++i;
       };
 
   //TODO generalize, obviously
@@ -700,7 +713,7 @@ bool Move_generator::is_in_check(bool side)
 //  cout << "checking for side: " << (side ? "white" : "black") << endl;
 //  cout << "to move: " << (p->white_to_move ? "white" : "black") << endl;
 //
-  //TODO this is only the naive way of doing this, it needs to be much more efficient
+//TODO this is only the naive way of doing this, it needs to be much more efficient
   vector<Move> capture_moves = generate_capture_moves();
 
   int king_pos = 0;

@@ -10,6 +10,7 @@
 
 #include "Position.h"
 #include "Move.h"
+#include "Move_container.h"
 
 class Move_generator
 {
@@ -17,7 +18,7 @@ public:
   Move_generator();
   virtual ~Move_generator();
   static void pregenerate_moves();
-  vector<Move> generate_moves(shared_ptr<Position> p);
+  Move_container generate_moves(shared_ptr<Position> p, size_t depth);
   vector<Move> generate_capture_moves();
   bool is_in_check(bool side);
 private:
