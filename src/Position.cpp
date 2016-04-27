@@ -119,10 +119,10 @@ int Position::clear_square(int file, int rank, bb& bbs)
 
 Position Position::create_position(const string& fen)
 {
-  Position start_position;
+  Position position;
   vector<string> split_fen = split(fen, ' ');
   string to_move = split_fen[1];
-  start_position.white_to_move = to_move == "w" ? true : false;
+  position.white_to_move = to_move == "w" ? true : false;
   string fen_board = split_fen[0];
   //cout << "board: " << fen_board << endl;
   vector<string> ranks = split(fen_board, '/');
@@ -142,54 +142,57 @@ Position Position::create_position(const string& fen)
         //  cout << "non-digit!" << endl;
         switch (c) {
         case 'P':
-          set_square(f, r, start_position.pawns);
-          set_square(f, r, start_position.white);
+          set_square(f, r, position.pawns);
+          set_square(f, r, position.white);
           break;
         case 'N':
-          set_square(f, r, start_position.knights);
-          set_square(f, r, start_position.white);
+          set_square(f, r, position.knights);
+          set_square(f, r, position.white);
           break;
         case 'B':
-          set_square(f, r, start_position.bishops);
-          set_square(f, r, start_position.white);
+          set_square(f, r, position.bishops);
+          set_square(f, r, position.white);
           break;
         case 'R':
-          set_square(f, r, start_position.rooks);
-          set_square(f, r, start_position.white);
+          set_square(f, r, position.rooks);
+          set_square(f, r, position.white);
           break;
         case 'Q':
-          set_square(f, r, start_position.queens);
-          set_square(f, r, start_position.white);
+          set_square(f, r, position.queens);
+          set_square(f, r, position.white);
           break;
         case 'K':
-          set_square(f, r, start_position.kings);
-          set_square(f, r, start_position.white);
+          //cout << "setting white king to " << f << ", " << r << endl;
+          set_square(f, r, position.kings);
+          set_square(f, r, position.white);
+//          cout << "p.k: " << hex << position.kings << dec << endl;
+//          cout << "p.w: " << hex << position.white << dec << endl;
           break;
         case 'p':
-          set_square(f, r, start_position.pawns);
-          set_square(f, r, start_position.black);
+          set_square(f, r, position.pawns);
+          set_square(f, r, position.black);
           break;
         case 'n':
-          set_square(f, r, start_position.knights);
-          set_square(f, r, start_position.black);
+          set_square(f, r, position.knights);
+          set_square(f, r, position.black);
           break;
         case 'b':
-          set_square(f, r, start_position.bishops);
-          set_square(f, r, start_position.black);
+          set_square(f, r, position.bishops);
+          set_square(f, r, position.black);
           break;
         case 'r':
-          set_square(f, r, start_position.rooks);
-          set_square(f, r, start_position.black);
+          set_square(f, r, position.rooks);
+          set_square(f, r, position.black);
 //          cout << "rooks: " << hex << start_position.rooks << dec << endl;
 //          cout << "black: " << hex << start_position.black << dec << endl;
           break;
         case 'q':
-          set_square(f, r, start_position.queens);
-          set_square(f, r, start_position.black);
+          set_square(f, r, position.queens);
+          set_square(f, r, position.black);
           break;
         case 'k':
-          set_square(f, r, start_position.kings);
-          set_square(f, r, start_position.black);
+          set_square(f, r, position.kings);
+          set_square(f, r, position.black);
           break;
         default:
           cerr << "unknown symbol: " << c << endl;
@@ -201,8 +204,9 @@ Position Position::create_position(const string& fen)
     }
     --r;
   }
-  // cout << "generated: " << endl << (start_position) << endl;
-  return start_position;
+//  cout << "generated position: " << endl << (position)
+//      << "end of generated position" << endl;
+  return position;
 }
 
 Position Position::create_start_position()
@@ -265,8 +269,10 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
   bb tmp = my_bb;
   bb t = 0;
   uint8_t coord = 0;
+  //cout << setw(16) << setfill('0') << hex << tmp << dec << endl;
   for (int i = 0; i < 64; ++i) {
     t = tmp & 0x01;
+    //cout << i << ": " << t << endl;
     if (t) {
       coord = lookup[i];
       f(coord);
@@ -328,7 +334,10 @@ void Position::print(ostream& stream) const
   visit_bitboard(white & queens, [&board](int x) {
     board[x] = 5;
   });
+  //cout << "visiting white kings" << endl;
   visit_bitboard(white & kings, [&board](int x) {
+    //cout << "visiting white king at: " << x << endl;
+
     board[x] = 6;
   });
   visit_bitboard(black & pawns, [&board](int x) {
@@ -352,9 +361,9 @@ void Position::print(ostream& stream) const
   visit_bitboard(~(black | white), [&board](int x) {
     board[x] = 13;
   });
-
+  //cout << "visits for position display done" << endl;
   visualize_mailbox_board(board, stream);
-  cout << "wtm: " << white_to_move << endl;
+  //cout << "wtm: " << white_to_move << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves)
@@ -407,6 +416,7 @@ static int8_t determine_piece(int8_t piece)
 }
 void Position::make_move(Move move)
 {
+  //cout << "make_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
 
@@ -453,6 +463,7 @@ void Position::make_move(Move move)
     cerr << "invalid move created: moving piece: " << moving << endl;
     throw moving_abs;
   }
+  //cout << "on_move: " << white_to_move << endl;
   if (white_to_move) {
     switch (moving) {
     case Piece::WHITE_PAWN:
@@ -536,7 +547,9 @@ void Position::make_move(Move move)
       clear_bit(black, from);
       break;
     default:
-      cerr << "unexpected black piece: " << moving << endl;
+      double error = ((double) moving);
+      cerr << "mm: unexpected black piece: " << error << " in move: "
+          << move.to_string() << endl;
       throw -moving;
       break;
     }
@@ -548,14 +561,18 @@ void Position::make_move(Move move)
 // TODO update 3 repetitions
 // TODO update 50 moves
   white_to_move = !white_to_move;
+ //cout << "switched on_move to " << white_to_move << endl;
 }
 void Position::unmake_move(Move move)
 {
+ // cout << "unmake_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
 
   int8_t moving = move.get_moving_piece();
   white_to_move = !white_to_move;
+  //cout << "switched on_move to " << white_to_move << endl;
+
   if (white_to_move) {
     switch (moving) {
     case Piece::WHITE_PAWN:
@@ -595,7 +612,7 @@ void Position::unmake_move(Move move)
       set_bit(white, from);
       break;
     default:
-      cerr << "unexpected white piece: " << moving << endl;
+      cerr << "unexpected white piece: " << ((int) moving) << endl;
       throw moving;
       break;
     }
@@ -638,7 +655,8 @@ void Position::unmake_move(Move move)
       set_bit(black, from);
       break;
     default:
-      cerr << "unexpected black piece: " << moving << endl;
+      double error = ((double) moving);
+      cerr << "umm: unexpected black piece: " << error << endl;
       throw -moving;
       break;
     }

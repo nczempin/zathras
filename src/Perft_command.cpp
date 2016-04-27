@@ -19,8 +19,6 @@
 Perft_command::Perft_command(shared_ptr<Command_receiver> receiver) :
     Abstract_command(receiver)
 {
-  // TODO Auto-generated constructor stub
-
 }
 
 Perft_command::~Perft_command()
@@ -69,25 +67,26 @@ void Perft_command::do_short_option(int c, string argument)
 
 int Perft_command::perft(int depth)
 {
-  cout << "perft depth: " << depth << endl;
+//  cout << "perft depth: " << depth << endl;
   if (depth == 0) {
     return 1;
   }
-  vector<Move> moves = mg.generate_moves();
-//  if (depth == 1) {
+  shared_ptr<Position> pp = make_shared<Position>(p);
+     vector<Move> moves = mg.generate_moves(pp);
+   //  if (depth == 1) {
 //    return moves.size();
 //  }
   int total_result = 0;
   size_t size = moves.size();
-  cout << "moves.size: " << size << endl;
-  // for (auto &move : moves) {
+//  cout << "moves.size: " << size << endl;
+//  cout << "perft::perft" << endl;
+//  for (size_t i = 0; i < size; ++i) {
+//    Move move = moves[i];
+//    cout << move.to_string() << endl;
+//  }
   for (size_t i = 0; i < size; ++i) {
     Move move = moves[i];
-    cout << move.to_string() << endl;
-  }
-  for (size_t i = 0; i < size; ++i) {
-    Move move = moves[i];
-    cout << move.to_string() << "-->" << endl;
+//    cout << move.to_string() << "-->" << endl;
     p.make_move(move);
 //    if (mg.is_in_check(p, !p.white_to_move)) {
 //      p.unmake_move(move);
@@ -117,23 +116,23 @@ void Perft_command::execute()
   //p = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << p << endl;
-
   mg.pregenerate_moves();
 
   ///////////////////////////////
   int total_result = 0;
-  vector<Move> moves = mg.generate_moves();
+  //cout << "b4 gen" << endl;
+  shared_ptr<Position> pp = make_shared<Position>(p);
+   vector<Move> moves = mg.generate_moves(pp);
+  //cout << "after gen" << endl;
+  size_t size = moves.size();
+//  cout << "moves.size: " << size << endl;
   if (depth == 0) {
-    total_result = moves.size();
+    total_result = size;
   } else {
-    //for (Move& move : moves) {
-    size_t size = moves.size();
-    cout << "moves.size: " << size << endl;
-    // for (auto &move : moves) {
-    for (size_t i = 0; i < size; ++i) {
-      Move move = moves[i];
-      cout << move.to_string() << endl;
-    }
+//    for (size_t i = 0; i < size; ++i) {
+//      Move move = moves[i];
+//      cout << move.to_string() << endl;
+//    }
     for (size_t i = 0; i < size; ++i) {
       Move move = moves[i];
       int8_t moving = move.get_moving_piece();
@@ -142,13 +141,16 @@ void Perft_command::execute()
         cerr << "invalid move created: moving piece: " << moving << endl;
         throw moving_abs;
       }
+//      cout << "on move in perft_execute: " << p.white_to_move << endl;
+//      cout.flush();
       p.make_move(move);
 //      if (mg.is_in_check(p, !p.white_to_move)) {
 //        p.unmake_move(move);
 //        continue;
 //      }
       string s = move.to_string();
-      cout << s << endl;
+//      cout << "(made move) " << s << endl;
+//      cout.flush();
 //    cout << "after make_move:" << endl;
 //    cout << p << endl;
       int perft_result = perft(depth - 1);

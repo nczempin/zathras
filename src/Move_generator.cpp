@@ -22,6 +22,22 @@ Move_generator::~Move_generator()
 {
   // TODO Auto-generated destructor stub
 }
+
+bitboard_set Move_generator::knight_moves = pregenerate_knight_moves();
+
+bitboard_set Move_generator::king_moves = pregenerate_king_moves();
+bitboard_set Move_generator::bishop_moves = pregenerate_bishop_moves();
+bitboard_set Move_generator::rook_moves = pregenerate_rook_moves();
+bitboard_set Move_generator::queen_moves = pregenerate_queen_moves();
+bitboard_set Move_generator::white_pawn_no_capture_moves =
+    pregenerate_white_pawn_no_capture_moves();
+bitboard_set Move_generator::black_pawn_no_capture_moves =
+    pregenerate_black_pawn_no_capture_moves();
+bitboard_set Move_generator::white_pawn_capture_moves =
+    pregenerate_white_pawn_capture_moves();
+bitboard_set Move_generator::black_pawn_capture_moves =
+    pregenerate_black_pawn_capture_moves();
+
 //TODO move these outside
 int Move_generator::set_square(int file_to, int rank_to, bitset<64>& bbs)
 {
@@ -39,7 +55,7 @@ int Move_generator::clear_square(int file_to, int rank_to, bitset<64>& bbs)
   return to;
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_rays(int direction)
+bitboard_set Move_generator::pregenerate_rays(int direction)
 {
   bitboard_set rays(64);
   bitset<64> bs[64];
@@ -69,12 +85,10 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_rays(int direction)
     unsigned long int as_int = bbs.to_ulong();
     rays[i] = as_int;
   }
-  pair<bitboard_set, bitboard_set> p(rays, rays);
-  return p;
+  return rays;
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_hoppers(
-    vector<int> hops)
+bitboard_set Move_generator::pregenerate_hoppers(vector<int> hops)
 {
   bitboard_set hoppers_attacking(64);
   bitset<64> attacking[64];
@@ -99,75 +113,66 @@ pair<bitboard_set, bitboard_set> Move_generator::pregenerate_hoppers(
   for (int i = 0; i < 64; ++i) {
     hoppers_attacking[i] = attacking[i].to_ulong();
   }
-  pair<bitboard_set, bitboard_set> p(hoppers_attacking, hoppers_attacking);
-  return p;
+  return hoppers_attacking;
 }
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_knight_moves()
+bitboard_set Move_generator::pregenerate_knight_moves()
 {
   vector<int> nm
     { 10, 17, 15, 6, -6, -15, -17, -10 };
-  bitboard_set knight_moves = pregenerate_hoppers(nm).first;
-  pair<bitboard_set, bitboard_set> p(knight_moves, knight_moves);
-  return p;
+  bitboard_set knight_moves = pregenerate_hoppers(nm);
+  return knight_moves;
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_king_moves()
+bitboard_set Move_generator::pregenerate_king_moves()
 {
   vector<int> km =
     { 1, 7, 8, 9, -1, -7, -8, -9 };
-  bitboard_set king_moves = pregenerate_hoppers(km).first;
-  pair<bitboard_set, bitboard_set> p(king_moves, king_moves);
-  return p;
+  bitboard_set king_moves = pregenerate_hoppers(km);
+  return king_moves;
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_bishop_moves()
+bitboard_set Move_generator::pregenerate_bishop_moves()
 {
-  pair<bitboard_set, bitboard_set> bishop_NE = pregenerate_rays(9);
-  pair<bitboard_set, bitboard_set> bishop_NW = pregenerate_rays(7);
-  pair<bitboard_set, bitboard_set> bishop_SE = pregenerate_rays(-9);
-  pair<bitboard_set, bitboard_set> bishop_SW = pregenerate_rays(-7);
+  bitboard_set bishop_NE = pregenerate_rays(9);
+  bitboard_set bishop_NW = pregenerate_rays(7);
+  bitboard_set bishop_SE = pregenerate_rays(-9);
+  bitboard_set bishop_SW = pregenerate_rays(-7);
   bitboard_set bishop_moves(64);
   for (int i = 0; i < 64; ++i) {
-    bishop_moves[i] = bishop_NE.first[i] | bishop_NW.first[i]
-        | bishop_SE.first[i] | bishop_SW.first[i];
+    bishop_moves[i] = bishop_NE[i] | bishop_NW[i] | bishop_SE[i] | bishop_SW[i];
   }
-  pair<bitboard_set, bitboard_set> p(bishop_moves, bishop_moves);
-  return p;
+  return bishop_moves;
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_rook_moves()
+bitboard_set Move_generator::pregenerate_rook_moves()
 {
-  pair<bitboard_set, bitboard_set> rook_E = pregenerate_rays(1);
-  pair<bitboard_set, bitboard_set> rook_W = pregenerate_rays(-1);
-  pair<bitboard_set, bitboard_set> rook_S = pregenerate_rays(-8);
-  pair<bitboard_set, bitboard_set> rook_N = pregenerate_rays(8);
+  bitboard_set rook_E = pregenerate_rays(1);
+  bitboard_set rook_W = pregenerate_rays(-1);
+  bitboard_set rook_S = pregenerate_rays(-8);
+  bitboard_set rook_N = pregenerate_rays(8);
   bitboard_set rook_moves(64);
   for (int i = 0; i < 64; ++i) {
-    rook_moves[i] = rook_E.first[i] | rook_W.first[i] | rook_S.first[i]
-        | rook_N.first[i];
+    rook_moves[i] = rook_E[i] | rook_W[i] | rook_S[i] | rook_N[i];
   }
-  pair<bitboard_set, bitboard_set> p(rook_moves, rook_moves);
-  return p;
+  return rook_moves;
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_queen_moves()
+bitboard_set Move_generator::pregenerate_queen_moves()
 {
-  pair<bitboard_set, bitboard_set> bishop_moves = pregenerate_bishop_moves();
-  pair<bitboard_set, bitboard_set> rook_moves = pregenerate_rook_moves();
+  bitboard_set bishop_moves = pregenerate_bishop_moves();
+  bitboard_set rook_moves = pregenerate_rook_moves();
   bitboard_set queen_moves(64);
   for (int i = 0; i < 64; ++i) {
-    queen_moves[i] = bishop_moves.first[i] | rook_moves.first[i];
+    queen_moves[i] = bishop_moves[i] | rook_moves[i];
   }
-  pair<bitboard_set, bitboard_set> p(queen_moves, queen_moves);
-  return p;
+  return queen_moves;
 }
 
 void Move_generator::pregenerate_moves()
 {
-  //TODO for now this is done statically on first load
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregen_pawn_caps(int direction)
+bitboard_set Move_generator::pregen_pawn_caps(int direction)
 {
   bitset<64> bs[64];
   bitboard_set pawn_capture_moves(64);
@@ -180,20 +185,17 @@ pair<bitboard_set, bitboard_set> Move_generator::pregen_pawn_caps(int direction)
     unsigned long int as_int = bs[i].to_ulong();
     pawn_capture_moves[i] = as_int;
   }
-  pair<bitboard_set, bitboard_set> p(pawn_capture_moves, pawn_capture_moves);
-  return p;
+  return pawn_capture_moves;
 }
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_white_pawn_capture_moves()
+bitboard_set Move_generator::pregenerate_white_pawn_capture_moves()
 {
-  pair<bitboard_set, bitboard_set> white_pawn_capture_moves = pregen_pawn_caps(
-      Piece::WHITE_PAWN);
+  bitboard_set white_pawn_capture_moves = pregen_pawn_caps(Piece::WHITE_PAWN);
   return white_pawn_capture_moves;
 }
 
-pair<bitboard_set, bitboard_set> Move_generator::pregenerate_black_pawn_capture_moves()
+bitboard_set Move_generator::pregenerate_black_pawn_capture_moves()
 {
-  pair<bitboard_set, bitboard_set> black_pawn_capture_moves = pregen_pawn_caps(
-      Piece::BLACK_PAWN);
+  bitboard_set black_pawn_capture_moves = pregen_pawn_caps(Piece::BLACK_PAWN);
   return black_pawn_capture_moves;
 
 }
@@ -290,11 +292,11 @@ void Move_generator::visit_capture_moves(const bb sub_position,
         bb raw_moves = all_moves[from];
         bb moves = raw_moves & other_colour;
         Position::visit_bitboard(moves, [this, from, f, moving](uint8_t to) {
-              if (p.white_to_move && moving <= 0) {
+              if (p->white_to_move && moving <= 0) {
                 cerr << "wrong mover: " << moving << endl;
                 throw from;
               }
-              if (!p.white_to_move && moving >= 0) {
+              if (!p->white_to_move && moving >= 0) {
                 cerr << "wrong mover: "<< moving << endl;
                 throw from;
               }
@@ -307,11 +309,12 @@ void Move_generator::visit_capture_moves(const bb sub_position,
       });
 }
 void Move_generator::visit_non_capture_moves(const bb sub_position,
-    const bitboard_set all_moves, move_visitor f, bb other_colour, int8_t moving)
+    const bitboard_set all_moves, move_visitor f, bb other_colour,
+    int8_t moving)
 {
   Position::visit_bitboard(sub_position,
       [all_moves, f, other_colour, moving](uint8_t from) {
-        bb raw_moves = all_moves[from];
+         bb raw_moves = all_moves[from];
         bb moves = raw_moves & ~other_colour;
         Position::visit_bitboard(moves, [from, f, moving](uint8_t to) {
               f(moving, from, to, 0);
@@ -498,16 +501,16 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
 
 vector<Move> Move_generator::generate_capture_moves()
 {
-  pieces = p.getPieceBitboards();
+  pieces = p->getPieceBitboards();
   vector<Move> moves;
   moves.clear();
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-        if (p.white_to_move && moving <= 0) {
+        if (p->white_to_move && moving <= 0) {
           cerr << "wrong mover: " << moving << endl;
           throw from;
         }
-        if (!p.white_to_move && moving >= 0) {
+        if (!p->white_to_move && moving >= 0) {
           cerr << "wrong mover: "<< moving << endl;
           throw from;
         }
@@ -530,43 +533,43 @@ vector<Move> Move_generator::generate_capture_moves()
   bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
   ///
 
-  if (p.white_to_move) {
+  if (p->white_to_move) {
     // cout << "capturing with white pawns" << endl;
-    visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+    visit_capture_moves(white_pawns, white_pawn_capture_moves, f,
         pieces[Piece::BLACK], Piece::WHITE_PAWN);
-    visit_capture_moves(white_knights, knight_moves.first, f,
-        pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
-    visit_capture_moves(white_kings, king_moves.first, f, pieces[Piece::BLACK],
+    visit_capture_moves(white_knights, knight_moves, f, pieces[Piece::BLACK],
+        Piece::WHITE_KNIGHT);
+    visit_capture_moves(white_kings, king_moves, f, pieces[Piece::BLACK],
         Piece::WHITE_KING);
-    visit_capture_ray_moves(white_queens, rook_moves.first, f,
+    visit_capture_ray_moves(white_queens, rook_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_QUEEN);
-    visit_capture_ray_moves(white_rooks, rook_moves.first, f,
+    visit_capture_ray_moves(white_rooks, rook_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_ROOK);
-    visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
+    visit_capture_ray_moves(white_bishops, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_BISHOP);
-    visit_capture_ray_moves(white_queens, bishop_moves.first, f,
+    visit_capture_ray_moves(white_queens, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_QUEEN);
   } else {
-    visit_capture_moves(black_pawns, black_pawn_capture_moves.first, f,
+    visit_capture_moves(black_pawns, black_pawn_capture_moves, f,
         pieces[Piece::WHITE], Piece::BLACK_PAWN);
-    visit_capture_moves(black_knights, knight_moves.first, f,
-        pieces[Piece::WHITE], Piece::BLACK_KNIGHT);
-    visit_capture_moves(black_kings, king_moves.first, f, pieces[Piece::WHITE],
+    visit_capture_moves(black_knights, knight_moves, f, pieces[Piece::WHITE],
+        Piece::BLACK_KNIGHT);
+    visit_capture_moves(black_kings, king_moves, f, pieces[Piece::WHITE],
         Piece::BLACK_KING);
-    visit_capture_ray_moves(black_queens, rook_moves.first, f,
+    visit_capture_ray_moves(black_queens, rook_moves, f,
         pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
         Piece::BLACK_QUEEN);
-    visit_capture_ray_moves(black_rooks, rook_moves.first, f,
+    visit_capture_ray_moves(black_rooks, rook_moves, f,
         pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
         Piece::BLACK_ROOK);
-    visit_capture_ray_moves(black_bishops, bishop_moves.first, f,
+    visit_capture_ray_moves(black_bishops, bishop_moves, f,
         pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
         Piece::BLACK_BISHOP);
-    visit_capture_ray_moves(black_queens, bishop_moves.first, f,
+    visit_capture_ray_moves(black_queens, bishop_moves, f,
         pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
         Piece::BLACK_QUEEN);
 
@@ -574,19 +577,25 @@ vector<Move> Move_generator::generate_capture_moves()
   return moves;
 }
 
-vector<Move> Move_generator::generate_moves()
+vector<Move> Move_generator::generate_moves(shared_ptr<Position> position)
 {
-  pieces = p.getPieceBitboards();
+  p = position;
+//  cout << p->white_to_move << endl;
+  pieces = p->getPieceBitboards();
+//  cout << "piece bitboards: " << endl;
+//  for (auto &piece : pieces) {
+//    cout << piece << endl;
+//  }
   vector<Move> moves;
   moves.clear();
-  cout << "should be 0: " << moves.size() << endl;
+ // cout << "should be 0: " << moves.size() << endl;
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-        if (p.white_to_move && moving <= 0) {
+        if (p->white_to_move && moving <= 0) {
           cerr << "wrong mover: " << moving << endl;
           throw from;
         }
-        if (!p.white_to_move && moving >= 0) {
+        if (!p->white_to_move && moving >= 0) {
           cerr << "wrong mover: "<< moving << endl;
           throw from;
         }
@@ -600,7 +609,12 @@ vector<Move> Move_generator::generate_moves()
   bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
   bb white_rooks = pieces[Piece::ROOK] & pieces[Piece::WHITE];
   bb white_queens = pieces[Piece::QUEEN] & pieces[Piece::WHITE];
-  bb white_kings = pieces[Piece::KING] & pieces[Piece::WHITE];
+  bb white_kings = p->kings & p->white;
+//  cout << hex << endl;
+//  cout << "k: " << p->kings << endl;
+//  cout << "w: " << p->white << endl;
+//  cout << "wk: " << white_kings << endl;
+//  cout << dec << endl;
   bb black_pawns = pieces[Piece::PAWN] & pieces[Piece::BLACK];
   bb black_knights = pieces[Piece::KNIGHT] & pieces[Piece::BLACK];
   bb black_bishops = pieces[Piece::BISHOP] & pieces[Piece::BLACK];
@@ -609,40 +623,41 @@ vector<Move> Move_generator::generate_moves()
   bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
   ///
 
-  cout << "generating, wtm: " << p.white_to_move << endl;
-  if (p.white_to_move) {
+  //cout << "generating, wtm: " << p->white_to_move << endl;
+  if (p->white_to_move) {
     // cout << "capturing with white pawns" << endl;
-    visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
-        pieces[Piece::BLACK], Piece::WHITE_PAWN);
-    visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
-        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_PAWN, true);
-    visit_capture_moves(white_knights, knight_moves.first, f,
-        pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
-    visit_non_capture_moves(white_knights, knight_moves.first, f,
-        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
+//    visit_capture_moves(white_pawns, white_pawn_capture_moves.first, f,
+//        pieces[Piece::BLACK], Piece::WHITE_PAWN);
+//    visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+//        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_PAWN, true);
+//    visit_capture_moves(white_knights, knight_moves.first, f,
+//        pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
+//    visit_non_capture_moves(white_knights, knight_moves.first, f,
+//        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
 //    visit_capture_moves(p, white_kings, king_moves.first, f,
 //        pieces[Piece::BLACK], Piece::WHITE_KING);
-    visit_non_capture_moves(white_kings, king_moves.first, f,
+    //cout << hex << white_kings << dec << endl;
+    visit_non_capture_moves(white_kings, king_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KING);
-    visit_non_capture_ray_moves(white_queens, rook_moves.first, f,
+    visit_non_capture_ray_moves(white_queens, rook_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
-    visit_non_capture_ray_moves(white_rooks, rook_moves.first, f,
+    visit_non_capture_ray_moves(white_rooks, rook_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_ROOK);
-    visit_capture_ray_moves(white_queens, rook_moves.first, f,
+    visit_capture_ray_moves(white_queens, rook_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_QUEEN);
-    visit_capture_ray_moves(white_rooks, rook_moves.first, f,
+    visit_capture_ray_moves(white_rooks, rook_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_ROOK);
-    visit_capture_ray_moves(white_bishops, bishop_moves.first, f,
+    visit_capture_ray_moves(white_bishops, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_BISHOP);
-    visit_capture_ray_moves(white_queens, bishop_moves.first, f,
+    visit_capture_ray_moves(white_queens, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
         Piece::WHITE_QUEEN);
-    visit_non_capture_ray_moves(white_bishops, bishop_moves.first, f,
+    visit_non_capture_ray_moves(white_bishops, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_BISHOP);
-    visit_non_capture_ray_moves(white_queens, bishop_moves.first, f,
+    visit_non_capture_ray_moves(white_queens, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
   } else {
 //    visit_capture_moves(p, black_pawns, black_pawn_capture_moves.first, f,
@@ -655,7 +670,7 @@ vector<Move> Move_generator::generate_moves()
 //        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KNIGHT);
 //    visit_capture_moves(p, black_kings, king_moves.first, f,
 //        pieces[Piece::WHITE], Piece::BLACK_KING);
-    visit_non_capture_moves(black_kings, king_moves.first, f,
+    visit_non_capture_moves(black_kings, king_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KING);
 //    visit_non_capture_ray_moves(black_queens, rook_moves.first, f,
 //        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
@@ -679,14 +694,14 @@ vector<Move> Move_generator::generate_moves()
 //        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
 
   }
-  cout << "after: " << moves.size() << endl;
+  //cout << "after: " << moves.size() << endl;
   return moves;
 }
 bool Move_generator::is_in_check(bool side)
 {
   bool retval = false;
   cout << "checking for side: " << (side ? "white" : "black") << endl;
-  cout << "to move: " << (p.white_to_move ? "white" : "black") << endl;
+  cout << "to move: " << (p->white_to_move ? "white" : "black") << endl;
 
   //TODO this is only the naive way of doing this, it needs to be much more efficient
   vector<Move> capture_moves = generate_capture_moves();
@@ -694,12 +709,12 @@ bool Move_generator::is_in_check(bool side)
   static function<void(int)> f = [&king_pos](int square) {
     king_pos = square;
   };
-//  cout << hex << p.kings << "... " << (p.kings & p.white) << dec << endl;
-//  cout << hex << p.kings << "... " << (p.kings & p.black) << dec << endl;
+//  cout << hex << p->kings << "... " << (p->kings & p->white) << dec << endl;
+//  cout << hex << p->kings << "... " << (p->kings & p->black) << dec << endl;
   if (side) {
-    Position::visit_bitboard(p.kings & p.white, f);
+    Position::visit_bitboard(p->kings & p->white, f);
   } else {
-    Position::visit_bitboard(p.kings & p.black, f);
+    Position::visit_bitboard(p->kings & p->black, f);
   }
   for (auto &move : capture_moves) {
     uint8_t t = move.get_to();

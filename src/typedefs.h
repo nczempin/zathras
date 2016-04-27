@@ -14,10 +14,10 @@
 
 using namespace std;
 
-typedef uint_fast64_t bb;
+using bb = uint_fast64_t;
 
-typedef vector<bb> bitboard_set;
-typedef function<void(uint8_t)> square_visitor;
-typedef function<void(int8_t, uint8_t, uint8_t, int8_t)> move_visitor;
+using bitboard_set = vector<bb>;
+using square_visitor = function<void(uint8_t)>;
+using move_visitor = function<void(int8_t, uint8_t, uint8_t, int8_t)>;
 
 #endif /* TYPEDEFS_H_ */
