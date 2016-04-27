@@ -254,11 +254,10 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "  +-----------------+" << endl;
   stream << "    A B C D E F G H" << endl;
 }
-
 void Position::visit_bitboard(const bb my_bb, const square_visitor f)
 {
   static uint8_t lookup[] =
-    { 7, 6, 5, 4, 3, 2, 1, 0, //
+    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
       15, 14, 13, 12, 11, 10, 9, 8, //
       23, 22, 21, 20, 19, 18, 17, 16, //
       31, 30, 29, 28, 27, 26, 25, 24, //
@@ -267,18 +266,25 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
       55, 54, 53, 52, 51, 50, 49, 48, //
       63, 62, 61, 60, 59, 58, 57, 56 };
   bb tmp = my_bb;
-  bb t = 0;
+  //static bb t = 0;
   uint8_t coord = 0;
-  //cout << setw(16) << setfill('0') << hex << tmp << dec << endl;
-  for (int i = 0; i < 64; ++i) {
-    t = tmp & 0x01;
-    //cout << i << ": " << t << endl;
-    if (t) {
-      coord = lookup[i];
-      f(coord);
+  uint8_t l = 0;
+  while (true) {
+    l = __builtin_ffsll(tmp);
+//    cout << hex;
+//    cout << "l, tmp: " << l << ", " << tmp << endl;
+    if (l == 0) {
+      return;
     }
-    tmp = tmp >> 1;
+    coord = lookup[l];
+    //   cout << "coord: " << coord << endl;
+
+    f(coord);
+    tmp &= tmp - 1; //clear LS1B
+    //   cout << "new tmp: " << tmp << endl;
+    //   cout << dec;
   }
+
 }
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {
@@ -338,8 +344,8 @@ void Position::print(ostream& stream) const
   visit_bitboard(white & kings, [&board](int x) {
     //cout << "visiting white king at: " << x << endl;
 
-    board[x] = 6;
-  });
+      board[x] = 6;
+    });
   visit_bitboard(black & pawns, [&board](int x) {
     board[x] = 7;
   });
@@ -565,7 +571,7 @@ void Position::make_move(Move move)
 }
 void Position::unmake_move(Move move)
 {
- // cout << "unmake_move: " << move.to_string() << endl;
+  // cout << "unmake_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
 
