@@ -71,9 +71,8 @@ int Perft_command::perft(int depth)
   if (depth == 0) {
     return 1;
   }
-  shared_ptr<Position> pp = make_shared<Position>(p);
-     vector<Move> moves = mg.generate_moves(pp);
-   //  if (depth == 1) {
+  vector<Move> moves = mg.generate_moves(pp);
+  //  if (depth == 1) {
 //    return moves.size();
 //  }
   int total_result = 0;
@@ -86,22 +85,17 @@ int Perft_command::perft(int depth)
 //  }
   for (size_t i = 0; i < size; ++i) {
     Move move = moves[i];
-//    cout << move.to_string() << "-->" << endl;
-    p.make_move(move);
-//    if (mg.is_in_check(p, !p.white_to_move)) {
-//      p.unmake_move(move);
-//      continue;
-//    }
-//    cout << "after make_move:" << endl;
-//    cout << p << endl;
-
-    if (depth == 1) {
-      ++total_result;
-    } else {
-      int perft_result = perft(depth - 1);
-      total_result += perft_result;
+//    cout << "(perft@" << depth << "): " << move.to_string() << "-->" << endl;
+    pp->make_move(move);
+    if (!mg.is_in_check(!pp->white_to_move)) {
+      if (depth == 1) {
+        ++total_result;
+      } else {
+        int perft_result = perft(depth - 1);
+        total_result += perft_result;
+      }
     }
-    p.unmake_move(move);
+    pp->unmake_move(move);
 //    cout << "after unmake_move:" << endl;
 //    cout << p << endl;
   }
@@ -112,17 +106,17 @@ void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
   int depth = 2; //TODO get this from arguments, but use a reasonable default
-  p = Position::create_position("7k/8/8/8/8/8/8/K7 w - - 0 2");
+  Position position = Position::create_position("8/8/8/8/8/k7/8/K7 w - - 0 1");
   //p = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
-  cout << p << endl;
+  cout << position << endl;
   mg.pregenerate_moves();
 
   ///////////////////////////////
   int total_result = 0;
   //cout << "b4 gen" << endl;
-  shared_ptr<Position> pp = make_shared<Position>(p);
-   vector<Move> moves = mg.generate_moves(pp);
+  pp = make_shared<Position>(position);
+  vector<Move> moves = mg.generate_moves(pp);
   //cout << "after gen" << endl;
   size_t size = moves.size();
 //  cout << "moves.size: " << size << endl;
@@ -143,20 +137,20 @@ void Perft_command::execute()
       }
 //      cout << "on move in perft_execute: " << p.white_to_move << endl;
 //      cout.flush();
-      p.make_move(move);
-//      if (mg.is_in_check(p, !p.white_to_move)) {
-//        p.unmake_move(move);
-//        continue;
-//      }
       string s = move.to_string();
 //      cout << "(made move) " << s << endl;
+      pp->make_move(move);
+      if (mg.is_in_check(!pp->white_to_move)) {
+        pp->unmake_move(move);
+        continue;
+      }
 //      cout.flush();
 //    cout << "after make_move:" << endl;
 //    cout << p << endl;
       int perft_result = perft(depth - 1);
       cout << s << ": " << perft_result << endl;
       total_result += perft_result;
-      p.unmake_move(move);
+      pp->unmake_move(move);
 //    cout << "after unmake_move:" << endl;
 //    cout << p << endl;
     }

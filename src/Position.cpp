@@ -561,7 +561,7 @@ void Position::make_move(Move move)
 // TODO update 3 repetitions
 // TODO update 50 moves
   white_to_move = !white_to_move;
- //cout << "switched on_move to " << white_to_move << endl;
+// cout << "switched on_move to " << white_to_move << endl;
 }
 void Position::unmake_move(Move move)
 {

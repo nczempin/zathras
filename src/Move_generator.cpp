@@ -314,7 +314,7 @@ void Move_generator::visit_non_capture_moves(const bb sub_position,
 {
   Position::visit_bitboard(sub_position,
       [all_moves, f, other_colour, moving](uint8_t from) {
-         bb raw_moves = all_moves[from];
+        bb raw_moves = all_moves[from];
         bb moves = raw_moves & ~other_colour;
         Position::visit_bitboard(moves, [from, f, moving](uint8_t to) {
               f(moving, from, to, 0);
@@ -588,7 +588,7 @@ vector<Move> Move_generator::generate_moves(shared_ptr<Position> position)
 //  }
   vector<Move> moves;
   moves.clear();
- // cout << "should be 0: " << moves.size() << endl;
+  // cout << "should be 0: " << moves.size() << endl;
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
         if (p->white_to_move && moving <= 0) {
@@ -700,27 +700,34 @@ vector<Move> Move_generator::generate_moves(shared_ptr<Position> position)
 bool Move_generator::is_in_check(bool side)
 {
   bool retval = false;
-  cout << "checking for side: " << (side ? "white" : "black") << endl;
-  cout << "to move: " << (p->white_to_move ? "white" : "black") << endl;
-
+//  cout << "checking for side: " << (side ? "white" : "black") << endl;
+//  cout << "to move: " << (p->white_to_move ? "white" : "black") << endl;
+//
   //TODO this is only the naive way of doing this, it needs to be much more efficient
   vector<Move> capture_moves = generate_capture_moves();
+
   int king_pos = 0;
-  static function<void(int)> f = [&king_pos](int square) {
+  function<void(int)> f = [&king_pos](int square) {
+//    cout << "determined: " << square << endl;
     king_pos = square;
+//    cout << "determined: " << king_pos << endl;
   };
-//  cout << hex << p->kings << "... " << (p->kings & p->white) << dec << endl;
-//  cout << hex << p->kings << "... " << (p->kings & p->black) << dec << endl;
+  bb wk = p->kings & p->white;
+  bb bk = p->kings & p->black;
+//  cout << hex << p->kings << "... " << wk << dec << endl;
+//  cout << hex << p->kings << "... " << bk << dec << endl;
   if (side) {
-    Position::visit_bitboard(p->kings & p->white, f);
+//    cout << "determining for white: ";
+    Position::visit_bitboard(wk, f);
   } else {
-    Position::visit_bitboard(p->kings & p->black, f);
+//    cout << "determining for black: ";
+    Position::visit_bitboard(bk, f);
   }
   for (auto &move : capture_moves) {
     uint8_t t = move.get_to();
     if (t == king_pos) {
       retval = true;
-      cout << "check: " << move.to_string() << endl;
+//      cout << "check: " << move.to_string() << endl;
       break;
     }
   }

@@ -26,7 +26,7 @@ public:
 
 private:
   int perft(int depth);
-  Position p;
+  shared_ptr<Position> pp;
   Move_generator mg;
 };
 
