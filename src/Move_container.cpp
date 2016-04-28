@@ -37,6 +37,11 @@ void Move_container::reset()
   container.clear();
 }
 
+size_t Move_container::size()
+{
+  return container.size();
+}
+
 vector<Move> Move_container::get_moves()
 {
   return container; //TODO unsafe?

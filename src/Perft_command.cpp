@@ -120,7 +120,7 @@ void Perft_command::execute()
   Move_container move_container = mg.generate_moves(pp, depth);
   vector<Move> moves = move_container.get_moves();
   //cout << "after gen" << endl;
-  size_t size = moves.size();
+  size_t size = move_container.size();
 //  cout << "moves.size: " << size << endl;
   if (depth == 0) {
     total_result = size;
