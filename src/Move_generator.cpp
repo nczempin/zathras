@@ -270,7 +270,7 @@ int Move_generator::find_captured_piece(int y)
 {
   //cout << "looking for captured piece at: " << y << endl;
   int captured = 0;
-  for (int i = 1; i < 7; ++i)
+  for (int i = 1; i < 7; ++i) {
     if (Position::is_set_square(pieces[i], y)) {
       captured = i;
       if (Position::is_set_square(pieces[8], y)) { //black
@@ -278,7 +278,16 @@ int Move_generator::find_captured_piece(int y)
       }
       break;
     }
-  //cout << "found: " << captured << endl;
+  }
+  if (p->en_passant_square != 0) {
+    Position::visit_bitboard(p->en_passant_square, [&captured](int square) {
+      captured = 1; //
+        if (square > 31) {
+          captured = -1;
+        }
+      });
+  }
+//cout << "found: " << captured << endl;
   return captured;
 }
 
@@ -286,11 +295,11 @@ void Move_generator::visit_capture_moves(const bb sub_position,
     const bitboard_set all_moves, const move_visitor f, const bb other_colour,
     const int8_t moving)
 {
-  //cout << "visit capture moves" << endl;
+//cout << "visit capture moves" << endl;
   Position::visit_bitboard(sub_position,
       [this, all_moves, f, other_colour, moving](uint8_t from) {
         bb raw_moves = all_moves[from];
-        bb moves = raw_moves & other_colour;
+        bb moves = raw_moves & (other_colour|p->en_passant_square);
         Position::visit_bitboard(moves, [this, from, f, moving](uint8_t to) {
               if (p->white_to_move && moving <= 0) {
                 cerr << "wrong mover: " << moving << endl;
@@ -518,7 +527,7 @@ vector<Move> Move_generator::generate_capture_moves()
         moves.push_back(m);
       };
 
-  //TODO generalize, obviously
+//TODO generalize, obviously
   bb white_pawns = pieces[Piece::PAWN] & pieces[Piece::WHITE];
   bb white_knights = pieces[Piece::KNIGHT] & pieces[Piece::WHITE];
   bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
@@ -531,7 +540,7 @@ vector<Move> Move_generator::generate_capture_moves()
   bb black_rooks = pieces[Piece::ROOK] & pieces[Piece::BLACK];
   bb black_queens = pieces[Piece::QUEEN] & pieces[Piece::BLACK];
   bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
-  ///
+///
 
   if (p->white_to_move) {
     // cout << "capturing with white pawns" << endl;
@@ -592,9 +601,9 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
 //  int i = 0;
 
   Move_container moves = Move_container::get(depth);
-  //moves.reserve(35);
+//moves.reserve(35);
   moves.reset();
-  // cout << "should be 0: " << moves.size() << endl;
+// cout << "should be 0: " << moves.size() << endl;
   move_visitor f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
 //        if (p->white_to_move && moving <= 0) {
@@ -616,7 +625,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
 //        ++i;
       };
 
-  //TODO generalize, obviously
+//TODO generalize, obviously
   bb white_pawns = pieces[Piece::PAWN] & pieces[Piece::WHITE];
   bb white_knights = pieces[Piece::KNIGHT] & pieces[Piece::WHITE];
   bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
@@ -634,7 +643,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   bb black_rooks = pieces[Piece::ROOK] & pieces[Piece::BLACK];
   bb black_queens = pieces[Piece::QUEEN] & pieces[Piece::BLACK];
   bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
-  ///
+///
 
   if (p->white_to_move) {
     visit_capture_moves(white_pawns, white_pawn_capture_moves, f,
@@ -704,7 +713,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
         pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
 
   }
-  //cout << "after: " << moves.size() << endl;
+//cout << "after: " << moves.size() << endl;
   return moves;
 }
 bool Move_generator::is_in_check(bool side)
