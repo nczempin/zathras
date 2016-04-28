@@ -280,12 +280,14 @@ int Move_generator::find_captured_piece(int y)
     }
   }
   if (p->en_passant_square != 0) {
-    Position::visit_bitboard(p->en_passant_square, [&captured](int square) {
-      captured = 1; //
+    Position::visit_bitboard(p->en_passant_square, [&captured, y](int square) {
+      if (y == square) {
+        captured = 1; //
         if (square > 31) {
           captured = -1;
         }
-      });
+      }
+    });
   }
 //cout << "found: " << captured << endl;
   return captured;
