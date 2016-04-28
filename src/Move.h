@@ -46,7 +46,7 @@ private:
   uint8_t to = 0;
   int8_t moving = 0;
   int8_t captured = 0;
-  bool en_passant = 0;
+  bool en_passant = false;
 };
 
 #endif /* MOVE_H_ */

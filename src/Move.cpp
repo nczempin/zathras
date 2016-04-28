@@ -16,6 +16,15 @@ Move::Move(int8_t moving, uint8_t from, uint8_t to, int8_t captured = 0,
     from(from), to(to), moving(moving), captured(captured), en_passant(
         en_passant)
 {
+  if (en_passant) {
+    if (moving == 1 || moving == -1) {
+
+    } else {
+      cerr << "non-pawn e. p." << endl;
+      throw 123;
+    }
+  }
+
 }
 
 uint8_t Move::get_from()
@@ -28,7 +37,7 @@ uint8_t Move::get_to() const
 }
 string Move::to_string() const
 {
-  //cout << moving << " " << from << " " << " " << to << " " << taken << endl;
+//cout << moving << " " << from << " " << " " << to << " " << taken << endl;
   static const string pieces("-PNBRQK");
   char p = pieces[moving > 0 ? moving : -moving];
   string moving_string = string(1, p);

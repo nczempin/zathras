@@ -301,7 +301,11 @@ void Move_generator::visit_capture_moves(const bb sub_position,
   Position::visit_bitboard(sub_position,
       [this, all_moves, f, other_colour, moving](uint8_t from) {
         bb raw_moves = all_moves[from];
-        bb moves = raw_moves & (other_colour|p->en_passant_square);
+        bb moves = raw_moves & (other_colour);
+        if (p->en_passant_square != 0x00 && (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN)) {
+          moves = raw_moves & (other_colour | p->en_passant_square);
+        }
+
         Position::visit_bitboard(moves, [this, from, f, moving](uint8_t to) {
               if (p->white_to_move && moving <= 0) {
                 cerr << "wrong mover: " << moving << endl;
@@ -518,7 +522,7 @@ vector<Move> Move_generator::generate_capture_moves()
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
         bool en_passant = false;
-        if (Position::is_set_square(p->en_passant_square, to)) {
+        if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
           en_passant = true;
         }
         Move m (moving, from, to, captured, en_passant);
