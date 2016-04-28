@@ -517,15 +517,11 @@ vector<Move> Move_generator::generate_capture_moves()
   moves.clear();
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-        if (p->white_to_move && moving <= 0) {
-          cerr << "wrong mover: " << moving << endl;
-          throw from;
+        bool en_passant = false;
+        if (Position::is_set_square(p->en_passant_square, to)) {
+          en_passant = true;
         }
-        if (!p->white_to_move && moving >= 0) {
-          cerr << "wrong mover: "<< moving << endl;
-          throw from;
-        }
-        Move m (moving, from, to, captured);
+        Move m (moving, from, to, captured, en_passant);
         moves.push_back(m);
       };
 
@@ -608,23 +604,11 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
 // cout << "should be 0: " << moves.size() << endl;
   move_visitor f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-//        if (p->white_to_move && moving <= 0) {
-//          cerr << "wrong mover: " << moving << endl;
-//          throw from;
-//        }
-//        if (!p->white_to_move && moving >= 0) {
-//          cerr << "wrong mover: "<< moving << endl;
-//          throw from;
-//        }
-        moves.add_move(moving, from, to, captured);
-        //       if (i >= next_max) {
-//          moves.resize(next_max+bunch);
-//        }
-//        moves[i].set_moving_piece(moving);
-//        moves[i].set_taken_piece(captured);
-//        moves[i].set_from(from);
-//        moves[i].set_to(to);
-//        ++i;
+        bool en_passant = false;
+        if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
+          en_passant = true;
+        }
+        moves.add_move(moving, from, to, captured, en_passant);
       };
 
 //TODO generalize, obviously

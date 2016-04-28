@@ -86,8 +86,10 @@ int Perft_command::perft(int depth)
 //  }
   for (size_t i = 0; i < size; ++i) {
     Move move = moves[i];
-    //cout << "(perft@" << depth << "): " << move.to_string() << "-->" << endl;
+//    cout << "(perft@" << depth << "): " << move.to_string() << "-->" << endl;
+//    cout << *pp << endl;
     pp->make_move(move);
+//    cout << *pp << endl;
     if (!mg.is_in_check(!pp->white_to_move)) {
       if (depth == 1) {
         ++total_result;
@@ -106,8 +108,9 @@ int Perft_command::perft(int depth)
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
-  int depth = 2; //TODO get this from arguments, but use a reasonable default
-  Position position = Position::create_position("rnbqkb1r/ppp1pppp/5n2/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3");
+  int depth = 3; //TODO get this from arguments, but use a reasonable default
+  Position position = Position::create_position(
+      "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -");
   //Position position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;

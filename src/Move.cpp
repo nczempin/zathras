@@ -11,22 +11,11 @@
 
 using namespace std;
 
-Move::Move(int8_t moving, uint8_t from, uint8_t to, int8_t captured = 0) :
-    from(from), to(to), moving(moving), captured(captured)
+Move::Move(int8_t moving, uint8_t from, uint8_t to, int8_t captured = 0,
+    bool en_passant = 0) :
+    from(from), to(to), moving(moving), captured(captured), en_passant(
+        en_passant)
 {
-  int8_t moving_abs = moving > 0 ? moving : -moving;
-//  if (moving_abs > 6) {
-//    cerr << "invalid move created: moving piece: " << moving << endl;
-//    throw moving_abs;
-//  }
-  int8_t captured_abs = captured > 0 ? captured : -captured;
-//  if (captured_abs > 6) {
-//    if (moving_abs > 6) {
-//      cerr << "invalid move created: captured piece: " << captured << endl;
-//      throw captured_abs;
-//    }
-
-//}
 }
 
 uint8_t Move::get_from()
@@ -50,6 +39,9 @@ string Move::to_string() const
     const signed char captured_abs = captured > 0 ? captured : -captured;
     string captured_string = string(1, pieces[captured_abs]);
     retval += " (" + captured_string + ")";
+  }
+  if (en_passant != 0) {
+    retval += " e. p.";
   }
   return retval;
 }

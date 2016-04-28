@@ -26,9 +26,9 @@ Move_container& Move_container::get(size_t index)
 }
 
 void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
-    int8_t captured)
+    int8_t captured, bool en_passant)
 {
-  Move m(moving, from, to, captured);
+  Move m(moving, from, to, captured, en_passant);
   container.push_back(m);
 }
 

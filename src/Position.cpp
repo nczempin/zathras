@@ -489,8 +489,8 @@ void Position::make_move(Move move)
     } else {
       clear_bit(black, to);
     }
-    int8_t p = determine_piece(taken);
-    switch (p) {
+    int8_t piece = determine_piece(taken);
+    switch (piece) {
     case 1:
       clear_bit(pawns, to);
       break;
@@ -510,8 +510,8 @@ void Position::make_move(Move move)
       clear_bit(kings, to);
       break;
     default:
-      cerr << "mm??" << p << endl;
-      throw p;
+      cerr << "mm??" << piece << endl;
+      throw piece;
     }
 
 //    cout << "taking: " << taken << endl;
@@ -532,6 +532,20 @@ void Position::make_move(Move move)
       set_bit(white, to);
       clear_bit(pawns, from);
       clear_bit(white, from);
+      {
+        // handle capturing by e. p.
+        int ep_square = to - 8;
+        if (is_set_square(en_passant_square, to)) { // en passant capture
+          clear_bit(pawns, ep_square);
+          clear_bit(black, ep_square);
+        }
+        // handle double step preparing the e. p.
+        en_passant_square = 0x00;
+        if (to - from == 16) {
+          set_bit(en_passant_square, ep_square);
+        }
+
+      }
       break;
     case Piece::WHITE_KNIGHT:
       set_bit(knights, to);
@@ -576,6 +590,20 @@ void Position::make_move(Move move)
       set_bit(black, to);
       clear_bit(pawns, from);
       clear_bit(black, from);
+      {
+         // handle capturing by e. p.
+         int ep_square = to + 8;
+         if (is_set_square(en_passant_square, to)) { // en passant capture
+           clear_bit(pawns, ep_square);
+           clear_bit(white, ep_square);
+         }
+         // handle double step preparing the e. p.
+         en_passant_square = 0x00;
+         if (to - from == -16) {
+           set_bit(en_passant_square, ep_square);
+         }
+
+       }
       break;
     case Piece::BLACK_KNIGHT:
       set_bit(knights, to);
@@ -637,10 +665,24 @@ void Position::unmake_move(Move move)
   if (white_to_move) {
     switch (moving) {
     case Piece::WHITE_PAWN:
+      // move pawn back
       clear_bit(pawns, to);
       clear_bit(white, to);
       set_bit(pawns, from);
       set_bit(white, from);
+      {
+        // handle capturing by e. p.
+        int ep_square = to - 8;
+
+        if (move.is_en_passant()) {
+          //is_set_square(en_passant_square, to)) { // en passant capture
+          set_bit(pawns, ep_square);
+          set_bit(black, ep_square);
+        }
+        // handle double step preparing the e. p.
+        en_passant_square = 0x00;
+
+      }
       break;
     case Piece::WHITE_KNIGHT:
       clear_bit(knights, to);
@@ -684,6 +726,19 @@ void Position::unmake_move(Move move)
       clear_bit(black, to);
       set_bit(pawns, from);
       set_bit(black, from);
+      {
+        // handle capturing by e. p.
+        int ep_square = to + 8;
+
+        if (move.is_en_passant()) {
+          //is_set_square(en_passant_square, to)) { // en passant capture
+          set_bit(pawns, ep_square);
+          set_bit(white, ep_square);
+        }
+        // handle double step preparing the e. p.
+        en_passant_square = 0x00;
+
+      }
       break;
     case Piece::BLACK_KNIGHT:
       clear_bit(knights, to);
@@ -722,39 +777,40 @@ void Position::unmake_move(Move move)
       break;
     }
   }
-
-  int8_t taken = move.get_taken_piece();
-  if (taken != 0) {
-    //cout << "untaken: " << taken << endl;
-    bool colour = determine_colour(taken);
-    if (colour) {
-      set_bit(white, to);
-    } else {
-      set_bit(black, to);
-    }
-    int8_t p = determine_piece(taken);
-    switch (p) {
-    case 1:
-      set_bit(pawns, to);
-      break;
-    case 2:
-      set_bit(knights, to);
-      break;
-    case 3:
-      set_bit(bishops, to);
-      break;
-    case 4:
-      set_bit(rooks, to);
-      break;
-    case 5:
-      set_bit(queens, to);
-      break;
-    case 6:
-      set_bit(kings, to);
-      break;
-    default:
-      cerr << "un??" << p << endl;
-      throw p;
+  if (!move.is_en_passant()) {
+    int8_t taken = move.get_taken_piece();
+    if (taken != 0) {
+      //cout << "untaken: " << taken << endl;
+      bool colour = determine_colour(taken);
+      if (colour) {
+        set_bit(white, to);
+      } else {
+        set_bit(black, to);
+      }
+      int8_t p = determine_piece(taken);
+      switch (p) {
+      case 1:
+        set_bit(pawns, to);
+        break;
+      case 2:
+        set_bit(knights, to);
+        break;
+      case 3:
+        set_bit(bishops, to);
+        break;
+      case 4:
+        set_bit(rooks, to);
+        break;
+      case 5:
+        set_bit(queens, to);
+        break;
+      case 6:
+        set_bit(kings, to);
+        break;
+      default:
+        cerr << "un??" << p << endl;
+        throw p;
+      }
     }
     // cout << *this << endl;
   }
