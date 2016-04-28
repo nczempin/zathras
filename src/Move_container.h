@@ -25,8 +25,9 @@ public:
   void add_move(int8_t moving, uint8_t from, uint8_t to, int8_t captured);
   void reset();
   size_t size();
-private:
   vector<Move> get_moves();
+private:
+
   static vector<Move_container> container_pool;
   vector<Move> container;
 };

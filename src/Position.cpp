@@ -122,6 +122,20 @@ Position Position::create_position(const string& fen)
   Position position;
   vector<string> split_fen = split(fen, ' ');
   string to_move = split_fen[1];
+  string castling = split_fen[2];
+  string en_passant = split_fen[3];
+  if (en_passant != "-") {
+    bb en_passant_square = 0x00;
+    //TODO this will crash on invalid e.p. square string
+    char file_string = en_passant[0];
+    uint8_t file = file_string - 'a';
+
+    char rank_string = en_passant[1];
+    uint8_t rank = rank_string - '1';
+    set_square(file, rank, en_passant_square);
+    position.en_passant_square = en_passant_square;
+  }
+
   position.white_to_move = to_move == "w" ? true : false;
   string fen_board = split_fen[0];
   //cout << "board: " << fen_board << endl;
@@ -406,7 +420,11 @@ void Position::print(ostream& stream) const
   });
   //cout << "visits for position display done" << endl;
   visualize_mailbox_board(board, stream);
-  //cout << "wtm: " << white_to_move << endl;
+  cout << "wtm: " << white_to_move << endl;
+  cout << "ep: ";
+  Position::visit_bitboard(en_passant_square, [](int y) {
+    cout << Square::mailbox_index_to_square(y)<< endl;
+  });
 }
 
 void Position::display_all_moves(const bitboard_set& moves)

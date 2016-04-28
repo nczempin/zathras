@@ -49,6 +49,9 @@ public:
   static void visit_bitboard(const bb my_bb, const square_visitor);
   static void visualize_mailbox_board(int board[64], ostream& stream);
   static void visit_mailbox_board(int board[64], void (*visitor)(int)); // TODO convert to c++11
+
+  static Position create_position(const string& fen);
+
   //static void print_square(int x);
   //TODO a separate Bitboard (helper) class is probably best
   static const bb BB_FULL_BOARD = 0xffffffffffffffff;
@@ -65,17 +68,17 @@ public:
     return white_to_move;
   }
   bool white_to_move = true; //TODO public for now
-  static Position create_position(const string& fen);
+  bb en_passant_square = 0x00;
 
   //public for now
-  bb pawns = 0;
-  bb knights = 0;
-  bb bishops = 0;
-  bb rooks = 0;
-  bb queens = 0;
-  bb kings = 0;
-  bb white = 0;
-  bb black = 0;
+  bb pawns = 0x00;
+  bb knights = 0x00;
+  bb bishops = 0x00;
+  bb rooks = 0x00;
+  bb queens = 0x00;
+  bb kings = 0x00;
+  bb white = 0x00;
+  bb black = 0x00;
 private:
 
   static string extract_row_string(uint_fast8_t row, string set);
