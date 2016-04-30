@@ -74,7 +74,7 @@ private:
   void visit_moves(move_visitor count_moves);
   int find_captured_piece(int y);
   void generate_castling(const move_visitor& f, const int piece,
-      int king_square);
+      int king_square, bool white);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

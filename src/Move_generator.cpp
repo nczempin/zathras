@@ -589,13 +589,23 @@ vector<Move> Move_generator::generate_capture_moves()
 }
 
 void Move_generator::generate_castling(const move_visitor& f, const int piece,
-    const int king_square)
+    const int king_square, bool white)
 {
   //castling:
   //1. check each right
-  //2.
-  f(piece, king_square, king_square - 2, 0);
-  f(piece, king_square, king_square + 2, 0);
+  if (white && p->castling[0]) {
+    f(piece, king_square, king_square + 2, 0);
+  }
+  if (white && p->castling[1]) {
+    f(piece, king_square, king_square - 2, 0);
+  }
+  if (!white && p->castling[2]) {
+    f(piece, king_square, king_square + 2, 0);
+  }
+  if (!white && p->castling[3]) {
+    f(piece, king_square, king_square - 2, 0);
+  }
+
 }
 
 Move_container Move_generator::generate_moves(shared_ptr<Position> position,
@@ -678,7 +688,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_BISHOP);
     visit_non_capture_ray_moves(white_queens, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
-    generate_castling(f, Piece::WHITE_KING, Square::E1);
+    generate_castling(f, Piece::WHITE_KING, Square::E1, true);
   } else {
     visit_capture_moves(black_pawns, black_pawn_capture_moves, f,
         pieces[Piece::WHITE], Piece::BLACK_PAWN);
@@ -712,7 +722,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
         pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_BISHOP);
     visit_non_capture_ray_moves(black_queens, bishop_moves, f,
         pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
-    generate_castling(f, Piece::BLACK_KING, Square::E8);
+    generate_castling(f, Piece::BLACK_KING, Square::E8, false);
 
   }
 //cout << "after: " << moves.size() << endl;
