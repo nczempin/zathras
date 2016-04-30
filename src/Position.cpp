@@ -473,6 +473,16 @@ static int8_t determine_piece(int8_t piece)
     return -piece;
   }
 }
+
+void Position::update_bits(unsigned long int colour, unsigned long int piece,
+    uint8_t from, uint8_t to)
+{
+  set_bit(piece, to);
+  set_bit(colour, to);
+  clear_bit(piece, from);
+  clear_bit(colour, from);
+}
+
 void Position::make_move(Move move)
 {
   //cout << "make_move: " << move.to_string() << endl;
@@ -574,6 +584,11 @@ void Position::make_move(Move move)
       set_bit(white, to);
       clear_bit(kings, from);
       clear_bit(white, from);
+      if (to == from - 2) { //queenside castle
+        update_bits(white, rooks, 0, 3); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(white, rooks, 7, 5); //TODO constants, not magics
+      }
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
@@ -628,10 +643,12 @@ void Position::make_move(Move move)
       clear_bit(black, from);
       break;
     case Piece::BLACK_KING:
-      set_bit(kings, to);
-      set_bit(black, to);
-      clear_bit(kings, from);
-      clear_bit(black, from);
+      update_bits(black, kings, from, to);
+      if (to == from - 2) { //queenside castle
+        update_bits(black, rooks, 56, 59); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(black, rooks, 63, 61); //TODO constants, not magics
+      }
       break;
     default:
       double error = ((double) moving);
@@ -699,6 +716,7 @@ void Position::unmake_move(Move move)
       clear_bit(white, to);
       set_bit(rooks, from);
       set_bit(white, from);
+      //TODO castling rights on regular rook move
       break;
     case Piece::WHITE_QUEEN:
       clear_bit(queens, to);
@@ -707,10 +725,14 @@ void Position::unmake_move(Move move)
       set_bit(white, from);
       break;
     case Piece::WHITE_KING:
-      clear_bit(kings, to);
-      clear_bit(white, to);
-      set_bit(kings, from);
-      set_bit(white, from);
+      update_bits(black, kings, to, from);
+      if (to == from - 2) { //queenside castle
+        update_bits(white, rooks, 59, 56); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(white, rooks, 61, 63); //TODO constants, not magics
+      }
+      //TODO castling rights on castle
+      //TODO castling rights on regular king move
       break;
     default:
       cerr << "unexpected white piece: " << ((int) moving) << endl;
@@ -755,6 +777,7 @@ void Position::unmake_move(Move move)
       clear_bit(black, to);
       set_bit(rooks, from);
       set_bit(black, from);
+      //TODO castling rights on regular rook move
       break;
     case Piece::BLACK_QUEEN:
       clear_bit(queens, to);
@@ -763,10 +786,14 @@ void Position::unmake_move(Move move)
       set_bit(black, from);
       break;
     case Piece::BLACK_KING:
-      clear_bit(kings, to);
-      clear_bit(black, to);
-      set_bit(kings, from);
-      set_bit(black, from);
+      update_bits(black, kings, to, from);
+      if (to == from - 2) { //queenside castle
+        update_bits(black, rooks, 59, 56); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(black, rooks, 61, 63); //TODO constants, not magics
+      }
+      //TODO castling rights on castle
+      //TODO castling rights on regular king move
       break;
     default:
       double error = ((double) moving);

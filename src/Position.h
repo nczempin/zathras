@@ -84,7 +84,8 @@ private:
 
   static string extract_row_string(uint_fast8_t row, string set);
   static void display_all_moves(const bitboard_set& moves);
-
+  void update_bits(unsigned long int colour, unsigned long int piece,
+      uint8_t from, uint8_t to);
 };
 
 #endif /* POSITION_H_ */
