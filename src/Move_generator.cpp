@@ -588,29 +588,26 @@ vector<Move> Move_generator::generate_capture_moves()
   return moves;
 }
 
-void Move_generator::generate_castling(const move_visitor& f, bool white)
+void Move_generator::generate_castling(const move_visitor& f,
+    bool white_to_move)
 {
   int piece = Piece::WHITE_KING;
   uint8_t king_square = Square::E1;
-  if (!white) {
+  if (!white_to_move) {
     piece = Piece::BLACK_KING;
     king_square = Square::E8;
   }
   //castling:
   //1. check each right
-  if (white && p->castling[0]) {
-    f(piece, king_square, king_square + 2, 0);
+  static int8_t king_targets[] =
+    { 2, -2, 2, -2 };
+  static bool colours[] =
+    { true, true, false, false };
+  for (int i = 0; i < 4; ++i) {
+    if (white_to_move == colours[i] && p->castling[i]) {
+      f(piece, king_square, king_square + king_targets[i], 0);
+    }
   }
-  if (white && p->castling[1]) {
-    f(piece, king_square, king_square - 2, 0);
-  }
-  if (!white && p->castling[2]) {
-    f(piece, king_square, king_square + 2, 0);
-  }
-  if (!white && p->castling[3]) {
-    f(piece, king_square, king_square - 2, 0);
-  }
-
 }
 
 Move_container Move_generator::generate_moves(shared_ptr<Position> position,
@@ -733,14 +730,28 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
 //cout << "after: " << moves.size() << endl;
   return moves;
 }
-bool Move_generator::is_in_check(bool side)
+
+bool Move_generator::is_attacked(int square)
 {
   bool retval = false;
-//  cout << "checking for side: " << (side ? "white" : "black") << endl;
+  vector<Move> capture_moves = generate_capture_moves();
+  for (auto& move : capture_moves) {
+    uint8_t t = move.get_to();
+    if (t == square) {
+      retval = true;
+      //      cout << "check: " << move.to_string() << endl;
+      break;
+    }
+  }
+  return retval;
+}
+
+bool Move_generator::is_in_check(bool side)
+{
+  //  cout << "checking for side: " << (side ? "white" : "black") << endl;
 //  cout << "to move: " << (p->white_to_move ? "white" : "black") << endl;
 //
 //TODO this is only the naive way of doing this, it needs to be much more efficient
-  vector<Move> capture_moves = generate_capture_moves();
 
   int king_pos = 0;
   function<void(int)> f = [&king_pos](int square) {
@@ -759,15 +770,7 @@ bool Move_generator::is_in_check(bool side)
 //    cout << "determining for black: ";
     Position::visit_bitboard(bk, f);
   }
-  for (auto &move : capture_moves) {
-    uint8_t t = move.get_to();
-    if (t == king_pos) {
-      retval = true;
-//      cout << "check: " << move.to_string() << endl;
-      break;
-    }
-  }
-
+  bool retval = is_attacked(king_pos);
 //  cout << "king_pos= " << king_pos << endl;
 //  cout << "in check: " << retval << endl;
   return retval;
