@@ -326,6 +326,37 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
   }
 
 }
+//void Position::visit_bitboard2(const bb my_bb, const square_visitor f)
+//{
+//  static uint8_t lookup[] =
+//    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+//      15, 14, 13, 12, 11, 10, 9, 8, //
+//      23, 22, 21, 20, 19, 18, 17, 16, //
+//      31, 30, 29, 28, 27, 26, 25, 24, //
+//      39, 38, 37, 36, 35, 34, 33, 32, //
+//      47, 46, 45, 44, 43, 42, 41, 40, //
+//      55, 54, 53, 52, 51, 50, 49, 48, //
+//      63, 62, 61, 60, 59, 58, 57, 56 };
+//  bb tmp = my_bb;
+//  uint8_t coord = 0;
+//  uint8_t l = 0;
+//  while (true) {
+//    l = __builtin_ffsll(tmp);
+//    cout << hex;
+//    cout << "l, tmp: " << (int) l << ", " << tmp << endl;
+//    if (l == 0) {
+//      return;
+//    }
+//    coord = lookup[l];
+//    cout << "coord: " << (int) coord << endl;
+//
+//    f(coord);
+//    tmp &= tmp - 1; //clear LS1B
+//    cout << "new tmp: " << tmp << endl;
+//    cout << dec;
+//  }
+//
+//}
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {
   stream << "  +-----------------+" << endl;
@@ -474,18 +505,18 @@ static int8_t determine_piece(int8_t piece)
   }
 }
 
-void Position::update_bits(unsigned long int colour, unsigned long int piece,
-    uint8_t from, uint8_t to)
+void Position::update_bits(unsigned long int& colour, unsigned long int& piece,
+    uint8_t clear, uint8_t set)
 {
-  set_bit(piece, to);
-  set_bit(colour, to);
-  clear_bit(piece, from);
-  clear_bit(colour, from);
+  set_bit(piece, set);
+  set_bit(colour, set);
+  clear_bit(piece, clear);
+  clear_bit(colour, clear);
 }
 
 void Position::make_move(Move move)
 {
-  //cout << "make_move: " << move.to_string() << endl;
+//  cout << "make_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
 
@@ -589,6 +620,7 @@ void Position::make_move(Move move)
       } else if (from == to - 2) { // kingside castle
         update_bits(white, rooks, 7, 5); //TODO constants, not magics
       }
+//      Position::visualize_bitboard(kings, cout);
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
@@ -725,12 +757,14 @@ void Position::unmake_move(Move move)
       set_bit(white, from);
       break;
     case Piece::WHITE_KING:
-      update_bits(black, kings, to, from);
+//      Position::visualize_bitboard(kings, cout);
+      update_bits(white, kings, to, from);
       if (to == from - 2) { //queenside castle
         update_bits(white, rooks, 59, 56); //TODO constants, not magics
       } else if (from == to - 2) { // kingside castle
         update_bits(white, rooks, 61, 63); //TODO constants, not magics
       }
+//      Position::visualize_bitboard(kings, cout);
       //TODO castling rights on castle
       //TODO castling rights on regular king move
       break;

@@ -143,7 +143,7 @@ void Perft_command::execute()
 //      cout << "on move in perft_execute: " << p.white_to_move << endl;
 //      cout.flush();
       string s = move.to_string();
-//      cout << "(made move) " << s << endl;
+//      cout << "(make move) " << s << endl;
       pp->make_move(move);
       if (mg.is_in_check(!pp->white_to_move)) {
         pp->unmake_move(move);

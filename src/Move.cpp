@@ -35,23 +35,35 @@ uint8_t Move::get_to() const
 {
   return to;
 }
+//
+//string Move::to_string() const
+//{
+////cout << moving << " " << from << " " << " " << to << " " << taken << endl;
+//  static const string pieces("-PNBRQK");
+//  char p = pieces[moving > 0 ? moving : -moving];
+//  string moving_string = string(1, p);
+//  string retval = moving_string + Square::mailbox_index_to_square(from);
+//  retval += (captured != 0) ? "x" : "-";
+//  retval += Square::mailbox_index_to_square(to);
+//  if (captured) {
+//    const signed char captured_abs = captured > 0 ? captured : -captured;
+//    string captured_string = string(1, pieces[captured_abs]);
+//    retval += " (" + captured_string + ")";
+//  }
+//  if (en_passant != 0) {
+//    retval += " e. p.";
+//  }
+//  return retval;
+//}
 string Move::to_string() const
 {
 //cout << moving << " " << from << " " << " " << to << " " << taken << endl;
   static const string pieces("-PNBRQK");
   char p = pieces[moving > 0 ? moving : -moving];
   string moving_string = string(1, p);
-  string retval = moving_string + Square::mailbox_index_to_square(from);
-  retval += (captured != 0) ? "x" : "-";
+  string retval = Square::mailbox_index_to_square(from);
   retval += Square::mailbox_index_to_square(to);
-  if (captured) {
-    const signed char captured_abs = captured > 0 ? captured : -captured;
-    string captured_string = string(1, pieces[captured_abs]);
-    retval += " (" + captured_string + ")";
-  }
-  if (en_passant != 0) {
-    retval += " e. p.";
-  }
+  retval += "*";
   return retval;
 }
 int8_t Move::get_moving_piece() const

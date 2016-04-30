@@ -47,6 +47,7 @@ public:
 
   static void visualize_bitboard(bb my_bb, ostream& stream);
   static void visit_bitboard(const bb my_bb, const square_visitor);
+//  static void visit_bitboard2(const bb my_bb, const square_visitor);
   static void visualize_mailbox_board(int board[64], ostream& stream);
   static void visit_mailbox_board(int board[64], void (*visitor)(int)); // TODO convert to c++11
 
@@ -84,7 +85,7 @@ private:
 
   static string extract_row_string(uint_fast8_t row, string set);
   static void display_all_moves(const bitboard_set& moves);
-  void update_bits(unsigned long int colour, unsigned long int piece,
+  void update_bits(unsigned long int& colour, unsigned long int& piece,
       uint8_t from, uint8_t to);
 };
 

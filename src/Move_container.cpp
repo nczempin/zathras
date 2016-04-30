@@ -6,7 +6,9 @@
  */
 
 #include "Move_container.h"
+#include "Piece.h"
 #include <vector>
+#include <iostream>
 
 vector<Move_container> Move_container::container_pool(10);
 
@@ -28,6 +30,8 @@ Move_container& Move_container::get(size_t index)
 void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
     int8_t captured, bool en_passant)
 {
+  uint64_t ff = from;
+
   Move m(moving, from, to, captured, en_passant);
   container.push_back(m);
 }
