@@ -760,9 +760,9 @@ void Position::unmake_move(Move move)
 //      Position::visualize_bitboard(kings, cout);
       update_bits(white, kings, to, from);
       if (to == from - 2) { //queenside castle
-        update_bits(white, rooks, 59, 56); //TODO constants, not magics
+        update_bits(white, rooks, 3, 0); //TODO constants, not magics
       } else if (from == to - 2) { // kingside castle
-        update_bits(white, rooks, 61, 63); //TODO constants, not magics
+        update_bits(white, rooks, 5, 7); //TODO constants, not magics
       }
 //      Position::visualize_bitboard(kings, cout);
       //TODO castling rights on castle
