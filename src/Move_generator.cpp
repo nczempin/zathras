@@ -668,6 +668,13 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_BISHOP);
     visit_non_capture_ray_moves(white_queens, bishop_moves, f,
         pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
+    //castling:
+    //1. check each right
+
+    //2.
+//    f(Piece::WHITE_KING, 4, 2, 0);
+//    f(Piece::WHITE_KING, 4, 6, 0);
+
   } else {
     visit_capture_moves(black_pawns, black_pawn_capture_moves, f,
         pieces[Piece::WHITE], Piece::BLACK_PAWN);

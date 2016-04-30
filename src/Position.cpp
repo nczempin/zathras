@@ -16,7 +16,7 @@
 
 Position::Position()
 {
-  // TODO Auto-generated constructor stub
+
 }
 //
 Position::~Position()
@@ -122,7 +122,32 @@ Position Position::create_position(const string& fen)
   Position position;
   vector<string> split_fen = split(fen, ' ');
   string to_move = split_fen[1];
-  string castling = split_fen[2];
+  string castling_string = split_fen[2];
+  for (int i = 0; i < 4; ++i) {
+    position.castling[i] = false;
+  }
+  if (castling_string != "-") {
+    for (auto& right : castling_string) {
+      //TODO make more elegant
+      switch (right) {
+      case ('K'):
+        position.castling[0] = true;
+        break;
+      case ('Q'):
+        position.castling[1] = true;
+        break;
+      case ('k'):
+        position.castling[2] = true;
+        break;
+      case ('q'):
+        position.castling[3] = true;
+        break;
+      default:
+        break;
+      }
+      cout << "right: " << right << endl;
+    }
+  }
   string en_passant = split_fen[3];
   if (en_passant != "-") {
     bb en_passant_square = 0x00;
@@ -269,42 +294,6 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
-//These processor instructions work only for 64-bit processors
-#ifdef _MSC_VER
-#include <intrin.h>
-#ifdef _WIN64
-#pragma intrinsic(_BitScanForward64)
-#pragma intrinsic(_BitScanReverse64)
-#define USING_INTRINSICS
-#endif
-#elif defined(__GNUC__) && defined(__LP64__)
-#define U64 bb
-static inline unsigned char _BitScanForward64(unsigned long* Index, U64 Mask)
-{
-  U64 Ret;
-  __asm__
-  (
-      "bsfq %[Mask], %[Ret]"
-      :[Ret] "=r" (Ret)
-      :[Mask] "mr" (Mask)
-  );
-  *Index = (unsigned long) Ret;
-  return Mask ? 1 : 0;
-}
-static inline unsigned char _BitScanReverse64(unsigned long* Index, U64 Mask)
-{
-  U64 Ret;
-  __asm__
-  (
-      "bsrq %[Mask], %[Ret]"
-      :[Ret] "=r" (Ret)
-      :[Mask] "mr" (Mask)
-  );
-  *Index = (unsigned long) Ret;
-  return Mask ? 1 : 0;
-}
-#define USING_INTRINSICS
-#endif
 void Position::visit_bitboard(const bb my_bb, const square_visitor f)
 {
   static uint8_t lookup[] =
@@ -425,6 +414,15 @@ void Position::print(ostream& stream) const
   Position::visit_bitboard(en_passant_square, [](int y) {
     cout << Square::mailbox_index_to_square(y)<< endl;
   });
+  cout << endl;
+  cout << "Castling: ";
+  static char castling_chars[] = "KQkq";
+  for (int i = 0; i < 4; ++i) {
+    if (castling[i]) {
+      cout << castling_chars[i];
+    }
+  }
+  cout << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves)
@@ -591,19 +589,19 @@ void Position::make_move(Move move)
       clear_bit(pawns, from);
       clear_bit(black, from);
       {
-         // handle capturing by e. p.
-         int ep_square = to + 8;
-         if (is_set_square(en_passant_square, to)) { // en passant capture
-           clear_bit(pawns, ep_square);
-           clear_bit(white, ep_square);
-         }
-         // handle double step preparing the e. p.
-         en_passant_square = 0x00;
-         if (to - from == -16) {
-           set_bit(en_passant_square, ep_square);
-         }
+        // handle capturing by e. p.
+        int ep_square = to + 8;
+        if (is_set_square(en_passant_square, to)) { // en passant capture
+          clear_bit(pawns, ep_square);
+          clear_bit(white, ep_square);
+        }
+        // handle double step preparing the e. p.
+        en_passant_square = 0x00;
+        if (to - from == -16) {
+          set_bit(en_passant_square, ep_square);
+        }
 
-       }
+      }
       break;
     case Piece::BLACK_KNIGHT:
       set_bit(knights, to);

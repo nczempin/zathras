@@ -69,6 +69,7 @@ public:
   }
   bool white_to_move = true; //TODO public for now
   bb en_passant_square = 0x00;
+  bool castling [4];
 
   //public for now
   bb pawns = 0x00;
