@@ -448,12 +448,12 @@ void Position::print(ostream& stream) const
   cout << endl;
   cout << "Castling: ";
   static char castling_chars[] = "KQkq";
-  for (int i = 0; i < 4; ++i) {
-    if (castling[i]) {
-      cout << castling_chars[i];
-    }
-  }
-  cout << endl;
+//  for (int i = 0; i < 4; ++i) {
+//    if (castling[i]) {
+//      cout << castling_chars[i];
+//    }
+//  }
+//  cout << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves)
@@ -467,7 +467,7 @@ void Position::display_all_moves(const bitboard_set& moves)
   });
 }
 
-bitboard_set Position::getPieceBitboards()
+bitboard_set Position::getPieceBitboards()const
 {
   bitboard_set retval;
 //TODO figure out what to do with [0]

@@ -62,7 +62,7 @@ public:
   static const bb BB_RANK5 = 0x000000ff00000000;
   static const bb BB_RANK6 = 0x0000ff0000000000;
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
-  bitboard_set getPieceBitboards();
+  bitboard_set getPieceBitboards() const;
 
   bool is_white_to_move() const
   {
@@ -70,7 +70,7 @@ public:
   }
   bool white_to_move = true; //TODO public for now
   bb en_passant_square = 0x00;
-  bool castling [4];
+  bool castling[4];
 
   //public for now
   bb pawns = 0x00;
