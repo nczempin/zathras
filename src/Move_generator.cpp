@@ -591,7 +591,23 @@ vector<Move> Move_generator::generate_capture_moves()
 void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
     const uint8_t king_square, const int8_t direction)
 {
-  //1. check if squares between king and rook are free. TODO
+  //1. check if squares between king and rook are free.
+  uint8_t next_square = king_square + direction;
+  uint8_t target_square = king_square + direction * 2;
+
+  if (p->is_set_square(p->white | p->black, next_square)) {
+    return;
+  }
+  if (p->is_set_square(p->white | p->black, target_square)) {
+    return;
+  }
+  if (direction == -1) { // queen side
+    if (p->is_set_square(p->white | p->black, target_square - 1)) { // b1/b8
+      return;
+    }
+
+  }
+
   //2. check if squares between king and rook are attacked.
   p->white_to_move = !p->white_to_move;
 
@@ -604,13 +620,13 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
     //cout << " is check" << endl;
     return;
   }
-  bool next = is_attacked(king_square + direction);
+  bool next = is_attacked(next_square);
   if (next) {
     //cout << "next is attacked" << endl;
     p->white_to_move = !p->white_to_move;
     return;
   }
-  bool target = is_attacked(king_square + direction * 2);
+  bool target = is_attacked(target_square);
   if (target) {
     //cout << "target is attacked" << endl;
     p->white_to_move = !p->white_to_move;

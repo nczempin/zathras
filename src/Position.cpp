@@ -78,7 +78,7 @@ void Position::clear_bit(bb& b, int to)
   clear_square(file, rank, b);
 }
 
-bool Position::is_set_square(bb& b, int to)
+bool Position::is_set_square(bb b, int to)
 {
   int t2 = (to / 8) * 8 + (7 - (to % 8));
   uint64_t ttt = 1L << (t2);
@@ -467,7 +467,7 @@ void Position::display_all_moves(const bitboard_set& moves)
   });
 }
 
-bitboard_set Position::getPieceBitboards()const
+bitboard_set Position::getPieceBitboards() const
 {
   bitboard_set retval;
 //TODO figure out what to do with [0]
