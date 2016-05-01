@@ -64,6 +64,9 @@ string Move::to_string() const
   string retval = Square::mailbox_index_to_square(from);
   retval += Square::mailbox_index_to_square(to);
   retval += "*";
+  retval += this->cleared_kingside_castling ? "#" : ".";
+  retval += this->cleared_queenside_castling ? "#" : ".";
+
   return retval;
 }
 int8_t Move::get_moving_piece() const

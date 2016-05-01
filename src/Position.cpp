@@ -448,12 +448,12 @@ void Position::print(ostream& stream) const
   cout << endl;
   cout << "Castling: ";
   static char castling_chars[] = "KQkq";
-//  for (int i = 0; i < 4; ++i) {
-//    if (castling[i]) {
-//      cout << castling_chars[i];
-//    }
-//  }
-//  cout << endl;
+  for (int i = 0; i < 4; ++i) {
+    if (castling[i]) {
+      cout << castling_chars[i];
+    }
+  }
+  cout << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves)
@@ -507,14 +507,15 @@ static int8_t determine_piece(int8_t piece)
 
 void Position::update_bits(unsigned long int& colour, unsigned long int& piece,
     uint8_t clear, uint8_t set)
-{
+{      //TODO castling rights on regular rook move
+
   set_bit(piece, set);
   set_bit(colour, set);
   clear_bit(piece, clear);
   clear_bit(colour, clear);
 }
 
-void Position::make_move(Move move)
+void Position::make_move(Move& move)
 {
 //  cout << "make_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
@@ -558,7 +559,8 @@ void Position::make_move(Move move)
 //        << Square::mailbox_index_to_square(to) << endl;
   }
   int8_t moving = move.get_moving_piece();
-  int8_t moving_abs = moving > 0 ? moving : -moving;
+  int8_t moving_abs = moving > 0 ? moving : -moving; //TODO castling rights on regular rook move
+
   if (moving_abs > 6 || moving_abs == 0) {
     cerr << "invalid move created: moving piece: " << moving << endl;
     throw moving_abs;
@@ -603,6 +605,13 @@ void Position::make_move(Move move)
       set_bit(white, to);
       clear_bit(rooks, from);
       clear_bit(white, from);
+      if (from == 7 && castling[0]) { // H1 //TODO
+        castling[0] = false;
+        move.cleared_kingside_castling = true;
+      } else if (from == 0 && castling[1]) { //A1 // TODO
+        castling[1] = false;
+        move.cleared_queenside_castling = true;
+      }
       break;
     case Piece::WHITE_QUEEN:
       set_bit(queens, to);
@@ -620,7 +629,14 @@ void Position::make_move(Move move)
       } else if (from == to - 2) { // kingside castle
         update_bits(white, rooks, 7, 5); //TODO constants, not magics
       }
-//      Position::visualize_bitboard(kings, cout);
+      if (castling[0]) {
+        move.cleared_kingside_castling = true;
+        castling[0] = false;
+        }
+      if (castling[1]) {
+        move.cleared_queenside_castling = true;
+        castling[1] = false;
+        }
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
@@ -667,6 +683,13 @@ void Position::make_move(Move move)
       set_bit(black, to);
       clear_bit(rooks, from);
       clear_bit(black, from);
+      if (from == 63 && castling[2]) { // H8 //TODO
+        move.cleared_kingside_castling = true;
+        castling[2] = false;
+      } else if (from == 56 && castling[3]) { //A8 // TODO
+        move.cleared_queenside_castling = true;
+        castling[3] = false;
+      }
       break;
     case Piece::BLACK_QUEEN:
       set_bit(queens, to);
@@ -681,7 +704,15 @@ void Position::make_move(Move move)
       } else if (from == to - 2) { // kingside castle
         update_bits(black, rooks, 63, 61); //TODO constants, not magics
       }
-      break;
+      if (castling[2]) {
+        move.cleared_kingside_castling = true;
+        castling[2] = false;
+   }
+      if (castling[3]) {
+        move.cleared_queenside_castling = true;
+        castling[3] = false;
+        }
+       break;
     default:
       double error = ((double) moving);
       cerr << "mm: unexpected black piece: " << error << " in move: "
@@ -699,7 +730,7 @@ void Position::make_move(Move move)
   white_to_move = !white_to_move;
 // cout << "switched on_move to " << white_to_move << endl;
 }
-void Position::unmake_move(Move move)
+void Position::unmake_move(Move& move)
 {
   // cout << "unmake_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
@@ -748,7 +779,14 @@ void Position::unmake_move(Move move)
       clear_bit(white, to);
       set_bit(rooks, from);
       set_bit(white, from);
-      //TODO castling rights on regular rook move
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[0] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[1] = true;
+      }
       break;
     case Piece::WHITE_QUEEN:
       clear_bit(queens, to);
@@ -764,9 +802,14 @@ void Position::unmake_move(Move move)
       } else if (from == to - 2) { // kingside castle
         update_bits(white, rooks, 5, 7); //TODO constants, not magics
       }
-//      Position::visualize_bitboard(kings, cout);
-      //TODO castling rights on castle
-      //TODO castling rights on regular king move
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[0] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[1] = true;
+      }
       break;
     default:
       cerr << "unexpected white piece: " << ((int) moving) << endl;
@@ -811,7 +854,14 @@ void Position::unmake_move(Move move)
       clear_bit(black, to);
       set_bit(rooks, from);
       set_bit(black, from);
-      //TODO castling rights on regular rook move
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[2] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[3] = true;
+      }
       break;
     case Piece::BLACK_QUEEN:
       clear_bit(queens, to);
@@ -826,8 +876,14 @@ void Position::unmake_move(Move move)
       } else if (from == to - 2) { // kingside castle
         update_bits(black, rooks, 61, 63); //TODO constants, not magics
       }
-      //TODO castling rights on castle
-      //TODO castling rights on regular king move
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[2] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[3] = true;
+      }
       break;
     default:
       double error = ((double) moving);

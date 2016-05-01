@@ -647,16 +647,17 @@ void Move_generator::generate_castling(const move_visitor& f,
     king_square = Square::E8;
   }
   //castling:
-  //1. check each right
   static int8_t king_jump_direction[] =
     { 1, -1, 1, -1 };
   static bool colour[] =
     { true, true, false, false };
   for (int i = 0; i < 4; ++i) {
+    //cout << p->castling[i];
     if (white_to_move == colour[i] && p->castling[i]) {
       attempt_castle(f, piece, king_square, king_jump_direction[i]);
     }
   }
+  //cout << endl;
 }
 
 Move_container Move_generator::generate_moves(shared_ptr<Position> position,

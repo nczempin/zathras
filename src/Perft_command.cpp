@@ -85,11 +85,14 @@ int Perft_command::perft(int depth)
 //    cout << move.to_string() << endl;
 //  }
   for (size_t i = 0; i < size; ++i) {
-    Move move = moves[i];
-    //  cout << "(perft@" << depth << "): " << move.to_string() << "-->" << endl;
+    Move& move = moves[i];
+//    cout << "(mm: perft@" << depth << "): " << move.to_string() << "-->"
+//        << endl;
 //    cout << *pp << endl;
     pp->make_move(move);
 //    cout << *pp << endl;
+//    cout << "(bc: perft@" << depth << "): " << move.to_string() << "-->"
+//        << endl;
     if (!mg.is_in_check(!pp->white_to_move)) {
       if (depth == 1) {
         ++total_result;
@@ -98,7 +101,12 @@ int Perft_command::perft(int depth)
         total_result += perft_result;
       }
     }
+//    cout << "(bu: perft@" << depth << "): " << move.to_string() << "-->"
+//        << endl;
     pp->unmake_move(move);
+//    cout << "(um: perft@" << depth << "): " << move.to_string() << "-->"
+//        << endl;
+
 //    cout << "after unmake_move:" << endl;
 //    cout << p << endl;
   }
@@ -109,9 +117,10 @@ void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
   int depth = 3; //TODO get this from arguments, but use a reasonable default
-  Position position = Position::create_position(
-      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
-  //Position position = Position::create_start_position();
+  Position position;
+  position = Position::create_position(
+      "r3k2r/8/8/8/8/8/5P1P/R3K2R w KQkq - 0 2");
+  //position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;
   mg.pregenerate_moves();
@@ -133,7 +142,7 @@ void Perft_command::execute()
 //      cout << move.to_string() << endl;
 //    }
     for (size_t i = 0; i < size; ++i) {
-      Move move = moves[i];
+      Move& move = moves[i];
       int8_t moving = move.get_moving_piece();
       int8_t moving_abs = moving > 0 ? moving : -moving;
       if (moving_abs > 6 || moving_abs == 0) {
@@ -144,6 +153,7 @@ void Perft_command::execute()
 //      cout.flush();
       string s = move.to_string();
 //      cout << "(make move) " << s << endl;
+      cout << s << "******************" << endl;
       pp->make_move(move);
       if (mg.is_in_check(!pp->white_to_move)) {
         pp->unmake_move(move);
@@ -153,6 +163,7 @@ void Perft_command::execute()
 //    cout << "after make_move:" << endl;
 //    cout << p << endl;
       int perft_result = perft(depth - 1);
+      s = move.to_string();
       cout << s << ": " << perft_result << endl;
       total_result += perft_result;
       pp->unmake_move(move);
