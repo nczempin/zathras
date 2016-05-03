@@ -793,6 +793,7 @@ vector<Move> Move_generator::generate_moves(uint8_t square)
       [&moves, this, square](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
         //cout << "trying: " << m.to_string() << endl;
         if (to == square) {
+          return true;
           Move m (moving, from, to, captured, false);
           //cout << "found one" << endl;
           moves.push_back(m);
