@@ -632,11 +632,11 @@ void Position::make_move(Move& move)
       if (castling[0]) {
         move.cleared_kingside_castling = true;
         castling[0] = false;
-        }
+      }
       if (castling[1]) {
         move.cleared_queenside_castling = true;
         castling[1] = false;
-        }
+      }
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
@@ -707,12 +707,12 @@ void Position::make_move(Move& move)
       if (castling[2]) {
         move.cleared_kingside_castling = true;
         castling[2] = false;
-   }
+      }
       if (castling[3]) {
         move.cleared_queenside_castling = true;
         castling[3] = false;
-        }
-       break;
+      }
+      break;
     default:
       double error = ((double) moving);
       cerr << "mm: unexpected black piece: " << error << " in move: "
