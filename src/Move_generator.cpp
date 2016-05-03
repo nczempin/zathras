@@ -972,12 +972,12 @@ bool Move_generator::is_in_check(bool side)
   //  cout << "checking for side: " << (side ? "white" : "black") << endl;
 //  cout << "to move: " << (p->white_to_move ? "white" : "black") << endl;
 //
-//TODO this is only the naive way of doing this, it needs to be much more efficient
+//TODO this is a somewhat naive way of doing this, it needs to be much more efficient
 
   int king_pos = 0;
-  function<void(int)> f = [&king_pos](int square) {
+  function<void(int)> f1 = [&king_pos](int sq) {
 //    cout << "determined: " << square << endl;
-      king_pos = square;
+      king_pos = sq;
 //    cout << "determined: " << king_pos << endl;
     };
   bb wk = p->kings & p->white;
@@ -986,13 +986,117 @@ bool Move_generator::is_in_check(bool side)
 //  cout << hex << p->kings << "... " << bk << dec << endl;
   if (side) {
 //    cout << "determining for white: ";
-    Position::visit_bitboard(wk, f);
+    Position::visit_bitboard(wk, f1);
   } else {
 //    cout << "determining for black: ";
-    Position::visit_bitboard(bk, f);
+    Position::visit_bitboard(bk, f1);
   }
-  bool retval = is_attacked(king_pos);
-//  cout << "king_pos= " << king_pos << endl;
-//  cout << "in check: " << retval << endl;
-  return retval;
+  uint8_t square = king_pos;
+  bool retval = false;
+  pieces = p->getPieceBitboards();
+  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
+      [square, &retval](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+        if (to == square) {
+          retval = true;
+        }
+      };
+
+  //TODO generalize, obviously
+  const bb white_pawns = pieces[Piece::PAWN] & pieces[Piece::WHITE];
+  const bb white_knights = pieces[Piece::KNIGHT] & pieces[Piece::WHITE];
+  const bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
+  const bb white_rooks = pieces[Piece::ROOK] & pieces[Piece::WHITE];
+  const bb white_queens = pieces[Piece::QUEEN] & pieces[Piece::WHITE];
+  const bb white_kings = pieces[Piece::KING] & pieces[Piece::WHITE];
+  const bb black_pawns = pieces[Piece::PAWN] & pieces[Piece::BLACK];
+  const bb black_knights = pieces[Piece::KNIGHT] & pieces[Piece::BLACK];
+  const bb black_bishops = pieces[Piece::BISHOP] & pieces[Piece::BLACK];
+  const bb black_rooks = pieces[Piece::ROOK] & pieces[Piece::BLACK];
+  const bb black_queens = pieces[Piece::QUEEN] & pieces[Piece::BLACK];
+  const bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
+  ///
+
+  if (p->white_to_move) {
+    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, black_kings,
+        Piece::WHITE_PAWN);
+    if (retval) {
+      return true;
+    }
+    visit_capture_moves(white_knights, knight_moves, f, black_kings,
+        Piece::WHITE_KNIGHT);
+    if (retval) {
+      return true;
+    }
+    visit_capture_moves(white_kings, king_moves, f, black_kings,
+        Piece::WHITE_KING);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(white_queens, rook_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], black_kings,
+        Piece::WHITE_QUEEN);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(white_rooks, rook_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], black_kings,
+        Piece::WHITE_ROOK);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(white_bishops, bishop_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], black_kings,
+        Piece::WHITE_BISHOP);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(white_queens, bishop_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], black_kings,
+        Piece::WHITE_QUEEN);
+    if (retval) {
+      return true;
+    }
+  } else {
+    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, white_kings,
+        Piece::BLACK_PAWN);
+    if (retval) {
+      return true;
+    }
+    visit_capture_moves(black_knights, knight_moves, f, white_kings,
+        Piece::BLACK_KNIGHT);
+    if (retval) {
+      return true;
+    }
+    visit_capture_moves(black_kings, king_moves, f, white_kings,
+        Piece::BLACK_KING);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(black_queens, rook_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], white_kings,
+        Piece::BLACK_QUEEN);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(black_rooks, rook_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], white_kings,
+        Piece::BLACK_ROOK);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(black_bishops, bishop_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], white_kings,
+        Piece::BLACK_BISHOP);
+    if (retval) {
+      return true;
+    }
+    visit_capture_ray_moves(black_queens, bishop_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], white_kings,
+        Piece::BLACK_QUEEN);
+    if (retval) {
+      return true;
+    }
+  }
+  return false;
+
 }
