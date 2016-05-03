@@ -795,9 +795,9 @@ vector<Move> Move_generator::generate_moves(uint8_t square)
         if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
           en_passant = true;
         }
-        Move m (moving, from, to, captured, en_passant);
         //cout << "trying: " << m.to_string() << endl;
         if (to == square) {
+          Move m (moving, from, to, captured, en_passant);
           //cout << "found one" << endl;
           moves.push_back(m);
         }
@@ -893,8 +893,109 @@ vector<Move> Move_generator::generate_moves(uint8_t square)
 
 bool Move_generator::is_attacked(uint8_t square)
 {
+  pieces = p->getPieceBitboards();
+  vector<Move> attack_moves;
+//  moves.clear();
+  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
+      [&attack_moves, this, square](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+        bool en_passant = false;
+        if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
+          en_passant = true;
+        }
+        //cout << "trying: " << m.to_string() << endl;
+        if (to == square) {
+          Move m (moving, from, to, captured, en_passant);
+          //cout << "found one" << endl;
+          attack_moves.push_back(m);
+        }
+      };
+
+  //TODO generalize, obviously
+  bb white_pawns = pieces[Piece::PAWN] & pieces[Piece::WHITE];
+  bb white_knights = pieces[Piece::KNIGHT] & pieces[Piece::WHITE];
+  bb white_bishops = pieces[Piece::BISHOP] & pieces[Piece::WHITE];
+  bb white_rooks = pieces[Piece::ROOK] & pieces[Piece::WHITE];
+  bb white_queens = pieces[Piece::QUEEN] & pieces[Piece::WHITE];
+  bb white_kings = pieces[Piece::KING] & pieces[Piece::WHITE];
+  bb black_pawns = pieces[Piece::PAWN] & pieces[Piece::BLACK];
+  bb black_knights = pieces[Piece::KNIGHT] & pieces[Piece::BLACK];
+  bb black_bishops = pieces[Piece::BISHOP] & pieces[Piece::BLACK];
+  bb black_rooks = pieces[Piece::ROOK] & pieces[Piece::BLACK];
+  bb black_queens = pieces[Piece::QUEEN] & pieces[Piece::BLACK];
+  bb black_kings = pieces[Piece::KING] & pieces[Piece::BLACK];
+  ///
+
+  if (p->white_to_move) {
+    visit_capture_moves(white_pawns, white_pawn_capture_moves, f,
+        pieces[Piece::BLACK], Piece::WHITE_PAWN);
+    visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_PAWN, true);
+    visit_capture_moves(white_knights, knight_moves, f, pieces[Piece::BLACK],
+        Piece::WHITE_KNIGHT);
+    visit_non_capture_moves(white_knights, knight_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KNIGHT);
+    visit_capture_moves(white_kings, king_moves, f, pieces[Piece::BLACK],
+        Piece::WHITE_KING);
+    visit_non_capture_moves(white_kings, king_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_KING);
+    visit_non_capture_ray_moves(white_queens, rook_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_rooks, rook_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_ROOK);
+    visit_capture_ray_moves(white_queens, rook_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_QUEEN);
+    visit_capture_ray_moves(white_rooks, rook_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_ROOK);
+    visit_capture_ray_moves(white_bishops, bishop_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_BISHOP);
+    visit_capture_ray_moves(white_queens, bishop_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], pieces[Piece::BLACK],
+        Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_bishops, bishop_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_BISHOP);
+    visit_non_capture_ray_moves(white_queens, bishop_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::WHITE_QUEEN);
+    //  generate_castling(f, true);
+  } else {
+    visit_capture_moves(black_pawns, black_pawn_capture_moves, f,
+        pieces[Piece::WHITE], Piece::BLACK_PAWN);
+    visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_PAWN, false);
+    visit_capture_moves(black_knights, knight_moves, f, pieces[Piece::WHITE],
+        Piece::BLACK_KNIGHT);
+    visit_non_capture_moves(black_knights, knight_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KNIGHT);
+    visit_capture_moves(black_kings, king_moves, f, pieces[Piece::WHITE],
+        Piece::BLACK_KING);
+    visit_non_capture_moves(black_kings, king_moves, f,
+        pieces[Piece::WHITE] | pieces[Piece::BLACK], Piece::BLACK_KING);
+    visit_non_capture_ray_moves(black_queens, rook_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+    visit_non_capture_ray_moves(black_rooks, rook_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_ROOK);
+    visit_capture_ray_moves(black_queens, rook_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_QUEEN);
+    visit_capture_ray_moves(black_rooks, rook_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_ROOK);
+    visit_capture_ray_moves(black_bishops, bishop_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_BISHOP);
+    visit_capture_ray_moves(black_queens, bishop_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], pieces[Piece::WHITE],
+        Piece::BLACK_QUEEN);
+    visit_non_capture_ray_moves(black_bishops, bishop_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_BISHOP);
+    visit_non_capture_ray_moves(black_queens, bishop_moves, f,
+        pieces[Piece::BLACK] | pieces[Piece::WHITE], Piece::BLACK_QUEEN);
+    //generate_castling(f, false);
+
+  }
   bool retval = false;
-  vector<Move> attack_moves = generate_moves(square);
   for (auto& move : attack_moves) {
     //cout << "is attacked?: " << move.to_string() << endl;
     uint8_t t = move.get_to();
