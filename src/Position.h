@@ -25,8 +25,8 @@ public:
   Position();
   virtual ~Position();
 
-  void make_move(Move move);
-  void unmake_move(Move move);
+  void make_move(Move& move);
+  void unmake_move(Move& move);
 
   friend ostream& operator<<(ostream& stream, const Position& position);
   void print(ostream& stream) const;
@@ -36,7 +36,7 @@ public:
   static void set_square(bitset<64>& bs, int to);
   static void clear_square(bitset<64>& bs, int to);
   static void set_square(bb& bs, int to);
-  static bool is_set_square(bb& bs, int to);
+  static bool is_set_square(bb bs, int to);
   static void clear_square(bb& bs, int to);
   static void set_bit(bb& bs, int to);
   static void clear_bit(bb& bs, int to);
@@ -47,6 +47,7 @@ public:
 
   static void visualize_bitboard(bb my_bb, ostream& stream);
   static void visit_bitboard(const bb my_bb, const square_visitor);
+//  static void visit_bitboard2(const bb my_bb, const square_visitor);
   static void visualize_mailbox_board(int board[64], ostream& stream);
   static void visit_mailbox_board(int board[64], void (*visitor)(int)); // TODO convert to c++11
 
@@ -61,7 +62,7 @@ public:
   static const bb BB_RANK5 = 0x000000ff00000000;
   static const bb BB_RANK6 = 0x0000ff0000000000;
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
-  bitboard_set getPieceBitboards();
+  bitboard_set getPieceBitboards() const;
 
   bool is_white_to_move() const
   {
@@ -69,6 +70,7 @@ public:
   }
   bool white_to_move = true; //TODO public for now
   bb en_passant_square = 0x00;
+  bool castling[4];
 
   //public for now
   bb pawns = 0x00;
@@ -83,7 +85,8 @@ private:
 
   static string extract_row_string(uint_fast8_t row, string set);
   static void display_all_moves(const bitboard_set& moves);
-
+  void update_bits(unsigned long int& colour, unsigned long int& piece,
+      uint8_t from, uint8_t to);
 };
 
 #endif /* POSITION_H_ */

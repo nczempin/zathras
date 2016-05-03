@@ -20,10 +20,11 @@ public:
   static void pregenerate_moves();
   Move_container generate_moves(shared_ptr<Position> p, size_t depth);
   vector<Move> generate_capture_moves();
+  vector<Move> generate_moves(uint8_t target);
   bool is_in_check(bool side);
 private:
   shared_ptr<Position> p;
-  static bitboard_set pregenerate_rays(int direction);
+  static bitboard_set pregenerate_rays(int8_t direction);
   static bitboard_set pregenerate_knight_moves();
   static bitboard_set pregenerate_king_moves();
   static bitboard_set pregenerate_bishop_moves();
@@ -31,7 +32,7 @@ private:
   static bitboard_set pregenerate_queen_moves();
   static bitboard_set pregenerate_white_pawn_no_capture_moves();
   static bitboard_set pregenerate_black_pawn_no_capture_moves();
-  static bitboard_set pregen_pawn_nocaps(int start, int stop, int direction);
+  static bitboard_set pregen_pawn_nocaps(int start, int stop, int8_t direction);
   static bitboard_set pregenerate_white_pawn_capture_moves();
   static bitboard_set pregenerate_black_pawn_capture_moves();
   static bitboard_set pregen_pawn_caps(int direction);
@@ -73,6 +74,11 @@ private:
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
   void visit_moves(move_visitor count_moves);
   int find_captured_piece(int y);
+  void generate_castling(const move_visitor& f, bool white);
+  bool is_attacked(uint8_t square);
+  void attempt_castle(const move_visitor f, const int8_t piece,
+      const uint8_t king_square, const int8_t direction);
+  vector<Move> generate_attack_moves();
 };
 
 #endif /* MOVE_GENERATOR_H_ */

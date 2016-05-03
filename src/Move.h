@@ -39,6 +39,8 @@ public:
   {
     en_passant = enPassant;
   }
+  bool cleared_queenside_castling = false;
+  bool cleared_kingside_castling = false;
 
 private:
   Move();

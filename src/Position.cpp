@@ -16,7 +16,7 @@
 
 Position::Position()
 {
-  // TODO Auto-generated constructor stub
+
 }
 //
 Position::~Position()
@@ -78,7 +78,7 @@ void Position::clear_bit(bb& b, int to)
   clear_square(file, rank, b);
 }
 
-bool Position::is_set_square(bb& b, int to)
+bool Position::is_set_square(bb b, int to)
 {
   int t2 = (to / 8) * 8 + (7 - (to % 8));
   uint64_t ttt = 1L << (t2);
@@ -122,7 +122,32 @@ Position Position::create_position(const string& fen)
   Position position;
   vector<string> split_fen = split(fen, ' ');
   string to_move = split_fen[1];
-  string castling = split_fen[2];
+  string castling_string = split_fen[2];
+  for (int i = 0; i < 4; ++i) {
+    position.castling[i] = false;
+  }
+  if (castling_string != "-") {
+    for (auto& right : castling_string) {
+      //TODO make more elegant
+      switch (right) {
+      case ('K'):
+        position.castling[0] = true;
+        break;
+      case ('Q'):
+        position.castling[1] = true;
+        break;
+      case ('k'):
+        position.castling[2] = true;
+        break;
+      case ('q'):
+        position.castling[3] = true;
+        break;
+      default:
+        break;
+      }
+      cout << "right: " << right << endl;
+    }
+  }
   string en_passant = split_fen[3];
   if (en_passant != "-") {
     bb en_passant_square = 0x00;
@@ -269,42 +294,6 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
-//These processor instructions work only for 64-bit processors
-#ifdef _MSC_VER
-#include <intrin.h>
-#ifdef _WIN64
-#pragma intrinsic(_BitScanForward64)
-#pragma intrinsic(_BitScanReverse64)
-#define USING_INTRINSICS
-#endif
-#elif defined(__GNUC__) && defined(__LP64__)
-#define U64 bb
-static inline unsigned char _BitScanForward64(unsigned long* Index, U64 Mask)
-{
-  U64 Ret;
-  __asm__
-  (
-      "bsfq %[Mask], %[Ret]"
-      :[Ret] "=r" (Ret)
-      :[Mask] "mr" (Mask)
-  );
-  *Index = (unsigned long) Ret;
-  return Mask ? 1 : 0;
-}
-static inline unsigned char _BitScanReverse64(unsigned long* Index, U64 Mask)
-{
-  U64 Ret;
-  __asm__
-  (
-      "bsrq %[Mask], %[Ret]"
-      :[Ret] "=r" (Ret)
-      :[Mask] "mr" (Mask)
-  );
-  *Index = (unsigned long) Ret;
-  return Mask ? 1 : 0;
-}
-#define USING_INTRINSICS
-#endif
 void Position::visit_bitboard(const bb my_bb, const square_visitor f)
 {
   static uint8_t lookup[] =
@@ -337,6 +326,37 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
   }
 
 }
+//void Position::visit_bitboard2(const bb my_bb, const square_visitor f)
+//{
+//  static uint8_t lookup[] =
+//    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+//      15, 14, 13, 12, 11, 10, 9, 8, //
+//      23, 22, 21, 20, 19, 18, 17, 16, //
+//      31, 30, 29, 28, 27, 26, 25, 24, //
+//      39, 38, 37, 36, 35, 34, 33, 32, //
+//      47, 46, 45, 44, 43, 42, 41, 40, //
+//      55, 54, 53, 52, 51, 50, 49, 48, //
+//      63, 62, 61, 60, 59, 58, 57, 56 };
+//  bb tmp = my_bb;
+//  uint8_t coord = 0;
+//  uint8_t l = 0;
+//  while (true) {
+//    l = __builtin_ffsll(tmp);
+//    cout << hex;
+//    cout << "l, tmp: " << (int) l << ", " << tmp << endl;
+//    if (l == 0) {
+//      return;
+//    }
+//    coord = lookup[l];
+//    cout << "coord: " << (int) coord << endl;
+//
+//    f(coord);
+//    tmp &= tmp - 1; //clear LS1B
+//    cout << "new tmp: " << tmp << endl;
+//    cout << dec;
+//  }
+//
+//}
 void Position::visualize_mailbox_board(int board[64], ostream& stream)
 {
   stream << "  +-----------------+" << endl;
@@ -425,6 +445,15 @@ void Position::print(ostream& stream) const
   Position::visit_bitboard(en_passant_square, [](int y) {
     cout << Square::mailbox_index_to_square(y)<< endl;
   });
+  cout << endl;
+  cout << "Castling: ";
+  static char castling_chars[] = "KQkq";
+  for (int i = 0; i < 4; ++i) {
+    if (castling[i]) {
+      cout << castling_chars[i];
+    }
+  }
+  cout << endl;
 }
 
 void Position::display_all_moves(const bitboard_set& moves)
@@ -438,7 +467,7 @@ void Position::display_all_moves(const bitboard_set& moves)
   });
 }
 
-bitboard_set Position::getPieceBitboards()
+bitboard_set Position::getPieceBitboards() const
 {
   bitboard_set retval;
 //TODO figure out what to do with [0]
@@ -475,9 +504,20 @@ static int8_t determine_piece(int8_t piece)
     return -piece;
   }
 }
-void Position::make_move(Move move)
+
+void Position::update_bits(unsigned long int& colour, unsigned long int& piece,
+    uint8_t clear, uint8_t set)
+{      //TODO castling rights on regular rook move
+
+  set_bit(piece, set);
+  set_bit(colour, set);
+  clear_bit(piece, clear);
+  clear_bit(colour, clear);
+}
+
+void Position::make_move(Move& move)
 {
-  //cout << "make_move: " << move.to_string() << endl;
+//  cout << "make_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
 
@@ -519,7 +559,8 @@ void Position::make_move(Move move)
 //        << Square::mailbox_index_to_square(to) << endl;
   }
   int8_t moving = move.get_moving_piece();
-  int8_t moving_abs = moving > 0 ? moving : -moving;
+  int8_t moving_abs = moving > 0 ? moving : -moving; //TODO castling rights on regular rook move
+
   if (moving_abs > 6 || moving_abs == 0) {
     cerr << "invalid move created: moving piece: " << moving << endl;
     throw moving_abs;
@@ -564,6 +605,13 @@ void Position::make_move(Move move)
       set_bit(white, to);
       clear_bit(rooks, from);
       clear_bit(white, from);
+      if (from == 7 && castling[0]) { // H1 //TODO
+        castling[0] = false;
+        move.cleared_kingside_castling = true;
+      } else if (from == 0 && castling[1]) { //A1 // TODO
+        castling[1] = false;
+        move.cleared_queenside_castling = true;
+      }
       break;
     case Piece::WHITE_QUEEN:
       set_bit(queens, to);
@@ -576,6 +624,19 @@ void Position::make_move(Move move)
       set_bit(white, to);
       clear_bit(kings, from);
       clear_bit(white, from);
+      if (to == from - 2) { //queenside castle
+        update_bits(white, rooks, 0, 3); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(white, rooks, 7, 5); //TODO constants, not magics
+      }
+      if (castling[0]) {
+        move.cleared_kingside_castling = true;
+        castling[0] = false;
+        }
+      if (castling[1]) {
+        move.cleared_queenside_castling = true;
+        castling[1] = false;
+        }
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
@@ -591,19 +652,19 @@ void Position::make_move(Move move)
       clear_bit(pawns, from);
       clear_bit(black, from);
       {
-         // handle capturing by e. p.
-         int ep_square = to + 8;
-         if (is_set_square(en_passant_square, to)) { // en passant capture
-           clear_bit(pawns, ep_square);
-           clear_bit(white, ep_square);
-         }
-         // handle double step preparing the e. p.
-         en_passant_square = 0x00;
-         if (to - from == -16) {
-           set_bit(en_passant_square, ep_square);
-         }
+        // handle capturing by e. p.
+        int ep_square = to + 8;
+        if (is_set_square(en_passant_square, to)) { // en passant capture
+          clear_bit(pawns, ep_square);
+          clear_bit(white, ep_square);
+        }
+        // handle double step preparing the e. p.
+        en_passant_square = 0x00;
+        if (to - from == -16) {
+          set_bit(en_passant_square, ep_square);
+        }
 
-       }
+      }
       break;
     case Piece::BLACK_KNIGHT:
       set_bit(knights, to);
@@ -622,6 +683,13 @@ void Position::make_move(Move move)
       set_bit(black, to);
       clear_bit(rooks, from);
       clear_bit(black, from);
+      if (from == 63 && castling[2]) { // H8 //TODO
+        move.cleared_kingside_castling = true;
+        castling[2] = false;
+      } else if (from == 56 && castling[3]) { //A8 // TODO
+        move.cleared_queenside_castling = true;
+        castling[3] = false;
+      }
       break;
     case Piece::BLACK_QUEEN:
       set_bit(queens, to);
@@ -630,11 +698,21 @@ void Position::make_move(Move move)
       clear_bit(black, from);
       break;
     case Piece::BLACK_KING:
-      set_bit(kings, to);
-      set_bit(black, to);
-      clear_bit(kings, from);
-      clear_bit(black, from);
-      break;
+      update_bits(black, kings, from, to);
+      if (to == from - 2) { //queenside castle
+        update_bits(black, rooks, 56, 59); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(black, rooks, 63, 61); //TODO constants, not magics
+      }
+      if (castling[2]) {
+        move.cleared_kingside_castling = true;
+        castling[2] = false;
+   }
+      if (castling[3]) {
+        move.cleared_queenside_castling = true;
+        castling[3] = false;
+        }
+       break;
     default:
       double error = ((double) moving);
       cerr << "mm: unexpected black piece: " << error << " in move: "
@@ -652,7 +730,7 @@ void Position::make_move(Move move)
   white_to_move = !white_to_move;
 // cout << "switched on_move to " << white_to_move << endl;
 }
-void Position::unmake_move(Move move)
+void Position::unmake_move(Move& move)
 {
   // cout << "unmake_move: " << move.to_string() << endl;
   uint8_t from = move.get_from();
@@ -701,6 +779,14 @@ void Position::unmake_move(Move move)
       clear_bit(white, to);
       set_bit(rooks, from);
       set_bit(white, from);
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[0] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[1] = true;
+      }
       break;
     case Piece::WHITE_QUEEN:
       clear_bit(queens, to);
@@ -709,10 +795,21 @@ void Position::unmake_move(Move move)
       set_bit(white, from);
       break;
     case Piece::WHITE_KING:
-      clear_bit(kings, to);
-      clear_bit(white, to);
-      set_bit(kings, from);
-      set_bit(white, from);
+//      Position::visualize_bitboard(kings, cout);
+      update_bits(white, kings, to, from);
+      if (to == from - 2) { //queenside castle
+        update_bits(white, rooks, 3, 0); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(white, rooks, 5, 7); //TODO constants, not magics
+      }
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[0] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[1] = true;
+      }
       break;
     default:
       cerr << "unexpected white piece: " << ((int) moving) << endl;
@@ -757,6 +854,14 @@ void Position::unmake_move(Move move)
       clear_bit(black, to);
       set_bit(rooks, from);
       set_bit(black, from);
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[2] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[3] = true;
+      }
       break;
     case Piece::BLACK_QUEEN:
       clear_bit(queens, to);
@@ -765,10 +870,20 @@ void Position::unmake_move(Move move)
       set_bit(black, from);
       break;
     case Piece::BLACK_KING:
-      clear_bit(kings, to);
-      clear_bit(black, to);
-      set_bit(kings, from);
-      set_bit(black, from);
+      update_bits(black, kings, to, from);
+      if (to == from - 2) { //queenside castle
+        update_bits(black, rooks, 59, 56); //TODO constants, not magics
+      } else if (from == to - 2) { // kingside castle
+        update_bits(black, rooks, 61, 63); //TODO constants, not magics
+      }
+      if (move.cleared_kingside_castling) {
+        //move.cleared_kingside_castling = false;
+        castling[2] = true;
+      }
+      if (move.cleared_queenside_castling) {
+        //move.cleared_queenside_castling = false;
+        castling[3] = true;
+      }
       break;
     default:
       double error = ((double) moving);
