@@ -7,14 +7,18 @@
 
 #include "Move_container.h"
 #include "Piece.h"
-#include <vector>
+#include <array>
 #include <iostream>
 
-vector<Move_container> Move_container::container_pool(10);
+array<Move_container, 10> Move_container::container_pool;
 
 Move_container::Move_container()
 {
-
+  Move m;
+  for (size_t i = 0; i < SIZE; ++i) {
+    container[i] = m;
+  }
+  index = 0;
 }
 
 Move_container::~Move_container()
@@ -30,23 +34,31 @@ Move_container& Move_container::get(size_t index)
 void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
     int8_t captured, bool en_passant)
 {
-  uint64_t ff = from;
-
-  Move m(moving, from, to, captured, en_passant);
-  container.push_back(m);
+  if (moving == 0) {
+    cerr << "moving == 0" << endl;
+    throw 17;
+  }
+  Move &m = container[index];
+  m.set_moving_piece(moving);
+  m.set_from(from);
+  m.set_to(to);
+  m.set_en_passant(en_passant);
+  m.set_captured(captured);
+  ++index;
+  //TODO if index == capacity
 }
 
 void Move_container::reset()
 {
-  container.clear();
+  index = 0;
 }
 
 size_t Move_container::size()
 {
-  return container.size();
+  return index;
 }
 
-vector<Move> Move_container::get_moves()
+array<Move, Move_container::SIZE> Move_container::get_moves()
 {
   return container; //TODO unsafe?
 }

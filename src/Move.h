@@ -16,6 +16,7 @@ using namespace std;
 class Move
 {
 public:
+  Move();
   Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured,
       bool en_passant);
   uint8_t get_from();
@@ -39,11 +40,21 @@ public:
   {
     en_passant = enPassant;
   }
+
+  int8_t get_captured() const
+  {
+    return captured;
+  }
+
+  void set_captured(int8_t captured = 0)
+  {
+    this->captured = captured;
+  }
+
   bool cleared_queenside_castling = false;
   bool cleared_kingside_castling = false;
 
 private:
-  Move();
   uint8_t from = 0;
   uint8_t to = 0;
   int8_t moving = 0;

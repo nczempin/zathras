@@ -11,8 +11,8 @@
 
 using namespace std;
 
-Move::Move(int8_t moving, uint8_t from, uint8_t to, int8_t captured = 0,
-    bool en_passant = 0) :
+Move::Move(int8_t moving = 0, uint8_t from = 0, uint8_t to = 0,
+    int8_t captured = 0, bool en_passant = false) :
     from(from), to(to), moving(moving), captured(captured), en_passant(
         en_passant)
 {
@@ -25,6 +25,10 @@ Move::Move(int8_t moving, uint8_t from, uint8_t to, int8_t captured = 0,
     }
   }
 
+}
+Move::Move() :
+    from(0), to(0), moving(0), captured(0), en_passant(false)
+{
 }
 
 uint8_t Move::get_from()

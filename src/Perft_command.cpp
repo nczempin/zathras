@@ -72,12 +72,12 @@ int Perft_command::perft(int depth)
     return 1;
   }
   Move_container move_container = mg.generate_moves(pp, depth);
-  vector<Move> moves = move_container.get_moves();
+  array<Move, Move_container::SIZE> moves = move_container.get_moves();
   //  if (depth == 1) {
 //    return moves.size();
 //  }
   int total_result = 0;
-  size_t size = moves.size();
+  size_t size = move_container.size();
 //  cout << "moves.size: " << size << endl;
 //  cout << "perft::perft" << endl;
 //  for (size_t i = 0; i < size; ++i) {
@@ -130,7 +130,7 @@ void Perft_command::execute()
   //cout << "b4 gen" << endl;
   pp = make_shared<Position>(position);
   Move_container move_container = mg.generate_moves(pp, depth);
-  vector<Move> moves = move_container.get_moves();
+  array<Move, Move_container::SIZE> moves = move_container.get_moves();
   //cout << "after gen" << endl;
   size_t size = move_container.size();
 //  cout << "moves.size: " << size << endl;
@@ -146,6 +146,7 @@ void Perft_command::execute()
       int8_t moving = move.get_moving_piece();
       int8_t moving_abs = moving > 0 ? moving : -moving;
       if (moving_abs > 6 || moving_abs == 0) {
+        cerr << "size: " << size << endl;
         cerr << "invalid move created: moving piece: " << moving << endl;
         throw moving_abs;
       }
