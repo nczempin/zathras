@@ -294,10 +294,9 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
   stream << "    A B C D E F G H" << endl;
 }
 
-void Position::visit_bitboard(const bb my_bb, const square_visitor f)
+uint8_t Position::extract_square(const bb my_bb)
 {
-  static uint8_t lookup[] =
-    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+  static uint8_t lookup[] = { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
       15, 14, 13, 12, 11, 10, 9, 8, //
       23, 22, 21, 20, 19, 18, 17, 16, //
       31, 30, 29, 28, 27, 26, 25, 24, //
@@ -305,10 +304,24 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
       47, 46, 45, 44, 43, 42, 41, 40, //
       55, 54, 53, 52, 51, 50, 49, 48, //
       63, 62, 61, 60, 59, 58, 57, 56 };
+
+  return lookup[__builtin_ffsll(my_bb)];
+}
+
+void Position::visit_bitboard(const bb my_bb, const square_visitor f)
+{
   bb tmp = my_bb;
   //static bb t = 0;
   uint8_t coord = 0;
   uint8_t l = 0;
+  static uint8_t lookup[] = { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+       15, 14, 13, 12, 11, 10, 9, 8, //
+       23, 22, 21, 20, 19, 18, 17, 16, //
+       31, 30, 29, 28, 27, 26, 25, 24, //
+       39, 38, 37, 36, 35, 34, 33, 32, //
+       47, 46, 45, 44, 43, 42, 41, 40, //
+       55, 54, 53, 52, 51, 50, 49, 48, //
+       63, 62, 61, 60, 59, 58, 57, 56 };
   while (true) {
     l = __builtin_ffsll(tmp);
 //    cout << hex;
@@ -316,7 +329,7 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
     if (l == 0) {
       return;
     }
-    coord = lookup[l];
+     coord = lookup[l];
     //   cout << "coord: " << coord << endl;
 
     f(coord);
@@ -632,11 +645,11 @@ void Position::make_move(Move& move)
       if (castling[0]) {
         move.cleared_kingside_castling = true;
         castling[0] = false;
-        }
+      }
       if (castling[1]) {
         move.cleared_queenside_castling = true;
         castling[1] = false;
-        }
+      }
       break;
     default:
       cerr << "unexpected white piece: " << moving << endl;
@@ -707,12 +720,12 @@ void Position::make_move(Move& move)
       if (castling[2]) {
         move.cleared_kingside_castling = true;
         castling[2] = false;
-   }
+      }
       if (castling[3]) {
         move.cleared_queenside_castling = true;
         castling[3] = false;
-        }
-       break;
+      }
+      break;
     default:
       double error = ((double) moving);
       cerr << "mm: unexpected black piece: " << error << " in move: "

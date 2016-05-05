@@ -19,8 +19,7 @@
 #include "Move.h"
 using namespace std;
 
-class Position
-{
+class Position {
 public:
   Position();
   virtual ~Position();
@@ -52,6 +51,7 @@ public:
   static void visit_mailbox_board(int board[64], void (*visitor)(int)); // TODO convert to c++11
 
   static Position create_position(const string& fen);
+  static uint8_t extract_square(const bb my_bb);
 
   //static void print_square(int x);
   //TODO a separate Bitboard (helper) class is probably best
