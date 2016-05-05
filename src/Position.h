@@ -17,9 +17,12 @@
 #include <vector>
 #include "typedefs.h"
 #include "Move.h"
+#include <array>
+
 using namespace std;
 
-class Position {
+class Position
+{
 public:
   Position();
   virtual ~Position();
@@ -62,7 +65,7 @@ public:
   static const bb BB_RANK5 = 0x000000ff00000000;
   static const bb BB_RANK6 = 0x0000ff0000000000;
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
-  bitboard_set getPieceBitboards() const;
+  array<bb, 9> getPieceBitboards() const;
 
   bool is_white_to_move() const
   {

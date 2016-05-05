@@ -13,6 +13,7 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
+#include <array>
 
 Position::Position()
 {
@@ -296,7 +297,8 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
 
 uint8_t Position::extract_square(const bb my_bb)
 {
-  static uint8_t lookup[] = { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+  static uint8_t lookup[] =
+    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
       15, 14, 13, 12, 11, 10, 9, 8, //
       23, 22, 21, 20, 19, 18, 17, 16, //
       31, 30, 29, 28, 27, 26, 25, 24, //
@@ -314,14 +316,15 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
   //static bb t = 0;
   uint8_t coord = 0;
   uint8_t l = 0;
-  static uint8_t lookup[] = { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
-       15, 14, 13, 12, 11, 10, 9, 8, //
-       23, 22, 21, 20, 19, 18, 17, 16, //
-       31, 30, 29, 28, 27, 26, 25, 24, //
-       39, 38, 37, 36, 35, 34, 33, 32, //
-       47, 46, 45, 44, 43, 42, 41, 40, //
-       55, 54, 53, 52, 51, 50, 49, 48, //
-       63, 62, 61, 60, 59, 58, 57, 56 };
+  static uint8_t lookup[] =
+    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+      15, 14, 13, 12, 11, 10, 9, 8, //
+      23, 22, 21, 20, 19, 18, 17, 16, //
+      31, 30, 29, 28, 27, 26, 25, 24, //
+      39, 38, 37, 36, 35, 34, 33, 32, //
+      47, 46, 45, 44, 43, 42, 41, 40, //
+      55, 54, 53, 52, 51, 50, 49, 48, //
+      63, 62, 61, 60, 59, 58, 57, 56 };
   while (true) {
     l = __builtin_ffsll(tmp);
 //    cout << hex;
@@ -329,7 +332,7 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
     if (l == 0) {
       return;
     }
-     coord = lookup[l];
+    coord = lookup[l];
     //   cout << "coord: " << coord << endl;
 
     f(coord);
@@ -480,27 +483,20 @@ void Position::display_all_moves(const bitboard_set& moves)
   });
 }
 
-bitboard_set Position::getPieceBitboards() const
+array<bb, 9> Position::getPieceBitboards() const
 {
-  bitboard_set retval;
+  array<bb, 9> retval;
 //TODO figure out what to do with [0]
-  retval.push_back(0);
-  bb p = pawns;
-  bb n = knights;
-  bb b = bishops;
-  bb r = rooks;
-  bb q = queens;
-  bb k = kings;
-  bb wh = white;
-  bb bl = black;
-  retval.push_back(p);
-  retval.push_back(n);
-  retval.push_back(b);
-  retval.push_back(r);
-  retval.push_back(q);
-  retval.push_back(k);
-  retval.push_back(wh);
-  retval.push_back(bl);
+  retval[0] = 0x00;
+  retval[1] = pawns;
+  retval[2] = knights;
+  retval[3] = bishops;
+  retval[4] = rooks;
+  retval[5] = queens;
+  retval[6] = kings;
+  retval[7] = white;
+  retval[8] = black;
+
   return retval;
 }
 

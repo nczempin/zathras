@@ -23,7 +23,7 @@ public:
   Move_container();
   virtual ~Move_container();
 
-  static const size_t SIZE = 50;
+  static const size_t SIZE = 128;
 
   static Move_container& get(size_t index);
   void add_move(int8_t moving, uint8_t from, uint8_t to, int8_t captured,
@@ -34,7 +34,7 @@ public:
 private:
   static array<Move_container, 10> container_pool;
   array<Move, SIZE> container;
-  size_t index;
+  int index = 0;
 };
 
 #endif /* MOVE_CONTAINER_H_ */

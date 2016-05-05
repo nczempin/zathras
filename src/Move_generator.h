@@ -49,7 +49,7 @@ private:
   static bitboard_set white_pawn_capture_moves;
   static bitboard_set black_pawn_capture_moves;
 
-  bitboard_set pieces;
+  //array<bb, 9> pieces;
 
   void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
       move_visitor f, int moving);
@@ -71,7 +71,7 @@ private:
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
   void visit_moves(move_visitor count_moves);
-  int find_captured_piece(int y);
+  int8_t find_captured_piece(uint8_t square);
   void generate_castling(const move_visitor& f, bool white);
   bool is_attacked(uint8_t square);
   void attempt_castle(const move_visitor f, const int8_t piece,

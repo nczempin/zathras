@@ -38,6 +38,9 @@ void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
     cerr << "moving == 0" << endl;
     throw 17;
   }
+  if (index > this->SIZE || index < 0) {
+    throw index;
+  }
   Move &m = container[index];
   m.set_moving_piece(moving);
   m.set_from(from);
@@ -45,6 +48,9 @@ void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
   m.set_en_passant(en_passant);
   m.set_captured(captured);
   ++index;
+  if (index > this->SIZE || index < 0) {
+    throw index;
+  }
   //TODO if index == capacity
 }
 
