@@ -811,6 +811,14 @@ bool Move_generator::is_attacked(const uint8_t square)
   return false;
 }
 
+bool Move_generator::is_check(const bb movers, const bitboard_set& all_moves,
+    const uint8_t king_pos)
+{
+  bb raw_moves = all_moves[king_pos];
+  bb moves = raw_moves & movers;
+  return moves != 0x00;
+}
+
 bool Move_generator::is_in_check(const bool side)
 {
   //  cout << "checking for side: " << (side ? "white" : "black") << endl;
@@ -818,6 +826,7 @@ bool Move_generator::is_in_check(const bool side)
 //
 //TODO this is a somewhat naive way of doing this, it needs to be much more efficient
   const bb colour = side ? p->white : p->black;
+  const bb other_colour = side ? p->black : p->white;
   const bb kpbb = p->kings & colour;
   const uint8_t king_pos = Position::extract_square(kpbb);
   bool retval = false;
@@ -844,16 +853,26 @@ bool Move_generator::is_in_check(const bool side)
   const bb occupied = p->black | p->white;
 
   if (p->white_to_move) {
+
+//    if (is_check(white_pawns, black_pawn_capture_moves, king_pos)) {
+//      return true;
+//    }
     visit_capture_moves(white_pawns, white_pawn_capture_moves, f, black_kings,
         Piece::WHITE_PAWN);
     if (retval) {
       return true;
     }
-    visit_capture_moves(white_knights, knight_moves, f, black_kings,
-        Piece::WHITE_KNIGHT);
-    if (retval) {
+    bool check = is_check(white_knights, knight_moves, king_pos);
+
+    if (check) {
       return true;
     }
+
+//    visit_capture_moves(white_knights, knight_moves, f, black_kings,
+//        Piece::WHITE_KNIGHT);
+//    if (retval) {
+//      return true;
+//    }
     visit_capture_moves(white_kings, king_moves, f, black_kings,
         Piece::WHITE_KING);
     if (retval) {
@@ -869,30 +888,44 @@ bool Move_generator::is_in_check(const bool side)
     if (retval) {
       return true;
     }
-    visit_capture_ray_moves(white_bishops, bishop_moves, f, occupied,
-        black_kings, Piece::WHITE_BISHOP);
+    bb raw_moves = bishop_moves[king_pos];
+    bb moves = raw_moves & white_bishops;
+    if (moves != 0) {
+      Position::visit_bitboard(moves,
+          [this, &king_pos, &retval, &occupied](int attacker) {
+            bool blocked = is_anything_between(king_pos, attacker, occupied);
+            if (!blocked) {
+              retval = true;
+            }
+          });
+    }
     if (retval) {
       return true;
     }
+//   visit_capture_ray_moves(white_bishops, bishop_moves, f, occupied,
+//        black_kings, Piece::WHITE_BISHOP);
+//    if (retval) {
+//      return true;
+//    }
     visit_capture_ray_moves(white_queens, bishop_moves, f, occupied,
         black_kings, Piece::WHITE_QUEEN);
     if (retval) {
       return true;
     }
   } else {
-    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, white_kings,
-        Piece::BLACK_PAWN);
-    if (retval) {
+    bool check = is_check(black_pawns, white_pawn_capture_moves, king_pos);
+
+    if (check) {
       return true;
     }
-    visit_capture_moves(black_knights, knight_moves, f, white_kings,
-        Piece::BLACK_KNIGHT);
-    if (retval) {
+    check = is_check(black_knights, knight_moves, king_pos);
+
+    if (check) {
       return true;
     }
-    visit_capture_moves(black_kings, king_moves, f, white_kings,
-        Piece::BLACK_KING);
-    if (retval) {
+    check = is_check(black_kings, king_moves, king_pos);
+
+    if (check) {
       return true;
     }
     visit_capture_ray_moves(black_queens, rook_moves, f, occupied, white_kings,

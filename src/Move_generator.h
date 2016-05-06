@@ -78,6 +78,8 @@ private:
       const uint8_t king_square, const int8_t direction);
   void f(Move_container& moves, const int8_t moving, const uint8_t from,
       const uint8_t to, const int8_t captured);
+  bool is_check(const bb movers, const bitboard_set& all_moves,
+      const uint8_t king_pos);
 };
 
 #endif /* MOVE_GENERATOR_H_ */
