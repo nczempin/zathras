@@ -872,9 +872,6 @@ bool Move_generator::is_in_check(const bool side)
 
   if (p->white_to_move) {
 
-//    if (is_check(white_pawns, black_pawn_capture_moves, king_pos)) {
-//      return true;
-//    }
     if (is_check_from_slider(bishop_moves, king_pos, white_queens, occupied)) {
       return true;
     }
@@ -887,18 +884,21 @@ bool Move_generator::is_in_check(const bool side)
     if (is_check_from_slider(rook_moves, king_pos, white_rooks, occupied)) {
       return true;
     }
-    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, black_kings,
-        Piece::WHITE_PAWN);
-    if (retval) {
-      return true;
-    }
-    if (is_check(white_knights, knight_moves, king_pos)) {
+     if (is_check(white_knights, knight_moves, king_pos)) {
       return true;
     }
     if (is_check(white_kings, king_moves, king_pos)) {
       return true;
     }
-  } else {
+//    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, black_kings,
+//         Piece::WHITE_PAWN);
+//     if (retval) {
+//       return true;
+//     }
+         if (is_check(white_pawns, black_pawn_capture_moves, king_pos)) {
+           return true;
+         }
+} else {
     if (is_check_from_slider(bishop_moves, king_pos, black_queens, occupied)) {
       return true;
     }
@@ -917,16 +917,16 @@ bool Move_generator::is_in_check(const bool side)
     if (is_check(black_kings, king_moves, king_pos)) {
       return true;
     }
-    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, white_kings,
-        Piece::BLACK_PAWN);
-    if (retval) {
-      return true;
-    }
-//    bool check = is_check(black_pawns, white_pawn_capture_moves, king_pos);
-//
-//    if (check) {
+//    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, white_kings,
+//        Piece::BLACK_PAWN);
+//    if (retval) {
 //      return true;
 //    }
+    bool check = is_check(black_pawns, white_pawn_capture_moves, king_pos);
+
+    if (check) {
+      return true;
+    }
   }
   return false;
 }
