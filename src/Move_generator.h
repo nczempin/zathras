@@ -80,6 +80,8 @@ private:
       const uint8_t to, const int8_t captured);
   bool is_check(const bb movers, const bitboard_set& all_moves,
       const uint8_t king_pos);
+  bool is_check_from_slider(const bitboard_set& sliding_moves,
+      const uint8_t king_pos, const bb slider, const bb& occupied);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

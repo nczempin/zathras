@@ -819,6 +819,24 @@ bool Move_generator::is_check(const bb movers, const bitboard_set& all_moves,
   return moves != 0x00;
 }
 
+bool Move_generator::is_check_from_slider(const bitboard_set& sliding_moves,
+    const uint8_t king_pos, const bb slider, const bb& occupied)
+{
+  bool retval = false;
+  bb raw_moves = sliding_moves[king_pos];
+  bb moves = raw_moves & slider;
+  if (moves != 0) {
+    Position::visit_bitboard(moves,
+        [this, &king_pos, &retval, &occupied](int attacker) {
+          bool blocked = is_anything_between(king_pos, attacker, occupied);
+          if (!blocked) {
+            retval = true;
+          }
+        });
+  }
+  return retval;
+}
+
 bool Move_generator::is_in_check(const bool side)
 {
   //  cout << "checking for side: " << (side ? "white" : "black") << endl;
@@ -862,90 +880,51 @@ bool Move_generator::is_in_check(const bool side)
     if (retval) {
       return true;
     }
-    bool check = is_check(white_knights, knight_moves, king_pos);
-
-    if (check) {
+    if (is_check(white_knights, knight_moves, king_pos)) {
       return true;
     }
-
-//    visit_capture_moves(white_knights, knight_moves, f, black_kings,
-//        Piece::WHITE_KNIGHT);
-//    if (retval) {
-//      return true;
-//    }
-    visit_capture_moves(white_kings, king_moves, f, black_kings,
-        Piece::WHITE_KING);
-    if (retval) {
+    if (is_check(white_kings, king_moves, king_pos)) {
       return true;
     }
-    visit_capture_ray_moves(white_queens, rook_moves, f, occupied, black_kings,
-        Piece::WHITE_QUEEN);
-    if (retval) {
+    if (is_check_from_slider(bishop_moves, king_pos, white_queens, occupied)) {
       return true;
     }
-    visit_capture_ray_moves(white_rooks, rook_moves, f, occupied, black_kings,
-        Piece::WHITE_ROOK);
-    if (retval) {
+    if (is_check_from_slider(rook_moves, king_pos, white_queens, occupied)) {
       return true;
     }
-    bb raw_moves = bishop_moves[king_pos];
-    bb moves = raw_moves & white_bishops;
-    if (moves != 0) {
-      Position::visit_bitboard(moves,
-          [this, &king_pos, &retval, &occupied](int attacker) {
-            bool blocked = is_anything_between(king_pos, attacker, occupied);
-            if (!blocked) {
-              retval = true;
-            }
-          });
-    }
-    if (retval) {
+    if (is_check_from_slider(bishop_moves, king_pos, white_bishops, occupied)) {
       return true;
     }
-//   visit_capture_ray_moves(white_bishops, bishop_moves, f, occupied,
-//        black_kings, Piece::WHITE_BISHOP);
-//    if (retval) {
-//      return true;
-//    }
-    visit_capture_ray_moves(white_queens, bishop_moves, f, occupied,
-        black_kings, Piece::WHITE_QUEEN);
-    if (retval) {
+    if (is_check_from_slider(rook_moves, king_pos, white_rooks, occupied)) {
       return true;
     }
   } else {
-    bool check = is_check(black_pawns, white_pawn_capture_moves, king_pos);
-
-    if (check) {
-      return true;
-    }
-    check = is_check(black_knights, knight_moves, king_pos);
-
-    if (check) {
-      return true;
-    }
-    check = is_check(black_kings, king_moves, king_pos);
-
-    if (check) {
-      return true;
-    }
-    visit_capture_ray_moves(black_queens, rook_moves, f, occupied, white_kings,
-        Piece::BLACK_QUEEN);
+    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, white_kings,
+        Piece::BLACK_PAWN);
     if (retval) {
       return true;
     }
-    visit_capture_ray_moves(black_rooks, rook_moves, f, occupied, white_kings,
-        Piece::BLACK_ROOK);
-    if (retval) {
+//    bool check = is_check(black_pawns, white_pawn_capture_moves, king_pos);
+//
+//    if (check) {
+//      return true;
+//    }
+    if (is_check(black_knights, knight_moves, king_pos)) {
       return true;
     }
-    visit_capture_ray_moves(black_bishops, bishop_moves, f, occupied,
-        white_kings, Piece::BLACK_BISHOP);
-    if (retval) {
+    if (is_check(black_kings, king_moves, king_pos)) {
       return true;
     }
-    visit_capture_ray_moves(black_queens, bishop_moves, f, occupied,
-        white_kings, Piece::BLACK_QUEEN);
-    if (retval) {
+    if (is_check_from_slider(bishop_moves, king_pos, black_queens, occupied)) {
+      return true;
+    }
+    if (is_check_from_slider(rook_moves, king_pos, black_queens, occupied)) {
+      return true;
+    }
+    if (is_check_from_slider(bishop_moves, king_pos, black_bishops, occupied)) {
+      return true;
+    }
+    if (is_check_from_slider(rook_moves, king_pos, black_rooks, occupied)) {
       return true;
     }
   }
