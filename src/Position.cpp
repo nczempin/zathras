@@ -310,9 +310,8 @@ uint8_t Position::extract_square(const bb my_bb)
   return lookup[__builtin_ffsll(my_bb)];
 }
 
-void Position::visit_bitboard(const bb my_bb, const square_visitor f)
+void Position::visit_bitboard(bb tmp, const square_visitor f)
 {
-  bb tmp = my_bb;
   //static bb t = 0;
   uint8_t coord = 0;
   uint8_t l = 0;
