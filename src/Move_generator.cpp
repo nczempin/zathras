@@ -327,10 +327,10 @@ void Move_generator::visit_non_capture_moves(const bb sub_position,
     int8_t moving)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, other_colour, moving](uint8_t from) {
+      [&all_moves, &f, &other_colour, &moving](uint8_t from) {
         bb raw_moves = all_moves[from];
         bb moves = raw_moves & ~other_colour;
-        Position::visit_bitboard(moves, [from, f, moving](uint8_t to) {
+        Position::visit_bitboard(moves, [&from, &f, &moving](uint8_t to) {
               f(moving, from, to, 0);
             }
         );
@@ -434,10 +434,10 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, bb occupied, int moving)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, occupied, moving](int x) {
+      [&all_moves, &f, &occupied, &moving](int x) {
         bb raw_moves = all_moves[x];
         bb moves = raw_moves & ~occupied;
-        Position::visit_bitboard(moves, [x, f, occupied, moving](int y) {
+        Position::visit_bitboard(moves, [&x, &f, &occupied, &moving](int y) {
               bool b = is_anything_between(x, y, occupied);
               if (!b) {
                 f(moving, x, y, 0);
@@ -451,10 +451,10 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
     int moving)
 {
   Position::visit_bitboard(sub_position,
-      [this, all_moves, f, occupied, other_colour, moving](int x) {
+      [this, &all_moves, &f, &occupied, &other_colour, &moving](int x) {
         bb raw_moves = all_moves[x];
         bb moves = raw_moves & other_colour;
-        Position::visit_bitboard(moves, [this, x, f, occupied, moving](int y) {
+        Position::visit_bitboard(moves, [this, &x, &f, &occupied, &moving](int y) {
               bool b = is_anything_between(x, y, occupied);
               if (!b) {
                 int captured = find_captured_piece(y);
@@ -469,13 +469,13 @@ void Move_generator::visit_moves_raw(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, int moving)
 {
 
-  Position::visit_bitboard(sub_position, [all_moves, f, moving](int x) {
-    Position::visit_bitboard(all_moves[x], [x, f, moving](int y) {
+  Position::visit_bitboard(sub_position, [&all_moves, &f, &moving](int x) {
+    Position::visit_bitboard(all_moves[x], [&x, &f, &moving](int y) {
           int captured = -98;
           f(moving, x, y, captured); //TODO get the captured piece from somewhere
-    }
-);
-});
+    });
+
+  });
 }
 
 bb Move_generator::filter_occupied_squares(bool white_to_move, bb occupied,
@@ -504,9 +504,9 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
     bool white_to_move)
 {
   Position::visit_bitboard(sub_position,
-      [all_moves, f, occupied, moving, white_to_move](int x) {
+      [&all_moves, &f, &occupied, &moving, &white_to_move](int x) {
         bb moves = filter_occupied_squares(white_to_move, occupied, all_moves, x);
-        Position::visit_bitboard(moves, [x, f, moving](int y) {
+        Position::visit_bitboard(moves, [&x, &f, &moving](int y) {
               f(moving, x, y, 0);
             }
         );
@@ -841,7 +841,7 @@ bool Move_generator::is_in_check(const bool side)
   const uint8_t king_pos = Position::extract_square(kpbb);
   bool retval = false;
   function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
-      [king_pos, &retval](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+      [&king_pos, &retval](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
         if (to == king_pos) {
           retval = true;
         }
