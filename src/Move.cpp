@@ -12,7 +12,7 @@
 using namespace std;
 
 Move::Move(int8_t moving = 0, uint8_t from = 0, uint8_t to = 0,
-    int8_t captured = 0, bool en_passant = false) :
+    int8_t captured = 0, uint8_t en_passant = 0) :
     from(from), to(to), moving(moving), captured(captured), en_passant(
         en_passant)
 {
@@ -70,6 +70,9 @@ string Move::to_string() const
   retval += "*";
   retval += this->cleared_kingside_castling ? "#" : ".";
   retval += this->cleared_queenside_castling ? "#" : ".";
+  if (en_passant != 0) {
+    retval += " e. p.";
+  }
 
   return retval;
 }
