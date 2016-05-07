@@ -605,13 +605,13 @@ void Position::make_move(Move& move)
 //        cout << "eps: " << hex << en_passant_square << dec << endl;
         int target = to - 8;
         if (move.is_en_passant_capture()) { // en passant capture
-          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
+//          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
           //      this->print(cout);
           clear_bit(pawns, target);
           clear_bit(black, target);
-          cout << "************************deleting pawn at " << (int) (target)
-              << endl;
-          this->print(cout);
+//          cout << "************************deleting pawn at " << (int) (target)
+//              << endl;
+//          this->print(cout);
 
         } else {
           save_en_passant_square(move);
@@ -693,14 +693,14 @@ void Position::make_move(Move& move)
         // handle capturing by e. p.
         int target = to + 8;
         if (move.is_en_passant_capture()) { // en passant capture
-          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
+//          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
           //      this->print(cout);
           clear_bit(pawns, target);
           clear_bit(white, target);
-          cout << "************************deleting pawn at " << (int) (target)
-              << endl;
-          this->print(cout);
-
+//          cout << "************************deleting pawn at " << (int) (target)
+//              << endl;
+//          this->print(cout);
+//
         } else {
           // handle double step preparing the e. p.
           save_en_passant_square(move);
@@ -880,7 +880,7 @@ void Position::unmake_move(Move& move)
           set_bit(en_passant_square, to);
           set_bit(pawns, target);
           set_bit(white, target);
-          cout << "unmade epcap to this: " << endl << (*this) << endl;
+//          cout << "unmade epcap to this: " << endl << (*this) << endl;
         }
 
       }
