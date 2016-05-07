@@ -33,7 +33,7 @@ public:
 
   uint8_t get_en_passant() const
   {
-    return en_passant;
+    return en_passant_square;
   }
 
   void set_en_passant(uint8_t en_passant)
@@ -51,6 +51,9 @@ public:
     this->captured = captured;
   }
 
+  bool is_en_passant_capture() const;
+  void set_en_passant_capture(bool enPassantCapture = false);
+
   bool cleared_queenside_castling = false;
   bool cleared_kingside_castling = false;
 
@@ -59,7 +62,8 @@ private:
   uint8_t to = 0;
   int8_t moving = 0;
   int8_t captured = 0;
-  uint8_t en_passant;
+  uint8_t en_passant_square = 0; //TODO file would be sufficient
+  bool en_passant_capture = false;
 };
 
 #endif /* MOVE_H_ */
