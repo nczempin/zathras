@@ -58,8 +58,9 @@ private:
   void visit_non_capture_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb other_colour,
       int8_t moving);
-  void visit_non_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, move_visitor f, bb occupied, int moving);
+  void visit_non_capture_ray_moves(const bb& sub_position,
+      const bitboard_set& all_moves, const move_visitor& f, const bb& occupied,
+      const int8_t& moving);
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
       bb other_colour, int moving);
