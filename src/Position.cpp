@@ -526,8 +526,8 @@ void Position::update_bits(unsigned long int& colour, unsigned long int& piece,
 
 void Position::make_move(Move& move)
 {
-  cout << "make_move: " << move.to_string() << endl;
-  this->print(cout);
+//  cout << "make_move: " << move.to_string() << endl;
+//  this->print(cout);
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
 
@@ -595,7 +595,7 @@ void Position::make_move(Move& move)
           cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
           //      this->print(cout);
           clear_bit(pawns, target);
-          clear_bit(black, to - 8);
+          clear_bit(black, target);
           cout << "************************deleting pawn at " << (int) (target)
               << endl;
           this->print(cout);
@@ -674,16 +674,21 @@ void Position::make_move(Move& move)
       clear_bit(black, from);
       {
         // handle capturing by e. p.
-        uint8_t ep_square = move.get_en_passant_square();
-        if (is_set_square(en_passant_square, to)) { // en passant capture
-          clear_bit(pawns, ep_square);
-          clear_bit(white, ep_square);
+        int target = to + 8;
+        if (move.is_en_passant_capture()) { // en passant capture
+          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
+          //      this->print(cout);
+          clear_bit(pawns, target);
+          clear_bit(white, target);
+          cout << "************************deleting pawn at " << (int) (target)
+              << endl;
+          this->print(cout);
+
         }
         // handle double step preparing the e. p.
         en_passant_square = 0x00;
         if (to - from == -16) {
-          //  cout << "ep move: " << Square::mailbox_index_to_square(to) << endl;
-          set_bit(en_passant_square, ep_square);
+          set_bit(en_passant_square, target);
         }
 
       }
@@ -743,8 +748,8 @@ void Position::make_move(Move& move)
       break;
     }
   }
-  cout << "made:" << endl;
-  this->print(cout);
+//  cout << "made:" << endl;
+//  this->print(cout);
 
 // TODO turned promoted pawn into new piece
 // TODO update en passant square
@@ -777,7 +782,7 @@ void Position::unmake_move(Move& move)
         // handle capturing by e. p.
         if (move.is_en_passant_capture()) {
           uint8_t target = to - 8;
-          set_bit(en_passant_square, target);
+          set_bit(en_passant_square, to);
           set_bit(pawns, target);
           set_bit(black, target);
         } else {
@@ -850,13 +855,12 @@ void Position::unmake_move(Move& move)
       set_bit(black, from);
       {
         // handle capturing by e. p.
-        int ep_square = to + 8;
-
-        if (move.get_en_passant_square()) {
-          set_bit(en_passant_square, ep_square + 16);
-          set_bit(pawns, ep_square);
-          set_bit(white, ep_square);
-
+        if (move.is_en_passant_capture()) {
+          uint8_t target = to + 8;
+          set_bit(en_passant_square, to);
+          set_bit(pawns, target);
+          set_bit(white, target);
+          cout << "unmade epcap to this: " << endl << (*this) << endl;
         } else {
           // handle double step preparing the e. p.
           en_passant_square = 0x00;
@@ -954,8 +958,8 @@ void Position::unmake_move(Move& move)
         throw p;
       }
     }
-    cout << "unmade:" << endl;
-    this->print(cout);
+//    cout << "unmade:" << endl;
+//    this->print(cout);
     // cout << *this << endl;
   }
 // TODO transform promoted piece back into pawn

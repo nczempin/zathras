@@ -93,13 +93,16 @@ int Perft_command::perft(int depth)
 //    cout << *pp << endl;
 //    cout << "(bc: perft@" << depth << "): " << move.to_string() << "-->"
 //        << endl;
-    if (!mg.is_in_check(!pp->white_to_move)) {
-      if (depth == 1) {
-        ++total_result;
-      } else {
-        int perft_result = perft(depth - 1);
-        total_result += perft_result;
-      }
+    if (mg.is_in_check(!pp->white_to_move)) {
+      cout << move.to_string() << "******was illegal; unmaking*******" << endl;
+      pp->unmake_move(move);
+      continue;
+    }
+    if (depth == 1) {
+      ++total_result;
+    } else {
+      int perft_result = perft(depth - 1);
+      total_result += perft_result;
     }
     cout << "(bu: perft@" << depth << "): " << move.to_string() << "-->"
         << endl;
@@ -116,9 +119,9 @@ int Perft_command::perft(int depth)
 void Perft_command::execute()
 {
   vector<string> path = receiver->getArguments();
-  int depth = 1; //TODO get this from arguments, but use a reasonable default
+  int depth = 3; //TODO get this from arguments, but use a reasonable default
   Position position;
-  position = Position::create_position("7k/8/8/2pP4/8/8/8/K7 w - c6 0 1");
+  position = Position::create_position("7k/8/8/8/2pP4/8/8/K7 b - d3 0 1");
   //position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;
@@ -156,7 +159,7 @@ void Perft_command::execute()
       //cout << s << "******************" << endl;
       pp->make_move(move);
       if (mg.is_in_check(!pp->white_to_move)) {
-        cout << "******was illegal; unmaking*******";
+        cout << "******was illegal; unmaking*******" << endl;
         pp->unmake_move(move);
         continue;
       }
