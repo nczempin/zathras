@@ -646,11 +646,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   const bb occupied = p->white | p->black;
 
   if (p->white_to_move) {
-    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, p->black,
-        Piece::WHITE_PAWN);
-    visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f, occupied,
-        Piece::WHITE_PAWN, true);
-    visit_capture_moves(white_knights, knight_moves, f, p->black,
+     visit_capture_moves(white_knights, knight_moves, f, p->black,
         Piece::WHITE_KNIGHT);
     visit_non_capture_moves(white_knights, knight_moves, f, p->white | p->black,
         Piece::WHITE_KNIGHT);
@@ -675,12 +671,12 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
     visit_non_capture_ray_moves(white_queens, bishop_moves, f,
         p->white | p->black, Piece::WHITE_QUEEN);
     generate_castling(f, true);
-  } else {
-    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, p->white,
-        Piece::BLACK_PAWN);
-    visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f, occupied,
-        Piece::BLACK_PAWN, false);
-    visit_capture_moves(black_knights, knight_moves, f, p->white,
+    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, p->black,
+         Piece::WHITE_PAWN);
+     visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f, occupied,
+         Piece::WHITE_PAWN, true);
+ } else {
+     visit_capture_moves(black_knights, knight_moves, f, p->white,
         Piece::BLACK_KNIGHT);
     visit_non_capture_moves(black_knights, knight_moves, f, p->white | p->black,
         Piece::BLACK_KNIGHT);
@@ -705,6 +701,10 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
     visit_non_capture_ray_moves(black_queens, bishop_moves, f, occupied,
         Piece::BLACK_QUEEN);
     generate_castling(f, false);
+    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, p->white,
+         Piece::BLACK_PAWN);
+     visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f, occupied,
+         Piece::BLACK_PAWN, false);
 
   }
 //cout << "after: " << moves.size() << endl;

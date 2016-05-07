@@ -90,6 +90,8 @@ private:
   static void display_all_moves(const bitboard_set& moves);
   void update_bits(unsigned long int& colour, unsigned long int& piece,
       uint8_t from, uint8_t to);
+  void save_en_passant_square(Move& move);
+  void restore_en_passant_square(Move& move);
 };
 
 #endif /* POSITION_H_ */

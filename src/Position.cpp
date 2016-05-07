@@ -524,6 +524,19 @@ void Position::update_bits(unsigned long int& colour, unsigned long int& piece,
   clear_bit(colour, clear);
 }
 
+void Position::save_en_passant_square(Move& move)
+{
+  if (en_passant_square != 0x00) {
+    uint8_t eps = extract_square(en_passant_square);
+    move.set_en_passant_square(eps);
+    en_passant_square = 0x00;
+  }
+}
+void Position::restore_en_passant_square(Move& move)
+{
+  en_passant_square = move.get_en_passant_square();
+}
+
 void Position::make_move(Move& move)
 {
 //  cout << "make_move: " << move.to_string() << endl;
@@ -600,13 +613,13 @@ void Position::make_move(Move& move)
               << endl;
           this->print(cout);
 
+        } else {
+          save_en_passant_square(move);
+          // handle double step preparing the e. p.
+          if (to - from == 16) {
+            set_bit(en_passant_square, target);
+          }
         }
-        // handle double step preparing the e. p.
-        en_passant_square = 0x00;
-        if (to - from == 16) {
-          set_bit(en_passant_square, target);
-        }
-
       }
       break;
     case Piece::WHITE_KNIGHT:
@@ -614,12 +627,14 @@ void Position::make_move(Move& move)
       set_bit(white, to);
       clear_bit(knights, from);
       clear_bit(white, from);
+      save_en_passant_square(move);
       break;
     case Piece::WHITE_BISHOP:
       set_bit(bishops, to);
       set_bit(white, to);
       clear_bit(bishops, from);
       clear_bit(white, from);
+      save_en_passant_square(move);
       break;
     case Piece::WHITE_ROOK:
       set_bit(rooks, to);
@@ -633,6 +648,7 @@ void Position::make_move(Move& move)
         castling[1] = false;
         move.cleared_queenside_castling = true;
       }
+      save_en_passant_square(move);
       break;
     case Piece::WHITE_QUEEN:
       set_bit(queens, to);
@@ -640,6 +656,7 @@ void Position::make_move(Move& move)
       clear_bit(queens, from);
       clear_bit(white, from);
       break;
+      save_en_passant_square(move);
     case Piece::WHITE_KING:
       set_bit(kings, to);
       set_bit(white, to);
@@ -684,13 +701,13 @@ void Position::make_move(Move& move)
               << endl;
           this->print(cout);
 
+        } else {
+          // handle double step preparing the e. p.
+          save_en_passant_square(move);
+          if (to - from == -16) {
+            set_bit(en_passant_square, target);
+          }
         }
-        // handle double step preparing the e. p.
-        en_passant_square = 0x00;
-        if (to - from == -16) {
-          set_bit(en_passant_square, target);
-        }
-
       }
       break;
     case Piece::BLACK_KNIGHT:
@@ -698,12 +715,14 @@ void Position::make_move(Move& move)
       set_bit(black, to);
       clear_bit(knights, from);
       clear_bit(black, from);
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_BISHOP:
       set_bit(bishops, to);
       set_bit(black, to);
       clear_bit(bishops, from);
       clear_bit(black, from);
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_ROOK:
       set_bit(rooks, to);
@@ -717,12 +736,14 @@ void Position::make_move(Move& move)
         move.cleared_queenside_castling = true;
         castling[3] = false;
       }
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_QUEEN:
       set_bit(queens, to);
       set_bit(black, to);
       clear_bit(queens, from);
       clear_bit(black, from);
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_KING:
       update_bits(black, kings, from, to);
@@ -739,6 +760,7 @@ void Position::make_move(Move& move)
         move.cleared_queenside_castling = true;
         castling[3] = false;
       }
+      save_en_passant_square(move);
       break;
     default:
       double error = ((double) moving);
@@ -765,6 +787,7 @@ void Position::unmake_move(Move& move)
 //  this->print(cout);
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
+  restore_en_passant_square(move);
 
   int8_t moving = move.get_moving_piece();
   white_to_move = !white_to_move;
@@ -785,9 +808,6 @@ void Position::unmake_move(Move& move)
           set_bit(en_passant_square, to);
           set_bit(pawns, target);
           set_bit(black, target);
-        } else {
-          // handle double step preparing the e. p.
-          en_passant_square = 0x00;
         }
 
       }
@@ -861,9 +881,6 @@ void Position::unmake_move(Move& move)
           set_bit(pawns, target);
           set_bit(white, target);
           cout << "unmade epcap to this: " << endl << (*this) << endl;
-        } else {
-          // handle double step preparing the e. p.
-          en_passant_square = 0x00;
         }
 
       }
@@ -924,6 +941,7 @@ void Position::unmake_move(Move& move)
     }
   }
   if (!move.is_en_passant_capture()) {
+
     int8_t taken = move.get_taken_piece();
     if (taken != 0) {
       //cout << "untaken: " << taken << endl;
