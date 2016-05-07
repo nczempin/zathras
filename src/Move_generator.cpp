@@ -307,23 +307,14 @@ void Move_generator::visit_capture_moves(const bb sub_position,
 {
 //cout << "visit capture moves" << endl;
   Position::visit_bitboard(sub_position,
-      [this, all_moves, f, other_colour, moving](uint8_t from) {
+      [this, &all_moves, &f, &other_colour, &moving](uint8_t from) {
         bb raw_moves = all_moves[from];
         bb moves = raw_moves & (other_colour);
         if (p->en_passant_square != 0x00 && (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN)) {
           moves = raw_moves & (other_colour | p->en_passant_square);
         }
 
-        Position::visit_bitboard(moves, [this, from, f, moving](uint8_t to) {
-              if (p->white_to_move && moving <= 0) {
-                cerr << "wrong mover: " << moving << endl;
-                throw from;
-              }
-              if (!p->white_to_move && moving >= 0) {
-                cerr << "wrong mover: "<< moving << endl;
-                throw from;
-              }
-
+        Position::visit_bitboard(moves, [this, &from, &f, &moving](uint8_t to) {
               int8_t captured = find_captured_piece(to);
 
               f(moving, from, to, captured);
@@ -646,7 +637,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   const bb occupied = p->white | p->black;
 
   if (p->white_to_move) {
-     visit_capture_moves(white_knights, knight_moves, f, p->black,
+    visit_capture_moves(white_knights, knight_moves, f, p->black,
         Piece::WHITE_KNIGHT);
     visit_non_capture_moves(white_knights, knight_moves, f, p->white | p->black,
         Piece::WHITE_KNIGHT);
@@ -672,11 +663,11 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
         p->white | p->black, Piece::WHITE_QUEEN);
     generate_castling(f, true);
     visit_capture_moves(white_pawns, white_pawn_capture_moves, f, p->black,
-         Piece::WHITE_PAWN);
-     visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f, occupied,
-         Piece::WHITE_PAWN, true);
- } else {
-     visit_capture_moves(black_knights, knight_moves, f, p->white,
+        Piece::WHITE_PAWN);
+    visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f, occupied,
+        Piece::WHITE_PAWN, true);
+  } else {
+    visit_capture_moves(black_knights, knight_moves, f, p->white,
         Piece::BLACK_KNIGHT);
     visit_non_capture_moves(black_knights, knight_moves, f, p->white | p->black,
         Piece::BLACK_KNIGHT);
@@ -702,9 +693,9 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
         Piece::BLACK_QUEEN);
     generate_castling(f, false);
     visit_capture_moves(black_pawns, black_pawn_capture_moves, f, p->white,
-         Piece::BLACK_PAWN);
-     visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f, occupied,
-         Piece::BLACK_PAWN, false);
+        Piece::BLACK_PAWN);
+    visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f, occupied,
+        Piece::BLACK_PAWN, false);
 
   }
 //cout << "after: " << moves.size() << endl;
