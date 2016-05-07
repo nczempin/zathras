@@ -435,16 +435,27 @@ void Move_generator::visit_non_capture_ray_moves(const bb& sub_position,
     const int8_t& moving)
 {
   Position::visit_bitboard(sub_position,
-      [&all_moves, &f, &occupied, &moving](const uint8_t& x) {
-        bb raw_moves = all_moves[x];
+      [&all_moves, &f, &occupied, &moving](const uint8_t& from) {
+        bb raw_moves = all_moves[from];
         bb moves = raw_moves & ~occupied;
-        Position::visit_bitboard(moves, [&x, &f, &occupied, &moving](const uint8_t& y) {
-              bool b = is_anything_between(x, y, occupied);
-              if (!b) {
-                f(moving, x, y, 0);
-              }
-            }
-        );
+        static uint8_t lookup[] = //TODO share one instead of copying
+        { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+          15, 14, 13, 12, 11, 10, 9, 8,//
+          23, 22, 21, 20, 19, 18, 17, 16,//
+          31, 30, 29, 28, 27, 26, 25, 24,//
+          39, 38, 37, 36, 35, 34, 33, 32,//
+          47, 46, 45, 44, 43, 42, 41, 40,//
+          55, 54, 53, 52, 51, 50, 49, 48,//
+          63, 62, 61, 60, 59, 58, 57, 56};
+        while(moves != 0x00) {
+          bb s = __builtin_ffsll(moves);
+          uint8_t to = lookup[s];
+          bool b = is_anything_between(from, to, occupied);
+          if (!b) {
+            f(moving, from, to, 0);
+          }
+          moves &= moves - 1;
+        }
       });
 }
 void Move_generator::visit_capture_ray_moves(const bb sub_position,

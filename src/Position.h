@@ -55,7 +55,7 @@ public:
 
   static Position create_position(const string& fen);
   static uint8_t extract_square(const bb my_bb);
-
+  static uint8_t extract_and_remove_square(bb& my_bb);
   //static void print_square(int x);
   //TODO a separate Bitboard (helper) class is probably best
   static const bb BB_FULL_BOARD = 0xffffffffffffffff;
