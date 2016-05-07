@@ -12,11 +12,11 @@
 using namespace std;
 
 Move::Move(int8_t moving = 0, uint8_t from = 0, uint8_t to = 0,
-    int8_t captured = 0, uint8_t en_passant = 0) :
-    from(from), to(to), moving(moving), captured(captured), en_passant_square(
-        en_passant)
+    int8_t captured = 0, bool en_passant_capture = false) :
+    from(from), to(to), moving(moving), captured(captured), en_passant_capture(
+        en_passant_capture)
 {
-  if (en_passant) {
+  if (en_passant_capture) {
     if (moving == 1 || moving == -1) {
 
     } else {
@@ -27,7 +27,7 @@ Move::Move(int8_t moving = 0, uint8_t from = 0, uint8_t to = 0,
 
 }
 Move::Move() :
-    from(0), to(0), moving(0), captured(0), en_passant_square(false)
+    from(0), to(0), moving(0), captured(0), en_passant_capture(false)
 {
 }
 
@@ -70,7 +70,7 @@ string Move::to_string() const
   retval += "*";
   retval += this->cleared_kingside_castling ? "#" : ".";
   retval += this->cleared_queenside_castling ? "#" : ".";
-  if (en_passant_square != 0) {
+  if (en_passant_capture) {
     retval += " e. p.";
   }
 
@@ -122,7 +122,7 @@ bool Move::is_en_passant_capture() const
   return en_passant_capture;
 }
 
-void Move::set_en_passant_capture(bool en_passant_capture)
+void Move::set_en_passant_capture(bool epc)
 {
-  en_passant_capture = en_passant_capture;
+  en_passant_capture = epc;
 }

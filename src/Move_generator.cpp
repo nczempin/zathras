@@ -596,12 +596,13 @@ void Move_generator::generate_castling(const move_visitor& f,
 void Move_generator::f(Move_container& moves, const int8_t moving,
     const uint8_t from, const uint8_t to, const int8_t captured)
 {
-  bool en_passant = false;
-  if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN)
-      && Position::is_set_square(p->en_passant_square, to)) {
-    en_passant = true;
+  bool en_passant_capture = false;
+  if (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) {
+    if (Position::is_set_square(p->en_passant_square, to)) {
+      en_passant_capture = true;
+    }
   }
-  moves.add_move(moving, from, to, captured, en_passant);
+  moves.add_move(moving, from, to, captured, en_passant_capture);
 }
 Move_container Move_generator::generate_moves(shared_ptr<Position> position,
     size_t depth)
@@ -622,11 +623,11 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
 // cout << "should be 0: " << moves.size() << endl;
   const move_visitor f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-        bool en_passant = false;
+        bool en_passant_capture = false;
         if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
-          en_passant = true;
+          en_passant_capture = true;
         }
-        moves.add_move(moving, from, to, captured, en_passant);
+        moves.add_move(moving, from, to, captured, en_passant_capture);
       };
 
   //TODO generalize, obviously
@@ -884,7 +885,7 @@ bool Move_generator::is_in_check(const bool side)
     if (is_check_from_slider(rook_moves, king_pos, white_rooks, occupied)) {
       return true;
     }
-     if (is_check(white_knights, knight_moves, king_pos)) {
+    if (is_check(white_knights, knight_moves, king_pos)) {
       return true;
     }
     if (is_check(white_kings, king_moves, king_pos)) {
@@ -895,10 +896,10 @@ bool Move_generator::is_in_check(const bool side)
 //     if (retval) {
 //       return true;
 //     }
-         if (is_check(white_pawns, black_pawn_capture_moves, king_pos)) {
-           return true;
-         }
-} else {
+    if (is_check(white_pawns, black_pawn_capture_moves, king_pos)) {
+      return true;
+    }
+  } else {
     if (is_check_from_slider(bishop_moves, king_pos, black_queens, occupied)) {
       return true;
     }

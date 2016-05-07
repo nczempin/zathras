@@ -18,7 +18,7 @@ class Move
 public:
   Move();
   Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured,
-      uint8_t en_passant);
+      bool en_passant_capture);
   uint8_t get_from();
   uint8_t get_to() const;
   string to_string() const;
@@ -31,12 +31,12 @@ public:
   void set_from(uint8_t from);
   void set_to(uint8_t to);
 
-  uint8_t get_en_passant() const
+  uint8_t get_en_passant_square() const
   {
     return en_passant_square;
   }
 
-  void set_en_passant(uint8_t en_passant)
+  void set_en_passant_square(uint8_t en_passant)
   {
     en_passant = en_passant;
   }

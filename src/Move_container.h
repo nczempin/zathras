@@ -27,7 +27,7 @@ public:
 
   static Move_container& get(size_t index);
   void add_move(int8_t moving, uint8_t from, uint8_t to, int8_t captured,
-      bool en_passant);
+      bool en_passant_capture);
   void reset();
   size_t size();
   array<Move, SIZE> get_moves();

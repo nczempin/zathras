@@ -32,7 +32,7 @@ Move_container& Move_container::get(size_t index)
 }
 
 void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
-    int8_t captured, bool en_passant)
+    int8_t captured, bool en_passant_capture)
 {
   if (moving == 0) {
     cerr << "moving == 0" << endl;
@@ -45,8 +45,9 @@ void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
   m.set_moving_piece(moving);
   m.set_from(from);
   m.set_to(to);
-  m.set_en_passant(en_passant);
   m.set_captured(captured);
+  m.set_en_passant_capture(en_passant_capture);
+  m.set_en_passant_square(0);
   ++index;
   if (index > this->SIZE || index < 0) {
     throw index;

@@ -585,25 +585,26 @@ void Position::make_move(Move& move)
       clear_bit(white, from);
       {
         // handle capturing by e. p.
-        uint8_t ep_square = move.get_en_passant();
-        cout << "ep_cap: " << Square::mailbox_index_to_square(ep_square)
-            << endl;
-        cout << "eps: " << hex << en_passant_square << dec << endl;
-        if (is_set_square(en_passant_square, to)) { // en passant capture
-          cout << "ep_cap: " << Square::mailbox_index_to_square(ep_square)
-              << endl;
+//        uint8_t ep_square = move.get_en_passant_square();
+//        cout << "ep_cap: " << Square::mailbox_index_to_square(ep_square)
+//            << endl;
+//        cout << "ep_square: " << ((int) ep_square) << endl;
+//        cout << "eps: " << hex << en_passant_square << dec << endl;
+        int target = to - 8;
+        if (move.is_en_passant_capture()) { // en passant capture
+          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
           //      this->print(cout);
-          clear_bit(pawns, ep_square - 8);
-          clear_bit(black, ep_square - 8);
-          cout << "************************deleting pawn at "
-              << (int) (ep_square - 8) << endl;
+          clear_bit(pawns, target);
+          clear_bit(black, to - 8);
+          cout << "************************deleting pawn at " << (int) (target)
+              << endl;
           this->print(cout);
 
         }
         // handle double step preparing the e. p.
         en_passant_square = 0x00;
         if (to - from == 16) {
-          set_bit(en_passant_square, ep_square);
+          set_bit(en_passant_square, target);
         }
 
       }
@@ -673,7 +674,7 @@ void Position::make_move(Move& move)
       clear_bit(black, from);
       {
         // handle capturing by e. p.
-        uint8_t ep_square = move.get_en_passant();
+        uint8_t ep_square = move.get_en_passant_square();
         if (is_set_square(en_passant_square, to)) { // en passant capture
           clear_bit(pawns, ep_square);
           clear_bit(white, ep_square);
@@ -774,12 +775,11 @@ void Position::unmake_move(Move& move)
       set_bit(white, from);
       {
         // handle capturing by e. p.
-        uint8_t ep_square = move.get_en_passant();
-        if (ep_square != 0) {
-          //is_set_square(en_passant_square, to)) { // en passant capture
-          set_bit(en_passant_square, ep_square);
-          set_bit(pawns, ep_square - 8);
-          set_bit(black, ep_square - 8);
+        if (move.is_en_passant_capture()) {
+          uint8_t target = to - 8;
+          set_bit(en_passant_square, target);
+          set_bit(pawns, target);
+          set_bit(black, target);
         } else {
           // handle double step preparing the e. p.
           en_passant_square = 0x00;
@@ -852,7 +852,7 @@ void Position::unmake_move(Move& move)
         // handle capturing by e. p.
         int ep_square = to + 8;
 
-        if (move.get_en_passant()) {
+        if (move.get_en_passant_square()) {
           set_bit(en_passant_square, ep_square + 16);
           set_bit(pawns, ep_square);
           set_bit(white, ep_square);
@@ -919,7 +919,7 @@ void Position::unmake_move(Move& move)
       break;
     }
   }
-  if (!move.get_en_passant()) {
+  if (!move.is_en_passant_capture()) {
     int8_t taken = move.get_taken_piece();
     if (taken != 0) {
       //cout << "untaken: " << taken << endl;
