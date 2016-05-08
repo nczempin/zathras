@@ -434,38 +434,17 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
     const bitboard_set all_moves, const move_visitor f, const bb occupied,
     const int8_t moving)
 {
-  static uint8_t lookup[] = //TODO share one instead of copying
-        { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
-          15, 14, 13, 12, 11, 10, 9, 8, //
-          23, 22, 21, 20, 19, 18, 17, 16, //
-          31, 30, 29, 28, 27, 26, 25, 24, //
-          39, 38, 37, 36, 35, 34, 33, 32, //
-          47, 46, 45, 44, 43, 42, 41, 40, //
-          55, 54, 53, 52, 51, 50, 49, 48, //
-          63, 62, 61, 60, 59, 58, 57, 56 };
-//  cout << "sub: " << hex << sub_position << dec << endl;
   bb position = sub_position;
   while (position != 0) {
     const uint8_t from = Position::extract_and_remove_square(position);
-    // cout << (int) from << endl;
     const bb raw_moves = all_moves[from];
-    // cout << hex << raw_moves << dec << endl;
     bb moves = raw_moves & ~occupied;
     while (moves != 0x00) {
-      //cout << hex << moves << dec << endl;
-      bb s = __builtin_ffsll(moves);
-      //   cout << s << endl;
-      if (s == 0) {
-        break;
-      }
-      uint8_t to = lookup[s];
-//    cout << (int) to << endl;
+      uint8_t to = Position::extract_and_remove_square(moves);
       bool b = is_anything_between(from, to, occupied);
-//    cout << b << endl;
       if (!b) {
         f(moving, from, to, 0);
       }
-      moves &= moves - 1;
     }
   }
 }
@@ -526,14 +505,17 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, bb occupied, int8_t moving,
     bool white_to_move)
 {
-  Position::visit_bitboard(sub_position,
-      [&all_moves, &f, &occupied, &moving, &white_to_move](int x) {
-        bb moves = filter_occupied_squares(white_to_move, occupied, all_moves, x);
-        Position::visit_bitboard(moves, [&x, &f, &moving](int y) {
-              f(moving, x, y, 0);
-            }
-        );
-      });
+  bb position = sub_position;
+  while (position != 0) {
+    const uint8_t from = Position::extract_and_remove_square(position);
+    bb moves = filter_occupied_squares(white_to_move, occupied, all_moves,
+        from);
+    while (moves != 0x00) {
+      uint8_t to = Position::extract_and_remove_square(moves);
+      f(moving, from, to, 0);
+    }
+  }
+
 }
 
 void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
