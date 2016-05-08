@@ -840,22 +840,10 @@ bool Move_generator::is_check_from_slider(const bitboard_set& sliding_moves,
 
 bool Move_generator::is_in_check(const bool side)
 {
-//    cout << "checking for side: " << (side ? "white" : "black") << endl;
-//  cout << "to move: " << (p->white_to_move ? "white" : "black") << endl;
-//
 //TODO this is a somewhat naive way of doing this, it needs to be much more efficient
   const bb colour = side ? p->white : p->black;
-  const bb other_colour = side ? p->black : p->white;
   const bb kpbb = p->kings & colour;
   const uint8_t king_pos = Position::extract_square(kpbb);
-  bool retval = false;
-  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
-      [&king_pos, &retval](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-        if (to == king_pos) {
-          retval = true;
-        }
-      };
-
 //TODO generalize, obviously
   const bb white_pawns = p->pawns & p->white;
   const bb white_knights = p->knights & p->white;
@@ -872,7 +860,6 @@ bool Move_generator::is_in_check(const bool side)
   const bb occupied = p->black | p->white;
 
   if (p->white_to_move) {
-
     if (is_check_from_slider(bishop_moves, king_pos, white_queens, occupied)) {
       return true;
     }
@@ -891,11 +878,6 @@ bool Move_generator::is_in_check(const bool side)
     if (is_check(white_kings, king_moves, king_pos)) {
       return true;
     }
-//    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, black_kings,
-//         Piece::WHITE_PAWN);
-//     if (retval) {
-//       return true;
-//     }
     if (is_check(white_pawns, black_pawn_capture_moves, king_pos)) {
       return true;
     }
@@ -918,14 +900,7 @@ bool Move_generator::is_in_check(const bool side)
     if (is_check(black_kings, king_moves, king_pos)) {
       return true;
     }
-//    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, white_kings,
-//        Piece::BLACK_PAWN);
-//    if (retval) {
-//      return true;
-//    }
-    bool check = is_check(black_pawns, white_pawn_capture_moves, king_pos);
-
-    if (check) {
+    if (is_check(black_pawns, white_pawn_capture_moves, king_pos)) {
       return true;
     }
   }
