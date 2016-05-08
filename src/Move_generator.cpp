@@ -452,19 +452,21 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, bb occupied, bb other_colour,
     int moving)
 {
-  Position::visit_bitboard(sub_position,
-      [this, &all_moves, &f, &occupied, &other_colour, &moving](int x) {
-        bb raw_moves = all_moves[x];
-        bb moves = raw_moves & other_colour;
-        Position::visit_bitboard(moves, [this, &x, &f, &occupied, &moving](int y) {
-              bool b = is_anything_between(x, y, occupied);
-              if (!b) {
-                int captured = find_captured_piece(y);
-                f(moving, x, y, captured);
-              }
-            }
-        );
-      });
+  bb position = sub_position;
+  while (position != 0) {
+    const uint8_t from = Position::extract_and_remove_square(position);
+    const bb raw_moves = all_moves[from];
+    bb moves = raw_moves & other_colour;
+    while (moves != 0x00) {
+      uint8_t to = Position::extract_and_remove_square(moves);
+      bool b = is_anything_between(from, to, occupied);
+      if (!b) {
+        int captured = find_captured_piece(to);
+        f(moving, from, to, captured);
+      }
+    }
+  }
+
 }
 
 void Move_generator::visit_moves_raw(const bb sub_position,
@@ -521,7 +523,7 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
 void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
     const uint8_t king_square, const int8_t direction)
 {
-  //1. check if squares between king and rook are free.
+//1. check if squares between king and rook are free.
   uint8_t next_square = king_square + direction;
   uint8_t target_square = king_square + direction * 2;
 
@@ -538,13 +540,13 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
 
   }
 
-  //2. check if squares between king and rook are attacked.
+//2. check if squares between king and rook are attacked.
   p->white_to_move = !p->white_to_move;
 
 //  cout << Square::mailbox_index_to_square(king_square) << "->"
 //      << (int) direction << endl;
   bool attacked = is_attacked(king_square);
-  //cout << attacked << "." << next << "." << target << endl;
+//cout << attacked << "." << next << "." << target << endl;
   if (attacked) {
     p->white_to_move = !p->white_to_move;
     //cout << " is check" << endl;
@@ -576,7 +578,7 @@ void Move_generator::generate_castling(const move_visitor& f,
     piece = Piece::BLACK_KING;
     king_square = Square::E8;
   }
-  //castling:
+//castling:
   static int8_t king_jump_direction[] =
     { 1, -1, 1, -1 };
   static bool colour[] =
@@ -587,7 +589,7 @@ void Move_generator::generate_castling(const move_visitor& f,
       attempt_castle(f, piece, king_square, king_jump_direction[i]);
     }
   }
-  //cout << endl;
+//cout << endl;
 }
 void Move_generator::f(Move_container& moves, const int8_t moving,
     const uint8_t from, const uint8_t to, const int8_t captured)
@@ -626,7 +628,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
         moves.add_move(moving, from, to, captured, en_passant_capture);
       };
 
-  //TODO generalize, obviously
+//TODO generalize, obviously
   const bb white_pawns = p->pawns & p->white;
   const bb white_knights = p->knights & p->white;
   const bb white_bishops = p->bishops & p->white;
@@ -717,7 +719,7 @@ bool Move_generator::is_attacked(const uint8_t square)
         }
       };
 
-  //TODO generalize, obviously
+//TODO generalize, obviously
   const bb white_pawns = p->pawns & p->white;
   const bb white_knights = p->knights & p->white;
   const bb white_bishops = p->bishops & p->white;
@@ -852,7 +854,7 @@ bool Move_generator::is_in_check(const bool side)
         }
       };
 
-  //TODO generalize, obviously
+//TODO generalize, obviously
   const bb white_pawns = p->pawns & p->white;
   const bb white_knights = p->knights & p->white;
   const bb white_bishops = p->bishops & p->white;
