@@ -116,43 +116,43 @@ int Perft_command::perft(int depth)
   return total_result;
 }
 
-uint8_t extract(bb outside_bb)
-{
-  return Position::extract_square(outside_bb);
-}
-
-uint8_t visit(bb outside_bb)
-{
-  uint8_t square0 = 0;
-  Position::visit_bitboard(outside_bb, [&square0](uint8_t sq) {
-    square0 = sq;
-  });
-  return square0;
-}
+//vector<uint8_t> extract(bb outside_bb)
+//{
+//
+//  uint8_t tmp = Position::extract_square(outside_bb);
+//}
+//
+//vector<uint8_t> visit(bb outside_bb)
+//{
+//  uint8_t square0 = 0;
+//  Position::visit_bitboard(outside_bb, [&square0](uint8_t sq) {
+//    square0 = sq;
+//  });
+//  return square0;
+//}
 
 void Perft_command::execute()
 {
-  bb outside_bb = 0x01;
-  uint8_t square1 = 0;
-  uint8_t square0 = 0;
-
-  while (outside_bb != 0) {
-    square1 = extract(outside_bb);
-    square0 = visit(outside_bb);
-    cout << hex << outside_bb << dec << ": " << (int) square0 << ", "
-        << (int) square1 << endl;
-    if (square0 != square1) {
-      throw 1;
-    }
-    outside_bb = outside_bb << 1;
-  }
-
-  exit(0);
+//  bb outside_bb = 0x01;
+//  uint8_t square1 = 0;
+//  uint8_t square0 = 0;
+//
+//  while (outside_bb != 0) {
+//    square1 = extract(outside_bb);
+//    square0 = visit(outside_bb);
+//    cout << hex << outside_bb << dec << ": " << (int) square0 << ", "
+//        << (int) square1 << endl;
+//    if (square0 != square1) {
+//      throw 1;
+//    }
+//    outside_bb = outside_bb << 1;
+//  }
+//
+//  exit(0);
   vector<string> path = receiver->getArguments();
   int depth = 6; //TODO get this from arguments, but use a reasonable default
   Position position;
-  position = Position::create_position(
-      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq –");
+  position = Position::create_position("8/8/8/1k6/5K2/4R3/2R5/8 w - - 0 1");
   position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;

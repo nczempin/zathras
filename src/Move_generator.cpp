@@ -430,13 +430,10 @@ bool Move_generator::is_anything_between(int x, int y, bb occupied)
   return intersection != 0;
 }
 
-void Move_generator::visit_non_capture_ray_moves(const bb& sub_position,
-    const bitboard_set& all_moves, const move_visitor& f, const bb& occupied,
-    const int8_t& moving)
+void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
+    const bitboard_set all_moves, const move_visitor f, const bb occupied,
+    const int8_t moving)
 {
-  const uint8_t from = Position::extract_square(sub_position);
-  const bb raw_moves = all_moves[from];
-  bb moves = raw_moves & ~occupied;
   static uint8_t lookup[] = //TODO share one instead of copying
         { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
           15, 14, 13, 12, 11, 10, 9, 8, //
@@ -446,14 +443,30 @@ void Move_generator::visit_non_capture_ray_moves(const bb& sub_position,
           47, 46, 45, 44, 43, 42, 41, 40, //
           55, 54, 53, 52, 51, 50, 49, 48, //
           63, 62, 61, 60, 59, 58, 57, 56 };
-  while (moves != 0x00) {
-    bb s = __builtin_ffsll(moves);
-    uint8_t to = lookup[s];
-    bool b = is_anything_between(from, to, occupied);
-    if (!b) {
-      f(moving, from, to, 0);
+//  cout << "sub: " << hex << sub_position << dec << endl;
+  bb position = sub_position;
+  while (position != 0) {
+    const uint8_t from = Position::extract_and_remove_square(position);
+    // cout << (int) from << endl;
+    const bb raw_moves = all_moves[from];
+    // cout << hex << raw_moves << dec << endl;
+    bb moves = raw_moves & ~occupied;
+    while (moves != 0x00) {
+      //cout << hex << moves << dec << endl;
+      bb s = __builtin_ffsll(moves);
+      //   cout << s << endl;
+      if (s == 0) {
+        break;
+      }
+      uint8_t to = lookup[s];
+//    cout << (int) to << endl;
+      bool b = is_anything_between(from, to, occupied);
+//    cout << b << endl;
+      if (!b) {
+        f(moving, from, to, 0);
+      }
+      moves &= moves - 1;
     }
-    moves &= moves - 1;
   }
 }
 void Move_generator::visit_capture_ray_moves(const bb sub_position,
@@ -649,28 +662,28 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   if (p->white_to_move) {
     visit_capture_moves(white_knights, knight_moves, f, p->black,
         Piece::WHITE_KNIGHT);
-    visit_non_capture_moves(white_knights, knight_moves, f, p->white | p->black,
+    visit_non_capture_moves(white_knights, knight_moves, f, occupied,
         Piece::WHITE_KNIGHT);
     visit_capture_moves(white_kings, king_moves, f, p->black,
         Piece::WHITE_KING);
-    visit_non_capture_moves(white_kings, king_moves, f, p->white | p->black,
+    visit_non_capture_moves(white_kings, king_moves, f, occupied,
         Piece::WHITE_KING);
-    visit_non_capture_ray_moves(white_queens, rook_moves, f,
-        p->white | p->black, Piece::WHITE_QUEEN);
-    visit_non_capture_ray_moves(white_rooks, rook_moves, f, p->white | p->black,
+    visit_non_capture_ray_moves(white_queens, rook_moves, f, occupied,
+        Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_rooks, rook_moves, f, occupied,
         Piece::WHITE_ROOK);
-    visit_capture_ray_moves(white_queens, rook_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_QUEEN);
-    visit_capture_ray_moves(white_rooks, rook_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_ROOK);
-    visit_capture_ray_moves(white_bishops, bishop_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_BISHOP);
-    visit_capture_ray_moves(white_queens, bishop_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_QUEEN);
-    visit_non_capture_ray_moves(white_bishops, bishop_moves, f,
-        p->white | p->black, Piece::WHITE_BISHOP);
-    visit_non_capture_ray_moves(white_queens, bishop_moves, f,
-        p->white | p->black, Piece::WHITE_QUEEN);
+    visit_capture_ray_moves(white_queens, rook_moves, f, occupied, p->black,
+        Piece::WHITE_QUEEN);
+    visit_capture_ray_moves(white_rooks, rook_moves, f, occupied, p->black,
+        Piece::WHITE_ROOK);
+    visit_capture_ray_moves(white_bishops, bishop_moves, f, occupied, p->black,
+        Piece::WHITE_BISHOP);
+    visit_capture_ray_moves(white_queens, bishop_moves, f, occupied, p->black,
+        Piece::WHITE_QUEEN);
+    visit_non_capture_ray_moves(white_bishops, bishop_moves, f, occupied,
+        Piece::WHITE_BISHOP);
+    visit_non_capture_ray_moves(white_queens, bishop_moves, f, occupied,
+        Piece::WHITE_QUEEN);
     generate_castling(f, true);
     visit_capture_moves(white_pawns, white_pawn_capture_moves, f, p->black,
         Piece::WHITE_PAWN);
@@ -679,11 +692,11 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   } else {
     visit_capture_moves(black_knights, knight_moves, f, p->white,
         Piece::BLACK_KNIGHT);
-    visit_non_capture_moves(black_knights, knight_moves, f, p->white | p->black,
+    visit_non_capture_moves(black_knights, knight_moves, f, occupied,
         Piece::BLACK_KNIGHT);
     visit_capture_moves(black_kings, king_moves, f, p->white,
         Piece::BLACK_KING);
-    visit_non_capture_moves(black_kings, king_moves, f, p->white | p->black,
+    visit_non_capture_moves(black_kings, king_moves, f, occupied,
         Piece::BLACK_KING);
     visit_non_capture_ray_moves(black_queens, rook_moves, f, occupied,
         Piece::BLACK_QUEEN);
