@@ -72,12 +72,12 @@ int Perft_command::perft(int depth)
     return 1;
   }
   Move_container move_container = mg.generate_moves(pp, depth);
-  vector<Move> moves = move_container.get_moves();
+  array<Move, Move_container::SIZE> moves = move_container.get_moves();
   //  if (depth == 1) {
 //    return moves.size();
 //  }
   int total_result = 0;
-  size_t size = moves.size();
+  size_t size = move_container.size();
 //  cout << "moves.size: " << size << endl;
 //  cout << "perft::perft" << endl;
 //  for (size_t i = 0; i < size; ++i) {
@@ -93,13 +93,16 @@ int Perft_command::perft(int depth)
 //    cout << *pp << endl;
 //    cout << "(bc: perft@" << depth << "): " << move.to_string() << "-->"
 //        << endl;
-    if (!mg.is_in_check(!pp->white_to_move)) {
-      if (depth == 1) {
-        ++total_result;
-      } else {
-        int perft_result = perft(depth - 1);
-        total_result += perft_result;
-      }
+    if (mg.is_in_check(!pp->white_to_move)) {
+      //cout << move.to_string() << "******was illegal; unmaking*******" << endl;
+      pp->unmake_move(move);
+      continue;
+    }
+    if (depth == 1) {
+      ++total_result;
+    } else {
+      int perft_result = perft(depth - 1);
+      total_result += perft_result;
     }
 //    cout << "(bu: perft@" << depth << "): " << move.to_string() << "-->"
 //        << endl;
@@ -113,13 +116,43 @@ int Perft_command::perft(int depth)
   return total_result;
 }
 
+//vector<uint8_t> extract(bb outside_bb)
+//{
+//
+//  uint8_t tmp = Position::extract_square(outside_bb);
+//}
+//
+//vector<uint8_t> visit(bb outside_bb)
+//{
+//  uint8_t square0 = 0;
+//  Position::visit_bitboard(outside_bb, [&square0](uint8_t sq) {
+//    square0 = sq;
+//  });
+//  return square0;
+//}
+
 void Perft_command::execute()
 {
+//  bb outside_bb = 0x01;
+//  uint8_t square1 = 0;
+//  uint8_t square0 = 0;
+//
+//  while (outside_bb != 0) {
+//    square1 = extract(outside_bb);
+//    square0 = visit(outside_bb);
+//    cout << hex << outside_bb << dec << ": " << (int) square0 << ", "
+//        << (int) square1 << endl;
+//    if (square0 != square1) {
+//      throw 1;
+//    }
+//    outside_bb = outside_bb << 1;
+//  }
+//
+//  exit(0);
   vector<string> path = receiver->getArguments();
-  int depth = 5; //TODO get this from arguments, but use a reasonable default
+  int depth = 6; //TODO get this from arguments, but use a reasonable default
   Position position;
-  position = Position::create_position(
-      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+  position = Position::create_position("8/8/8/1k6/5K2/4R3/2R5/8 w - - 0 1");
   position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;
@@ -130,7 +163,7 @@ void Perft_command::execute()
   //cout << "b4 gen" << endl;
   pp = make_shared<Position>(position);
   Move_container move_container = mg.generate_moves(pp, depth);
-  vector<Move> moves = move_container.get_moves();
+  array<Move, Move_container::SIZE> moves = move_container.get_moves();
   //cout << "after gen" << endl;
   size_t size = move_container.size();
 //  cout << "moves.size: " << size << endl;
@@ -146,6 +179,7 @@ void Perft_command::execute()
       int8_t moving = move.get_moving_piece();
       int8_t moving_abs = moving > 0 ? moving : -moving;
       if (moving_abs > 6 || moving_abs == 0) {
+        cerr << "size: " << size << endl;
         cerr << "invalid move created: moving piece: " << moving << endl;
         throw moving_abs;
       }
@@ -156,8 +190,11 @@ void Perft_command::execute()
       //cout << s << "******************" << endl;
       pp->make_move(move);
       if (mg.is_in_check(!pp->white_to_move)) {
+        //cout << "******was illegal; unmaking*******" << endl;
         pp->unmake_move(move);
         continue;
+      } else {
+        // cout << move.to_string() << " is not check" << endl;
       }
 //      cout.flush();
 //    cout << "after make_move:" << endl;

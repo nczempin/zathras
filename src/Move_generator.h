@@ -19,8 +19,6 @@ public:
   virtual ~Move_generator();
   static void pregenerate_moves();
   Move_container generate_moves(shared_ptr<Position> p, size_t depth);
-  vector<Move> generate_capture_moves();
-  vector<Move> generate_moves(uint8_t target);
   bool is_in_check(bool side);
 private:
   shared_ptr<Position> p;
@@ -51,7 +49,7 @@ private:
   static bitboard_set white_pawn_capture_moves;
   static bitboard_set black_pawn_capture_moves;
 
-  bitboard_set pieces;
+  //array<bb, 9> pieces;
 
   void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
       move_visitor f, int moving);
@@ -61,7 +59,8 @@ private:
       const bitboard_set all_moves, move_visitor f, bb other_colour,
       int8_t moving);
   void visit_non_capture_ray_moves(const bb sub_position,
-      const bitboard_set all_moves, move_visitor f, bb occupied, int moving);
+      const bitboard_set all_moves, const move_visitor f, const bb occupied,
+      const int8_t moving);
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
       bb other_colour, int moving);
@@ -73,12 +72,17 @@ private:
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
   void visit_moves(move_visitor count_moves);
-  int find_captured_piece(int y);
+  int8_t find_captured_piece(uint8_t square);
   void generate_castling(const move_visitor& f, bool white);
   bool is_attacked(uint8_t square);
   void attempt_castle(const move_visitor f, const int8_t piece,
       const uint8_t king_square, const int8_t direction);
-  vector<Move> generate_attack_moves();
+  void f(Move_container& moves, const int8_t moving, const uint8_t from,
+      const uint8_t to, const int8_t captured);
+  bool is_check(const bb movers, const bitboard_set& all_moves,
+      const uint8_t king_pos);
+  bool is_check_from_slider(const bitboard_set& sliding_moves,
+      const uint8_t king_pos, const bb slider, const bb& occupied);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

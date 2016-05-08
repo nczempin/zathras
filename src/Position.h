@@ -17,9 +17,12 @@
 #include <vector>
 #include "typedefs.h"
 #include "Move.h"
+#include <array>
+
 using namespace std;
 
-class Position {
+class Position
+{
 public:
   Position();
   virtual ~Position();
@@ -52,7 +55,7 @@ public:
 
   static Position create_position(const string& fen);
   static uint8_t extract_square(const bb my_bb);
-
+  static uint8_t extract_and_remove_square(bb& my_bb);
   //static void print_square(int x);
   //TODO a separate Bitboard (helper) class is probably best
   static const bb BB_FULL_BOARD = 0xffffffffffffffff;
@@ -62,7 +65,7 @@ public:
   static const bb BB_RANK5 = 0x000000ff00000000;
   static const bb BB_RANK6 = 0x0000ff0000000000;
   static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
-  bitboard_set getPieceBitboards() const;
+  array<bb, 9> getPieceBitboards() const;
 
   bool is_white_to_move() const
   {
@@ -87,6 +90,8 @@ private:
   static void display_all_moves(const bitboard_set& moves);
   void update_bits(unsigned long int& colour, unsigned long int& piece,
       uint8_t from, uint8_t to);
+  void save_en_passant_square(Move& move);
+  void restore_en_passant_square(Move& move);
 };
 
 #endif /* POSITION_H_ */

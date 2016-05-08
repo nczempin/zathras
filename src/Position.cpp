@@ -13,6 +13,7 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
+#include <array>
 
 Position::Position()
 {
@@ -296,7 +297,8 @@ void Position::visualize_bitboard(bb my_bb, ostream& stream)
 
 uint8_t Position::extract_square(const bb my_bb)
 {
-  static uint8_t lookup[] = { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+  static uint8_t lookup[] =
+    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
       15, 14, 13, 12, 11, 10, 9, 8, //
       23, 22, 21, 20, 19, 18, 17, 16, //
       31, 30, 29, 28, 27, 26, 25, 24, //
@@ -307,6 +309,21 @@ uint8_t Position::extract_square(const bb my_bb)
 
   return lookup[__builtin_ffsll(my_bb)];
 }
+uint8_t Position::extract_and_remove_square(bb& my_bb)
+{
+  static uint8_t lookup[] = //TODO share one instead of copying
+        { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+          15, 14, 13, 12, 11, 10, 9, 8, //
+          23, 22, 21, 20, 19, 18, 17, 16, //
+          31, 30, 29, 28, 27, 26, 25, 24, //
+          39, 38, 37, 36, 35, 34, 33, 32, //
+          47, 46, 45, 44, 43, 42, 41, 40, //
+          55, 54, 53, 52, 51, 50, 49, 48, //
+          63, 62, 61, 60, 59, 58, 57, 56 };
+  int builtinFfsll = __builtin_ffsll(my_bb);
+  my_bb &= my_bb - 1;
+  return lookup[builtinFfsll];
+}
 
 void Position::visit_bitboard(const bb my_bb, const square_visitor f)
 {
@@ -314,14 +331,15 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
   //static bb t = 0;
   uint8_t coord = 0;
   uint8_t l = 0;
-  static uint8_t lookup[] = { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
-       15, 14, 13, 12, 11, 10, 9, 8, //
-       23, 22, 21, 20, 19, 18, 17, 16, //
-       31, 30, 29, 28, 27, 26, 25, 24, //
-       39, 38, 37, 36, 35, 34, 33, 32, //
-       47, 46, 45, 44, 43, 42, 41, 40, //
-       55, 54, 53, 52, 51, 50, 49, 48, //
-       63, 62, 61, 60, 59, 58, 57, 56 };
+  static uint8_t lookup[] =
+    { 255, 7, 6, 5, 4, 3, 2, 1, 0, //
+      15, 14, 13, 12, 11, 10, 9, 8, //
+      23, 22, 21, 20, 19, 18, 17, 16, //
+      31, 30, 29, 28, 27, 26, 25, 24, //
+      39, 38, 37, 36, 35, 34, 33, 32, //
+      47, 46, 45, 44, 43, 42, 41, 40, //
+      55, 54, 53, 52, 51, 50, 49, 48, //
+      63, 62, 61, 60, 59, 58, 57, 56 };
   while (true) {
     l = __builtin_ffsll(tmp);
 //    cout << hex;
@@ -329,7 +347,7 @@ void Position::visit_bitboard(const bb my_bb, const square_visitor f)
     if (l == 0) {
       return;
     }
-     coord = lookup[l];
+    coord = lookup[l];
     //   cout << "coord: " << coord << endl;
 
     f(coord);
@@ -480,27 +498,20 @@ void Position::display_all_moves(const bitboard_set& moves)
   });
 }
 
-bitboard_set Position::getPieceBitboards() const
+array<bb, 9> Position::getPieceBitboards() const
 {
-  bitboard_set retval;
+  array<bb, 9> retval;
 //TODO figure out what to do with [0]
-  retval.push_back(0);
-  bb p = pawns;
-  bb n = knights;
-  bb b = bishops;
-  bb r = rooks;
-  bb q = queens;
-  bb k = kings;
-  bb wh = white;
-  bb bl = black;
-  retval.push_back(p);
-  retval.push_back(n);
-  retval.push_back(b);
-  retval.push_back(r);
-  retval.push_back(q);
-  retval.push_back(k);
-  retval.push_back(wh);
-  retval.push_back(bl);
+  retval[0] = 0x00;
+  retval[1] = pawns;
+  retval[2] = knights;
+  retval[3] = bishops;
+  retval[4] = rooks;
+  retval[5] = queens;
+  retval[6] = kings;
+  retval[7] = white;
+  retval[8] = black;
+
   return retval;
 }
 
@@ -528,9 +539,23 @@ void Position::update_bits(unsigned long int& colour, unsigned long int& piece,
   clear_bit(colour, clear);
 }
 
+void Position::save_en_passant_square(Move& move)
+{
+  if (en_passant_square != 0x00) {
+    uint8_t eps = extract_square(en_passant_square);
+    move.set_en_passant_square(eps);
+    en_passant_square = 0x00;
+  }
+}
+void Position::restore_en_passant_square(Move& move)
+{
+  en_passant_square = move.get_en_passant_square();
+}
+
 void Position::make_move(Move& move)
 {
 //  cout << "make_move: " << move.to_string() << endl;
+//  this->print(cout);
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
 
@@ -588,17 +613,28 @@ void Position::make_move(Move& move)
       clear_bit(white, from);
       {
         // handle capturing by e. p.
-        int ep_square = to - 8;
-        if (is_set_square(en_passant_square, to)) { // en passant capture
-          clear_bit(pawns, ep_square);
-          clear_bit(black, ep_square);
-        }
-        // handle double step preparing the e. p.
-        en_passant_square = 0x00;
-        if (to - from == 16) {
-          set_bit(en_passant_square, ep_square);
-        }
+//        uint8_t ep_square = move.get_en_passant_square();
+//        cout << "ep_cap: " << Square::mailbox_index_to_square(ep_square)
+//            << endl;
+//        cout << "ep_square: " << ((int) ep_square) << endl;
+//        cout << "eps: " << hex << en_passant_square << dec << endl;
+        int target = to - 8;
+        if (move.is_en_passant_capture()) { // en passant capture
+//          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
+        //      this->print(cout);
+          clear_bit(pawns, target);
+          clear_bit(black, target);
+//          cout << "************************deleting pawn at " << (int) (target)
+//              << endl;
+//          this->print(cout);
 
+        } else {
+          save_en_passant_square(move);
+          // handle double step preparing the e. p.
+          if (to - from == 16) {
+            set_bit(en_passant_square, target);
+          }
+        }
       }
       break;
     case Piece::WHITE_KNIGHT:
@@ -606,12 +642,14 @@ void Position::make_move(Move& move)
       set_bit(white, to);
       clear_bit(knights, from);
       clear_bit(white, from);
+      save_en_passant_square(move);
       break;
     case Piece::WHITE_BISHOP:
       set_bit(bishops, to);
       set_bit(white, to);
       clear_bit(bishops, from);
       clear_bit(white, from);
+      save_en_passant_square(move);
       break;
     case Piece::WHITE_ROOK:
       set_bit(rooks, to);
@@ -625,6 +663,7 @@ void Position::make_move(Move& move)
         castling[1] = false;
         move.cleared_queenside_castling = true;
       }
+      save_en_passant_square(move);
       break;
     case Piece::WHITE_QUEEN:
       set_bit(queens, to);
@@ -632,6 +671,7 @@ void Position::make_move(Move& move)
       clear_bit(queens, from);
       clear_bit(white, from);
       break;
+      save_en_passant_square(move);
     case Piece::WHITE_KING:
       set_bit(kings, to);
       set_bit(white, to);
@@ -666,17 +706,23 @@ void Position::make_move(Move& move)
       clear_bit(black, from);
       {
         // handle capturing by e. p.
-        int ep_square = to + 8;
-        if (is_set_square(en_passant_square, to)) { // en passant capture
-          clear_bit(pawns, ep_square);
-          clear_bit(white, ep_square);
+        int target = to + 8;
+        if (move.is_en_passant_capture()) { // en passant capture
+//          cout << "ep_cap: " << Square::mailbox_index_to_square(target) << endl;
+        //      this->print(cout);
+          clear_bit(pawns, target);
+          clear_bit(white, target);
+//          cout << "************************deleting pawn at " << (int) (target)
+//              << endl;
+//          this->print(cout);
+//
+        } else {
+          // handle double step preparing the e. p.
+          save_en_passant_square(move);
+          if (to - from == -16) {
+            set_bit(en_passant_square, target);
+          }
         }
-        // handle double step preparing the e. p.
-        en_passant_square = 0x00;
-        if (to - from == -16) {
-          set_bit(en_passant_square, ep_square);
-        }
-
       }
       break;
     case Piece::BLACK_KNIGHT:
@@ -684,12 +730,14 @@ void Position::make_move(Move& move)
       set_bit(black, to);
       clear_bit(knights, from);
       clear_bit(black, from);
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_BISHOP:
       set_bit(bishops, to);
       set_bit(black, to);
       clear_bit(bishops, from);
       clear_bit(black, from);
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_ROOK:
       set_bit(rooks, to);
@@ -703,12 +751,14 @@ void Position::make_move(Move& move)
         move.cleared_queenside_castling = true;
         castling[3] = false;
       }
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_QUEEN:
       set_bit(queens, to);
       set_bit(black, to);
       clear_bit(queens, from);
       clear_bit(black, from);
+      save_en_passant_square(move);
       break;
     case Piece::BLACK_KING:
       update_bits(black, kings, from, to);
@@ -725,6 +775,7 @@ void Position::make_move(Move& move)
         move.cleared_queenside_castling = true;
         castling[3] = false;
       }
+      save_en_passant_square(move);
       break;
     default:
       double error = ((double) moving);
@@ -734,6 +785,8 @@ void Position::make_move(Move& move)
       break;
     }
   }
+//  cout << "made:" << endl;
+//  this->print(cout);
 
 // TODO turned promoted pawn into new piece
 // TODO update en passant square
@@ -745,9 +798,11 @@ void Position::make_move(Move& move)
 }
 void Position::unmake_move(Move& move)
 {
-  // cout << "unmake_move: " << move.to_string() << endl;
+//  cout << "unmake_move: " << move.to_string() << endl;
+//  this->print(cout);
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
+  restore_en_passant_square(move);
 
   int8_t moving = move.get_moving_piece();
   white_to_move = !white_to_move;
@@ -763,15 +818,12 @@ void Position::unmake_move(Move& move)
       set_bit(white, from);
       {
         // handle capturing by e. p.
-        int ep_square = to - 8;
-
-        if (move.is_en_passant()) {
-          //is_set_square(en_passant_square, to)) { // en passant capture
-          set_bit(pawns, ep_square);
-          set_bit(black, ep_square);
+        if (move.is_en_passant_capture()) {
+          uint8_t target = to - 8;
+          set_bit(en_passant_square, to);
+          set_bit(pawns, target);
+          set_bit(black, target);
         }
-        // handle double step preparing the e. p.
-        en_passant_square = 0x00;
 
       }
       break;
@@ -838,15 +890,13 @@ void Position::unmake_move(Move& move)
       set_bit(black, from);
       {
         // handle capturing by e. p.
-        int ep_square = to + 8;
-
-        if (move.is_en_passant()) {
-          //is_set_square(en_passant_square, to)) { // en passant capture
-          set_bit(pawns, ep_square);
-          set_bit(white, ep_square);
+        if (move.is_en_passant_capture()) {
+          uint8_t target = to + 8;
+          set_bit(en_passant_square, to);
+          set_bit(pawns, target);
+          set_bit(white, target);
+//          cout << "unmade epcap to this: " << endl << (*this) << endl;
         }
-        // handle double step preparing the e. p.
-        en_passant_square = 0x00;
 
       }
       break;
@@ -905,7 +955,8 @@ void Position::unmake_move(Move& move)
       break;
     }
   }
-  if (!move.is_en_passant()) {
+  if (!move.is_en_passant_capture()) {
+
     int8_t taken = move.get_taken_piece();
     if (taken != 0) {
       //cout << "untaken: " << taken << endl;
@@ -940,6 +991,8 @@ void Position::unmake_move(Move& move)
         throw p;
       }
     }
+//    cout << "unmade:" << endl;
+//    this->print(cout);
     // cout << *this << endl;
   }
 // TODO transform promoted piece back into pawn

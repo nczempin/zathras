@@ -14,7 +14,8 @@
 #include "Move_generator.h"
 #include <memory>
 
-class Perft_command: public Abstract_command {
+class Perft_command: public Abstract_command
+{
 public:
   Perft_command(shared_ptr<Command_receiver> receiver);
   virtual ~Perft_command();
@@ -26,6 +27,7 @@ public:
 
 private:
   int perft(int depth);
+
   shared_ptr<Position> pp;
   Move_generator mg;
 };
