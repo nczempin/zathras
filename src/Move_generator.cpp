@@ -305,36 +305,38 @@ void Move_generator::visit_capture_moves(const bb sub_position,
     const bitboard_set all_moves, const move_visitor f, const bb other_colour,
     const int8_t moving)
 {
-//cout << "visit capture moves" << endl;
-  Position::visit_bitboard(sub_position,
-      [this, &all_moves, &f, &other_colour, &moving](uint8_t from) {
-        bb raw_moves = all_moves[from];
-        bb moves = raw_moves & (other_colour);
-        if (p->en_passant_square != 0x00 && (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN)) {
-          moves = raw_moves & (other_colour | p->en_passant_square);
-        }
-
-        Position::visit_bitboard(moves, [this, &from, &f, &moving](uint8_t to) {
-              int8_t captured = find_captured_piece(to);
-
-              f(moving, from, to, captured);
-            }
-        );
-      });
+  bb position = sub_position;
+  while (position != 0) {
+    const uint8_t from = Position::extract_and_remove_square(position);
+    const bb raw_moves = all_moves[from];
+    bb moves = raw_moves & other_colour;
+    //TODO move this to a separate visit_pawn_caps method
+    if (p->en_passant_square != 0x00
+        && (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN)) {
+      moves = raw_moves & (other_colour | p->en_passant_square);
+    }
+    while (moves != 0x00) {
+      uint8_t to = Position::extract_and_remove_square(moves);
+      int captured = find_captured_piece(to);
+      f(moving, from, to, captured);
+    }
+  }
 }
 void Move_generator::visit_non_capture_moves(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, bb other_colour,
     int8_t moving)
 {
-  Position::visit_bitboard(sub_position,
-      [&all_moves, &f, &other_colour, &moving](uint8_t from) {
-        bb raw_moves = all_moves[from];
-        bb moves = raw_moves & ~other_colour;
-        Position::visit_bitboard(moves, [&from, &f, &moving](const uint8_t& to) {
-              f(moving, from, to, 0);
-            }
-        );
-      });
+  bb position = sub_position;
+  while (position != 0) {
+    const uint8_t from = Position::extract_and_remove_square(position);
+    const bb raw_moves = all_moves[from];
+    bb moves = raw_moves & ~other_colour;
+    //TODO move this to a separate visit_pawn_caps method
+    while (moves != 0x00) {
+      uint8_t to = Position::extract_and_remove_square(moves);
+      f(moving, from, to, 0);
+    }
+  }
 }
 static bool on_same_file(int x, int y)
 {
