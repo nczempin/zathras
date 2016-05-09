@@ -751,7 +751,7 @@ bool Move_generator::is_attacked(const uint8_t square)
 
   if (p->white_to_move) {
 
-    if (is_attacked_by_pawn(white_pawns, white_pawn_capture_moves, square,
+    if (is_attacked_by_pawn(white_pawns, black_pawn_capture_moves, square,
         true)) {
       return true;
     }
@@ -774,7 +774,7 @@ bool Move_generator::is_attacked(const uint8_t square)
       return true;
     }
   } else {
-    if (is_attacked_by_pawn(black_pawns, black_pawn_capture_moves, square,
+    if (is_attacked_by_pawn(black_pawns, white_pawn_capture_moves, square,
         false)) {
       return true;
     }
