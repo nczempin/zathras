@@ -452,7 +452,7 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
 }
 void Move_generator::visit_capture_ray_moves(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, bb occupied, bb other_colour,
-    int moving)
+    int8_t moving)
 {
   bb position = sub_position;
   while (position != 0) {
@@ -463,14 +463,13 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
       uint8_t to = Position::extract_and_remove_square(moves);
       bool b = is_anything_between(from, to, occupied);
       if (!b) {
-        int captured = find_captured_piece(to);
+        int8_t captured = find_captured_piece(to);
         f(moving, from, to, captured);
       }
     }
   }
 
 }
-
 void Move_generator::visit_moves_raw(const bb sub_position,
     const bitboard_set all_moves, move_visitor f, int moving)
 {
@@ -548,10 +547,9 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
 //  cout << Square::mailbox_index_to_square(king_square) << "->"
 //      << (int) direction << endl;
   bool attacked = is_attacked(king_square);
-//cout << attacked << "." << next << "." << target << endl;
   if (attacked) {
-    p->white_to_move = !p->white_to_move;
-    //cout << " is check" << endl;
+    //p->white_to_move = !p->white_to_move;
+    cout << " is check" << endl;
     return;
   }
   bool next = is_attacked(next_square);
@@ -561,6 +559,7 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
     return;
   }
   bool target = is_attacked(target_square);
+  //cout << attacked << "." << next << "." << target << endl;
   if (target) {
     //cout << "target is attacked" << endl;
     p->white_to_move = !p->white_to_move;
@@ -711,15 +710,29 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   return moves;
 }
 
+bool Move_generator::is_attacked_by_slider(bb position,
+    const bitboard_set& all_moves, const uint8_t square, const bb occupied)
+{
+  while (position != 0) {
+    const uint8_t from = Position::extract_and_remove_square(position);
+    const bb raw_moves = all_moves[from];
+    bb kpsq = 0;
+    Position::set_bit(kpsq, square);
+    bb moves = raw_moves & kpsq;
+    while (moves != 0x00) {
+      uint8_t to = Position::extract_and_remove_square(moves);
+      bool b = is_anything_between(from, to, occupied);
+      if (!b) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 bool Move_generator::is_attacked(const uint8_t square)
 {
   bool retval = false;
-  function<void(int8_t, uint8_t, uint8_t, int8_t)> f =
-      [square, &retval](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
-        if (to == square) {
-          retval = true;
-        }
-      };
 
 //TODO generalize, obviously
   const bb white_pawns = p->pawns & p->white;
@@ -737,89 +750,73 @@ bool Move_generator::is_attacked(const uint8_t square)
   const bb occupied = p->white | p->black;
 
   if (p->white_to_move) {
-    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, p->black,
-        Piece::WHITE_PAWN);
-    if (retval) {
+
+    if (is_attacked_by_pawn(white_pawns, white_pawn_capture_moves, square,
+        true)) {
       return true;
     }
-    visit_capture_moves(white_knights, knight_moves, f, p->black,
-        Piece::WHITE_KNIGHT);
-    if (retval) {
+    if (is_attacked_by_hopper(white_knights, knight_moves, square)) {
       return true;
     }
-    visit_capture_moves(white_kings, king_moves, f, p->black,
-        Piece::WHITE_KING);
-    if (retval) {
+    if (is_attacked_by_hopper(white_kings, king_moves, square)) {
       return true;
     }
-    visit_capture_ray_moves(white_queens, rook_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_QUEEN);
-    if (retval) {
+    if (is_attacked_by_slider(white_rooks, rook_moves, square, occupied)) {
       return true;
     }
-    visit_capture_ray_moves(white_rooks, rook_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_ROOK);
-    if (retval) {
+    if (is_attacked_by_slider(white_bishops, bishop_moves, square, occupied)) {
       return true;
     }
-    visit_capture_ray_moves(white_bishops, bishop_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_BISHOP);
-    if (retval) {
+    if (is_attacked_by_slider(white_queens, rook_moves, square, occupied)) {
       return true;
     }
-    visit_capture_ray_moves(white_queens, bishop_moves, f, p->white | p->black,
-        p->black, Piece::WHITE_QUEEN);
-    if (retval) {
+    if (is_attacked_by_slider(white_queens, bishop_moves, square, occupied)) {
       return true;
     }
   } else {
-    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, p->white,
-        Piece::BLACK_PAWN);
-    if (retval) {
+    if (is_attacked_by_pawn(black_pawns, black_pawn_capture_moves, square,
+        false)) {
       return true;
     }
-    visit_capture_moves(black_knights, knight_moves, f, p->white,
-        Piece::BLACK_KNIGHT);
-    if (retval) {
+    if (is_attacked_by_hopper(black_knights, knight_moves, square)) {
       return true;
     }
-    visit_capture_moves(black_kings, king_moves, f, p->white,
-        Piece::BLACK_KING);
-    if (retval) {
+    if (is_attacked_by_hopper(black_kings, king_moves, square)) {
       return true;
     }
-    visit_capture_ray_moves(black_queens, rook_moves, f, occupied, p->white,
-        Piece::BLACK_QUEEN);
-    if (retval) {
+    if (is_attacked_by_slider(black_rooks, rook_moves, square, occupied)) {
       return true;
     }
-    visit_capture_ray_moves(black_rooks, rook_moves, f, occupied, p->white,
-        Piece::BLACK_ROOK);
-    if (retval) {
+    if (is_attacked_by_slider(black_bishops, bishop_moves, square, occupied)) {
       return true;
     }
-    visit_capture_ray_moves(black_bishops, bishop_moves, f, occupied, p->white,
-        Piece::BLACK_BISHOP);
-    if (retval) {
+    if (is_attacked_by_slider(black_queens, rook_moves, square, occupied)) {
       return true;
     }
-    visit_capture_ray_moves(black_queens, bishop_moves, f, occupied, p->white,
-        Piece::BLACK_QUEEN);
-    if (retval) {
+    if (is_attacked_by_slider(black_queens, bishop_moves, square, occupied)) {
       return true;
     }
   }
   return false;
 }
 
-bool Move_generator::is_check(const bb movers, const bitboard_set& all_moves,
-    const uint8_t king_pos)
+bool Move_generator::is_attacked_by_hopper(const bb movers,
+    const bitboard_set& all_moves, const uint8_t square)
 {
-  bb raw_moves = all_moves[king_pos];
+  bb raw_moves = all_moves[square];
   bb moves = raw_moves & movers;
   return moves != 0x00;
 }
-
+bool Move_generator::is_attacked_by_pawn(const bb movers,
+    const bitboard_set& all_moves, const uint8_t square, bool side_to_move)
+{
+  bb raw_moves = all_moves[square];
+  if ((side_to_move && square > 31) || (!side_to_move) && square < 31) {
+    raw_moves |= p->en_passant_square;
+  }
+  bb moves = raw_moves & movers;
+  return moves != 0x00;
+}
 bool Move_generator::is_check_from_slider(const bitboard_set& sliding_moves,
     const uint8_t king_pos, const bb slider, const bb& occupied)
 {
@@ -872,13 +869,14 @@ bool Move_generator::is_in_check(const bool side)
     if (is_check_from_slider(rook_moves, king_pos, white_rooks, occupied)) {
       return true;
     }
-    if (is_check(white_knights, knight_moves, king_pos)) {
+    if (is_attacked_by_hopper(white_knights, knight_moves, king_pos)) {
       return true;
     }
-    if (is_check(white_kings, king_moves, king_pos)) {
+    if (is_attacked_by_hopper(white_kings, king_moves, king_pos)) {
       return true;
     }
-    if (is_check(white_pawns, black_pawn_capture_moves, king_pos)) {
+    if (is_attacked_by_hopper(white_pawns, black_pawn_capture_moves,
+        king_pos)) {
       return true;
     }
   } else {
@@ -894,13 +892,14 @@ bool Move_generator::is_in_check(const bool side)
     if (is_check_from_slider(rook_moves, king_pos, black_rooks, occupied)) {
       return true;
     }
-    if (is_check(black_knights, knight_moves, king_pos)) {
+    if (is_attacked_by_hopper(black_knights, knight_moves, king_pos)) {
       return true;
     }
-    if (is_check(black_kings, king_moves, king_pos)) {
+    if (is_attacked_by_hopper(black_kings, king_moves, king_pos)) {
       return true;
     }
-    if (is_check(black_pawns, white_pawn_capture_moves, king_pos)) {
+    if (is_attacked_by_hopper(black_pawns, white_pawn_capture_moves,
+        king_pos)) {
       return true;
     }
   }
