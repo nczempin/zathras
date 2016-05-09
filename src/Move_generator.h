@@ -63,7 +63,7 @@ private:
       const int8_t moving);
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
-      bb other_colour, int moving);
+      bb other_colour, int8_t moving);
   void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
       move_visitor f, bb occupied, int8_t moving, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,
@@ -79,10 +79,15 @@ private:
       const uint8_t king_square, const int8_t direction);
   void f(Move_container& moves, const int8_t moving, const uint8_t from,
       const uint8_t to, const int8_t captured);
-  bool is_check(const bb movers, const bitboard_set& all_moves,
-      const uint8_t king_pos);
+  static bool is_attacked_by_hopper(const bb movers,
+      const bitboard_set& all_moves, const uint8_t square);
+  bool is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves,
+      const uint8_t square, bool side_to_move);
   bool is_check_from_slider(const bitboard_set& sliding_moves,
       const uint8_t king_pos, const bb slider, const bb& occupied);
+  bool is_attacked_by_slider(bb position, const bitboard_set& all_moves,
+      const uint8_t square, const bb occupied);
+
 };
 
 #endif /* MOVE_GENERATOR_H_ */
