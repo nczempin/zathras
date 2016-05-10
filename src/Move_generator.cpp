@@ -176,7 +176,7 @@ bitboard_set Move_generator::pregen_pawn_caps(int direction)
 {
   bitset<64> bs[64];
   bitboard_set pawn_capture_moves(64);
-  for (int i = 8; i < 56; ++i) {
+  for (int i = 0; i < 64; ++i) {
     //TODO not the most elegant way to refactor/extract the function
     place_pawn_move(i, 9, direction, bs);
     place_pawn_move(i, 7, direction, bs);
@@ -548,8 +548,8 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
 //      << (int) direction << endl;
   bool attacked = is_attacked(king_square);
   if (attacked) {
-    //p->white_to_move = !p->white_to_move;
-    cout << " is check" << endl;
+    //cout << " is check" << endl;
+    p->white_to_move = !p->white_to_move;
     return;
   }
   bool next = is_attacked(next_square);
@@ -751,7 +751,7 @@ bool Move_generator::is_attacked(const uint8_t square)
 
   if (p->white_to_move) {
 
-    if (is_attacked_by_pawn(white_pawns, white_pawn_capture_moves, square,
+    if (is_attacked_by_pawn(white_pawns, black_pawn_capture_moves, square,
         true)) {
       return true;
     }
@@ -774,7 +774,7 @@ bool Move_generator::is_attacked(const uint8_t square)
       return true;
     }
   } else {
-    if (is_attacked_by_pawn(black_pawns, black_pawn_capture_moves, square,
+    if (is_attacked_by_pawn(black_pawns, white_pawn_capture_moves, square,
         false)) {
       return true;
     }
