@@ -176,7 +176,7 @@ bitboard_set Move_generator::pregen_pawn_caps(int direction)
 {
   bitset<64> bs[64];
   bitboard_set pawn_capture_moves(64);
-  for (int i = 8; i < 56; ++i) {
+  for (int i = 0; i < 64; ++i) {
     //TODO not the most elegant way to refactor/extract the function
     place_pawn_move(i, 9, direction, bs);
     place_pawn_move(i, 7, direction, bs);
@@ -548,8 +548,8 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
 //      << (int) direction << endl;
   bool attacked = is_attacked(king_square);
   if (attacked) {
-    //p->white_to_move = !p->white_to_move;
-    cout << " is check" << endl;
+    //cout << " is check" << endl;
+    p->white_to_move = !p->white_to_move;
     return;
   }
   bool next = is_attacked(next_square);
