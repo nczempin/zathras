@@ -152,9 +152,8 @@ void Perft_command::execute()
   vector<string> path = receiver->getArguments();
   int depth = 1; //TODO get this from arguments, but use a reasonable default
   Position position;
-  position = Position::create_position(
-      "4k3/8/8/8/8/8/6pP/4K2R w K - 0 2");
-  // position = Position::create_start_position();
+  position = Position::create_position("4k3/8/8/8/8/8/6pP/4K2R w K - 0 2");
+  //position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;
   mg.pregenerate_moves();
