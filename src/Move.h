@@ -54,6 +54,16 @@ public:
   bool is_en_passant_capture() const;
   void set_en_passant_capture(bool enPassantCapture = false);
 
+  int8_t get_promoted_to() const
+  {
+    return promoted_to;
+  }
+
+  void set_promoted_to(int8_t promotedTo = 0)
+  {
+    promoted_to = promotedTo;
+  }
+
   bool cleared_queenside_castling = false;
   bool cleared_kingside_castling = false;
 
@@ -64,6 +74,8 @@ private:
   int8_t captured = 0;
   uint8_t en_passant_square = 0; //TODO file would be sufficient
   bool en_passant_capture = false;
+  int8_t promoted_to = 0;
+
 };
 
 #endif /* MOVE_H_ */
