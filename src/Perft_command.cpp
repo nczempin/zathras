@@ -150,7 +150,7 @@ void Perft_command::execute()
 //
 //  exit(0);
   vector<string> path = receiver->getArguments();
-  int depth = 1; //TODO get this from arguments, but use a reasonable default
+  int depth = 2; //TODO get this from arguments, but use a reasonable default
   Position position;
   position = Position::create_position(
       "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8 ");

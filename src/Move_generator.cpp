@@ -338,7 +338,25 @@ void Move_generator::visit_pawn_caps(const bb sub_position,
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
       int captured = find_captured_piece(to);
-      f(moving, from, to, captured, 0);
+      if (to >= 56) { // promoting white pawn
+        f(moving, from, to, captured, Piece::WHITE_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, captured, Piece::WHITE_ROOK);
+        f(moving, from, to, captured, Piece::WHITE_BISHOP);
+        f(moving, from, to, captured, Piece::WHITE_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else if (to <= 7) { // promoting black pawn
+        f(moving, from, to, captured, Piece::BLACK_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, captured, Piece::BLACK_ROOK);
+        f(moving, from, to, captured, Piece::BLACK_BISHOP);
+        f(moving, from, to, captured, Piece::BLACK_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else {
+        f(moving, from, to, captured, 0);
+      }
     }
   }
 }
@@ -831,7 +849,7 @@ bool Move_generator::is_attacked_by_pawn(const bb movers,
     const bitboard_set& all_moves, const uint8_t square, bool side_to_move)
 {
   bb raw_moves = all_moves[square];
-  if ((side_to_move && square > 31) || (!side_to_move) && square < 31) {
+  if ((side_to_move && square > 31) || (!side_to_move && square < 31)) {
     raw_moves |= p->en_passant_square;
   }
   bb moves = raw_moves & movers;
