@@ -552,6 +552,51 @@ void Position::restore_en_passant_square(Move& move)
   en_passant_square = move.get_en_passant_square();
 }
 
+void Position::promote(int8_t promoted_to, uint8_t to)
+{
+  //TODO no idea whether this is faster or simply using absolute value is
+  switch (promoted_to) {
+  case Piece::WHITE_QUEEN:
+  case Piece::BLACK_QUEEN:
+    set_bit(queens, to);
+    break;
+  case Piece::WHITE_ROOK:
+  case Piece::BLACK_ROOK:
+    set_bit(rooks, to);
+    break;
+  case Piece::WHITE_BISHOP:
+  case Piece::BLACK_BISHOP:
+    set_bit(bishops, to);
+    break;
+  case Piece::WHITE_KNIGHT:
+  case Piece::BLACK_KNIGHT:
+    set_bit(knights, to);
+    break;
+  }
+}
+void Position::un_promote(int8_t promoted_to, uint8_t to)
+{
+  switch (promoted_to) {
+  case Piece::WHITE_QUEEN:
+  case Piece::BLACK_QUEEN:
+    clear_bit(queens, to);
+    break;
+  case Piece::WHITE_ROOK:
+  case Piece::BLACK_ROOK:
+    clear_bit(rooks, to);
+    break;
+  case Piece::WHITE_BISHOP:
+  case Piece::BLACK_BISHOP:
+    clear_bit(bishops, to);
+    break;
+  case Piece::WHITE_KNIGHT:
+  case Piece::BLACK_KNIGHT:
+    clear_bit(knights, to);
+    break;
+  }
+
+}
+
 void Position::make_move(Move& move)
 {
 //  cout << "make_move: " << move.to_string() << endl;
@@ -606,12 +651,15 @@ void Position::make_move(Move& move)
   //cout << "on_move: " << white_to_move << endl;
   if (white_to_move) {
     switch (moving) {
-    case Piece::WHITE_PAWN:
-      set_bit(pawns, to);
-      set_bit(white, to);
+    case Piece::WHITE_PAWN: {
       clear_bit(pawns, from);
       clear_bit(white, from);
-      {
+      int8_t promoted_to = move.get_promoted_to();
+      set_bit(white, to);
+      if (promoted_to != 0) {
+        promote(promoted_to, to);
+      } else {
+        set_bit(pawns, to);
         // handle capturing by e. p.
 //        uint8_t ep_square = move.get_en_passant_square();
 //        cout << "ep_cap: " << Square::mailbox_index_to_square(ep_square)
@@ -637,6 +685,7 @@ void Position::make_move(Move& move)
         }
       }
       break;
+    }
     case Piece::WHITE_KNIGHT:
       set_bit(knights, to);
       set_bit(white, to);
@@ -699,12 +748,15 @@ void Position::make_move(Move& move)
     }
   } else {
     switch (moving) {
-    case Piece::BLACK_PAWN:
-      set_bit(pawns, to);
-      set_bit(black, to);
+    case Piece::BLACK_PAWN: {
       clear_bit(pawns, from);
       clear_bit(black, from);
-      {
+      int8_t promoted_to = move.get_promoted_to();
+      set_bit(black, to);
+      if (promoted_to != 0) {
+        promote(promoted_to, to);
+      } else {
+        set_bit(pawns, to);
         // handle capturing by e. p.
         int target = to + 8;
         if (move.is_en_passant_capture()) { // en passant capture
@@ -725,6 +777,7 @@ void Position::make_move(Move& move)
         }
       }
       break;
+    }
     case Piece::BLACK_KNIGHT:
       set_bit(knights, to);
       set_bit(black, to);
@@ -796,6 +849,7 @@ void Position::make_move(Move& move)
   white_to_move = !white_to_move;
 // cout << "switched on_move to " << white_to_move << endl;
 }
+
 void Position::unmake_move(Move& move)
 {
 //  cout << "unmake_move: " << move.to_string() << endl;
@@ -810,13 +864,17 @@ void Position::unmake_move(Move& move)
 
   if (white_to_move) {
     switch (moving) {
-    case Piece::WHITE_PAWN:
+    case Piece::WHITE_PAWN: {
       // move pawn back
+      //TODO clearing can be saved when move was a capture. find out which is faster
       clear_bit(pawns, to);
       clear_bit(white, to);
       set_bit(pawns, from);
       set_bit(white, from);
-      {
+      int8_t promoted_to = move.get_promoted_to();
+      if (promoted_to != 0) {
+        un_promote(promoted_to, to);
+      } else {
         // handle capturing by e. p.
         if (move.is_en_passant_capture()) {
           uint8_t target = to - 8;
@@ -827,6 +885,7 @@ void Position::unmake_move(Move& move)
 
       }
       break;
+    }
     case Piece::WHITE_KNIGHT:
       clear_bit(knights, to);
       clear_bit(white, to);
@@ -883,12 +942,15 @@ void Position::unmake_move(Move& move)
     }
   } else {
     switch (moving) {
-    case Piece::BLACK_PAWN:
+    case Piece::BLACK_PAWN: {
       clear_bit(pawns, to);
       clear_bit(black, to);
       set_bit(pawns, from);
       set_bit(black, from);
-      {
+      int8_t promoted_to = move.get_promoted_to();
+      if (promoted_to != 0) {
+        un_promote(promoted_to, to);
+      } else {
         // handle capturing by e. p.
         if (move.is_en_passant_capture()) {
           uint8_t target = to + 8;
@@ -897,8 +959,8 @@ void Position::unmake_move(Move& move)
           set_bit(white, target);
 //          cout << "unmade epcap to this: " << endl << (*this) << endl;
         }
-
       }
+    }
       break;
     case Piece::BLACK_KNIGHT:
       clear_bit(knights, to);
