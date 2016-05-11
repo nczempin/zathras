@@ -259,11 +259,12 @@ bitboard_set Move_generator::pregenerate_black_pawn_no_capture_moves()
 void Move_generator::print_moves_raw(const bb sub_position,
     const bitboard_set all_moves, const Position position)
 {
-  visit_moves_raw(sub_position, all_moves, [](int pc, int x, int y, int cpt) {
-    string from = Square::mailbox_index_to_square(x);
-    string to = Square::mailbox_index_to_square(y);
-    cout << from << to << endl;
-  }, position.is_white_to_move());
+  visit_moves_raw(sub_position, all_moves,
+      [](int pc, int x, int y, int cpt, int8_t promoted_tovisit_pawn_caps) {
+        string from = Square::mailbox_index_to_square(x);
+        string to = Square::mailbox_index_to_square(y);
+        cout << from << to << endl;
+      }, position.is_white_to_move());
 }
 
 int8_t Move_generator::find_captured_piece(uint8_t y)
@@ -311,14 +312,51 @@ void Move_generator::visit_capture_moves(const bb sub_position,
     const bb raw_moves = all_moves[from];
     bb moves = raw_moves & other_colour;
     //TODO move this to a separate visit_pawn_caps method
+    while (moves != 0x00) {
+      uint8_t to = Position::extract_and_remove_square(moves);
+      int captured = find_captured_piece(to);
+      f(moving, from, to, captured, 0);
+    }
+  }
+}
+
+void Move_generator::visit_pawn_caps(const bb sub_position,
+    const bitboard_set all_moves, const move_visitor f, const bb other_colour,
+    const int8_t moving)
+{
+  bb position = sub_position;
+  while (position != 0) {
+    const uint8_t from = Position::extract_and_remove_square(position);
+    const bb raw_moves = all_moves[from];
+    bb moves = raw_moves & other_colour;
+    //TODO move this to a separate visit_pawn_caps method
     if (p->en_passant_square != 0x00
         && (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN)) {
       moves = raw_moves & (other_colour | p->en_passant_square);
+      //TODO: for e.p. capture we know the captured piece is opposing pawn
     }
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
       int captured = find_captured_piece(to);
-      f(moving, from, to, captured);
+      if (to >= 56) { // promoting white pawn
+        f(moving, from, to, captured, Piece::WHITE_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, captured, Piece::WHITE_ROOK);
+        f(moving, from, to, captured, Piece::WHITE_BISHOP);
+        f(moving, from, to, captured, Piece::WHITE_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else if (to <= 7) { // promoting black pawn
+        f(moving, from, to, captured, Piece::BLACK_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, captured, Piece::BLACK_ROOK);
+        f(moving, from, to, captured, Piece::BLACK_BISHOP);
+        f(moving, from, to, captured, Piece::BLACK_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else {
+        f(moving, from, to, captured, 0);
+      }
     }
   }
 }
@@ -334,7 +372,7 @@ void Move_generator::visit_non_capture_moves(const bb sub_position,
     //TODO move this to a separate visit_pawn_caps method
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
-      f(moving, from, to, 0);
+      f(moving, from, to, 0, 0);
     }
   }
 }
@@ -445,7 +483,7 @@ void Move_generator::visit_non_capture_ray_moves(const bb sub_position,
       uint8_t to = Position::extract_and_remove_square(moves);
       bool b = is_anything_between(from, to, occupied);
       if (!b) {
-        f(moving, from, to, 0);
+        f(moving, from, to, 0, 0);
       }
     }
   }
@@ -464,7 +502,7 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
       bool b = is_anything_between(from, to, occupied);
       if (!b) {
         int8_t captured = find_captured_piece(to);
-        f(moving, from, to, captured);
+        f(moving, from, to, captured, 0);
       }
     }
   }
@@ -477,7 +515,7 @@ void Move_generator::visit_moves_raw(const bb sub_position,
   Position::visit_bitboard(sub_position, [&all_moves, &f, &moving](int x) {
     Position::visit_bitboard(all_moves[x], [&x, &f, &moving](int y) {
           int captured = -98;
-          f(moving, x, y, captured); //TODO get the captured piece from somewhere
+          f(moving, x, y, captured, 0); //TODO get the captured piece from somewhere
     });
 
 });
@@ -515,10 +553,27 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
         from);
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
-      f(moving, from, to, 0);
+      if (to >= 56) { // promoting white pawn
+        f(moving, from, to, 0, Piece::WHITE_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, 0, Piece::WHITE_ROOK);
+        f(moving, from, to, 0, Piece::WHITE_BISHOP);
+        f(moving, from, to, 0, Piece::WHITE_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else if (to <= 7) { // promoting black pawn
+        f(moving, from, to, 0, Piece::BLACK_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, 0, Piece::BLACK_ROOK);
+        f(moving, from, to, 0, Piece::BLACK_BISHOP);
+        f(moving, from, to, 0, Piece::BLACK_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else {
+        f(moving, from, to, 0, 0);
+      }
     }
   }
-
 }
 
 void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
@@ -559,7 +614,7 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
     return;
   }
   bool target = is_attacked(target_square);
-  //cout << attacked << "." << next << "." << target << endl;
+//cout << attacked << "." << next << "." << target << endl;
   if (target) {
     //cout << "target is attacked" << endl;
     p->white_to_move = !p->white_to_move;
@@ -567,7 +622,7 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
   }
   p->white_to_move = !p->white_to_move;
 
-  f(piece, king_square, king_square + direction * 2, 0);
+  f(piece, king_square, king_square + direction * 2, 0, 0);
 }
 
 void Move_generator::generate_castling(const move_visitor& f,
@@ -593,7 +648,8 @@ void Move_generator::generate_castling(const move_visitor& f,
 //cout << endl;
 }
 void Move_generator::f(Move_container& moves, const int8_t moving,
-    const uint8_t from, const uint8_t to, const int8_t captured)
+    const uint8_t from, const uint8_t to, const int8_t captured,
+    const int8_t promoted_to)
 {
   bool en_passant_capture = false;
   if (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) {
@@ -601,7 +657,7 @@ void Move_generator::f(Move_container& moves, const int8_t moving,
       en_passant_capture = true;
     }
   }
-  moves.add_move(moving, from, to, captured, en_passant_capture);
+  moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
 }
 Move_container Move_generator::generate_moves(shared_ptr<Position> position,
     size_t depth)
@@ -621,12 +677,12 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   moves.reset();
 // cout << "should be 0: " << moves.size() << endl;
   const move_visitor f =
-      [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured) {
+      [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured, int8_t promoted_to) {
         bool en_passant_capture = false;
         if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
           en_passant_capture = true;
         }
-        moves.add_move(moving, from, to, captured, en_passant_capture);
+        moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
       };
 
 //TODO generalize, obviously
@@ -670,7 +726,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
     visit_non_capture_ray_moves(white_queens, bishop_moves, f, occupied,
         Piece::WHITE_QUEEN);
     generate_castling(f, true);
-    visit_capture_moves(white_pawns, white_pawn_capture_moves, f, p->black,
+    visit_pawn_caps(white_pawns, white_pawn_capture_moves, f, p->black,
         Piece::WHITE_PAWN);
     visit_pawn_nocaps(white_pawns, white_pawn_no_capture_moves, f, occupied,
         Piece::WHITE_PAWN, true);
@@ -700,7 +756,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
     visit_non_capture_ray_moves(black_queens, bishop_moves, f, occupied,
         Piece::BLACK_QUEEN);
     generate_castling(f, false);
-    visit_capture_moves(black_pawns, black_pawn_capture_moves, f, p->white,
+    visit_pawn_caps(black_pawns, black_pawn_capture_moves, f, p->white,
         Piece::BLACK_PAWN);
     visit_pawn_nocaps(black_pawns, black_pawn_no_capture_moves, f, occupied,
         Piece::BLACK_PAWN, false);
@@ -732,7 +788,6 @@ bool Move_generator::is_attacked_by_slider(bb position,
 
 bool Move_generator::is_attacked(const uint8_t square)
 {
-  bool retval = false;
 
 //TODO generalize, obviously
   const bb white_pawns = p->pawns & p->white;
@@ -811,7 +866,7 @@ bool Move_generator::is_attacked_by_pawn(const bb movers,
     const bitboard_set& all_moves, const uint8_t square, bool side_to_move)
 {
   bb raw_moves = all_moves[square];
-  if ((side_to_move && square > 31) || (!side_to_move) && square < 31) {
+  if ((side_to_move && square > 31) || (!side_to_move && square < 31)) {
     raw_moves |= p->en_passant_square;
   }
   bb moves = raw_moves & movers;

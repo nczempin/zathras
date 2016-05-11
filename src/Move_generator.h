@@ -64,6 +64,8 @@ private:
   void visit_capture_ray_moves(const bb sub_position,
       const bitboard_set all_moves, move_visitor f, bb occupied,
       bb other_colour, int8_t moving);
+  void visit_pawn_caps(const bb sub_position, const bitboard_set all_moves,
+      const move_visitor f, const bb other_colour, const int8_t moving);
   void visit_pawn_nocaps(const bb sub_position, const bitboard_set all_moves,
       move_visitor f, bb occupied, int8_t moving, bool white_to_move);
   static bb filter_occupied_squares(bool white_to_move, bb occupied,
@@ -78,7 +80,7 @@ private:
   void attempt_castle(const move_visitor f, const int8_t piece,
       const uint8_t king_square, const int8_t direction);
   void f(Move_container& moves, const int8_t moving, const uint8_t from,
-      const uint8_t to, const int8_t captured);
+      const uint8_t to, const int8_t captured, int8_t promoted_to);
   static bool is_attacked_by_hopper(const bb movers,
       const bitboard_set& all_moves, const uint8_t square);
   bool is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves,

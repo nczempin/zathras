@@ -67,7 +67,8 @@ string Move::to_string() const
   string moving_string = string(1, p);
   string retval = Square::mailbox_index_to_square(from);
   retval += Square::mailbox_index_to_square(to);
-  retval += "*";
+  uint8_t promoted = pieces[promoted_to > 0 ? promoted_to : -promoted_to];
+  retval += promoted;
   retval += this->cleared_kingside_castling ? "#" : ".";
   retval += this->cleared_queenside_castling ? "#" : ".";
   if (en_passant_capture) {
