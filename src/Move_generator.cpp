@@ -553,10 +553,27 @@ void Move_generator::visit_pawn_nocaps(const bb sub_position,
         from);
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
-      f(moving, from, to, 0, 0);
+      if (to >= 56) { // promoting white pawn
+        f(moving, from, to, 0, Piece::WHITE_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, 0, Piece::WHITE_ROOK);
+        f(moving, from, to, 0, Piece::WHITE_BISHOP);
+        f(moving, from, to, 0, Piece::WHITE_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else if (to <= 7) { // promoting black pawn
+        f(moving, from, to, 0, Piece::BLACK_QUEEN);
+        //TODO switch subpromotions on/off here
+        f(moving, from, to, 0, Piece::BLACK_ROOK);
+        f(moving, from, to, 0, Piece::BLACK_BISHOP);
+        f(moving, from, to, 0, Piece::BLACK_KNIGHT);
+        // end switch subpromotions on/off
+
+      } else {
+        f(moving, from, to, 0, 0);
+      }
     }
   }
-
 }
 
 void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
@@ -597,7 +614,7 @@ void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
     return;
   }
   bool target = is_attacked(target_square);
-  //cout << attacked << "." << next << "." << target << endl;
+//cout << attacked << "." << next << "." << target << endl;
   if (target) {
     //cout << "target is attacked" << endl;
     p->white_to_move = !p->white_to_move;
