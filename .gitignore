@@ -16,6 +16,9 @@ zathras
 *-ann
 #valgrind
 massif.out*
+#more profilers
+perf.data
+output*.png
 #OS junk files
 [Tt]humbs.db
 *.DS_Store
