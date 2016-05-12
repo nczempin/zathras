@@ -614,22 +614,37 @@ void Position::make_move(Move& move)
     }
     int8_t piece = determine_piece(taken);
     switch (piece) {
-    case 1:
+    case Piece::PAWN:
       clear_bit(pawns, to);
       break;
-    case 2:
+    case Piece::KNIGHT:
       clear_bit(knights, to);
       break;
-    case 3:
+    case Piece::BISHOP:
       clear_bit(bishops, to);
       break;
-    case 4:
+    case Piece::ROOK:
+      //TODO use constants, not magics
+      if (castling[2] && to == 63) {
+        castling[2] = false;
+        move.cleared_kingside_castling = true;
+      } else if (castling[3] && to == 56) {
+        castling[3] = false;
+        move.cleared_queenside_castling = true;
+      } else if (castling[0] && to == 7) {
+        castling[0] = false;
+        move.cleared_kingside_castling = true;
+      } else if (castling[1] && to == 0) {
+        castling[1] = false;
+        move.cleared_queenside_castling = true;
+      }
       clear_bit(rooks, to);
       break;
-    case 5:
+    case Piece::QUEEN:
       clear_bit(queens, to);
       break;
-    case 6:
+    case Piece::KING:
+      //TODO unclear if this is ever valid
       clear_bit(kings, to);
       break;
     default:
@@ -904,11 +919,9 @@ void Position::unmake_move(Move& move)
       set_bit(rooks, from);
       set_bit(white, from);
       if (move.cleared_kingside_castling) {
-        //move.cleared_kingside_castling = false;
         castling[0] = true;
       }
       if (move.cleared_queenside_castling) {
-        //move.cleared_queenside_castling = false;
         castling[1] = true;
       }
       break;
@@ -927,12 +940,10 @@ void Position::unmake_move(Move& move)
         update_bits(white, rooks, 5, 7); //TODO constants, not magics
       }
       if (move.cleared_kingside_castling) {
-        //move.cleared_kingside_castling = false;
         castling[0] = true;
       }
       if (move.cleared_queenside_castling) {
-        //move.cleared_queenside_castling = false;
-        castling[1] = true;
+         castling[1] = true;
       }
       break;
     default:
@@ -980,11 +991,9 @@ void Position::unmake_move(Move& move)
       set_bit(rooks, from);
       set_bit(black, from);
       if (move.cleared_kingside_castling) {
-        //move.cleared_kingside_castling = false;
         castling[2] = true;
       }
       if (move.cleared_queenside_castling) {
-        //move.cleared_queenside_castling = false;
         castling[3] = true;
       }
       break;
@@ -1039,7 +1048,17 @@ void Position::unmake_move(Move& move)
       case 3:
         set_bit(bishops, to);
         break;
-      case 4:
+      case Piece::ROOK:
+        //TODO use constants, not magics
+        if (move.cleared_kingside_castling && to == 63) {
+          castling[2] = true;
+        } else if (move.cleared_queenside_castling && to == 56) {
+          castling[3] = true;
+        } else if (move.cleared_kingside_castling && to == 7) {
+          castling[0] = true;
+        } else if (move.cleared_queenside_castling && to == 0) {
+          castling[1] = true;
+        }
         set_bit(rooks, to);
         break;
       case 5:
