@@ -150,7 +150,7 @@ void Perft_command::execute()
 //
 //  exit(0);
   vector<string> path = receiver->getArguments();
-  int depth = 4; //TODO get this from arguments, but use a reasonable default
+  int depth = 5; //TODO get this from arguments, but use a reasonable default
   Position position;
   position = Position::create_position(
       "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
@@ -191,7 +191,7 @@ void Perft_command::execute()
 //      cout << s << "******************" << endl;
       pp->make_move(move);
 //      cout << "after make_move:" << endl;
-      cout << *pp << endl;
+      //cout << *pp << endl;
       if (mg.is_in_check(!pp->white_to_move)) {
         //cout << "******was illegal; unmaking*******" << endl;
         pp->unmake_move(move);
