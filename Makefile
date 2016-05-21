@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-g -std=c++11 -Wall -Wextra -pedantic
+CFLAGS=-Ofast -g -march=sandybridge -mtune=sandybridge -mno-avx -mno-aes -std=c++11 -Wall -Wextra -pedantic -fno-omit-frame-pointer
 
 BIN= zathras
 SRC=$(wildcard **/*.cpp)

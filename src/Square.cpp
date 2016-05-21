@@ -21,7 +21,7 @@ Square::~Square()
   // TODO Auto-generated destructor stub
 }
 
-void Square::print_square(int x)
+void Square::print_square(uint8_t x)
 {
   string square = mailbox_index_to_square(x);
   cout << x << " = " << square << endl;

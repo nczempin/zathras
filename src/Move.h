@@ -16,7 +16,9 @@ using namespace std;
 class Move
 {
 public:
-  Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured);
+  Move();
+  Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured,
+      bool en_passant_capture);
   uint8_t get_from();
   uint8_t get_to() const;
   string to_string() const;
@@ -26,12 +28,54 @@ public:
   int8_t get_taken_piece() const;
 
   void set_taken_piece(int8_t taken);
+  void set_from(uint8_t from);
+  void set_to(uint8_t to);
+
+  uint8_t get_en_passant_square() const
+  {
+    return en_passant_square;
+  }
+
+  void set_en_passant_square(uint8_t en_passant)
+  {
+    en_passant = en_passant;
+  }
+
+  int8_t get_captured() const
+  {
+    return captured;
+  }
+
+  void set_captured(int8_t captured = 0)
+  {
+    this->captured = captured;
+  }
+
+  bool is_en_passant_capture() const;
+  void set_en_passant_capture(bool enPassantCapture = false);
+
+  int8_t get_promoted_to() const
+  {
+    return promoted_to;
+  }
+
+  void set_promoted_to(int8_t promotedTo = 0)
+  {
+    promoted_to = promotedTo;
+  }
+
+  bool cleared_queenside_castling = false;
+  bool cleared_kingside_castling = false;
+
 private:
-  Move();
-  uint8_t from;
-  uint8_t to;
-  int8_t moving;
-  int8_t captured;
+  uint8_t from = 0;
+  uint8_t to = 0;
+  int8_t moving = 0;
+  int8_t captured = 0;
+  uint8_t en_passant_square = 0; //TODO file would be sufficient
+  bool en_passant_capture = false;
+  int8_t promoted_to = 0;
+
 };
 
 #endif /* MOVE_H_ */
