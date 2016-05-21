@@ -65,7 +65,7 @@ void Perft_command::do_short_option(int c, string argument)
   }
 }
 
-int Perft_command::perft(int depth)
+uint64_t Perft_command::perft(uint8_t depth)
 {
 //  cout << "perft depth: " << depth << endl;
   if (depth == 0) {
@@ -76,7 +76,7 @@ int Perft_command::perft(int depth)
   //  if (depth == 1) {
 //    return moves.size();
 //  }
-  int total_result = 0;
+  uint64_t total_result = 0;
   size_t size = move_container.size();
 //  cout << "moves.size: " << size << endl;
 //  cout << "perft::perft" << endl;
@@ -101,7 +101,7 @@ int Perft_command::perft(int depth)
     if (depth == 1) {
       ++total_result;
     } else {
-      int perft_result = perft(depth - 1);
+      uint64_t perft_result = perft(depth - 1);
       total_result += perft_result;
     }
 //    cout << "(bu: perft@" << depth << "): " << move.to_string() << "-->"
@@ -150,17 +150,17 @@ void Perft_command::execute()
 //
 //  exit(0);
   vector<string> path = receiver->getArguments();
-  int depth = 5; //TODO get this from arguments, but use a reasonable default
+  int depth =7; //TODO get this from arguments, but use a reasonable default
   Position position;
   position = Position::create_position(
-      "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+      "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
   //position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;
   mg.pregenerate_moves();
 
   ///////////////////////////////
-  int total_result = 0;
+  uint64_t total_result = 0;
   //cout << "b4 gen" << endl;
   pp = make_shared<Position>(position);
   Move_container move_container = mg.generate_moves(pp, depth);
@@ -179,11 +179,11 @@ void Perft_command::execute()
       Move& move = moves[i];
       int8_t moving = move.get_moving_piece();
       int8_t moving_abs = moving > 0 ? moving : -moving;
-      if (moving_abs > 6 || moving_abs == 0) {
-        cerr << "size: " << size << endl;
-        cerr << "invalid move created: moving piece: " << moving << endl;
-        throw moving_abs;
-      }
+//      if (moving_abs > 6 || moving_abs == 0) {
+//        cerr << "size: " << size << endl;
+//        cerr << "invalid move created: moving piece: " << moving << endl;
+//        throw moving_abs;
+//      }
 //      cout << "on move in perft_execute: " << p.white_to_move << endl;
 //      cout.flush();
       string s = move.to_string();
@@ -200,7 +200,7 @@ void Perft_command::execute()
         // cout << move.to_string() << " is not check" << endl;
       }
 //      cout.flush();
-      int perft_result = perft(depth - 1);
+      uint64_t perft_result = perft(depth - 1);
       s = move.to_string();
       cout << s << ": " << perft_result << endl;
       total_result += perft_result;

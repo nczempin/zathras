@@ -26,7 +26,7 @@ public:
   void do_short_option(int c, string argument);
 
 private:
-  int perft(int depth);
+  uint64_t perft(uint8_t depth);
 
   shared_ptr<Position> pp;
   Move_generator mg;
