@@ -151,10 +151,10 @@ void Perft_command::execute()
 //
 //  exit(0);
   vector<string> path = receiver->getArguments();
-  int depth = 2; //TODO get this from arguments, but use a reasonable default
+  int depth = 6; //TODO get this from arguments, but use a reasonable default
   Position position;
   position = Position::create_position(
-      "4k3/1p6/8/1Pp5/8/8/8/6K1 w - c6 0 4");
+      "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
   //position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;

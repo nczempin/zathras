@@ -904,9 +904,6 @@ bool Move_generator::is_check_from_slider(const bitboard_set& sliding_moves,
   if (moves != 0) {
     Position::visit_bitboard(moves,
         [this, &king_pos, &retval, &occupied](int8_t attacker) {
-          if (outside && (true||(attacker == 41 && king_pos == 13))) {
-            cout << "Debug!" << endl;
-          }
           bool blocked = is_anything_between(king_pos, attacker, occupied);
           if (!blocked) {
             retval = true;
