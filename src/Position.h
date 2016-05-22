@@ -94,6 +94,8 @@ private:
   void restore_en_passant_square(Move& move);
   void promote(int8_t promoted_to, uint8_t to);
   void un_promote(int8_t promoted_to, uint8_t to);
+  void sanity_check_overlap();
+  void sanity_check_from_colour(int8_t moving, uint8_t from);
 };
 
 #endif /* POSITION_H_ */

@@ -93,12 +93,8 @@ void Move::set_moving_piece(int8_t moving)
   this->moving = moving;
 }
 
-int8_t Move::get_taken_piece() const
-{
-  return captured;
-}
 
-void Move::set_taken_piece(int8_t taken)
+void Move::set_captured(int8_t taken)
 {
   int8_t captured_abs = taken > 0 ? taken : -taken;
   if (captured_abs > 6) {

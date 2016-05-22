@@ -267,38 +267,44 @@ void Move_generator::print_moves_raw(const bb sub_position,
       }, position.is_white_to_move());
 }
 
-int8_t Move_generator::find_captured_piece(uint8_t y)
+int8_t Move_generator::find_captured_piece(uint8_t square, int8_t moving)
 {
   //cout << "looking for captured piece at: " << y << endl;
   int8_t captured = 0;
-  if (Position::is_set_square(p->pawns, y)) {
+  if (Position::is_set_square(p->pawns, square)) {
     captured = Piece::PAWN;
-  } else if (Position::is_set_square(p->knights, y)) {
+  } else if (Position::is_set_square(p->knights, square)) {
     captured = Piece::KNIGHT;
-  } else if (Position::is_set_square(p->bishops, y)) {
+  } else if (Position::is_set_square(p->bishops, square)) {
     captured = Piece::BISHOP;
-  } else if (Position::is_set_square(p->rooks, y)) {
+  } else if (Position::is_set_square(p->rooks, square)) {
     captured = Piece::ROOK;
-  } else if (Position::is_set_square(p->queens, y)) {
+  } else if (Position::is_set_square(p->queens, square)) {
     captured = Piece::QUEEN;
-  } else if (Position::is_set_square(p->kings, y)) {
+  } else if (Position::is_set_square(p->kings, square)) {
     captured = Piece::KING; // should this even happen? exception?
   }
-  if (Position::is_set_square(p->black, y)) { //black
+  if (Position::is_set_square(p->black, square)) { //black
     captured = -captured;
   }
 
   if (p->en_passant_square != 0) {
-    Position::visit_bitboard(p->en_passant_square, [&captured, y](int square) {
-      if (y == square) {
-        captured = 1; //
-        if (square > 31) { // in black half, must be black pawn
-          captured = -1;
+    Position::visit_bitboard(p->en_passant_square, [&captured, &square, &moving](uint8_t en_passant_capture_square) {
+      if (square == en_passant_capture_square) {
+        if (moving == Piece::BLACK_PAWN){
+          captured = Piece::WHITE_PAWN; //
+        }
+        if (moving == Piece::WHITE_PAWN && en_passant_capture_square > 31) { // in black half, must be black pawn
+          captured = Piece::BLACK_PAWN;
         }
       }
     });
   }
 //cout << "found: " << captured << endl;
+  if ((moving < 0 && captured < 0) || (moving > 0 && captured >0)){
+     throw 27;
+   }
+
   return captured;
 }
 
@@ -314,7 +320,7 @@ void Move_generator::visit_capture_moves(const bb sub_position,
     //TODO move this to a separate visit_pawn_caps method
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
-      int captured = find_captured_piece(to);
+      int captured = find_captured_piece(to, moving);
       f(moving, from, to, captured, 0);
     }
   }
@@ -337,7 +343,7 @@ void Move_generator::visit_pawn_caps(const bb sub_position,
     }
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
-      int captured = find_captured_piece(to);
+      int captured = find_captured_piece(to, moving);
       if (to >= 56) { // promoting white pawn
         f(moving, from, to, captured, Piece::WHITE_QUEEN);
         //TODO switch subpromotions on/off here
@@ -501,7 +507,7 @@ void Move_generator::visit_capture_ray_moves(const bb sub_position,
       uint8_t to = Position::extract_and_remove_square(moves);
       bool b = is_anything_between(from, to, occupied);
       if (!b) {
-        int8_t captured = find_captured_piece(to);
+        int8_t captured = find_captured_piece(to, moving);
         f(moving, from, to, captured, 0);
       }
     }
@@ -678,6 +684,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
 // cout << "should be 0: " << moves.size() << endl;
   const move_visitor f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured, int8_t promoted_to) {
+
         bool en_passant_capture = false;
         if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
           en_passant_capture = true;
@@ -699,6 +706,11 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   const bb black_queens = p->queens & p->black;
   const bb black_kings = p->kings & p->black;
   const bb occupied = p->white | p->black;
+  const bb always_empty = p->white & p->black;
+  if (always_empty != 0){
+    Position::visualize_bitboard(always_empty, cout);
+    throw 34;
+  }
 
   if (p->white_to_move) {
     visit_capture_moves(white_knights, knight_moves, f, p->black,
@@ -880,7 +892,10 @@ bool Move_generator::is_check_from_slider(const bitboard_set& sliding_moves,
   bb moves = raw_moves & slider;
   if (moves != 0) {
     Position::visit_bitboard(moves,
-        [this, &king_pos, &retval, &occupied](int attacker) {
+        [this, &king_pos, &retval, &occupied](int8_t attacker) {
+      if (outside && (true||(attacker == 41 && king_pos == 13))){
+        cout << "Debug!" << endl;
+      }
           bool blocked = is_anything_between(king_pos, attacker, occupied);
           if (!blocked) {
             retval = true;

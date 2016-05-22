@@ -25,9 +25,8 @@ public:
   int8_t get_moving_piece() const;
 
   void set_moving_piece(int8_t moving);
-  int8_t get_taken_piece() const;
 
-  void set_taken_piece(int8_t taken);
+  void set_captured(int8_t taken);
   void set_from(uint8_t from);
   void set_to(uint8_t to);
 
@@ -41,15 +40,7 @@ public:
     en_passant = en_passant;
   }
 
-  int8_t get_captured() const
-  {
-    return captured;
-  }
 
-  void set_captured(int8_t captured = 0)
-  {
-    this->captured = captured;
-  }
 
   bool is_en_passant_capture() const;
   void set_en_passant_capture(bool enPassantCapture = false);
@@ -62,6 +53,11 @@ public:
   void set_promoted_to(int8_t promotedTo = 0)
   {
     promoted_to = promotedTo;
+  }
+
+  int8_t get_captured() const
+  {
+    return captured;
   }
 
   bool cleared_queenside_castling = false;

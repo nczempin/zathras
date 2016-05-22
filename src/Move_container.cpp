@@ -34,6 +34,10 @@ Move_container& Move_container::get(size_t index)
 void Move_container::add_move(int8_t moving, uint8_t from, uint8_t to,
     int8_t captured, bool en_passant_capture, int8_t promoted_to)
 {
+  if ((moving < 0 && captured < 0) || (moving > 0 && captured >0)){
+    throw 28;
+
+  }
   if (moving == 0) {
     cerr << "moving == 0" << endl;
     throw 17;
