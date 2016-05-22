@@ -86,7 +86,7 @@ uint64_t Perft_command::perft(uint8_t depth)
 //  }
   for (size_t i = 0; i < size; ++i) {
     Move& move = moves[i];
-//    cout << "(mm: perft@" << depth << "): " << move.to_string() << "-->"
+//    cout << "(mm: perft@" << (int)depth << "): " << move.to_string() << "-->"
 //        << endl;
 //    cout << *pp << endl;
     pp->make_move(move);
@@ -154,7 +154,7 @@ void Perft_command::execute()
   int depth = 2; //TODO get this from arguments, but use a reasonable default
   Position position;
   position = Position::create_position(
-      "4k3/1p6/8/1Pp5/8/8/8/6K1 w kq c6 0 4");
+      "4k3/1p6/8/1Pp5/8/8/8/6K1 w - c6 0 4");
   //position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;
@@ -189,17 +189,17 @@ void Perft_command::execute()
 //      cout.flush();
       string s = move.to_string();
 //      cout << "(make move) " << s << endl;
-      cout << s << "******************" << endl;
+      //cout << s << "******************" << endl;
       pp->make_move(move);
-      cout << "after make_move:" << endl;
-      cout << *pp << endl;
+//      cout << "after make_move:" << endl;
+//      cout << *pp << endl;
       mg.outside = true;
       if (mg.is_in_check(!pp->white_to_move)) {
-        cout << "******was illegal; unmaking*******" << endl;
+        //cout << "******was illegal; unmaking*******" << endl;
         pp->unmake_move(move);
         continue;
       } else {
-        cout << move.to_string() << " is not check" << endl;
+        //cout << move.to_string() << " is not check" << endl;
       }
 //      cout.flush();
       uint64_t perft_result = perft(depth - 1);
@@ -207,8 +207,8 @@ void Perft_command::execute()
       cout << s << ": " << perft_result << endl;
       total_result += perft_result;
       pp->unmake_move(move);
-    cout << "after unmake_move:" << endl;
-    cout << *pp << endl;
+//    cout << "after unmake_move:" << endl;
+//    cout << *pp << endl;
     }
   }
   cout << endl << "Perft " << depth << " result: " << total_result << endl;

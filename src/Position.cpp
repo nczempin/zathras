@@ -608,12 +608,13 @@ void Position::sanity_check_overlap()
 
 void Position::make_move(Move& move)
 {
+  bool set_en_passant = false;
 //  cout << "make_move: " << move.to_string() << endl;
 //  this->print(cout);
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
   int8_t moving = move.get_moving_piece();
- sanity_check_from_colour(moving, from);
+  sanity_check_from_colour(moving, from);
 
   int8_t taken = move.get_captured();
   if (taken != 0) {
@@ -705,6 +706,7 @@ void Position::make_move(Move& move)
           save_en_passant_square(move);
           // handle double step preparing the e. p.
           if (to - from == 16) {
+            set_en_passant = true;
             set_bit(en_passant_square, target);
           }
         }
@@ -798,6 +800,7 @@ void Position::make_move(Move& move)
           save_en_passant_square(move);
           if (to - from == -16) {
             set_bit(en_passant_square, target);
+            set_en_passant = true;
           }
         }
       }
@@ -868,6 +871,9 @@ void Position::make_move(Move& move)
 
 // TODO turned promoted pawn into new piece
 // TODO update en passant square
+  if (!set_en_passant) {
+    en_passant_square = 0x00;
+  }
 // TODO update castling rights
 // TODO update 3 repetitions
 // TODO update 50 moves
@@ -876,13 +882,13 @@ void Position::make_move(Move& move)
 
   size_t king_count = 0;
   bb v = kings & white;
-  while(v){
-    v =  v & (v - 1);
+  while (v) {
+    v = v & (v - 1);
     ++king_count;
   }
-  if (king_count != 1){
+  if (king_count != 1) {
     cout << "kc: " << king_count << endl;
-    cout << "made:" << move.to_string( )<< endl;
+    cout << "made:" << move.to_string() << endl;
     cout << (*this) << endl;
   }
   sanity_check_from_colour(moving, from);
@@ -925,7 +931,7 @@ void Position::unmake_move(Move& move)
   int8_t moving = move.get_moving_piece();
   sanity_check_overlap();
   sanity_check_from_colour(moving, from);
- restore_en_passant_square(move);
+  restore_en_passant_square(move);
   sanity_check_overlap();
   white_to_move = !white_to_move;
   //cout << "switched on_move to " << white_to_move << endl;
@@ -936,10 +942,10 @@ void Position::unmake_move(Move& move)
       // move pawn back
       //TODO clearing can be saved when move was a capture. find out which is faster
       sanity_check_from_colour(moving, from);
-         clear_bit(pawns, to);
+      clear_bit(pawns, to);
       clear_bit(white, to);
       sanity_check_from_colour(moving, from);
-        set_bit(pawns, from);
+      set_bit(pawns, from);
       set_bit(white, from);
       int8_t promoted_to = move.get_promoted_to();
       if (promoted_to != 0) {
@@ -1029,8 +1035,8 @@ void Position::unmake_move(Move& move)
         }
       }
     }
-    sanity_check_overlap();
-     break;
+      sanity_check_overlap();
+      break;
     case Piece::BLACK_KNIGHT:
       clear_bit(knights, to);
       clear_bit(black, to);
@@ -1091,14 +1097,14 @@ void Position::unmake_move(Move& move)
     if (captured != 0) {
       //cout << "untaken: " << (int)captured << endl;
       sanity_check_overlap();
-    bool colour = determine_colour(captured);
+      bool colour = determine_colour(captured);
       if (colour) {
         set_bit(white, to);
       } else {
         set_bit(black, to);
       }
       sanity_check_overlap();
-     int8_t p = determine_piece(captured);
+      int8_t p = determine_piece(captured);
       switch (p) {
       case 1:
         set_bit(pawns, to);
@@ -1144,13 +1150,13 @@ void Position::unmake_move(Move& move)
 // TODO update 50 moves
   size_t king_count = 0;
   bb v = kings & white;
-  while(v){
-    v =  v & (v - 1);
+  while (v) {
+    v = v & (v - 1);
     ++king_count;
   }
-  if (king_count != 1){
+  if (king_count != 1) {
     cout << "kc: " << king_count << endl;
-    cout << "unmade:" << move.to_string( )<< endl;
+    cout << "unmade:" << move.to_string() << endl;
     cout << (*this) << endl;
   }
   sanity_check_overlap();

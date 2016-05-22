@@ -90,7 +90,7 @@ private:
       const uint8_t king_pos, const bb slider, const bb& occupied);
   bool is_attacked_by_slider(bb position, const bitboard_set& all_moves,
       const uint8_t square, const bb occupied);
-
+  bool will_be_en_passant(uint8_t to, int8_t moving);
 };
 
 #endif /* MOVE_GENERATOR_H_ */

@@ -289,21 +289,22 @@ int8_t Move_generator::find_captured_piece(uint8_t square, int8_t moving)
   }
 
   if (p->en_passant_square != 0) {
-    Position::visit_bitboard(p->en_passant_square, [&captured, &square, &moving](uint8_t en_passant_capture_square) {
-      if (square == en_passant_capture_square) {
-        if (moving == Piece::BLACK_PAWN){
-          captured = Piece::WHITE_PAWN; //
-        }
-        if (moving == Piece::WHITE_PAWN && en_passant_capture_square > 31) { // in black half, must be black pawn
-          captured = Piece::BLACK_PAWN;
-        }
-      }
-    });
+    Position::visit_bitboard(p->en_passant_square,
+        [&captured, &square, &moving](uint8_t en_passant_capture_square) {
+          if (square == en_passant_capture_square) {
+            if (moving == Piece::BLACK_PAWN) {
+              captured = Piece::WHITE_PAWN; //
+            }
+            if (moving == Piece::WHITE_PAWN && en_passant_capture_square > 31) { // in black half, must be black pawn
+              captured = Piece::BLACK_PAWN;
+            }
+          }
+        });
   }
 //cout << "found: " << captured << endl;
-  if ((moving < 0 && captured < 0) || (moving > 0 && captured >0)){
-     throw 27;
-   }
+  if ((moving < 0 && captured < 0) || (moving > 0 && captured > 0)) {
+    throw 27;
+  }
 
   return captured;
 }
@@ -335,33 +336,37 @@ void Move_generator::visit_pawn_caps(const bb sub_position,
     const uint8_t from = Position::extract_and_remove_square(position);
     const bb raw_moves = all_moves[from];
     bb moves = raw_moves & other_colour;
-    //TODO move this to a separate visit_pawn_caps method
-    if (p->en_passant_square != 0x00
-        && (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN)) {
+
+    if ((moving == Piece::BLACK_PAWN
+        && (p->en_passant_square & Position::BB_RANK3))
+        || (moving == Piece::WHITE_PAWN
+            && (p->en_passant_square & Position::BB_RANK6))) {
       moves = raw_moves & (other_colour | p->en_passant_square);
       //TODO: for e.p. capture we know the captured piece is opposing pawn
     }
     while (moves != 0x00) {
       uint8_t to = Position::extract_and_remove_square(moves);
       int captured = find_captured_piece(to, moving);
-      if (to >= 56) { // promoting white pawn
-        f(moving, from, to, captured, Piece::WHITE_QUEEN);
-        //TODO switch subpromotions on/off here
-        f(moving, from, to, captured, Piece::WHITE_ROOK);
-        f(moving, from, to, captured, Piece::WHITE_BISHOP);
-        f(moving, from, to, captured, Piece::WHITE_KNIGHT);
-        // end switch subpromotions on/off
+      if (captured != 0) {
+        if (to >= 56) { // promoting white pawn
+          f(moving, from, to, captured, Piece::WHITE_QUEEN);
+          //TODO switch subpromotions on/off here
+          f(moving, from, to, captured, Piece::WHITE_ROOK);
+          f(moving, from, to, captured, Piece::WHITE_BISHOP);
+          f(moving, from, to, captured, Piece::WHITE_KNIGHT);
+          // end switch subpromotions on/off
 
-      } else if (to <= 7) { // promoting black pawn
-        f(moving, from, to, captured, Piece::BLACK_QUEEN);
-        //TODO switch subpromotions on/off here
-        f(moving, from, to, captured, Piece::BLACK_ROOK);
-        f(moving, from, to, captured, Piece::BLACK_BISHOP);
-        f(moving, from, to, captured, Piece::BLACK_KNIGHT);
-        // end switch subpromotions on/off
+        } else if (to <= 7) { // promoting black pawn
+          f(moving, from, to, captured, Piece::BLACK_QUEEN);
+          //TODO switch subpromotions on/off here
+          f(moving, from, to, captured, Piece::BLACK_ROOK);
+          f(moving, from, to, captured, Piece::BLACK_BISHOP);
+          f(moving, from, to, captured, Piece::BLACK_KNIGHT);
+          // end switch subpromotions on/off
 
-      } else {
-        f(moving, from, to, captured, 0);
+        } else {
+          f(moving, from, to, captured, 0);
+        }
       }
     }
   }
@@ -657,14 +662,23 @@ void Move_generator::f(Move_container& moves, const int8_t moving,
     const uint8_t from, const uint8_t to, const int8_t captured,
     const int8_t promoted_to)
 {
+  bool en_passant_capture = will_be_en_passant(to, moving);
+
+  moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+}
+
+bool Move_generator::will_be_en_passant(uint8_t to, int8_t moving)
+{
   bool en_passant_capture = false;
-  if (moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) {
-    if (Position::is_set_square(p->en_passant_square, to)) {
+  if (Position::is_set_square(p->en_passant_square, to)) {
+    if ((moving == Piece::WHITE_PAWN && to > 31)
+        || (moving == Piece::BLACK_PAWN && to < 31)) {
       en_passant_capture = true;
     }
   }
-  moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+  return en_passant_capture;
 }
+
 Move_container Move_generator::generate_moves(shared_ptr<Position> position,
     size_t depth)
 {
@@ -685,10 +699,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   const move_visitor f =
       [&moves, this](int8_t moving, uint8_t from, uint8_t to, int8_t captured, int8_t promoted_to) {
 
-        bool en_passant_capture = false;
-        if ((moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN) &&Position::is_set_square(p->en_passant_square, to)) {
-          en_passant_capture = true;
-        }
+        bool en_passant_capture = will_be_en_passant(to, moving);
         moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
       };
 
@@ -707,7 +718,7 @@ Move_container Move_generator::generate_moves(shared_ptr<Position> position,
   const bb black_kings = p->kings & p->black;
   const bb occupied = p->white | p->black;
   const bb always_empty = p->white & p->black;
-  if (always_empty != 0){
+  if (always_empty != 0) {
     Position::visualize_bitboard(always_empty, cout);
     throw 34;
   }
@@ -893,9 +904,9 @@ bool Move_generator::is_check_from_slider(const bitboard_set& sliding_moves,
   if (moves != 0) {
     Position::visit_bitboard(moves,
         [this, &king_pos, &retval, &occupied](int8_t attacker) {
-      if (outside && (true||(attacker == 41 && king_pos == 13))){
-        cout << "Debug!" << endl;
-      }
+          if (outside && (true||(attacker == 41 && king_pos == 13))) {
+            cout << "Debug!" << endl;
+          }
           bool blocked = is_anything_between(king_pos, attacker, occupied);
           if (!blocked) {
             retval = true;
