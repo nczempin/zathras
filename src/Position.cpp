@@ -599,12 +599,14 @@ void Position::un_promote(int8_t promoted_to, uint8_t to)
 
 void Position::make_move(Move& move)
 {
+  bool set_en_passant = false;
 //  cout << "make_move: " << move.to_string() << endl;
 //  this->print(cout);
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
+  int8_t moving = move.get_moving_piece();
 
-  int8_t taken = move.get_taken_piece();
+  int8_t taken = move.get_captured();
   if (taken != 0) {
     bool colour = determine_colour(taken);
     if (colour) {
@@ -656,7 +658,6 @@ void Position::make_move(Move& move)
 //    cout << Square::mailbox_index_to_square(from) << "-"
 //        << Square::mailbox_index_to_square(to) << endl;
   }
-  int8_t moving = move.get_moving_piece();
   int8_t moving_abs = moving > 0 ? moving : -moving; //TODO castling rights on regular rook move
 
   if (moving_abs > 6 || moving_abs == 0) {
@@ -695,6 +696,7 @@ void Position::make_move(Move& move)
           save_en_passant_square(move);
           // handle double step preparing the e. p.
           if (to - from == 16) {
+            set_en_passant = true;
             set_bit(en_passant_square, target);
           }
         }
@@ -788,6 +790,7 @@ void Position::make_move(Move& move)
           save_en_passant_square(move);
           if (to - from == -16) {
             set_bit(en_passant_square, target);
+            set_en_passant = true;
           }
         }
       }
@@ -858,11 +861,15 @@ void Position::make_move(Move& move)
 
 // TODO turned promoted pawn into new piece
 // TODO update en passant square
+  if (!set_en_passant) {
+    en_passant_square = 0x00;
+  }
 // TODO update castling rights
 // TODO update 3 repetitions
 // TODO update 50 moves
   white_to_move = !white_to_move;
 // cout << "switched on_move to " << white_to_move << endl;
+
 }
 
 void Position::unmake_move(Move& move)
@@ -871,9 +878,8 @@ void Position::unmake_move(Move& move)
 //  this->print(cout);
   uint8_t from = move.get_from();
   uint8_t to = move.get_to();
-  restore_en_passant_square(move);
-
   int8_t moving = move.get_moving_piece();
+  restore_en_passant_square(move);
   white_to_move = !white_to_move;
   //cout << "switched on_move to " << white_to_move << endl;
 
@@ -943,7 +949,7 @@ void Position::unmake_move(Move& move)
         castling[0] = true;
       }
       if (move.cleared_queenside_castling) {
-         castling[1] = true;
+        castling[1] = true;
       }
       break;
     default:
@@ -954,6 +960,7 @@ void Position::unmake_move(Move& move)
   } else {
     switch (moving) {
     case Piece::BLACK_PAWN: {
+
       clear_bit(pawns, to);
       clear_bit(black, to);
       set_bit(pawns, from);
@@ -972,6 +979,7 @@ void Position::unmake_move(Move& move)
         }
       }
     }
+
       break;
     case Piece::BLACK_KNIGHT:
       clear_bit(knights, to);
@@ -1026,18 +1034,19 @@ void Position::unmake_move(Move& move)
       break;
     }
   }
+
   if (!move.is_en_passant_capture()) {
 
-    int8_t taken = move.get_taken_piece();
-    if (taken != 0) {
-      //cout << "untaken: " << taken << endl;
-      bool colour = determine_colour(taken);
+    int8_t captured = move.get_captured();
+    if (captured != 0) {
+      //cout << "untaken: " << (int)captured << endl;
+      bool colour = determine_colour(captured);
       if (colour) {
         set_bit(white, to);
       } else {
         set_bit(black, to);
       }
-      int8_t p = determine_piece(taken);
+      int8_t p = determine_piece(captured);
       switch (p) {
       case 1:
         set_bit(pawns, to);
@@ -1081,6 +1090,17 @@ void Position::unmake_move(Move& move)
 // TODO update castling rights
 // TODO update 3 repetitions
 // TODO update 50 moves
-
+  size_t king_count = 0;
+  bb v = kings & white;
+  while (v) {
+    v = v & (v - 1);
+    ++king_count;
+  }
+  if (king_count != 1) {
+    cout << "kc: " << king_count << endl;
+    cout << "unmade:" << move.to_string() << endl;
+    cout << (*this) << endl;
+  }
+  const bb wp = white & pawns;
 }
 

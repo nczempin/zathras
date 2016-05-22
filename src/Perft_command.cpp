@@ -86,13 +86,14 @@ uint64_t Perft_command::perft(uint8_t depth)
 //  }
   for (size_t i = 0; i < size; ++i) {
     Move& move = moves[i];
-//    cout << "(mm: perft@" << depth << "): " << move.to_string() << "-->"
+//    cout << "(mm: perft@" << (int)depth << "): " << move.to_string() << "-->"
 //        << endl;
 //    cout << *pp << endl;
     pp->make_move(move);
 //    cout << *pp << endl;
 //    cout << "(bc: perft@" << depth << "): " << move.to_string() << "-->"
 //        << endl;
+    mg.outside = false;
     if (mg.is_in_check(!pp->white_to_move)) {
       //cout << move.to_string() << "******was illegal; unmaking*******" << endl;
       pp->unmake_move(move);
@@ -111,7 +112,7 @@ uint64_t Perft_command::perft(uint8_t depth)
 //        << endl;
 
 //    cout << "after unmake_move:" << endl;
-//    cout << p << endl;
+//    cout << *pp << endl;
   }
   return total_result;
 }
@@ -150,10 +151,10 @@ void Perft_command::execute()
 //
 //  exit(0);
   vector<string> path = receiver->getArguments();
-  int depth =7; //TODO get this from arguments, but use a reasonable default
+  int depth = 6; //TODO get this from arguments, but use a reasonable default
   Position position;
   position = Position::create_position(
-      "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10");
+      "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
   //position = Position::create_start_position();
   cout << "Perft " << depth << " for this position: " << endl;
   cout << position << endl;
@@ -188,16 +189,17 @@ void Perft_command::execute()
 //      cout.flush();
       string s = move.to_string();
 //      cout << "(make move) " << s << endl;
-//      cout << s << "******************" << endl;
+      //cout << s << "******************" << endl;
       pp->make_move(move);
 //      cout << "after make_move:" << endl;
-      //cout << *pp << endl;
+//      cout << *pp << endl;
+      mg.outside = true;
       if (mg.is_in_check(!pp->white_to_move)) {
         //cout << "******was illegal; unmaking*******" << endl;
         pp->unmake_move(move);
         continue;
       } else {
-        // cout << move.to_string() << " is not check" << endl;
+        //cout << move.to_string() << " is not check" << endl;
       }
 //      cout.flush();
       uint64_t perft_result = perft(depth - 1);
@@ -206,7 +208,7 @@ void Perft_command::execute()
       total_result += perft_result;
       pp->unmake_move(move);
 //    cout << "after unmake_move:" << endl;
-//    cout << p << endl;
+//    cout << *pp << endl;
     }
   }
   cout << endl << "Perft " << depth << " result: " << total_result << endl;

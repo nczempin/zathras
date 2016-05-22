@@ -94,6 +94,6 @@ private:
   void restore_en_passant_square(Move& move);
   void promote(int8_t promoted_to, uint8_t to);
   void un_promote(int8_t promoted_to, uint8_t to);
-};
+ };
 
 #endif /* POSITION_H_ */

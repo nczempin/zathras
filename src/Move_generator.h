@@ -20,6 +20,7 @@ public:
   static void pregenerate_moves();
   Move_container generate_moves(shared_ptr<Position> p, size_t depth);
   bool is_in_check(bool side);
+  bool outside = true;
 private:
   shared_ptr<Position> p;
   static bitboard_set pregenerate_rays(int8_t direction);
@@ -74,7 +75,7 @@ private:
   static int set_square(int file_to, int rank_to, bitset<64>& bbs);
   static int clear_square(int file_to, int rank_to, bitset<64>& bbs);
   void visit_moves(move_visitor count_moves);
-  int8_t find_captured_piece(uint8_t square);
+  int8_t find_captured_piece(uint8_t square, int8_t moving);
   void generate_castling(const move_visitor& f, bool white);
   bool is_attacked(uint8_t square);
   void attempt_castle(const move_visitor f, const int8_t piece,
@@ -89,7 +90,7 @@ private:
       const uint8_t king_pos, const bb slider, const bb& occupied);
   bool is_attacked_by_slider(bb position, const bitboard_set& all_moves,
       const uint8_t square, const bb occupied);
-
+  bool will_be_en_passant(uint8_t to, int8_t moving);
 };
 
 #endif /* MOVE_GENERATOR_H_ */
