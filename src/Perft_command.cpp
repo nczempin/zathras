@@ -144,10 +144,12 @@ void Perft_command::execute() {
 	vector<string> path = receiver->getArguments();
 	int depth = 5; //TODO get this from arguments, but use a reasonable default
 	Position position;
-	position = Position::create_position(
-			"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+	const string perft_string =
+			"r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1";
+	position = Position::create_position(perft_string);
 	//position = Position::create_start_position();
 	cout << "Perft " << depth << " for this position: " << endl;
+	cout << perft_string << endl;
 	cout << position << endl;
 	mg.pregenerate_moves();
 	clock_t begin = clock();
