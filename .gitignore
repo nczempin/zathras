@@ -18,6 +18,7 @@ zathras
 massif.out*
 #more profilers
 perf.data
+perf.data.old
 output*.png
 #OS junk files
 [Tt]humbs.db
@@ -28,6 +29,9 @@ output*.png
 *.user
 *.aps
 *.pch
+*.psess
+*.vsp
+*.vspx
 *.vspscc
 *.vssscc
 *_i.c

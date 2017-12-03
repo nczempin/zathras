@@ -16,7 +16,7 @@ using namespace std;
 class Command
 {
 public:
-  Command(shared_ptr<Command_receiver> receiver);
+  Command();
   virtual ~Command();
   virtual void execute() = 0;
 protected:

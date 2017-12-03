@@ -2,7 +2,7 @@
  * Square.cpp
  *
  *  Created on: 22.04.2016
- *      Author: admin
+ *      Author: nczempin
  */
 
 #include "Square.h"
@@ -28,7 +28,7 @@ void Square::print_square(uint8_t x)
 
 }
 
-string Square::mailbox_index_to_square(int x)
+string Square::mailbox_index_to_square(uint8_t x)
 {
   char column = 'a' + x % 8;
   string columnString(1, column);

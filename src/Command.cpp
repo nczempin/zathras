@@ -7,9 +7,7 @@
 
 #include "Command.h"
 
-Command::Command(shared_ptr<Command_receiver> receiver) :
-    receiver(receiver)
-{
+Command::Command(){
 }
 
 
