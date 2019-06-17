@@ -1,5 +1,6 @@
 #executable name
 zathras
+zathras.exe
 #cygwin app crashes
 *.stackdump
 #gcc object files
@@ -25,6 +26,7 @@ output*.png
 *.DS_Store
 
 #Visual Studio files
+*.pdb
 *.[Oo]bj
 *.user
 *.aps
