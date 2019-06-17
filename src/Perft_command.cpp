@@ -70,7 +70,7 @@ void Perft_command::execute() {
 	//"k7/8/8/8/8/8/8/5B1K w - -";
 	position = Position::create_position(perft_string);
 	//position = Position::create_start_position();
-	cout << "Perft " << to_string(depth) << " for this prosition:\n";
+	cout << "Perft " << to_string(depth) << " for this position:\n";
 	cout << perft_string << "\n" << endl;
 	//cout << position << "\n";
 	cout << position.print_board();
