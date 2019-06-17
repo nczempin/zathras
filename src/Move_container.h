@@ -16,7 +16,7 @@
 #include <array>
 
 
-const size_t CONTAINER_COUNT = 6;
+const size_t CONTAINER_COUNT = 99; //TODO this needs to be the maximum depth
 
 
 using namespace std;
