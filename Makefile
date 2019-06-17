@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Ofast -g -std=c++11 -Wall -Wextra -pedantic -fno-omit-frame-pointer
+CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto  -fno-builtin -m64 -malign-data=cacheline -march=sandybridge #-fno-inline-small-functions #-fno-omit-frame-pointer
 
 BIN= zathras
 SRC=$(wildcard **/*.cpp)

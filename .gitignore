@@ -1,5 +1,6 @@
 #executable name
 zathras
+zathras.exe
 #cygwin app crashes
 *.stackdump
 #gcc object files
@@ -18,16 +19,21 @@ zathras
 massif.out*
 #more profilers
 perf.data
+perf.data.old
 output*.png
 #OS junk files
 [Tt]humbs.db
 *.DS_Store
 
 #Visual Studio files
+*.pdb
 *.[Oo]bj
 *.user
 *.aps
 *.pch
+*.psess
+*.vsp
+*.vspx
 *.vspscc
 *.vssscc
 *_i.c

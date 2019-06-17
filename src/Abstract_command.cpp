@@ -7,9 +7,7 @@
 
 #include "Abstract_command.h"
 
-Abstract_command::Abstract_command(shared_ptr<Command_receiver> receiver) :
-    Command(receiver)
-{
+Abstract_command::Abstract_command(){
 }
 
 Abstract_command::~Abstract_command()
