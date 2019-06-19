@@ -18,7 +18,9 @@ public:
 	Move_generator();
 	virtual ~Move_generator();
 	static void pregenerate_moves();
-	Move_container generate_moves(shared_ptr<Position> p, size_t depth);
+	Move_container generate_legal_moves(Position position, size_t depth);
+	Move_container generate_pseudolegal_moves(Position position, size_t depth);
+
 	bool is_attacked_by_slider(bb position, const bitboard_set & all_moves,
 			const uint8_t & square, const bb & occupied);
 	bool is_in_check(bool side);
@@ -26,7 +28,7 @@ public:
 
 
 private:
-	shared_ptr<Position> p;
+	Position* p =NULL; 
 	
 	static bool between_initialized;
 	static bool init_between();
@@ -53,7 +55,7 @@ private:
 	static bitboard_set pregenerate_hoppers(vector<int> jumps);
 	static void place_pawn_move(int from, int steps, int direction,
 			bitset<64> bs[64]);
-	void print_moves_raw(bb ppp, bitboard_set mmm, Position position);
+	//void print_moves_raw(bb ppp, bitboard_set mmm, Position position);
 
 	//array<bb, 9> pieces;
 
@@ -101,6 +103,9 @@ private:
 	void add_non_capture_ray_moves(Move_container & moves, const int8_t piece,
 			bb position, const bitboard_set & pieceMoves, const bb & occupied);
 
+	
+
+	
 };
 
 #endif /* MOVE_GENERATOR_H_ */

@@ -4,7 +4,7 @@
  *  Created on: Apr 9, 2016
  *      Author: nczempin
  */
-
+#pragma once
 #ifndef POSITION_H_
 #define POSITION_H_
 
@@ -87,14 +87,50 @@ public:
 		return white_to_move;
 	}
 
+	void makeMove(string moveString) {
+		Move m = Move(moveString);
+		int board[64];
+		for (int i = 0; i < 64; ++i) {
+			board[i] = 0;
+		}
+		mailbox_from_bitboard(board);
+
+		//TODO make this more elegant
+		int from = m.get_from();
+		uint8_t moving = board[from];
+		if (moving > 6) {
+			moving = -(moving - 6);
+		}
+		visualize_mailbox_board(board, cout);
+		m.set_moving_piece(moving);
+		int to = m.get_to();
+		//cout << "to: " << to << endl;
+		int captured = board[to];
+		cout << "captured: " << captured << endl;
+		if (captured > 6) {
+			captured = -(captured - 6);
+		}
+		cout << "captured: " << captured << endl;
+		m.set_captured(captured);
+		//cout << "from: " << from << endl;
+		//cout << "moving piece: " << moving << endl;
+		//cout << "makeMove: " << moveString << endl;
+		Move_state ms;
+		make_move(m,ms);// m.from, m.to, m.captured, m.promoted);
+		//isGivingCheck = null;
+		//isReceivingCheck = null;
+		print(cout);
+	}
+	//
 	//TODO public for now
-	bb piece_bb[6];
+	bb piece_bb[6] = {};
 	bb white = 0x00;
 	bb black = 0x00;
 	bb en_passant_square = 0x00;
 	bitset<4> castling;
 	bool white_to_move = true; //TODO public for now
 
+	void mailbox_from_bitboard(int board[64]) const;
 
 	void debugPosition();
 private:
@@ -107,8 +143,7 @@ private:
 	void promote(int8_t promoted_to, uint8_t to);
 	void un_promote(int8_t promoted_to, uint8_t to);
 	void handleCapture(const uint8_t& to, const int8_t& taken, Move_state &move_state);
-	void mailbox_from_bitboard(int board[64]) const;
-
+	
 
 public:
 	static bb between[BETWEEN_ARRAY_SIZE];

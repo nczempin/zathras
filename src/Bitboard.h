@@ -46,7 +46,7 @@ public:
 		unsigned long index;
 		bool isNonZero = _BitScanForward64(&index, my_bb);
 		if (isNonZero) {
-			return index + 1;
+			return static_cast<uint8_t> (index + 1);
 		}
 		else {
 			return 0;

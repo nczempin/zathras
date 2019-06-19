@@ -112,6 +112,7 @@
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <EnablePREfast>true</EnablePREfast>
+      <DisableSpecificWarnings>4458;4244;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -131,6 +132,7 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <Optimization>Full</Optimization>
       <CallingConvention>FastCall</CallingConvention>
+      <DisableSpecificWarnings>4530;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <Profile>true</Profile>
@@ -144,6 +146,7 @@
     <ClCompile Include="src\Bitboard_test.cpp" />
     <ClCompile Include="src\Command.cpp" />
     <ClCompile Include="src\Command_receiver.cpp" />
+    <ClCompile Include="src\Info.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Move.cpp" />
     <ClCompile Include="src\Move_container.cpp" />
@@ -152,6 +155,7 @@
     <ClCompile Include="src\Perft_command.cpp" />
     <ClCompile Include="src\Piece.cpp" />
     <ClCompile Include="src\Position.cpp" />
+    <ClCompile Include="src\Searcher.cpp" />
     <ClCompile Include="src\Square.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +163,8 @@
     <ClInclude Include="src\Bitboard.h" />
     <ClInclude Include="src\Command.h" />
     <ClInclude Include="src\Command_receiver.h" />
+    <ClInclude Include="src\global.h" />
+    <ClInclude Include="src\Info.h" />
     <ClInclude Include="src\Move.h" />
     <ClInclude Include="src\Move_container.h" />
     <ClInclude Include="src\Move_generator.h" />
@@ -166,8 +172,10 @@
     <ClInclude Include="src\Perft_command.h" />
     <ClInclude Include="src\Piece.h" />
     <ClInclude Include="src\Position.h" />
+    <ClInclude Include="src\Searcher.h" />
     <ClInclude Include="src\Square.h" />
     <ClInclude Include="src\typedefs.h" />
+    <ClInclude Include="src\Uci.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

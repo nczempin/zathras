@@ -13,7 +13,7 @@ class Piece
 public:
   Piece();
   virtual ~Piece();
-  static const int PAWN = 1;
+  static const int PAWN = 1; //TODO enums
   static const int KNIGHT = 2;
   static const int BISHOP = 3;
   static const int ROOK = 4;
