@@ -22,25 +22,30 @@ public:
 	int idDepth = -1; //TODO find good init value
 	bool kingCapture = false;
 	deque<Move> pv;
-	/*int quiescence_alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp);
+	//int quiescence_alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp);
 	int alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp);
-	Move findBestmove(vector<Move> moves, Position p);*/
+
+	Move findBestmove(array<Move, Move_container::SIZE> moves, Position p);
+
 	Move analyze(Position p) {
 		Move_generator mg;
 
-		Move_container moves = mg.generate_legal_moves(p, 1);// generateLegalMoves(p);
-		if (moves.size() == 0) {
+		Move_container move_container = mg.generate_legal_moves(p, 1);
+		auto moves = move_container.get_moves();
+		if (move_container.size() == 0) {
 			return nullptr;// Move(-1, -1, 0); //TODO
 		}
-		else {/*if (moves.size() == 1){*///FIXME just return first move for now
-			auto move = moves.get_moves()[0];// front();
+		else if (move_container.size() == 1) {
+			auto move = moves[0];
 			cout << move.to_string() << endl;
 			return move;
-			/*} else {
-				Move m = findBestmove(moves, p);
-				return m;*/
+		}
+		else {
+			Move m = findBestmove(moves, p);
+			return m;
 		}
 	}
+
 
 	void updateNps() {
 		chrono::duration<double> elapsed_seconds = chrono::system_clock::now() - Info::start;

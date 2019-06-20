@@ -10,11 +10,13 @@
 #include <thread>
 
 #include "global.h"
+#include "Character.h"
 #include "Position.h"
 #include "Move_generator.h"
 #include "Searcher.h"
 #include "Move.h"
-//#include "Evaluator.h"
+#include "Perft_command.h"
+#include "Evaluator.h"
 
 using namespace std;
 
@@ -40,25 +42,27 @@ public:
 			cout << "id author Nicolai Czempin" << endl;
 			cout << "uciok" << endl;
 		}
-		//else if (startsWith("perft ", toParse)) {
-		//	char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
-		//	int perftDepth = Character::getNumericValue(perftDepthParameter);
+		else if (startsWith("perft ", toParse)) { //TODO not really UCI
+			Perft_command pc;
+			pc.execute();
+			//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
+			//int perftDepth = Character::getNumericValue(perftDepthParameter);
 
-		//	chrono::time_point<chrono::system_clock> end;
+			//chrono::time_point<chrono::system_clock> end;
 
 
-		//	//TODO do this more elegantly
-		//	for (int i = 0; i < perftDepth; ++i) {
-		//		Info::start = chrono::system_clock::now();
-		//		int nodes = perft(p, i + 1);
-		//		end = chrono::system_clock::now();
-		//		chrono::duration<double> elapsed_seconds = end - Info::start;
-		//		cout << i + 1 << ", " << nodes << " @ " << elapsed_seconds.count() << endl;
-		//		//time_t end_time = chrono::system_clock::to_time_t(end);
-		//	}
-		//	cout << "Done." << endl;
-		//
-		//}
+			////TODO do this more elegantly
+			//for (int i = 0; i < perftDepth; ++i) {
+			//	Info::start = chrono::system_clock::now();
+			//	int nodes = perft(p, i + 1);
+			//	end = chrono::system_clock::now();
+			//	chrono::duration<double> elapsed_seconds = end - Info::start;
+			//	cout << i + 1 << ", " << nodes << " @ " << elapsed_seconds.count() << endl;
+			//	//time_t end_time = chrono::system_clock::to_time_t(end);
+			//}
+			//cout << "Done." << endl;
+		
+		}
 		//else if (startsWith("divide ", toParse)) {
 		//	char perftDepthParameter = toParse[7];
 		//	int perftDepth = Character::getNumericValue(perftDepthParameter);
@@ -81,10 +85,10 @@ public:
 		else if (toParse == "isready") {
 			cout << "readyok" << endl;
 		}
-		/*else if (toParse == "eval") {
+		else if (toParse == "eval") {
 			int v = Evaluator::getValue(p);
 			cout << "Value: " << v << endl;
-		}*/
+		}
 		else if (startsWith("go", toParse)) {
 			/*int wtime = extractIntValue(toParse, "wtime");
 			int btime = extractIntValue(toParse, "btime");
@@ -103,7 +107,7 @@ public:
 				tpm = calculateTimePerMove(btime, binc, mtg);
 			}*/
 
-			auto tpm = 1;
+			auto tpm = 5000;
 			timePerMove = tpm;
 
 			cout << "tpm: " << tpm << endl;

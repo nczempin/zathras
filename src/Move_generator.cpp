@@ -679,7 +679,7 @@ void Move_generator::add_non_capture_ray_moves(Move_container& moves,
 
 Move_container Move_generator::generate_legal_moves(Position position, size_t depth) {
 	//TODO this is all terrible
-	Move_container& pseudolegal_moves = generate_pseudolegal_moves(position, depth);
+	Move_container pseudolegal_moves = generate_pseudolegal_moves(position, depth);
 	Move_container legal_moves;
 	auto moves = pseudolegal_moves.get_moves();
 	for (int i = 0; i < pseudolegal_moves.size(); ++i){

@@ -90,22 +90,26 @@ bool timeUp()
 
 
 
-//static int perft(const Position position, int maxDepth) {
-//	if (maxDepth == 0) {
-//		return 1;
-//	}
-//	MoveGenerator mg;
-//	vector<Move> moves = mg.generateLegalMoves(position);
-//	int count = 0;
-//	Position tmpPos = position;
-//	for (Move move : moves) {
-//		tmpPos = position;
-//		tmpPos.makeMove(move);
-//		count += perft(tmpPos, maxDepth - 1);
-//	}
-//
-//	return count;
-//}
+static long perft(const Position position, int maxDepth) {
+	if (maxDepth == 0) {
+		return 1;
+	}
+	Move_generator mg;
+	Move_container move_container = mg.generate_legal_moves(position,1);
+	int count = 0;
+	Position tmpPos = position;
+	Move_state ms;
+	for (Move move : move_container.get_moves()) {
+		if (move.get_moving_piece() == 0) {
+			break;
+		}
+		tmpPos = position;
+		tmpPos.make_move(move, ms);
+		count += perft(tmpPos, maxDepth - 1);
+	}
+
+	return count;
+}
 
 bool invalidSquare(int next) {
 	bool isInvalid = false;

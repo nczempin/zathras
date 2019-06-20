@@ -27,7 +27,7 @@ uint64_t Perft_command::perft(uint8_t depth) {
 	if (depth == 0) {
 		return 1;
 	}
-	Move_container move_container;//TODO = mg.generate_pseudolegal_moves(pp, depth);
+	Move_container move_container = mg.generate_pseudolegal_moves(*pp, depth);
 	array<Move, Move_container::SIZE> moves = move_container.get_moves();
 	uint64_t total_result = 0;
 	size_t size = move_container.size();
@@ -81,7 +81,7 @@ void Perft_command::execute() {
 	///////////////////////////////
 	uint64_t total_result = 0;
 	pp = make_shared < Position >(position);
-	Move_container move_container;//TODO = mg.generate_pseudolegal_moves(pp, depth);
+	Move_container move_container = mg.generate_pseudolegal_moves(position, depth);
 	array<Move, Move_container::SIZE> moves = move_container.get_moves();
 	size_t move_count = move_container.size();
 	if (depth == 0) {
@@ -110,8 +110,8 @@ void Perft_command::execute() {
 	clock_t end = clock();
 	double elapsed_secs = (static_cast<double>(end) - static_cast<double>(begin)) / CLOCKS_PER_SEC;
 	int nps = static_cast<int>(total_result / elapsed_secs);
-	string nps_wc = format_large_number(nps);
+	//	string nps_wc = format_large_number(nps);
 	cout << endl << "Perft " << to_string(depth) << " result: " << total_result << endl;
 	//cout.imbue(locale(""));
-	cout << "time: " << elapsed_secs << ", nps: " << nps_wc << endl;
+	cout << "time: " << elapsed_secs << ", nps: " << nps << endl;
 }

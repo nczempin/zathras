@@ -628,12 +628,16 @@ void Position::make_move(const Move& move, Move_state& move_state) {
 
 	const int8_t& taken = move.get_captured();
 	if (taken != 0) {
-		cout << "capturing: " << taken << endl;
+		//cout << "capturing: " << taken << endl;
 		handleCapture(to, taken, move_state);
 	}
 	if (white_to_move) {
 		clear_bit(white, from);
 		set_bit(white, to);
+		if (moving <= 0) {
+			cout << this->print_board() << endl;
+			cout << move.to_string() << endl;
+		}
 		assert(moving > 0);
 		bb& pbb = piece_bb[moving - 1];
 		set_bit(pbb, to);

@@ -31,6 +31,8 @@ public:
 		}
 
 		captured = 0;
+
+		
 	}
 	inline uint8_t get_from() const {
 		return this->from;
@@ -53,7 +55,7 @@ public:
 		this->to = to;
 	}
 	string to_string() const;
-
+	int value{ 0 };
 	//  uint8_t get_en_passant_square() const  {
 	//    return en_passant_square;
 	//  }
