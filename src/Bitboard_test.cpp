@@ -9,7 +9,7 @@
 #include "Bitboard.h"
 #include "typedefs.h"
 
-int main_(int argc, char* argv[]) {
+int main_() {
 	for (int i = 0; i < 64; ++i) {
 		int x = Bitboard::ffs(i);
 		cout << i << ": " <<  x << "\n";

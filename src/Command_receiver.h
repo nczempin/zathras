@@ -16,18 +16,16 @@ using namespace std;
 class Command_receiver
 {
 public:
-  Command_receiver();
-  virtual ~Command_receiver();
-  void setArguments(vector<string> arguments)
-  {
-    this->arguments = arguments;
-  }
-  vector<string> getArguments()
-  {
-    return arguments;
-  }
+	Command_receiver();
+	virtual ~Command_receiver();
+	void setArguments(vector<string> arguments){
+		this->arguments = arguments;
+	}
+	vector<string> getArguments(){
+		return arguments;
+	}
 private:
-  vector<string> arguments;
+	vector<string> arguments;
 };
 
 #endif /* COMMAND_RECEIVER_H_ */

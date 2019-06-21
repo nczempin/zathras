@@ -14,7 +14,7 @@
 #include "Move_generator.h"
 #include <memory>
 
-class Perft_command: public Abstract_command {
+class Perft_command : public Abstract_command {
 public:
 	Perft_command();
 	virtual ~Perft_command();
