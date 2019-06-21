@@ -213,6 +213,9 @@ Position Position::create_position(const string& fen) {
 
 Position Position::create_start_position() {
 	const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+	//const char* p = "r3r1k1/1p3nqp/2pp4/p4p2/Pn3P1Q/2N4P/1PPR2P1/3R1BK1 w - - 0 1";
+
 	Position start_position = create_position(p);
 	return start_position;
 }
@@ -617,13 +620,13 @@ void Position::handleCapture(const uint8_t& to, const int8_t& taken,
 	}
 }
 
-void Position::make_move(const Move& move, Move_state& move_state) {
+void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
 	bool set_en_passant = false;
 	const uint8_t& from = move.get_from();
 	const uint8_t& to = move.get_to();
 	int8_t moving = move.get_moving_piece();
 	if (moving == 0) {
-		
+
 	}
 
 	const int8_t& taken = move.get_captured();

@@ -20,6 +20,8 @@ public:
 	static void pregenerate_moves();
 	Move_container generate_legal_moves(Position position, size_t depth);
 	Move_container generate_pseudolegal_moves(Position position, size_t depth);
+	Move_container generate_pseudolegal_captures(Position position, size_t depth);
+	Move_container generate_legal_captures(Position position, int depth);
 
 	bool is_attacked_by_slider(bb position, const bitboard_set & all_moves,
 			const uint8_t & square, const bb & occupied);
@@ -49,6 +51,7 @@ public:
 	static bitboard_set pregenerate_white_pawn_capture_moves();
 	static bitboard_set pregenerate_black_pawn_capture_moves();
 
+	
 private:
 
 	static bitboard_set pregen_pawn_caps(int direction);

@@ -107,7 +107,7 @@ public:
 				tpm = calculateTimePerMove(btime, binc, mtg);
 			}*/
 
-			auto tpm = 5000;
+			auto tpm = 10000;
 			timePerMove = tpm;
 
 			cout << "tpm: " << tpm << endl;

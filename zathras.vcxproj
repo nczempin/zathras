@@ -138,6 +138,9 @@
       <Profile>true</Profile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <SubSystem>Console</SubSystem>
+      <OutputFile>$(OutDir)$(TargetName)0.0.2$(TargetExt)</OutputFile>
+      <Version>
+      </Version>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

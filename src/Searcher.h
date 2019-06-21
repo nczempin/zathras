@@ -22,7 +22,7 @@ public:
 	int idDepth = -1; //TODO find good init value
 	bool kingCapture = false;
 	deque<Move> pv;
-	//int quiescence_alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp);
+	int quiescence_alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp);
 	int alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp);
 
 	Move findBestmove(array<Move, Move_container::SIZE> moves, Position p);
