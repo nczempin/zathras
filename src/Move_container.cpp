@@ -16,10 +16,10 @@ array<Move_container, CONTAINER_COUNT> Move_container::container_pool; // TODO p
 
 Move_container::Move_container()
 {
-	Move m;
+	/*Move m;
 	for (size_t i = 0; i < SIZE; ++i) {
 		container[i] = m;
-	}
+	}*/
 	index = 0;
 }
 

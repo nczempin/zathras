@@ -41,26 +41,21 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 		sortedMoves.clear();
 		otherMoves.clear();
 		Info::currmovenumber = 0;
-		for (Move move : moves) {
+		for (Move& move : moves) {
 			// TODO this is a workaround because of garbage
 			if (move.get_moving_piece() == 0) {
 				break;
 			}
-			Position newPos = position;
+			//Position newPos = position;
 			Move_state ms;
-			newPos.make_move(move, ms);
+			position.make_move(move, ms);
 			++Info::nodes;
 			Info::currmove = move;
 			Info::currmovenumber++;
-			updateNps();
-			cout << "info ";
-			cout << " currmove " << Info::currmove.to_string();
-			cout << " currmovenumber " << Info::currmovenumber;
-			cout << " nodes " << Info::nodes;
-			cout << " nps " << Info::nps << endl;
+			printInfo();
 
 			//cout << "trying " << move.toString() << endl;
-			int value = -alphabeta(1, newPos, -9999999, -bestValue, lineDown);
+			int value = -alphabeta(1, position, -9999999, -bestValue, lineDown);
 			if (timeUp()) {
 				//return lastIterationBestMove;
 				done = true;
@@ -79,14 +74,11 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 					done = true;
 					break;
 				}
-				//}else if (value==bestValue){
-				//	//cout << "inserting alt." << move.toString() << "@" << value << endl;
-				//	sortedMoves.push_front(move);
 			}
 			else {
 				otherMoves.push_front(move);
 			}
-
+			position.unmake_move(move, ms);
 		}
 
 		printInfo();
@@ -118,7 +110,7 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 	} while (!done);
 	return bestMove;
 }
-int Searcher::alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp) {
+int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
 	if (done || (timeUp())) {
 		//	timeIsUp = true;
 		done = true;
@@ -130,45 +122,30 @@ int Searcher::alphabeta(int depth, Position position, int alpha, int beta, deque
 		deque<Move> lineDown;
 		value = quiescence_alphabeta(depth, position, alpha, beta, lineDown);
 		lineUp = lineDown;
-		//value = Evaluator::getValue(position);
 		return value;
 	}
-	//vector<Move> moves;
-	//moves.reserve(40);
 	Move_generator mg;
 	Move_container mc = mg.generate_legal_moves(position, 1);
 	auto moves = mc.get_moves();// AllMoves(position, moves);
-	//vector<Move> moves = MoveGenerator::generateLegalMoves(position);
 	int actualMoves = 0;
 	int moveCount = 0;
-	for (Move newMove : moves) {
+	for (const Move& newMove : moves) {
 		if (moveCount++ >= mc.size()) {
 			break;
 		}
-		//int capture = newMove.get_captured();// captured;
-		////assert(capture >= 0);
-		//if (capture == 6) {
-		//	//cout << "king captured: " << newMove.toString() << endl;
-		//	kingCapture = true;
-		//	//	//	illegalCount += 1;
-		//	return 666663;
-		//}
+
 		//expensive way to make next move
-		Position nextPos = position;// .copyPosition();
+		//Position nextPos = position;// .copyPosition();
 		Move_state ms;
-		nextPos.make_move(newMove, ms);
+		position.make_move(newMove, ms);
 		++Info::nodes;
 		//cout << "making " << newMove.toString() << endl;
 		deque<Move> lineDown;
-		value = -alphabeta(depth + 1, nextPos, -beta, -alpha, lineDown);
-		
-		// back to "position" = expensive take back move
-		//if (kingCapture) {
-		//	//cout << "caught king capture: " << newMove.toString() << endl;
-		//	kingCapture = false;
-		//	//ignore this move, though
-		//}
-		//else {
+		value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown);
+		position.unmake_move(newMove, ms);
+
+
+
 		++actualMoves;
 
 		if (value >= beta) {
@@ -215,31 +192,15 @@ static bool shouldBeIgnored(Position nextPos, Move newMove, int capture, int cap
 	return false;//TODO (abs(capturing) > abs(capture)) && ((capturing != 3) || (capture != 2)); //TODO: && (!nextPos.enPrise(newMove));
 }
 
-int Searcher::quiescence_alphabeta(int depth, Position position, int alpha, int beta, deque<Move>& lineUp) {
+int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
 	//ValidFlag bestMoveValidFlag = new ValidFlag();
 	int v = Evaluator::getValue(position);
-	//if (done || (timeUp())) {
-	//	//	timeIsUp = true;
-	//	done = true;
-	//	printInfo();
-	//	return v;
-	//}
+
 	if (depth > Info::seldepth) {
 		Info::seldepth = depth;
 		printInfo();
 	}
-	//if (nextPos == null)
-	//	try {
-	//		Info.qs_nodes += 1L;
-	//		nextPos = Position.createPosition(position, move);
-	//	} catch (ThreeRepetitionsAB e) {
-	//		System.err.println("three repetitions. what to do?");
-	//		return 0;
-	//	}
-	//return v;
-	/*if (depth>20){
-	 return -v;
-	 }*/
+
 	if (v >= beta)
 		return beta;
 	if (v > alpha) {
@@ -248,101 +209,43 @@ int Searcher::quiescence_alphabeta(int depth, Position position, int alpha, int 
 	}
 	//kingCapture = false;
 	int loopCount = 0;
-	//vector<Move> moves;
-	//moves.reserve(10);
+
 	Move_generator mg;
 
 	auto mc = mg.generate_legal_captures(position, 1);
 	auto moves = mc.get_moves();
 
 	//vector<Move> legalMoves = MoveGenerator::removeIllegalMoves(moves);
-	for (Move newMove : moves) {
+	for (const Move& newMove : moves) {
 		if (newMove.get_moving_piece() == 0) {
 			break;
 		}
 		int capture = newMove.get_captured();
 		assert(capture != 0);
 		int capturing = newMove.get_moving_piece();// abs(position.board[newMove.get_from()]);
-		//if (capture == 6 || capture == -6) {
-		//	kingCapture = true;
-		//	//	//	illegalCount += 1;
-		//	//cout << "captured King: " << newMove.toString() << endl;
-		//	return -666663;
-		//}
+
 		if (!shouldBeIgnored(position, newMove, capture, capturing)) {
-			//moveStack.push(newMove);
-			//vector<Move> downPv;
-			Position nextPos = position;// .copyPosition(); //TODO unmake
+			
 			Move_state ms;
-			nextPos.make_move(newMove, ms);
+			position.make_move(newMove, ms);
 			++Info::nodes;
 			deque<Move> lineDown;
-			int value = -quiescence_alphabeta(depth + 1, nextPos, -beta, -alpha, lineDown);
-			//if (kingCapture) {
-			//	//	illegalCount += 1;
-			//	//	moveStack.pop();
-			//	kingCapture = false;
-			//	//cout << "ignoring: " << newMove.toString() << endl;
-			//}
-			//else {
-			loopCount++;
+			int value = -quiescence_alphabeta(depth + 1, position, -beta, -alpha, lineDown);
+			position.unmake_move(newMove, ms);
+
+			
 			if (value >= beta) {
-				//moveStack.pop();
 				return beta;
 			}
-			//bestMoveValidFlag.setNr(-1);
 			if (value > alpha) {
 				alpha = value;
 				lineUp = lineDown;
 				lineUp.push_front(newMove);
-				/*		cout << "new q best: " << newMove.toString() << endl;
-				 for(Move move: lineUp){
-				 cout << move.toString() << " ";
-				 }
-				 cout << endl;*/
-				 //upPv.clear();
-				 //upPv.add(newMove);
-				 //upPv.addAll(downPv);
+
 			}
-			//moveStack.pop();
-		//}
-		//}
+
 		}
-		//if (loopCount==0){
-		//	vector<Move> legalMoves = MoveGenerator::generateLegalMoves(position);
-		//	if (legalMoves.size()==0){
-		//		//cout << "no more moves!" << endl;
-		//		//position.print();
-		//		if (position.isReceivingCheck()){
-		//			return -888888; // Checkmate
-		//		}else{
-		//			return 0; // Stalemate
-		//		}
-		//	}
+
+		return alpha;
 	}
-	/*	if (loopCount == 0) {
-	 nextPos.initNonCaptureMoveGenerator();
-	 boolean legal = false;
-	 while (nextPos.hasNextNonCaptureMove()) {
-	 Move testMove = nextPos.nextNonCaptureMove();
-	 Info.quiescentMateCheckNodes += 1;
-	 Position tp = Position.createTestPosition(nextPos, testMove);
-	 if (!tp.isGivingCheck()) {
-	 legal = true;
-	 break;
-	 }
-	 }
-	 if (!legal) {
-	 SortedSet lMoves = nextPos.generateLegalMoves();
-	 if (lMoves.size() == 0) {
-	 if (nextPos.isMate()) {
-	 int value = -90000 + depth;
-	 return -value;
-	 }
-	 return 0;
-	 }
-	 }
-	 alpha = v;
-	 }*/
-	return alpha;
 }

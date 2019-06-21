@@ -21,6 +21,7 @@
 #include "Move.h"
 #include "Move_state.h"
 #include "Bitboard.h"
+#include "Info.h"
 
 #define pawns piece_bb[0]
 #define knights piece_bb[1]
@@ -117,6 +118,8 @@ public:
 		//cout << "makeMove: " << moveString << endl;
 		Move_state ms;
 		make_move(m,ms);// m.from, m.to, m.captured, m.promoted);
+		++Info::nodes;
+
 		//isGivingCheck = null;
 		//isReceivingCheck = null;
 		print(cout);

@@ -26,6 +26,7 @@ private:
 
 	shared_ptr<Position> pp;
 	Move_generator mg;
+	size_t illegal_moves_generated = 0;
 };
 
 #endif /* PERFT_COMMAND_H_ */

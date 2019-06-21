@@ -36,6 +36,7 @@ uint64_t Perft_command::perft(uint8_t depth) {
 		Move_state ms;
 		pp->make_move(move, ms);
 		if (pp->is_in_check(!pp->white_to_move)) {
+			//++illegal_moves_generated;
 			pp->unmake_move(move, ms);
 			continue;
 		}
@@ -82,18 +83,21 @@ void Perft_command::execute() {
 	uint64_t total_result = 0;
 	pp = make_shared < Position >(position);
 	Move_container move_container = mg.generate_pseudolegal_moves(position, depth);
-	array<Move, Move_container::SIZE> moves = move_container.get_moves();
 	size_t move_count = move_container.size();
+	
 	if (depth == 0) {
 		total_result = move_count;
 	}
 	else {
+		array<Move, Move_container::SIZE> moves = move_container.get_moves();
+
 		for (size_t i = 0; i < move_count; ++i) {
 			Move& move = moves[i];
 			Move_state ms;
 			pp->make_move(move, ms);
 			mg.outside = true;
 			if (pp->is_in_check(!pp->white_to_move)) {
+				//++illegal_moves_generated;
 				pp->unmake_move(move, ms);
 				continue;
 			}
@@ -112,6 +116,7 @@ void Perft_command::execute() {
 	int nps = static_cast<int>(total_result / elapsed_secs);
 	//	string nps_wc = format_large_number(nps);
 	cout << endl << "Perft " << to_string(depth) << " result: " << total_result << endl;
+	//cout << "(illegal moves generated)" << illegal_moves_generated << endl;
 	//cout.imbue(locale(""));
 	cout << "time: " << elapsed_secs << ", nps: " << nps << endl;
 }

@@ -15,6 +15,7 @@
 #include "Square.h"
 #include "Piece.h"
 #include "Bitboard.h"
+#include "Info.h"
 
 Move_generator::Move_generator() {
 }
@@ -683,12 +684,15 @@ Move_container Move_generator::generate_legal_captures(Position position, int de
 	auto moves = pseudolegal_moves.get_moves();
 	for (int i = 0; i < pseudolegal_moves.size(); ++i) {
 		Move move = moves[i];
-		Position pos2 = position; //copied //TODO inefficient
+		//Position pos2 = position; //copied //TODO inefficient
 		Move_state ms;
-		pos2.make_move(move, ms);
-		if (!pos2.is_in_check(!pos2.is_white_to_move())) {
+		position.make_move(move, ms);
+		++Info::nodes;
+		if (!position.is_in_check(!position.is_white_to_move())) {
 			legal_moves.add_move(move);// moving, from, to, captured, en_passant_capture, promoted_to);
 		}
+		position.unmake_move(move, ms);
+
 	}
 	return legal_moves;
 }
@@ -699,12 +703,15 @@ Move_container Move_generator::generate_legal_moves(Position position, size_t de
 	auto moves = pseudolegal_moves.get_moves();
 	for (int i = 0; i < pseudolegal_moves.size(); ++i){
 		Move move = moves[i];
-		Position pos2 = position; //copied //TODO inefficient
+		//Position pos2 = position; //copied //TODO inefficient
 		Move_state ms;
-		pos2.make_move(move, ms);
-		if (!pos2.is_in_check(!pos2.is_white_to_move())) {
+		position.make_move(move, ms);
+		++Info::nodes;
+
+		if (!position.is_in_check(!position.is_white_to_move())) {
 			legal_moves.add_move(move);// moving, from, to, captured, en_passant_capture, promoted_to);
 		}
+		position.unmake_move(move, ms);
 	}
 	return legal_moves;
 }

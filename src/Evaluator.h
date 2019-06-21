@@ -319,6 +319,7 @@ public:
 			return 1 + countSetBits(n & (n - 1));
 	}
 	static int getMidgameValue(Position position) {
+		
 		Position* p = &position;
 		const bb white_pawns = p->pawns & p->white;
 		const bb white_knights = p->knights & p->white;
