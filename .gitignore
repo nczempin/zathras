@@ -1,6 +1,6 @@
 #executable name
-zathras*
-!zathras_lib/
+zathras*.exe
+!zathras_lib/*
 #cygwin app crashes
 *.stackdump
 #gcc object files
