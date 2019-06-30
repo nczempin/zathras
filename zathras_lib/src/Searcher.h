@@ -30,7 +30,9 @@ public:
 
 	Move analyze(Position p) {
 		Move_generator mg;
-
+		if (done) {
+			return Move();
+		}
 		const Move_container move_container = mg.generate_legal_moves(p, 1);
 		auto moves = move_container.get_moves();
 		if (move_container.size() == 0) {
@@ -47,11 +49,5 @@ public:
 		}
 	}
 
-
-	/*void updateNps() {
-		Interface::Info::updateNps();
-	}
-
-	*/
 };
 

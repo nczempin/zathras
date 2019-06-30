@@ -30,6 +30,7 @@ extern const std::string VERSION;
 namespace Interface {
 
 	using namespace std;
+
 	class Uci {
 	public:
 
@@ -111,7 +112,7 @@ namespace Interface {
 					tpm = calculateTimePerMove(btime, binc, mtg);
 				}*/
 
-				auto tpm = 10000;
+				auto tpm = 5000;
 
 				Info::timePerMove = tpm;
 
@@ -182,37 +183,34 @@ namespace Interface {
 
 		static void stopBrain()
 		{
-			searcher.done = true; // ask the thread to finish
-			fut.get(); //wait until the thread is finished
-
-			//if ((brainThread != null) && (brainThread.isAlive())) {
-			//	String move = this.brain.getBestMoveSoFar();
-			//	String toPrint; if (move == null) {
-			//		toPrint = printMove(null);
-			//	} else
-			//		toPrint = printMove(move);
-			//	System.out.println(toPrint);
-			//	brainThread.stop();
-			//}
-			//if ((printInfoThread != null) && (printInfoThread.isAlive()))
-			//	printInfoThread.stop();
+			if (!searcher.done) {
+				searcher.done = true; // ask the thread to finish
+				Move move = fut.get(); //wait until the thread is finished
+				cout << "hurz!" << endl;
+				cout << "bestmove " << move.to_string() << endl;
+				
+			}
+			else {
+				cout << "engine already stopped" << endl;
+			}
 		}
-
+		static void finishBrain() {
+			cout << "schnurzel" << endl;
+			this_thread::sleep_for(chrono::milliseconds(Info::timePerMove));
+			if (!searcher.done) {
+				searcher.done = true; // ask the searcher to finish
+				cout << "purzel" << endl;
+				Move move = fut.get(); //wait until the thread is finished
+				cout << "hurzel" << endl;
+				cout << "bestmove " << move.to_string() << endl;
+			}
+		}
 		static void startBrain() {
-			//stopBrain(false);
 
+			searcher.done = false;
 			fut = async(asyncAnalyze);
-			//async(printInfo);
-			//	this_thread::sleep_for (chrono::seconds(10));
-			//Move bestMoveSoFar = s.bestMove;
-			//cout << "best move so far " << bestMoveSoFar.toString() << endl;
-			//this_thread::sleep_for (chrono::seconds(10));
-			Move move = fut.get();
-			//cout << "info string after fut.get" << endl;
-			cout << "bestmove " << move.to_string() << endl;
-
-
-
+			thread(finishBrain).detach();
+		
 
 		}
 
@@ -251,21 +249,20 @@ namespace Interface {
 			return retValue;
 		}
 
-
+		void static resetClock() {
+			Interface::Info::start = chrono::system_clock::now();
+		}
 		static Move asyncAnalyze() {
-			//TODOUtil::resetClock();
+			resetClock();
+
+
 			Move bestmove = searcher.analyze(p);
 
-			deque<Move> pv;
-			Info::printInfo(0, 0, 0, pv);
-
-			//cout << "info string after fut.get" << endl;
-			cout << "bestmove " << bestmove.to_string() << endl;
 			return bestmove;
 		}
 
 
-		void static makeMove( Position& p, string moveString) {
+		void static makeMove(Position& p, string moveString) {
 			Move& m = convert_move(moveString);
 			int board[64];
 			for (int i = 0; i < 64; ++i) {
