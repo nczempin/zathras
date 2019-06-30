@@ -1,14 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2009
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zathras", "zathras.vcxproj", "{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zathras_lib", "zathras_lib\zathras_lib.vcxproj", "{1624D07D-062B-41CD-AE93-D1E4C34D8B02}"
+EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
@@ -18,18 +17,27 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Debug|x64.ActiveCfg = Debug|x64
 		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Debug|x64.Build.0 = Debug|x64
-		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Debug|x86.ActiveCfg = Debug|Win32
-		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Debug|x86.Build.0 = Debug|Win32
+		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Debug|x86.ActiveCfg = Debug|x64
 		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Release|x64.ActiveCfg = Release|x64
 		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Release|x64.Build.0 = Release|x64
-		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Release|x86.ActiveCfg = Release|Win32
-		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Release|x86.Build.0 = Release|Win32
+		{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}.Release|x86.ActiveCfg = Release|x64
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Debug|x64.ActiveCfg = Debug|x64
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Debug|x64.Build.0 = Debug|x64
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Debug|x86.ActiveCfg = Debug|Win32
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Debug|x86.Build.0 = Debug|Win32
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Release|x64.ActiveCfg = Release|x64
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Release|x64.Build.0 = Release|x64
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Release|x86.ActiveCfg = Release|Win32
+		{1624D07D-062B-41CD-AE93-D1E4C34D8B02}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11E4658F-C932-49DB-BB15-24E6E7DB2882}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

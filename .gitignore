@@ -1,5 +1,6 @@
 #executable name
-zathras*
+zathras*.exe
+!zathras_lib/*
 #cygwin app crashes
 *.stackdump
 #gcc object files
@@ -45,7 +46,7 @@ output*.png
 *.[Cc]ache
 *.ilk
 *.log
-*.lib
+#*.lib
 *.sbr
 *.sdf
 *.opensdf
