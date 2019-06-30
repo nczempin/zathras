@@ -67,7 +67,7 @@ namespace Interface {
 
 	void Perft_command::execute() {
 		//vector<string> path = receiver->getArguments();
-		uint8_t depth =6; //TODO get this from arguments, but use a reasonable default
+		uint8_t depth = 6; //TODO get this from arguments, but use a reasonable default
 		Position position;
 		const string perft_string =
 			"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";

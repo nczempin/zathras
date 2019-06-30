@@ -21,6 +21,7 @@
 #include "Move.h"
 #include "Move_state.h"
 #include "Bitboard.h"
+#include "Piece.h"
 
  //#include "Info.h"
 namespace Positions {
@@ -64,7 +65,52 @@ namespace Positions {
 			return Square::A1 <= square && square <= Square::H1;
 
 		}
+		piece_t get_piece_on(square_t sq) {
+			piece_t retval = 0;
 
+			if (is_set_square(white, sq)) {
+				if (is_set_square(pawns, sq)) {
+					retval = Piece::WHITE_PAWN;
+				}
+				else if (is_set_square(knights, sq)) {
+					retval = Piece::WHITE_KNIGHT;
+				}
+				else if (is_set_square(bishops, sq)) {
+					retval = Piece::WHITE_BISHOP;
+				}
+				else if (is_set_square(rooks, sq)) {
+					retval = Piece::WHITE_ROOK;
+				}
+				else if (is_set_square(queens, sq)) {
+					retval = Piece::WHITE_QUEEN;
+				}
+				else if (is_set_square(kings, sq)) {
+					retval = Piece::WHITE_KING;
+				}
+			}
+			else {
+				if (is_set_square(pawns, sq)) {
+					retval = Piece::BLACK_PAWN;
+				}
+				else if (is_set_square(knights, sq)) {
+					retval = Piece::BLACK_KNIGHT;
+				}
+				else if (is_set_square(bishops, sq)) {
+					retval = Piece::BLACK_BISHOP;
+				}
+				else if (is_set_square(rooks, sq)) {
+					retval = Piece::BLACK_ROOK;
+				}
+				else if (is_set_square(queens, sq)) {
+					retval = Piece::BLACK_QUEEN;
+				}
+				else if (is_set_square(kings, sq)) {
+					retval = Piece::BLACK_KING;
+				}
+			}
+			
+			return retval;
+		}
 		friend ostream& operator<<(ostream& stream, const Position& position);
 		void print(ostream& stream) const;
 		string print_board() const;

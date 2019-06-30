@@ -553,6 +553,7 @@ namespace Positions {
 
 	void Position::handleCapture(const uint8_t& to, const int8_t& taken,
 		Move_state& move_state) {
+		move_state.captured = taken;
 		switch (taken) {
 		case Piece::WHITE_PAWN:
 			clear_bit(white, to);
@@ -614,7 +615,7 @@ namespace Positions {
 			clear_bit(queens, to);
 			break;
 		default:
-			cerr << "mm??" << to_string(taken) << "\n";
+			cerr << "mmc??" << to_string(taken) << "\n";
 			throw taken;
 		}
 	}
@@ -623,12 +624,12 @@ namespace Positions {
 		bool set_en_passant = false;
 		const uint8_t& from = move.get_from();
 		const uint8_t& to = move.get_to();
-		int8_t moving = 99;// move.get_moving_piece(); //TODO get piece on from square
+		int8_t moving = get_piece_on(from);
 		if (moving == 0) {
 
 		}
 
-		const int8_t& taken = 99;// move.get_captured(); //TODO get piece on to square
+		const int8_t& taken = get_piece_on(to);
 		if (taken != 0) {
 			//cout << "capturing: " << taken << endl;
 			handleCapture(to, taken, move_state);
@@ -652,7 +653,8 @@ namespace Positions {
 	void Position::unmake_move(const Move& move, const Move_state& move_state) {
 		uint8_t from = move.get_from();
 		uint8_t to = move.get_to();
-		int8_t moving = 99;//move.get_moving_piece(); //TODO get piece on from square
+		int8_t moving = get_piece_on(to);
+		
 		restore_en_passant_square(move_state);
 		white_to_move = !white_to_move;
 
@@ -732,6 +734,7 @@ namespace Positions {
 				}
 				break;
 			default:
+				debugPosition();
 				cerr << "unexpected white piece: " << ((int)moving) << endl;
 				throw moving;
 				break;
@@ -810,6 +813,7 @@ namespace Positions {
 				}
 				break;
 			default:
+				debugPosition(); 
 				double error = ((double)moving);
 				cerr << "umm: unexpected black piece: " << error << endl;
 				throw - moving;
