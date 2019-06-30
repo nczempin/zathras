@@ -2,14 +2,13 @@
 #include <deque>
 #include <chrono>
 
-#include "global.h"
+
 #include "Move.h"
 #include "Position.h"
 #include "Move_generator.h"
-#include "Info.h"
+//#include "Info.h"
 
-using namespace std;
-
+using namespace Moves;
 class Searcher
 {
 public:
@@ -32,10 +31,10 @@ public:
 	Move analyze(Position p) {
 		Move_generator mg;
 
-		Move_container move_container = mg.generate_legal_moves(p, 1);
+		const Move_container move_container = mg.generate_legal_moves(p, 1);
 		auto moves = move_container.get_moves();
 		if (move_container.size() == 0) {
-			return nullptr;// Move(-1, -1, 0); //TODO
+			return Move();// -1, -1, 0); //TODO
 		}
 		else if (move_container.size() == 1) {
 			auto move = moves[0];
@@ -49,35 +48,10 @@ public:
 	}
 
 
-	void updateNps() {
-		chrono::duration<double> elapsed_seconds = chrono::system_clock::now() - Info::start;
-		double seconds = elapsed_seconds.count();
-		Info::nps = (Info::nodes / seconds);
+	/*void updateNps() {
+		Interface::Info::updateNps();
 	}
 
-	void printInfo() {
-		cout << "info depth " << idDepth;
-		cout << " seldepth " << Info::seldepth;
-		cout << " currmove " << Info::currmove.to_string();
-		cout << " currmovenumber " << Info::currmovenumber;
-		cout << " nodes " << Info::nodes;
-		updateNps();
-		cout << " nps " << Info::nps;
-		cout << " score ";
-		if (bestValue > 80000) {
-			cout << "mate " << idDepth / 2;
-		}
-		else if (bestValue < 900000) {
-			cout << "cp " << oldBestValue;
-		}
-		else {
-			cout << "cp " << bestValue;
-		}
-		cout << " pv ";
-		for (Move m : pv) {
-			cout << m.to_string() << " ";
-		}
-		cout << endl;
-	}
+	*/
 };
 

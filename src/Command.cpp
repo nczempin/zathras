@@ -1,18 +1,13 @@
-/*
- * Command.cpp
- *
- *  Created on: Apr 9, 2016
- *      Author: nczempin
- */
-
+#pragma once
 #include "Command.h"
+namespace Interface {
+	Command::Command() {
+	}
 
-Command::Command(){
+
+	Command::~Command()
+	{
+		// TODO Auto-generated destructor stub
+	}
+
 }
-
-
-Command::~Command()
-{
-  // TODO Auto-generated destructor stub
-}
-

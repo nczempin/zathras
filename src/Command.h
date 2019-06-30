@@ -11,17 +11,17 @@
 
 #include "Command_receiver.h"
 
-using namespace std;
 
-class Command
-{
-public:
-  Command();
-  virtual ~Command();
-  virtual void execute() = 0;
-protected:
-  shared_ptr<Command_receiver> receiver;
+namespace Interface {
+	class Command
+	{
+	public:
+		Command();
+		virtual ~Command();
+		virtual void execute() = 0;
+	protected:
+		shared_ptr<Command_receiver> receiver;
 
-};
-
+	};
+}
 #endif /* COMMAND_H_ */

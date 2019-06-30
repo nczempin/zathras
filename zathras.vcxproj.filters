@@ -2,61 +2,23 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\Abstract_command.cpp">
-      <Filter>Interface</Filter>
-    </ClCompile>
     <ClCompile Include="src\Command.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
     <ClCompile Include="src\Command_receiver.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\Bitboard.cpp">
-      <Filter>Position</Filter>
-    </ClCompile>
     <ClCompile Include="src\Info.cpp">
       <Filter>Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Bitboard_test.cpp">
-      <Filter>Position</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Move.cpp">
-      <Filter>Move</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Move_container.cpp">
-      <Filter>Move</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Move_generator.cpp">
-      <Filter>Move</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Move_state.cpp">
-      <Filter>Move</Filter>
     </ClCompile>
     <ClCompile Include="src\Perft_command.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\Piece.cpp">
-      <Filter>Position</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Position.cpp">
-      <Filter>Position</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Searcher.cpp">
-      <Filter>Search</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Square.cpp">
-      <Filter>Position</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Evaluator.h">
-      <Filter>Eval</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Evaluator.cpp">
-      <Filter>Eval</Filter>
+    <ClCompile Include="src\clock.cpp">
+      <Filter>Interface</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\global.h" />
-    <ClInclude Include="src\typedefs.h" />
     <ClInclude Include="src\Uci.h">
       <Filter>Interface</Filter>
     </ClInclude>
@@ -69,64 +31,19 @@
     <ClInclude Include="src\Command_receiver.h">
       <Filter>Interface</Filter>
     </ClInclude>
-    <ClInclude Include="src\Bitboard.h">
-      <Filter>Position</Filter>
-    </ClInclude>
     <ClInclude Include="src\Info.h">
       <Filter>Interface</Filter>
     </ClInclude>
-    <ClInclude Include="src\Move.h">
-      <Filter>Move</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Move_container.h">
-      <Filter>Move</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Move_generator.h">
-      <Filter>Move</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Move_state.h">
-      <Filter>Move</Filter>
-    </ClInclude>
     <ClInclude Include="src\Perft_command.h">
       <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Piece.h">
-      <Filter>Position</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Position.h">
-      <Filter>Position</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Searcher.h">
-      <Filter>Search</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Square.h">
-      <Filter>Position</Filter>
-    </ClInclude>
-    <ClInclude Include="src\PieceCount.h">
-      <Filter>Position</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Character.h">
-      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Interface">
       <UniqueIdentifier>{6e0482fc-2dd7-4fce-b3d0-4278e482edac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Position">
-      <UniqueIdentifier>{d2ce30d9-95a6-47dd-a79f-43a9c4165eb1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Move">
-      <UniqueIdentifier>{c9f8ed29-5a97-4371-8d5a-785790d8aa5d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Search">
-      <UniqueIdentifier>{7d020995-7632-4a10-9f77-1f62fd7a8363}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Eval">
-      <UniqueIdentifier>{ae2e0f94-008d-4ce5-8bb3-54c1443a9cc5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Util">
-      <UniqueIdentifier>{b0403ad9-c3b1-4b0a-841b-d706dcac4fdf}</UniqueIdentifier>
-    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
