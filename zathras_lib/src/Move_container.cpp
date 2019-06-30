@@ -28,7 +28,7 @@ namespace Moves {
 		return container_pool[index];
 	}
 
-	void Move_container::add_move(const int8_t& moving, const uint8_t& from, const uint8_t& to,
+	/*void Move_container::add_move(const int8_t& moving, const uint8_t& from, const uint8_t& to,
 		const int8_t& captured, const bool& en_passant_capture, const int8_t& promoted_to)
 	{
 		Move& m = container[index];
@@ -39,6 +39,13 @@ namespace Moves {
 		m.set_en_passant_capture(en_passant_capture);
 
 		m.set_promoted_to(promoted_to);
+		++index;
+	}*/
+	void Move_container::add_move(const uint8_t& from, const uint8_t& to)
+	{
+		Move& m = container[index];
+		m.set_from(from);
+		m.set_to(to);
 		++index;
 	}
 

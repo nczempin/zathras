@@ -188,7 +188,7 @@ namespace Interface {
 				Move move = fut.get(); //wait until the thread is finished
 				cout << "hurz!" << endl;
 				cout << "bestmove " << move.to_string() << endl;
-				
+
 			}
 			else {
 				cout << "engine already stopped" << endl;
@@ -210,7 +210,7 @@ namespace Interface {
 			searcher.done = false;
 			fut = async(asyncAnalyze);
 			thread(finishBrain).detach();
-		
+
 
 		}
 
@@ -277,7 +277,7 @@ namespace Interface {
 				moving = -(moving - 6);
 			}
 			p.visualize_mailbox_board(board, cout);
-			m.set_moving_piece(moving);
+			//m.set_moving_piece(moving);
 			int to = m.get_to();
 			//cout << "to: " << to << endl;
 			int captured = board[to];
@@ -286,11 +286,12 @@ namespace Interface {
 				captured = -(captured - 6);
 			}
 			//cout << "captured: " << captured << endl;
-			m.set_captured(captured);
+
 			//cout << "from: " << from << endl;
 			//cout << "moving piece: " << moving << endl;
 			//cout << "makeMove: " << moveString << endl;
 			Move_state ms;
+			ms.captured = captured;
 			p.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
 
 
@@ -313,8 +314,9 @@ namespace Interface {
 
 			int captured = 0;
 
-			Move m(0, from, to, captured, false);
-			m.set_promoted_to(promoted_to);
+			//Move m(0, from, to, captured, false);
+			Move m(from, to);/// , captured, false);
+			//m.set_promoted_to(promoted_to);
 			return m;
 		}
 	};

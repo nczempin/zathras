@@ -67,7 +67,7 @@ namespace Interface {
 
 	void Perft_command::execute() {
 		//vector<string> path = receiver->getArguments();
-		uint8_t depth = 6; //TODO get this from arguments, but use a reasonable default
+		uint8_t depth =6; //TODO get this from arguments, but use a reasonable default
 		Position position;
 		const string perft_string =
 			"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
@@ -84,7 +84,7 @@ namespace Interface {
 		///////////////////////////////
 		uint64_t total_result = 0;
 		pp = make_shared < Position >(position);
-		Move_container move_container = mg.generate_legal_moves(position, depth);
+		Move_container move_container = mg.generate_pseudolegal_moves(position, depth);
 		size_t move_count = move_container.size();
 
 		if (depth == 0) {
@@ -98,11 +98,11 @@ namespace Interface {
 				Move_state ms;
 				pp->make_move(move, ms);
 				mg.outside = true;
-				//if (pp->is_in_check(!pp->white_to_move)) {
-				//	//++illegal_moves_generated;
-				//	pp->unmake_move(move, ms);
-				//	continue;
-				//}
+				if (pp->is_in_check(!pp->white_to_move)) {
+					//++illegal_moves_generated;
+					pp->unmake_move(move, ms);
+					continue;
+				}
 
 				uint64_t perft_result = perft(depth - 1);
 				string s = move.to_string();

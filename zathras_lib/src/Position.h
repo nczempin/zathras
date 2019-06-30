@@ -22,7 +22,7 @@
 #include "Move_state.h"
 #include "Bitboard.h"
 
-//#include "Info.h"
+ //#include "Info.h"
 namespace Positions {
 #define pawns piece_bb[0]
 #define knights piece_bb[1]
@@ -56,7 +56,14 @@ namespace Positions {
 		static bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const uint8_t& square, const bb& occupied);
 		static bool is_anything_between(uint8_t from, uint8_t to, const bb& occupied);
 
+		//TODO template
+		static bool is_in_back_rank_black(square_t square) {
+			return Square::A8 <= square && square <= Square::H8;
+		}
+		static bool is_in_back_rank_white(square_t square) {
+			return Square::A1 <= square && square <= Square::H1;
 
+		}
 
 		friend ostream& operator<<(ostream& stream, const Position& position);
 		void print(ostream& stream) const;
@@ -90,7 +97,7 @@ namespace Positions {
 			return white_to_move;
 		}
 
-		
+
 		//TODO public for now
 		bb piece_bb[6] = {};
 		bb white = 0x00;
@@ -126,10 +133,10 @@ namespace Positions {
 				if (white_or_not) {
 					clear_bit(white, from);
 					set_bit(white, to);
-					if (moving <= 0) {
+					/*if (moving <= 0) {
 						cout << this->print_board() << endl;
 						cout << move.to_string() << endl;
-					}
+					}*/
 					//assert(moving > 0);
 					bb& pbb = piece_bb[moving - 1];
 					set_bit(pbb, to);
@@ -140,15 +147,16 @@ namespace Positions {
 					switch (moving) {
 					case Piece::WHITE_PAWN: {
 						clear_bit(pawns, from);
-						int8_t promoted_to = move.get_promoted_to();
-						if (promoted_to != 0) {
-							promote(promoted_to, to);
+						/*int8_t promoted_to = move.get_promoted_to();
+						if (promoted_to != 0) {*/
+						if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
+							promote(Piece::WHITE_QUEEN, to);
 						}
 						else {
 							set_bit(pawns, to);
 							// handle capturing by e. p.
 							int target = to - 8;
-							if (move.is_en_passant_capture()) { // en passant capture
+							if (false /*&& move.is_en_passant_capture()*/) { // en passant capture //TODO
 								clear_bit(pawns, target);
 								clear_bit(black, target);
 							}
@@ -197,19 +205,22 @@ namespace Positions {
 					switch (moving) {
 					case Piece::BLACK_PAWN: {
 						clear_bit(pawns, from);
-						int8_t promoted_to = move.get_promoted_to();
-						if (promoted_to != 0) {
-							promote(promoted_to, to);
+						/*int8_t promoted_to = move.get_promoted_to();
+						if (promoted_to != 0) {*/
+						if (is_in_back_rank_white(to)) {
+							promote(Piece::BLACK_QUEEN, to); // TODO underpromote
 						}
 						else {
 							set_bit(pawns, to);
 							// handle capturing by e. p.
 							int target = to + 8;
-							if (move.is_en_passant_capture()) { // en passant capture
-								clear_bit(pawns, target);
-								clear_bit(white, target);
-							}
-							else {
+
+							//TODO
+							//if (move.is_en_passant_capture()) { // en passant capture
+							//	clear_bit(pawns, target);
+							//	clear_bit(white, target);
+							//}
+							/*else*/ {
 								// handle double step preparing the e. p.
 								save_en_passant_square(move_state);
 								if (to - from == -16) {

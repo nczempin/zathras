@@ -623,12 +623,12 @@ namespace Positions {
 		bool set_en_passant = false;
 		const uint8_t& from = move.get_from();
 		const uint8_t& to = move.get_to();
-		int8_t moving = move.get_moving_piece();
+		int8_t moving = 99;// move.get_moving_piece(); //TODO get piece on from square
 		if (moving == 0) {
 
 		}
 
-		const int8_t& taken = move.get_captured();
+		const int8_t& taken = 99;// move.get_captured(); //TODO get piece on to square
 		if (taken != 0) {
 			//cout << "capturing: " << taken << endl;
 			handleCapture(to, taken, move_state);
@@ -652,7 +652,7 @@ namespace Positions {
 	void Position::unmake_move(const Move& move, const Move_state& move_state) {
 		uint8_t from = move.get_from();
 		uint8_t to = move.get_to();
-		int8_t moving = move.get_moving_piece();
+		int8_t moving = 99;//move.get_moving_piece(); //TODO get piece on from square
 		restore_en_passant_square(move_state);
 		white_to_move = !white_to_move;
 
@@ -665,18 +665,22 @@ namespace Positions {
 				clear_bit(white, to);
 				set_bit(pawns, from);
 				set_bit(white, from);
+/*
 				int8_t promoted_to = move.get_promoted_to();
-				if (promoted_to != 0) {
+				if (promoted_to != 0) {*/
+				if (is_in_back_rank_black(to)){
+					piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
 					un_promote(promoted_to, to);
 				}
 				else {
 					// handle capturing by e. p.
-					if (move.is_en_passant_capture()) {
+					//TODO BIG TODO
+					/*if (move.is_en_passant_capture()) {
 						uint8_t target = to - 8;
 						set_bit(en_passant_square, to);
 						set_bit(pawns, target);
 						set_bit(black, target);
-					}
+					}*/
 
 				}
 				break;
@@ -741,19 +745,21 @@ namespace Positions {
 				clear_bit(black, to);
 				set_bit(pawns, from);
 				set_bit(black, from);
-				int8_t promoted_to = move.get_promoted_to();
-				if (promoted_to != 0) {
-					un_promote(promoted_to, to);
+				//int8_t promoted_to = move.get_promoted_to();
+				//if (promoted_to != 0) {
+				if(is_in_back_rank_white(to)){
+					un_promote(Piece::BLACK_QUEEN, to);
 				}
 				else {
+					//TODO BIG TODO
 					// handle capturing by e. p.
-					if (move.is_en_passant_capture()) {
-						uint8_t target = to + 8;
-						set_bit(en_passant_square, to);
-						set_bit(pawns, target);
-						set_bit(white, target);
-						//          cout << "unmade epcap to this: " << endl << (*this) << endl;
-					}
+					//if (move.is_en_passant_capture()) {
+					//	uint8_t target = to + 8;
+					//	set_bit(en_passant_square, to);
+					//	set_bit(pawns, target);
+					//	set_bit(white, target);
+					//	//          cout << "unmade epcap to this: " << endl << (*this) << endl;
+					//}
 				}
 			}
 
@@ -811,9 +817,9 @@ namespace Positions {
 			}
 		}
 
-		if (!move.is_en_passant_capture()) {
-
-			int8_t captured = move.get_captured();
+		//TODOif (!move.is_en_passant_capture()) {
+		{
+		int8_t captured = move_state.captured;// get_captured();
 			if (captured != 0) {
 				//cout << "untaken: " << (int)captured << endl;
 				bool colour = determine_colour(captured);

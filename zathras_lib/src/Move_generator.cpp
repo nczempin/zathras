@@ -646,9 +646,10 @@ namespace Moves {
 	void Move_generator::f(Move_container& moves, const int8_t moving,
 		const uint8_t from, const uint8_t to, const int8_t captured,
 		const int8_t promoted_to) {
-		bool en_passant_capture = will_be_en_passant(to, moving);
+		//bool en_passant_capture = will_be_en_passant(to, moving);
 
-		moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+//		moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+		moves.add_move(from, to);
 	}
 
 	bool Move_generator::will_be_en_passant(uint8_t to, int8_t moving) {
@@ -673,7 +674,8 @@ namespace Moves {
 				const uint8_t& to = Bitboard::extract_and_remove_square(moves_bb);
 				const bool& b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
-					moves.add_move(piece, from, to, 0, false, 0);
+					//moves.add_move(piece, from, to, 0, false, 0);
+					moves.add_move(from, to);
 				}
 			}
 		}
@@ -727,7 +729,8 @@ namespace Moves {
 			[&moves, this](const int8_t& moving, const uint8_t& from, const uint8_t& to, const int8_t& captured, const int8_t& promoted_to) {
 
 			bool en_passant_capture = will_be_en_passant(to, moving);
-			moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+			//moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+			moves.add_move(from, to);
 		};
 		//TODO generalize, obviously
 		const bb white_pawns = p->pawns & p->white;
@@ -794,7 +797,8 @@ namespace Moves {
 			[&moves, this](const int8_t& moving, const uint8_t& from, const uint8_t& to, const int8_t& captured, const int8_t& promoted_to) {
 
 			bool en_passant_capture = will_be_en_passant(to, moving);
-			moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+//			moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+			moves.add_move(from, to);
 		};
 		//TODO generalize, obviously
 		const bb white_pawns = p->pawns & p->white;

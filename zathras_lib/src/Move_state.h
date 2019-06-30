@@ -38,12 +38,13 @@ namespace Moves {
 		void set_en_passant_square(uint8_t en_passant) {
 			this->en_passant_square = en_passant;
 		}
-
+		piece_t captured = 0; //TODO public for now
 	private:
 		int en_passant_square = -1; //TODO file would be sufficient //TODO handle square_t vs. -1 (invalid/nonexistant) more elegantly
 		bool cleared_kingside_castling = false;
 		bool cleared_queenside_castling = false;
 
+		
 	};
 }
 #endif /* MOVE_STATE_H_ */

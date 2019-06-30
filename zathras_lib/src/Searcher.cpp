@@ -44,9 +44,9 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 		//TODOInfo::currmovenumber = 0;
 		for (Move& move : moves) {
 			// TODO this is a workaround because of garbage
-			if (move.get_moving_piece() == 0) {
+			/*if (move.get_moving_piece() == 0) {
 				break;
-			}
+			}*/
 			//Position newPos = position;
 			Move_state ms;
 			position.make_move(move, ms);
@@ -68,7 +68,7 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 			//	done = true;
 			//	break;
 			//}
-			move.value = value;
+			//TODO move with value move.value = value;
 			if (value > bestValue) {
 				//cout << "inserting " << move.toString() << "@" << value << endl;
 				
@@ -212,14 +212,14 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 
 	//vector<Move> legalMoves = MoveGenerator::removeIllegalMoves(moves);
 	for (const Move& newMove : moves) {
-		if (newMove.get_moving_piece() == 0) {
-			break;
-		}
-		const int& capture = newMove.get_captured();
-		assert(capture != 0);
-		const int& capturing = newMove.get_moving_piece();// abs(position.board[newMove.get_from()]);
+		//if (newMove.get_moving_piece() == 0) {
+		//	break;
+		//}
+		//const int& capture = newMove.get_captured();
+		//assert(capture != 0);
+		//const int& capturing = newMove.get_moving_piece();// abs(position.board[newMove.get_from()]);
 
-		if (!shouldBeIgnored(position, newMove, capture, capturing)) {
+		//if (!shouldBeIgnored(position, newMove, capture, capturing)) {
 
 			Move_state ms;
 			position.make_move(newMove, ms);
@@ -239,7 +239,7 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 
 			}
 
-		}
+	//	}
 	}
 	return alpha;
 }
