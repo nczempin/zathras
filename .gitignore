@@ -24,8 +24,10 @@ output*.png
 #OS junk files
 [Tt]humbs.db
 *.DS_Store
-
+VTune*/
 #Visual Studio files
+*lastcodeanalysissucceeded
+.vs/
 *.pdb
 *.[Oo]bj
 *.user
