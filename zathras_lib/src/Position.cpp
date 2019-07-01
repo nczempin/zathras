@@ -140,6 +140,7 @@ namespace Positions {
 		string fen_board = split_fen[0];
 		vector<string> ranks = split(fen_board, '/');
 		int r = 7;
+		fill_n(position.board, 64, 0);
 		for (auto& rank : ranks) {
 			int f = 0;
 			for (auto& c : rank) {
@@ -152,50 +153,62 @@ namespace Positions {
 					case 'P':
 						set_square(f, r, position.pawns);
 						set_square(f, r, position.white);
+						position.board[f + r * 8] = Piece::WHITE_PAWN; //TODO encapsulate
 						break;
 					case 'N':
 						set_square(f, r, position.knights);
 						set_square(f, r, position.white);
+						position.board[f + r * 8] = Piece::WHITE_KNIGHT; //TODO encapsulate
 						break;
 					case 'B':
 						set_square(f, r, position.bishops);
 						set_square(f, r, position.white);
+						position.board[f + r * 8] = Piece::WHITE_BISHOP; //TODO encapsulate
 						break;
 					case 'R':
 						set_square(f, r, position.rooks);
 						set_square(f, r, position.white);
+						position.board[f + r * 8] = Piece::WHITE_ROOK; //TODO encapsulate
 						break;
 					case 'Q':
 						set_square(f, r, position.queens);
 						set_square(f, r, position.white);
+						position.board[f + r * 8] = Piece::WHITE_QUEEN; //TODO encapsulate
 						break;
 					case 'K':
 						set_square(f, r, position.kings);
 						set_square(f, r, position.white);
+						position.board[f + r * 8] = Piece::WHITE_KING; //TODO encapsulate
 						break;
 					case 'p':
 						set_square(f, r, position.pawns);
 						set_square(f, r, position.black);
+						position.board[f + r * 8] = Piece::BLACK_PAWN; //TODO encapsulate
 						break;
 					case 'n':
 						set_square(f, r, position.knights);
 						set_square(f, r, position.black);
+						position.board[f + r * 8] = Piece::BLACK_KNIGHT; //TODO encapsulate
 						break;
 					case 'b':
 						set_square(f, r, position.bishops);
 						set_square(f, r, position.black);
+						position.board[f + r * 8] = Piece::BLACK_BISHOP; //TODO encapsulate
 						break;
 					case 'r':
 						set_square(f, r, position.rooks);
 						set_square(f, r, position.black);
+						position.board[f + r * 8] = Piece::BLACK_ROOK; //TODO encapsulate
 						break;
 					case 'q':
 						set_square(f, r, position.queens);
 						set_square(f, r, position.black);
+						position.board[f + r * 8] = Piece::BLACK_QUEEN; //TODO encapsulate
 						break;
 					case 'k':
 						set_square(f, r, position.kings);
 						set_square(f, r, position.black);
+						position.board[f + r * 8] = Piece::BLACK_KING; //TODO encapsulate
 						break;
 					default:
 						cerr << "unknown symbol: " << c << endl;
@@ -267,7 +280,7 @@ namespace Positions {
 		return retval;
 	}
 
-	void Position::visualize_mailbox_board(const int board[64], ostream& stream) {
+	void Position::visualize_mailbox_board(const piece_t board[64], ostream& stream) {
 		stream << "  +-----------------+" << endl;
 		const char* symbols = ".PNBRQKpnbrqk*";
 		for (int i = 0; i < 8; ++i) {
@@ -282,7 +295,7 @@ namespace Positions {
 		stream << "    a b c d e f g h\n";
 
 	}
-	string Position::print_mailbox_board(const int board[64]) {
+	string Position::print_mailbox_board(const piece_t board[64]) {
 		string retval;
 		retval += "  +-----------------+\n";
 		const char* symbols = ".PNBRQKpnbrqk*";
@@ -313,7 +326,7 @@ namespace Positions {
 	void Position::print(ostream& stream) const {
 		// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 
-		int board[64];
+		piece_t board[64];
 		for (int i = 0; i < 64; ++i) {
 			board[i] = 0;
 		}
@@ -373,7 +386,7 @@ namespace Positions {
 		cout << endl;
 	}
 
-	void Position::mailbox_from_bitboard(int board[64]) const {
+	void Position::mailbox_from_bitboard(piece_t board[64]) const {
 		Bitboard::visit_bitboard(white & pawns, [&board](int x) {
 			board[x] = 1;
 			}
@@ -431,11 +444,12 @@ namespace Positions {
 	string Position::print_board() const {
 		// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 		string retval("");
-		int board[64];
+		piece_t mboard[64];
 		for (int i = 0; i < 64; ++i) {
-			board[i] = 0;
+			mboard[i] = 0;
 		}
-		mailbox_from_bitboard(board);
+		mailbox_from_bitboard(mboard);
+		retval += print_mailbox_board(mboard);
 		retval += print_mailbox_board(board);
 		retval += "wtm: " + to_string(white_to_move) + "\n";
 		retval += "\n";
@@ -476,7 +490,7 @@ namespace Positions {
 		return retval;
 	}
 
-	static constexpr bool determine_colour(int piece)  {
+	static constexpr bool determine_colour(int piece) {
 		return piece > 0; // makes == 0 black, deal with it
 	}
 
@@ -654,7 +668,8 @@ namespace Positions {
 		uint8_t from = move.get_from();
 		uint8_t to = move.get_to();
 		int8_t moving = get_piece_on(to);
-		
+
+
 		restore_en_passant_square(move_state);
 		white_to_move = !white_to_move;
 
@@ -667,22 +682,22 @@ namespace Positions {
 				clear_bit(white, to);
 				set_bit(pawns, from);
 				set_bit(white, from);
-/*
-				int8_t promoted_to = move.get_promoted_to();
-				if (promoted_to != 0) {*/
-				if (is_in_back_rank_black(to)){
+				/*
+								int8_t promoted_to = move.get_promoted_to();
+								if (promoted_to != 0) {*/
+				if (is_in_back_rank_black(to)) {
 					piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
 					un_promote(promoted_to, to);
 				}
 				else {
 					// handle capturing by e. p.
 					//TODO BIG TODO
-					/*if (move.is_en_passant_capture()) {
+					if (move_state.get_en_passant_square() == to) {
 						uint8_t target = to - 8;
 						set_bit(en_passant_square, to);
 						set_bit(pawns, target);
 						set_bit(black, target);
-					}*/
+					}
 
 				}
 				break;
@@ -750,19 +765,19 @@ namespace Positions {
 				set_bit(black, from);
 				//int8_t promoted_to = move.get_promoted_to();
 				//if (promoted_to != 0) {
-				if(is_in_back_rank_white(to)){
+				if (is_in_back_rank_white(to)) {
 					un_promote(Piece::BLACK_QUEEN, to);
 				}
 				else {
 					//TODO BIG TODO
 					// handle capturing by e. p.
-					//if (move.is_en_passant_capture()) {
-					//	uint8_t target = to + 8;
-					//	set_bit(en_passant_square, to);
-					//	set_bit(pawns, target);
-					//	set_bit(white, target);
-					//	//          cout << "unmade epcap to this: " << endl << (*this) << endl;
-					//}
+					if (move_state.get_en_passant_square() == to) {
+						uint8_t target = to + 8;
+						set_bit(en_passant_square, to);
+						set_bit(pawns, target);
+						set_bit(white, target);
+						//          cout << "unmade epcap to this: " << endl << (*this) << endl;
+					}
 				}
 			}
 
@@ -813,7 +828,7 @@ namespace Positions {
 				}
 				break;
 			default:
-				debugPosition(); 
+				debugPosition();
 				double error = ((double)moving);
 				cerr << "umm: unexpected black piece: " << error << endl;
 				throw - moving;
@@ -821,9 +836,12 @@ namespace Positions {
 			}
 		}
 
-		//TODOif (!move.is_en_passant_capture()) {
+		//BIG TODOif (!move.is_en_passant_capture()) {
 		{
-		int8_t captured = move_state.captured;// get_captured();
+			int8_t captured = move_state.captured;// get_captured();
+			board[from] = moving; //TODO encapsulate
+			board[to] = captured; //TODO encapsulate
+
 			if (captured != 0) {
 				//cout << "untaken: " << (int)captured << endl;
 				bool colour = determine_colour(captured);
@@ -912,7 +930,10 @@ namespace Positions {
 		const bb colour = side ? white : black;
 		const bb kpbb = kings & colour;
 		const uint8_t& king_pos = Bitboard::extract_square(kpbb);
-
+		if (king_pos > 64) {
+			debugPosition();
+			throw king_pos;
+		}
 		if (white_to_move) {
 			const bb white_knights = knights & white;
 			if (is_attacked_by_hopper(white_knights, Bitboard::knight_moves, king_pos)) {

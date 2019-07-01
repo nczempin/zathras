@@ -264,7 +264,7 @@ namespace Interface {
 
 		void static makeMove(Position& p, string moveString) {
 			Move& m = convert_move(moveString);
-			int board[64];
+			piece_t board[64];
 			for (int i = 0; i < 64; ++i) {
 				board[i] = 0;
 			}

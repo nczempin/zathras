@@ -66,6 +66,9 @@ namespace Positions {
 
 		}
 		piece_t get_piece_on(square_t sq) {
+			return board[sq];
+
+			//TODO all the rest is obsolete
 			piece_t retval = 0;
 
 			if (is_set_square(white, sq)) {
@@ -88,7 +91,7 @@ namespace Positions {
 					retval = Piece::WHITE_KING;
 				}
 			}
-			else {
+			else if (is_set_square(black, sq)) {
 				if (is_set_square(pawns, sq)) {
 					retval = Piece::BLACK_PAWN;
 				}
@@ -108,7 +111,10 @@ namespace Positions {
 					retval = Piece::BLACK_KING;
 				}
 			}
-			
+			else {
+				// empty, stays 0
+			}
+
 			return retval;
 		}
 		friend ostream& operator<<(ostream& stream, const Position& position);
@@ -128,11 +134,11 @@ namespace Positions {
 		static void clear_bit(bb& bs, uint8_t to);
 		static void set_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
 		static void clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
-		static string print_mailbox_board(const int board[64]);
+		static string print_mailbox_board(const piece_t board[64]);
 
 		static void visualize_bitboard(bb my_bb, ostream& stream);
 		static string print_bitboard(bb my_bb);
-		static void visualize_mailbox_board(const int board[64], ostream& stream);
+		static void visualize_mailbox_board(const piece_t board[64], ostream& stream);
 		static void visit_mailbox_board(const int board[64], void (*visitor)(int)); // TODO convert to c++11
 
 		static Position create_position(const string& fen);
@@ -152,10 +158,11 @@ namespace Positions {
 		bitset<4> castling;
 		bool white_to_move = true; //TODO public for now
 
-		void mailbox_from_bitboard(int board[64]) const;
+		void mailbox_from_bitboard(piece_t board[64]) const;
 
 		void debugPosition();
 	private:
+		piece_t board[64]; //TODO use std::array
 
 		static string extract_row_string(uint_fast8_t row, string set);
 		static void display_all_moves(const bitboard_set& moves);
@@ -176,6 +183,8 @@ namespace Positions {
 
 		template<bool white_or_not> void make_move_for_colour(const uint8_t& from, const uint8_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
 			{
+				board[from] = 0; //TODO encapsulate
+				board[to] = moving; //TODO encapsulate
 				if (white_or_not) {
 					clear_bit(white, from);
 					set_bit(white, to);
@@ -193,8 +202,7 @@ namespace Positions {
 					switch (moving) {
 					case Piece::WHITE_PAWN: {
 						clear_bit(pawns, from);
-						/*int8_t promoted_to = move.get_promoted_to();
-						if (promoted_to != 0) {*/
+
 						if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
 							promote(Piece::WHITE_QUEEN, to);
 						}
@@ -202,7 +210,7 @@ namespace Positions {
 							set_bit(pawns, to);
 							// handle capturing by e. p.
 							int target = to - 8;
-							if (false /*&& move.is_en_passant_capture()*/) { // en passant capture //TODO
+							if (get_piece_on(to) == 0) { // en passant capture
 								clear_bit(pawns, target);
 								clear_bit(black, target);
 							}
@@ -230,6 +238,7 @@ namespace Positions {
 					case Piece::WHITE_KING:
 						if (to == from - 2) { //queenside castle
 							update_bits(white, rooks, 0, 3);//TODO constants, not magics
+
 						}
 						else if (from == to - 2) { // kingside castle
 							update_bits(white, rooks, 7, 5);//TODO constants, not magics
@@ -261,12 +270,12 @@ namespace Positions {
 							// handle capturing by e. p.
 							int target = to + 8;
 
-							//TODO
-							//if (move.is_en_passant_capture()) { // en passant capture
-							//	clear_bit(pawns, target);
-							//	clear_bit(white, target);
-							//}
-							/*else*/ {
+							
+							if (get_piece_on(to) == 0) { // en passant capture
+								clear_bit(pawns, target);
+								clear_bit(white, target);
+							}
+							else {
 								// handle double step preparing the e. p.
 								save_en_passant_square(move_state);
 								if (to - from == -16) {
