@@ -19,7 +19,7 @@ namespace Positions {
 		Bitboard()noexcept;
 		virtual ~Bitboard();
 
-		static void visit_bitboard(const bb my_bb, const square_visitor f);
+		static void visit_bitboard(const bb my_bb, const square_visitor& f);
 
 		static uint8_t ffs_software(const bb& my_bb)noexcept {
 			if (my_bb == 0) {

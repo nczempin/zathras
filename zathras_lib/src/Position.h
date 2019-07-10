@@ -295,7 +295,7 @@ namespace Positions {
 					case Piece::BLACK_BISHOP:
 					case Piece::BLACK_QUEEN:
 					{
-						bb& pbb = piece_bb[-moving - 1];
+					    bb& pbb = piece_bb[-moving - 1];
 						set_bit(pbb, to);
 						clear_bit(pbb, from);
 						save_en_passant_square(move_state);

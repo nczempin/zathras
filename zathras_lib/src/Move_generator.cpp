@@ -305,10 +305,38 @@ namespace Moves {
 
 		return captured;
 	}
+	bool Move_generator::has_captured_piece(uint8_t square, int8_t moving) {
 
-	void Move_generator::visit_capture_moves(const bb& sub_position,
-		const bitboard_set& all_moves, const move_visitor& f,
-		const bb& other_colour, const int8_t& moving) {
+//		const bb pieces = p->pawns | p->knights | p->bishops | p->rooks | p->queens | p->kings;
+
+	/*	if (Position::is_set_square(pieces, square)) {
+			return true;
+		}*/
+		if (Position::is_set_square(p->black|p->white, square)) { //black
+			return true;
+		}
+
+		if (p->en_passant_square != 0) {
+			Bitboard::visit_bitboard(p->en_passant_square,
+				[ &square, &moving](uint8_t en_passant_capture_square) {
+					if (square == en_passant_capture_square) {
+						if (moving == Piece::BLACK_PAWN) {
+							return true;
+						}
+						if (moving == Piece::WHITE_PAWN && en_passant_capture_square > 31) { // in black half, must be black pawn
+							return true;
+						}
+					}
+					return false;
+				});
+			return false;
+		}
+
+
+		return false;
+	}
+
+	void Move_generator::visit_capture_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& other_colour, const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
 			const uint8_t from = Bitboard::extract_and_remove_square(position);
@@ -320,8 +348,7 @@ namespace Moves {
 			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
-				int8_t captured = find_captured_piece(to, moving);
-				f(moving, from, to, captured, 0);
+				f(from, to );
 			}
 		}
 	}
@@ -344,28 +371,28 @@ namespace Moves {
 			}
 			while (moves != 0x00) {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
-				int8_t captured = find_captured_piece(to, moving);
-				if (captured != 0) {
+				int8_t captured = has_captured_piece(to, moving);
+				if (captured) {
 					if (to >= 56) { // promoting white pawn
-						f(moving, from, to, captured, Piece::WHITE_QUEEN);
+						f(from, to);
 						//TODO switch subpromotions on/off here
-						f(moving, from, to, captured, Piece::WHITE_ROOK);
+	/*					f(moving, from, to, captured, Piece::WHITE_ROOK);
 						f(moving, from, to, captured, Piece::WHITE_BISHOP);
-						f(moving, from, to, captured, Piece::WHITE_KNIGHT);
+						f(moving, from, to, captured, Piece::WHITE_KNIGHT);*/
 						// end switch subpromotions on/off
 
 					}
 					else if (to <= 7) { // promoting black pawn
-						f(moving, from, to, captured, Piece::BLACK_QUEEN);
+						f(from, to);
 						//TODO switch subpromotions on/off here
-						f(moving, from, to, captured, Piece::BLACK_ROOK);
-						f(moving, from, to, captured, Piece::BLACK_BISHOP);
-						f(moving, from, to, captured, Piece::BLACK_KNIGHT);
+						//f(moving, from, to, captured, Piece::BLACK_ROOK);
+						//f(moving, from, to, captured, Piece::BLACK_BISHOP);
+						//f(moving, from, to, captured, Piece::BLACK_KNIGHT);
 						// end switch subpromotions on/off
 
 					}
 					else {
-						f(moving, from, to, captured, 0);
+						f(from, to);
 					}
 				}
 			}
@@ -385,7 +412,7 @@ namespace Moves {
 			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
-				f(moving, from, to, 0, 0);
+				f(from, to);
 			}
 		}
 	}
@@ -491,7 +518,7 @@ namespace Moves {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
 				bool b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
-					f(moving, from, to, 0, 0);
+					f(from, to);
 				}
 			}
 		}
@@ -508,8 +535,8 @@ namespace Moves {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
 				bool b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
-					int8_t captured = find_captured_piece(to, moving);
-					f(moving, from, to, captured, 0);
+					//int8_t captured = find_captured_piece(to, moving);
+					f(from, to);
 				}
 			}
 		}
@@ -522,7 +549,7 @@ namespace Moves {
 			[&all_moves, &f, &moving](uint8_t x) {
 				Bitboard::visit_bitboard(all_moves[x], [&x, &f, &moving](uint8_t y) {
 					int8_t captured = -98;
-					f(moving, x, y, captured, 0); //TODO get the captured piece from somewhere
+					f(x, y);
 					});
 
 			});
@@ -561,25 +588,25 @@ namespace Moves {
 			while (moves != 0x00) {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
 				if (to >= 56) { // promoting white pawn
-					f(moving, from, to, 0, Piece::WHITE_QUEEN);
+					f(from, to);
 					//TODO switch subpromotions on/off here
-					f(moving, from, to, 0, Piece::WHITE_ROOK);
+					/*f(moving, from, to, 0, Piece::WHITE_ROOK);
 					f(moving, from, to, 0, Piece::WHITE_BISHOP);
-					f(moving, from, to, 0, Piece::WHITE_KNIGHT);
+					f(moving, from, to, 0, Piece::WHITE_KNIGHT);*/
 					// end switch subpromotions on/off
 
 				}
 				else if (to <= 7) { // promoting black pawn
-					f(moving, from, to, 0, Piece::BLACK_QUEEN);
+					f(from, to);
 					//TODO switch subpromotions on/off here
-					f(moving, from, to, 0, Piece::BLACK_ROOK);
-					f(moving, from, to, 0, Piece::BLACK_BISHOP);
-					f(moving, from, to, 0, Piece::BLACK_KNIGHT);
+					//f(moving, from, to, 0, Piece::BLACK_ROOK);
+					//f(moving, from, to, 0, Piece::BLACK_BISHOP);
+					//f(moving, from, to, 0, Piece::BLACK_KNIGHT);
 					// end switch subpromotions on/off
 
 				}
 				else {
-					f(moving, from, to, 0, 0);
+					f(from, to);
 				}
 			}
 		}
@@ -624,7 +651,9 @@ namespace Moves {
 		}
 		p->white_to_move = !p->white_to_move;
 
-		f(piece, king_square, king_square + direction * 2, 0, 0);
+		//f(piece, king_square, king_square + direction * 2, 0, 0);
+		f(king_square, king_square + direction * 2);
+
 	}
 
 	void Move_generator::generate_castling(const move_visitor& f,
@@ -664,11 +693,11 @@ namespace Moves {
 	}
 
 	void Move_generator::add_non_capture_ray_moves(Move_container& moves,
-		const int8_t piece, bb position, const bitboard_set& pieceMoves,
+		const int8_t& piece, bb position, const bitboard_set& pieceMoves,
 		const bb& occupied) {
 		while (position != 0) {
-			const uint8_t from = Bitboard::extract_and_remove_square(position);
-			const bb raw_moves = pieceMoves[from]; //TODO potential bug flagged here: "C28020: The expression '0<=_Param_(1)&&_Param_(1)<=64-1' is not true at this call."
+			const uint8_t& from = Bitboard::extract_and_remove_square(position);
+			const bb& raw_moves = pieceMoves[from]; //TODO potential bug flagged here: "C28020: The expression '0<=_Param_(1)&&_Param_(1)<=64-1' is not true at this call."
 			bb moves_bb = raw_moves & ~occupied;
 			while (moves_bb != 0x00) {
 				const uint8_t& to = Bitboard::extract_and_remove_square(moves_bb);
@@ -726,9 +755,9 @@ namespace Moves {
 		//moves.reserve(35);
 		moves.reset();
 		const move_visitor& f =
-			[&moves, this](const int8_t& moving, const uint8_t& from, const uint8_t& to, const int8_t& captured, const int8_t& promoted_to) {
+			[&moves]( const uint8_t& from, const uint8_t& to) {
 
-			bool en_passant_capture = will_be_en_passant(to, moving);
+			//bool en_passant_capture = will_be_en_passant(to, moving);
 			//moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
 			moves.add_move(from, to);
 		};
@@ -759,7 +788,7 @@ namespace Moves {
 			visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black, Piece::WHITE_ROOK);
 			visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, p->black, Piece::WHITE_BISHOP);
 			visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black, Piece::WHITE_QUEEN);
-			add_non_capture_ray_moves(moves, Piece::Piece::WHITE_BISHOP, white_bishops, Bitboard::bishop_moves, occupied);
+			add_non_capture_ray_moves(moves, Piece::WHITE_BISHOP, white_bishops, Bitboard::bishop_moves, occupied);
 			add_non_capture_ray_moves(moves, Piece::WHITE_QUEEN, white_queens, Bitboard::bishop_moves, occupied);
 			generate_castling(f, true);
 			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
@@ -777,7 +806,7 @@ namespace Moves {
 			visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white, Piece::BLACK_ROOK);
 			visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, p->white, Piece::BLACK_BISHOP);
 			visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white, Piece::BLACK_QUEEN);
-			add_non_capture_ray_moves(moves, Piece::Piece::BLACK_BISHOP, black_bishops, Bitboard::bishop_moves, occupied);
+			add_non_capture_ray_moves(moves, Piece::BLACK_BISHOP, black_bishops, Bitboard::bishop_moves, occupied);
 			add_non_capture_ray_moves(moves, Piece::BLACK_QUEEN, black_queens, Bitboard::bishop_moves, occupied);
 
 			generate_castling(f, false);
@@ -794,9 +823,9 @@ namespace Moves {
 		//moves.reserve(35);
 		moves.reset();
 		const move_visitor& f =
-			[&moves, this](const int8_t& moving, const uint8_t& from, const uint8_t& to, const int8_t& captured, const int8_t& promoted_to) {
+			[&moves](const uint8_t& from, const uint8_t& to) {
 
-			bool en_passant_capture = will_be_en_passant(to, moving);
+//			bool en_passant_capture = will_be_en_passant(to, moving);
 //			moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
 			moves.add_move(from, to);
 		};

@@ -94,6 +94,7 @@ namespace Moves {
 			bitset<64> & bbs);
 		static int clear_square(int file_to, int rank_to, bitset<64> & bbs);
 		int8_t find_captured_piece(uint8_t square, int8_t moving);
+		bool has_captured_piece(uint8_t square, int8_t moving);
 		void generate_castling(const move_visitor& f, bool white);
 		bool is_attacked(const uint8_t& square);
 		void attempt_castle(const move_visitor f, const int8_t piece,
@@ -104,9 +105,8 @@ namespace Moves {
 		bool is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves,
 			const uint8_t square, bool side_to_move);
 		bool will_be_en_passant(uint8_t to, int8_t moving);
-		void add_non_capture_ray_moves(Move_container& moves, const int8_t piece,
-			bb position, const bitboard_set& pieceMoves, const bb& occupied);
 
+		void add_non_capture_ray_moves(Move_container& moves, const int8_t& piece, bb position, const bitboard_set& pieceMoves, const bb& occupied);
 
 
 
