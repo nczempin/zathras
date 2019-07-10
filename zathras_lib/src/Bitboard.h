@@ -37,7 +37,7 @@ namespace Positions {
 		inline static uint8_t ffs(const bb& my_bb) {
 			return __builtin_ffsll(my_bb);
 		}
-#elif defined(_WIN64) && (_MSC_VER >= 1500)
+#elif defined(_WIN64) && (_MSC_VER >= 1500) 
 		inline static uint8_t ffs(const bb& my_bb)noexcept {
 			unsigned long index;
 			const bool isNonZero = _BitScanForward64(&index, my_bb);

@@ -130,8 +130,9 @@ namespace Positions {
 		static void set_square(bb& bs, uint8_t to);
 		static bool is_set_square(bb bs, uint8_t to);
 		static void clear_square(bb& bs, uint8_t to);
-		static void set_bit(bb& bs, uint8_t to);
-		static void clear_bit(bb& bs, uint8_t to);
+		static void set_bit(bb& bs, const uint8_t& to);
+		static void preset_bit(bb& bs, const uint8_t& to);
+		static void clear_bit(bb& bs, const uint8_t& to);
 		static void set_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
 		static void clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
 		static string print_mailbox_board(const piece_t board[64]);
@@ -163,6 +164,7 @@ namespace Positions {
 		void debugPosition();
 	private:
 		piece_t board[64]; //TODO use std::array
+		static bb squares[64];
 
 		static string extract_row_string(uint_fast8_t row, string set);
 		static void display_all_moves(const bitboard_set& moves);
@@ -178,7 +180,6 @@ namespace Positions {
 		static bb between[BETWEEN_ARRAY_SIZE];
 		inline static uint16_t calc_index(const uint8_t& x, const uint8_t& y) {
 			return x + 64 * y;
-			//return x>y ? ind(x,y):ind(y,x);
 		}
 
 		template<bool white_or_not> void make_move_for_colour(const uint8_t& from, const uint8_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
@@ -188,11 +189,6 @@ namespace Positions {
 				if (white_or_not) {
 					clear_bit(white, from);
 					set_bit(white, to);
-					/*if (moving <= 0) {
-						cout << this->print_board() << endl;
-						cout << move.to_string() << endl;
-					}*/
-					//assert(moving > 0);
 					bb& pbb = piece_bb[moving - 1];
 					set_bit(pbb, to);
 					clear_bit(pbb, from);
@@ -225,7 +221,16 @@ namespace Positions {
 						}
 						break;
 					}
-					case Piece::WHITE_ROOK:
+					case Piece::WHITE_KNIGHT:
+					case Piece::WHITE_BISHOP:
+					case Piece::WHITE_QUEEN:
+					{
+						bb& pbb = piece_bb[moving - 1];
+						set_bit(pbb, to);
+						clear_bit(pbb, from);
+						save_en_passant_square(move_state);
+						break;
+					}case Piece::WHITE_ROOK:
 						if (from == 7 && castling[0]) { // H1 //TODO
 							castling[0] = false;
 							move_state.set_cleared_kingside_castling(true);
