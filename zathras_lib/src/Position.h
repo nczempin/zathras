@@ -51,18 +51,18 @@ namespace Positions {
 		void unmake_move(const Move& move, const Move_state& move_state);
 
 		bool is_in_check(const bool side);
-		static bool is_attacked_by_hopper(const bb& movers, const bitboard_set& all_moves, const uint8_t& square);
-		static bool is_check_from_slider(const bitboard_set& sliding_moves, const uint8_t& king_pos, const bb& slider, const bb& occupied);
+		static bool is_attacked_by_hopper(const bb& movers, const bitboard_set& all_moves, const square_t& square);
+		static bool is_check_from_slider(const bitboard_set& sliding_moves, const square_t& king_pos, const bb& slider, const bb& occupied);
 
-		static bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const uint8_t& square, const bb& occupied);
-		static bool is_anything_between(uint8_t from, uint8_t to, const bb& occupied);
+		static bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
+		static bool is_anything_between(square_t from, square_t to, const bb& occupied);
 
 		//TODO template
 		static bool is_in_back_rank_black(square_t square) {
-			return Square::A8 <= square && square <= Square::H8;
+			return Squares::A8 <= square && square <= Squares::H8;
 		}
 		static bool is_in_back_rank_white(square_t square) {
-			return Square::A1 <= square && square <= Square::H1;
+			return Squares::A1 <= square && square <= Squares::H1;
 
 		}
 		piece_t get_piece_on(square_t sq) {
@@ -125,14 +125,14 @@ namespace Positions {
 		static vector<string> split(const string& s, char delim);
 
 		//TODO move; probably to Square class
-		static void set_square(bitset<64> & bs, uint8_t to);
-		static void clear_square(bitset<64> & bs, uint8_t to);
-		static void set_square(bb& bs, uint8_t to);
-		static bool is_set_square(bb bs, uint8_t to);
-		static void clear_square(bb& bs, uint8_t to);
-		static void set_bit(bb& bs, const uint8_t& to);
-		static void preset_bit(bb& bs, const uint8_t& to);
-		static void clear_bit(bb& bs, const uint8_t& to);
+		static void set_square(bitset<64> & bs, square_t to);
+		static void clear_square(bitset<64> & bs, square_t to);
+		static void set_square(bb& bs, square_t to);
+		static bool is_set_square(bb bs, square_t to);
+		static void clear_square(bb& bs, square_t to);
+		static void set_bit(bb& bs, const square_t& to);
+		static void preset_bit(bb& bs, const square_t& to);
+		static void clear_bit(bb& bs, const square_t& to);
 		static void set_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
 		static void clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
 		static string print_mailbox_board(const piece_t board[64]);
@@ -168,12 +168,12 @@ namespace Positions {
 
 		static string extract_row_string(uint_fast8_t row, string set);
 		static void display_all_moves(const bitboard_set& moves);
-		void update_bits(bb& colour, bb& piece, uint8_t clear, uint8_t set);
+		void update_bits(bb& colour, bb& piece, square_t clear, square_t set);
 		void save_en_passant_square(Move_state& move_state);
 		void restore_en_passant_square(const Move_state& move_state);
-		void promote(int8_t promoted_to, uint8_t to);
-		void un_promote(int8_t promoted_to, uint8_t to);
-		void handleCapture(const uint8_t& to, const int8_t& taken, Move_state& move_state);
+		void promote(int8_t promoted_to, square_t to);
+		void un_promote(int8_t promoted_to, square_t to);
+		void handleCapture(const square_t& to, const int8_t& taken, Move_state& move_state);
 
 
 	public:
@@ -182,7 +182,7 @@ namespace Positions {
 			return x + 64 * y;
 		}
 
-		template<bool white_or_not> void make_move_for_colour(const uint8_t& from, const uint8_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
+		template<bool white_or_not> void make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
 			{
 				board[from] = 0; //TODO encapsulate
 				board[to] = moving; //TODO encapsulate
@@ -192,7 +192,7 @@ namespace Positions {
 					bb& pbb = piece_bb[moving - 1];
 					set_bit(pbb, to);
 					clear_bit(pbb, from);
-					
+
 					switch (moving) {
 					case Piece::WHITE_PAWN: {
 						//clear_bit(pawns, from);
@@ -205,7 +205,7 @@ namespace Positions {
 						else {
 							//set_bit(pawns, to);
 							// handle capturing by e. p.
-							int target = to - 8;
+							square_t target = square_t(to - 8);
 							if (get_piece_on(to) == 0) { // en passant capture
 								clear_bit(pawns, target);
 								clear_bit(black, target);
@@ -225,7 +225,7 @@ namespace Positions {
 					case Piece::WHITE_BISHOP:
 					case Piece::WHITE_QUEEN:
 					{
-						
+
 						save_en_passant_square(move_state);
 						break;
 					}case Piece::WHITE_ROOK:
@@ -241,11 +241,11 @@ namespace Positions {
 						break;
 					case Piece::WHITE_KING:
 						if (to == from - 2) { //queenside castle
-							update_bits(white, rooks, 0, 3);//TODO constants, not magics
+							update_bits(white, rooks, A1, C1);//TODO constants, not magics
 
 						}
 						else if (from == to - 2) { // kingside castle
-							update_bits(white, rooks, 7, 5);//TODO constants, not magics
+							update_bits(white, rooks, H1, F1);//TODO constants, not magics
 						}
 						if (castling[0]) {
 							move_state.set_cleared_kingside_castling(true);
@@ -276,11 +276,11 @@ namespace Positions {
 //							promote(Piece::BLACK_QUEEN, to); // TODO underpromote
 						}
 						else {
-							
-							// handle capturing by e. p.
-							int target = to + 8;
 
-							
+							// handle capturing by e. p.
+							square_t target = square_t( to + 8);
+
+
 							if (get_piece_on(to) == 0) { // en passant capture
 								clear_bit(pawns, target);
 								clear_bit(white, target);
@@ -300,12 +300,12 @@ namespace Positions {
 					case Piece::BLACK_BISHOP:
 					case Piece::BLACK_QUEEN:
 					{
-					    
+
 						save_en_passant_square(move_state);
 						break;
 					}
 					case Piece::BLACK_ROOK:
-						
+
 						if (from == 63 && castling[2]) { // H8 //TODO
 							move_state.set_cleared_kingside_castling(true);
 							castling[2] = false;
@@ -317,12 +317,12 @@ namespace Positions {
 						save_en_passant_square(move_state);
 						break;
 					case Piece::BLACK_KING:
-						
+
 						if (to == from - 2) { //queenside castle
-							update_bits(black, rooks, 56, 59);//TODO constants, not magics
+							update_bits(black, rooks, A8, C8);//TODO constants, not magics
 						}
 						else if (from == to - 2) { // kingside castle
-							update_bits(black, rooks, 63, 61);//TODO constants, not magics
+							update_bits(black, rooks, H8, F8);//TODO constants, not magics
 						}
 						if (castling[2]) {
 							move_state.set_cleared_kingside_castling(true);

@@ -29,7 +29,7 @@ namespace Moves {
 		uint8_t y = 0;
 		for (uint8_t i = 0; i < 64; ++i) {
 			for (uint8_t j = 0; j < 64; ++j) {
-				bb poss = possibly_between_pre(i, j);
+				bb poss = possibly_between_pre(square_t(i), square_t(j)); // TODO: more cleanly handle the uint8_t vs. square_t (enum)
 				y = i;
 				x = j;
 				size_t index = Position::calc_index(x, y);
@@ -45,13 +45,13 @@ namespace Moves {
 	void Move_generator::set_square(const int& file_to, const int& rank_to,
 		bitset<64> & bbs) {
 		const unsigned int to_twisted = 7 - file_to + rank_to * 8;
-		Position::set_square(bbs, to_twisted);
+		Position::set_square(bbs, square_t(to_twisted));
 	}
 
 	int Move_generator::clear_square(int file_to, int rank_to, bitset<64> & bbs) {
 		int to_twisted = 7 - file_to + rank_to * 8;
 		int to = file_to + rank_to * 8;
-		Position::clear_square(bbs, to_twisted);
+		Position::clear_square(bbs, square_t(to_twisted));
 		return to;
 	}
 
@@ -251,7 +251,7 @@ namespace Moves {
 	//		}, position.is_white_to_move());
 	//}
 
-	int8_t Move_generator::find_captured_piece(uint8_t square, int8_t moving) {
+	int8_t Move_generator::find_captured_piece(square_t square, int8_t moving) {
 		//cout << "looking for captured piece at: " << y << endl;
 		int8_t captured = 0;
 		if (Position::is_set_square(p->pawns, square)) {
@@ -305,20 +305,20 @@ namespace Moves {
 
 		return captured;
 	}
-	bool Move_generator::has_captured_piece(uint8_t square, int8_t moving) {
+	bool Move_generator::has_captured_piece(square_t square, int8_t moving) {
 
-//		const bb pieces = p->pawns | p->knights | p->bishops | p->rooks | p->queens | p->kings;
+		//		const bb pieces = p->pawns | p->knights | p->bishops | p->rooks | p->queens | p->kings;
 
-	/*	if (Position::is_set_square(pieces, square)) {
-			return true;
-		}*/
-		if (Position::is_set_square(p->black|p->white, square)) { //black
+			/*	if (Position::is_set_square(pieces, square)) {
+					return true;
+				}*/
+		if (Position::is_set_square(p->black | p->white, square)) { //black
 			return true;
 		}
 
 		if (p->en_passant_square != 0) {
 			Bitboard::visit_bitboard(p->en_passant_square,
-				[ &square, &moving](uint8_t en_passant_capture_square) {
+				[&square, &moving](square_t en_passant_capture_square) {
 					if (square == en_passant_capture_square) {
 						if (moving == Piece::BLACK_PAWN) {
 							return true;
@@ -339,7 +339,7 @@ namespace Moves {
 	void Move_generator::visit_capture_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& other_colour, const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
-			const uint8_t from = Bitboard::extract_and_remove_square(position);
+			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO handle cast better
 			if (from == 255) {
 				break; //TODO
 			}
@@ -347,8 +347,8 @@ namespace Moves {
 			bb moves = raw_moves & other_colour;
 			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
-				uint8_t to = Bitboard::extract_and_remove_square(moves);
-				f(from, to );
+				square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO handle cast better
+				f(from, to);
 			}
 		}
 	}
@@ -358,7 +358,7 @@ namespace Moves {
 		const bb& other_colour, const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
-			const uint8_t from = Bitboard::extract_and_remove_square(position);
+			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO handle cast better
 			const bb raw_moves = all_moves[from];
 			bb moves = raw_moves & other_colour;
 
@@ -370,7 +370,7 @@ namespace Moves {
 				//TODO: for e.p. capture we know the captured piece is opposing pawn
 			}
 			while (moves != 0x00) {
-				uint8_t to = Bitboard::extract_and_remove_square(moves);
+				square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO handle cast better
 				int8_t captured = has_captured_piece(to, moving);
 				if (captured) {
 					if (to >= 56) { // promoting white pawn
@@ -412,7 +412,7 @@ namespace Moves {
 			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
-				f(from, to);
+				f(square_t(from), square_t(to)); //TODO
 			}
 		}
 	}
@@ -444,13 +444,13 @@ namespace Moves {
 		return 0;
 	}
 
-	bb Move_generator::possibly_between_pre(const uint8_t& x, const uint8_t& y) {
+	bb Move_generator::possibly_between_pre(const square_t& x, const square_t& y) {
 		if (x == y) {
 			return false;
 		}
 		//TODO this can be done much more elegantly and much more efficiently
-		uint8_t smaller = x;
-		uint8_t larger = y;
+		uint8_t smaller = uint8_t(x); // TODO proper cast
+		uint8_t larger = uint8_t(y); // TODO proper cast
 		if (y < x) {
 			smaller = y;
 			larger = x;
@@ -511,11 +511,11 @@ namespace Moves {
 		const bb& occupied, const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
-			const uint8_t from = Bitboard::extract_and_remove_square(position);
+			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO proper cast
 			const bb raw_moves = all_moves[from];
 			bb moves = raw_moves & ~occupied;
 			while (moves != 0x00) {
-				uint8_t to = Bitboard::extract_and_remove_square(moves);
+				square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO proper cast
 				bool b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
 					f(from, to);
@@ -528,11 +528,11 @@ namespace Moves {
 		const bb& occupied, const bb& other_colour, const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
-			const uint8_t from = Bitboard::extract_and_remove_square(position);
+			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO proper cast
 			const bb raw_moves = all_moves[from];
 			bb moves = raw_moves & other_colour;
 			while (moves != 0x00) {
-				uint8_t to = Bitboard::extract_and_remove_square(moves);
+				square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO proper cast
 				bool b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
 					//int8_t captured = find_captured_piece(to, moving);
@@ -546,8 +546,8 @@ namespace Moves {
 		const bitboard_set all_moves, move_visitor f, int8_t moving) {
 
 		Bitboard::visit_bitboard(sub_position,
-			[&all_moves, &f, &moving](uint8_t x) {
-				Bitboard::visit_bitboard(all_moves[x], [&x, &f, &moving](uint8_t y) {
+			[&all_moves, &f, &moving](square_t x) {
+				Bitboard::visit_bitboard(all_moves[x], [&x, &f, &moving](square_t y) {
 					int8_t captured = -98;
 					f(x, y);
 					});
@@ -582,11 +582,11 @@ namespace Moves {
 		const bb& occupied, const int8_t& moving, const bool& white_to_move) {
 		bb position = sub_position;
 		while (position != 0) {
-			const uint8_t from = Bitboard::extract_and_remove_square(position);
+			const square_t from = square_t(Bitboard::extract_and_remove_square(position));
 			bb moves = filter_occupied_squares(white_to_move, occupied, all_moves,
 				from);
 			while (moves != 0x00) {
-				uint8_t to = Bitboard::extract_and_remove_square(moves);
+				square_t to = square_t(Bitboard::extract_and_remove_square(moves));
 				if (to >= 56) { // promoting white pawn
 					f(from, to);
 					//TODO switch subpromotions on/off here
@@ -613,10 +613,10 @@ namespace Moves {
 	}
 
 	void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
-		const uint8_t king_square, const int8_t direction) {
+		const square_t king_square, const int8_t direction) {
 		//1. check if squares between king and rook are free.
-		uint8_t next_square = king_square + direction;
-		uint8_t target_square = king_square + direction * 2;
+		square_t next_square = square_t(uint8_t(king_square) + direction); //TODO proper cast
+		square_t target_square = square_t(uint8_t(king_square) + direction * 2);//TODO proper cast
 
 		if (p->is_set_square(p->white | p->black, next_square)) {
 			return;
@@ -625,7 +625,7 @@ namespace Moves {
 			return;
 		}
 		if (direction == -1) { // queen side
-			if (p->is_set_square(p->white | p->black, target_square - 1)) { // b1/b8
+			if (p->is_set_square(p->white | p->black, square_t(target_square - 1))) { // b1/b8
 				return;
 			}
 
@@ -652,17 +652,17 @@ namespace Moves {
 		p->white_to_move = !p->white_to_move;
 
 		//f(piece, king_square, king_square + direction * 2, 0, 0);
-		f(king_square, king_square + direction * 2);
+		f(king_square, square_t(uint8_t(king_square) + direction * 2));
 
 	}
 
 	void Move_generator::generate_castling(const move_visitor& f,
 		bool white_to_move) {
 		int8_t piece = Piece::WHITE_KING;
-		uint8_t king_square = Square::E1;
+		square_t king_square = Squares::E1;
 		if (!white_to_move) {
 			piece = Piece::BLACK_KING;
-			king_square = Square::E8;
+			king_square = Squares::E8;
 		}
 		static int8_t king_jump_direction[] = { 1, -1, 1, -1 };
 		static bool colour[] = { true, true, false, false };
@@ -673,7 +673,7 @@ namespace Moves {
 		}
 	}
 	void Move_generator::f(Move_container& moves, const int8_t moving,
-		const uint8_t from, const uint8_t to, const int8_t captured,
+		const square_t from, const square_t to, const int8_t captured,
 		const int8_t promoted_to) {
 		//bool en_passant_capture = will_be_en_passant(to, moving);
 
@@ -681,7 +681,7 @@ namespace Moves {
 		moves.add_move(from, to);
 	}
 
-	bool Move_generator::will_be_en_passant(uint8_t to, int8_t moving) {
+	bool Move_generator::will_be_en_passant(square_t to, int8_t moving) {
 		bool en_passant_capture = false;
 		if (Position::is_set_square(p->en_passant_square, to)) {
 			if ((moving == Piece::WHITE_PAWN && to > 31)
@@ -696,11 +696,11 @@ namespace Moves {
 		const int8_t& piece, bb position, const bitboard_set& pieceMoves,
 		const bb& occupied) {
 		while (position != 0) {
-			const uint8_t& from = Bitboard::extract_and_remove_square(position);
+			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));  //TODO cast
 			const bb& raw_moves = pieceMoves[from]; //TODO potential bug flagged here: "C28020: The expression '0<=_Param_(1)&&_Param_(1)<=64-1' is not true at this call."
 			bb moves_bb = raw_moves & ~occupied;
 			while (moves_bb != 0x00) {
-				const uint8_t& to = Bitboard::extract_and_remove_square(moves_bb);
+				const square_t& to = square_t(Bitboard::extract_and_remove_square(moves_bb));  //TODO cast
 				const bool& b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
 					//moves.add_move(piece, from, to, 0, false, 0);
@@ -755,7 +755,7 @@ namespace Moves {
 		//moves.reserve(35);
 		moves.reset();
 		const move_visitor& f =
-			[&moves]( const uint8_t& from, const uint8_t& to) {
+			[&moves](const square_t& from, const square_t& to) {
 
 			//bool en_passant_capture = will_be_en_passant(to, moving);
 			//moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
@@ -823,10 +823,10 @@ namespace Moves {
 		//moves.reserve(35);
 		moves.reset();
 		const move_visitor& f =
-			[&moves](const uint8_t& from, const uint8_t& to) {
+			[&moves](const square_t& from, const square_t& to) {
 
-//			bool en_passant_capture = will_be_en_passant(to, moving);
-//			moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
+			//			bool en_passant_capture = will_be_en_passant(to, moving);
+			//			moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
 			moves.add_move(from, to);
 		};
 		//TODO generalize, obviously
@@ -885,16 +885,17 @@ namespace Moves {
 		return moves;
 	}
 	bool Move_generator::is_attacked_by_slider(bb position,
-		const bitboard_set& all_moves, const uint8_t& square,
+		const bitboard_set& all_moves, const square_t& square,
 		const bb& occupied) {
+		//TODO, BIG TODO: all this stuff is incredibly repetitive and should really be done with templates.
 		while (position != 0) {
-			const uint8_t& from = Bitboard::extract_and_remove_square(position);
+			const square_t& from = square_t( Bitboard::extract_and_remove_square(position));
 			const bb& raw_moves = all_moves[from];
 			bb kpsq = 0;
 			Position::set_bit(kpsq, square);
 			bb moves = raw_moves & kpsq;
 			while (moves != 0x00) {
-				const uint8_t& to = Bitboard::extract_and_remove_square(moves);
+				const square_t& to = square_t( Bitboard::extract_and_remove_square(moves));
 				const bool& b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
 					return true;
@@ -904,7 +905,7 @@ namespace Moves {
 		return false;
 	}
 
-	bool Move_generator::is_attacked(const uint8_t& square) {
+	bool Move_generator::is_attacked(const square_t& square) {
 		if (square > 64) {
 			p->debugPosition();
 		}
@@ -960,7 +961,7 @@ namespace Moves {
 		return false;
 	}
 
-	bool Move_generator::is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves, const uint8_t square, bool side_to_move) {
+	bool Move_generator::is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves, const square_t square, bool side_to_move) {
 		bb raw_moves = all_moves[square];
 		if ((side_to_move && square > 31) || (!side_to_move && square < 31)) { //TODO bit test rather than lt/gt
 			raw_moves |= p->en_passant_square;

@@ -8,37 +8,37 @@
 #include "misc.h"
 
 namespace Moves {
+	using Positions::Squares;
+	using Positions::square_t;
 
 	class Move
 	{
 	public:
-		Move() {}
+		Move() {
+		}
 		//		Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured, bool en_passant_capture);
-		Move(uint8_t from, uint8_t to) :from(from), to(to) {}
+		Move(Squares from, Squares to) :from(from), to(to) {
+		}
 
 
-		inline uint8_t get_from() const {
+		inline Squares get_from() const {
 			return this->from;
 		}
-		inline uint8_t get_to() const {
+		inline Squares get_to() const {
 			return this->to;
 		}
-		/*int8_t get_moving_piece() const;
-
-		inline void set_moving_piece(int8_t moving) {
-			this->moving = moving;
-		}*/
+		
 
 		//void set_captured(int8_t taken);
 
-		inline void set_from(uint8_t from) {
+		inline void set_from(Positions::square_t from) {
 			this->from = from;
 		}
-		inline void set_to(uint8_t to) {
+		inline void set_to(square_t to) {
 			this->to = to;
 		}
 		
-		//int value{ 0 };
+		
 
 
 
@@ -59,8 +59,8 @@ int8_t get_captured() const {
 
 
 	private:
-		square_t from = 0;
-		square_t to = 0;
+		Squares from;
+		Squares to;
 		//piece_t moving = 0;
 		//piece_t captured = 0; //TODO maybe also move this out
 		//piece_t promoted_to = 0;

@@ -303,9 +303,9 @@ namespace Interface {
 		}
 		//
 		static Move convert_move(string move) {
-			int from = static_cast<square_t> (Util::decodeSquare(move.substr(0, 2)));
+			square_t from = static_cast<square_t> (Util::decodeSquare(move.substr(0, 2)));
 
-			int to = static_cast<square_t> (Util::decodeSquare(move.substr(2, 4)));
+			square_t to = static_cast<square_t> (Util::decodeSquare(move.substr(2, 4)));
 			string promotedTo = move.substr(4);
 			int promoted_to = 0;
 			if (promotedTo != "") {

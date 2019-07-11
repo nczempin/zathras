@@ -28,7 +28,7 @@ namespace Positions {
 		//TODO statically initialize
 		for (int i = 0; i < 64; ++i) {
 			squares[i] = 0;
-			preset_bit(squares[i], i);
+			preset_bit(squares[i], square_t(i));
 		}
 	}
 
@@ -56,34 +56,34 @@ namespace Positions {
 		return '0' <= c && c <= '9';
 	}
 
-	void Position::set_square(bitset<64> & bs, const uint8_t to) {
+	void Position::set_square(bitset<64> & bs, const square_t to) {
 		bs[to] = true;
 	}
 
-	void Position::clear_square(bitset<64> & bs, uint8_t to) {
+	void Position::clear_square(bitset<64> & bs, square_t to) {
 		bs[to] = false;
 	}
-	void Position::set_square(bb& b, uint8_t to) {
+	void Position::set_square(bb& b, square_t to) {
 		bb tmp = 1ULL << to;
 		b |= tmp;
 	}
-	void Position::clear_square(bb& b, uint8_t to) {
+	void Position::clear_square(bb& b, square_t to) {
 		bb tmp = ~(1ULL << to);
 		b &= tmp;
 	}
-	void Position::set_bit(bb& b, const uint8_t& to) {
+	void Position::set_bit(bb& b, const square_t& to) {
 		b |= squares[to];
 	}
-	void Position::preset_bit(bb& b, const uint8_t& to) {
+	void Position::preset_bit(bb& b, const square_t& to) {
 
 		uint8_t rank = to / 8;
 		uint8_t file = (to % 8);
 		set_square(file, rank, b);
 	}
-	void Position::clear_bit(bb& b, const uint8_t& to) {
+	void Position::clear_bit(bb& b, const square_t& to) {
 		b &= ~squares[to];
 	}
-	bool Position::is_set_square(bb b, uint8_t to) {
+	bool Position::is_set_square(bb b, square_t to) {
 		return b & squares[to];
 		//uint8_t t2 = (to / 8) * 8 + (7 - (to % 8)); // mirror row
 		//bb ttt = 1ULL << (t2);
@@ -95,13 +95,13 @@ namespace Positions {
 	void Position::set_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
 		uint8_t to_twisted = 7 - file + rank * 8;
 		//uint8_t to = file + rank * 8;
-		Position::set_square(bbs, to_twisted);
+		Position::set_square(bbs, square_t(to_twisted));
 	}
 
 	void Position::clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
 		uint8_t to_twisted = 7 - file + rank * 8;
 		//uint8_t to = file + rank * 8;
-		Position::clear_square(bbs, to_twisted);
+		Position::clear_square(bbs, square_t( to_twisted));
 	}
 
 	Position Position::create_position(const string& fen) {
@@ -513,7 +513,7 @@ namespace Positions {
 		}
 	}
 
-	void Position::update_bits(bb& colour, bb& piece, uint8_t clear, uint8_t set) { //TODO castling rights on regular rook move
+	void Position::update_bits(bb& colour, bb& piece, square_t clear, square_t set) { //TODO castling rights on regular rook move
 
 		set_bit(piece, set);
 		set_bit(colour, set);
@@ -532,7 +532,7 @@ namespace Positions {
 		en_passant_square = move_state.get_en_passant_square();
 	}
 
-	void Position::promote(int8_t promoted_to, uint8_t to) {
+	void Position::promote(int8_t promoted_to, square_t to) {
 		//TODO no idea whether this is faster or simply using absolute value is
 		switch (promoted_to) {
 		case Piece::WHITE_QUEEN:
@@ -553,7 +553,7 @@ namespace Positions {
 			break;
 		}
 	}
-	void Position::un_promote(int8_t promoted_to, uint8_t to) {
+	void Position::un_promote(int8_t promoted_to, square_t to) {
 		switch (promoted_to) {
 		case Piece::WHITE_QUEEN:
 		case Piece::BLACK_QUEEN:
@@ -575,7 +575,7 @@ namespace Positions {
 
 	}
 
-	void Position::handleCapture(const uint8_t& to, const int8_t& taken,
+	void Position::handleCapture(const square_t& to, const int8_t& taken,
 		Move_state& move_state) {
 		move_state.captured = taken;
 		switch (taken) {
@@ -646,8 +646,8 @@ namespace Positions {
 
 	void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
 		bool set_en_passant = false;
-		const uint8_t& from = move.get_from();
-		const uint8_t& to = move.get_to();
+		const square_t& from = move.get_from();
+		const square_t& to = move.get_to();
 		int8_t moving = get_piece_on(from);
 		if (moving == 0) {
 
@@ -675,8 +675,8 @@ namespace Positions {
 
 
 	void Position::unmake_move(const Move& move, const Move_state& move_state) {
-		uint8_t from = move.get_from();
-		uint8_t to = move.get_to();
+		square_t from = move.get_from();
+		square_t to = move.get_to();
 		int8_t moving = get_piece_on(to);
 
 
@@ -702,7 +702,7 @@ namespace Positions {
 					// handle capturing by e. p.
 					//TODO BIG TODO
 					if (move_state.get_en_passant_square() == to) {
-						uint8_t target = to - 8;
+						square_t target = square_t(to - 8); //TODO
 						set_bit(en_passant_square, to);
 						set_bit(pawns, target);
 						set_bit(black, target);
@@ -725,10 +725,10 @@ namespace Positions {
 				break;
 			case Piece::WHITE_KING:
 				if (to == from - 2) { //queenside castle
-					update_bits(white, rooks, 3, 0);//TODO constants, not magics
+					update_bits(white, rooks, C1, A1);
 				}
 				else if (from == to - 2) { // kingside castle
-					update_bits(white, rooks, 5, 7);//TODO constants, not magics
+					update_bits(white, rooks, F1, H1);
 				}
 				if (move_state.is_cleared_kingside_castling()) {
 					castling[0] = true;
@@ -761,7 +761,7 @@ namespace Positions {
 					//TODO BIG TODO
 					// handle capturing by e. p.
 					if (move_state.get_en_passant_square() == to) {
-						uint8_t target = to + 8;
+						square_t target = square_t( to + 8);
 						set_bit(en_passant_square, to);
 						set_bit(pawns, target);
 						set_bit(white, target);
@@ -785,10 +785,10 @@ namespace Positions {
 				break;
 				case Piece::BLACK_KING:
 				if (to == from - 2) { //queenside castle
-					update_bits(black, rooks, 59, 56);//TODO constants, not magics
+					update_bits(black, rooks, C8, A8);//TODO constants, not magics
 				}
 				else if (from == to - 2) { // kingside castle
-					update_bits(black, rooks, 61, 63);//TODO constants, not magics
+					update_bits(black, rooks, F8, H8);//TODO constants, not magics
 				}
 				if (move_state.is_cleared_kingside_castling()) {
 					castling[2] = true;
@@ -870,7 +870,7 @@ namespace Positions {
 		cout << print_bitboard(black);
 		cout << print_bitboard(pawns);
 		for (uint8_t i = 0; i < 64; ++i) {
-			if (is_set_square(black, i)) {
+			if (is_set_square(black, square_t(i))) {
 				cout << "1";
 			}
 			else {        
@@ -882,7 +882,7 @@ namespace Positions {
 		}
 		cout << "\n";
 		for (uint8_t i = 0; i < 64; ++i) {
-			if (is_set_square(white, i)) {
+			if (is_set_square(white, square_t(i))) {
 				cout << "1";
 			}
 			else {
@@ -899,7 +899,7 @@ namespace Positions {
 		//TODO this is a somewhat naive way of doing this, it needs to be much more efficient
 		const bb colour = side ? white : black;
 		const bb kpbb = kings & colour;
-		const uint8_t& king_pos = Bitboard::extract_square(kpbb);
+		const square_t& king_pos = square_t(Bitboard::extract_square(kpbb));
 		if (king_pos > 64) {
 			debugPosition();
 			throw king_pos;
@@ -952,16 +952,16 @@ namespace Positions {
 	}
 
 	bool Position::is_attacked_by_slider(bb position,
-		const bitboard_set& all_moves, const uint8_t& square,
+		const bitboard_set& all_moves, const square_t& square,
 		const bb& occupied) {
 		while (position != 0) {
-			const uint8_t& from = Bitboard::extract_and_remove_square(position);
+			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));
 			const bb& raw_moves = all_moves[from];
 			bb kpsq = 0;
 			Position::set_bit(kpsq, square);
 			bb moves = raw_moves & kpsq;
 			while (moves != 0x00) {
-				const uint8_t& to = Bitboard::extract_and_remove_square(moves);
+				const square_t& to = square_t(Bitboard::extract_and_remove_square(moves));
 				const bool& b = is_anything_between(from, to, occupied);
 				if (!b) {
 					return true;
@@ -973,7 +973,7 @@ namespace Positions {
 
 
 	bool Position::is_check_from_slider(const bitboard_set& sliding_moves,
-		const uint8_t& king_pos, const bb& slider, const bb& occupied) {
+		const square_t& king_pos, const bb& slider, const bb& occupied) {
 		bool retval = false;
 		const bb& raw_moves = sliding_moves[king_pos];
 		const bb& moves = raw_moves & slider;
@@ -984,7 +984,7 @@ namespace Positions {
 			while (tmp) {
 				l = Bitboard::ffs(tmp);
 				attacker = Bitboard::look_up(l);
-				if (!is_anything_between(king_pos, attacker, occupied)) {
+				if (!is_anything_between(king_pos, square_t(attacker), occupied)) {
 					return true;
 				}
 				tmp &= tmp - 1ULL; //clear LS1B
@@ -993,13 +993,13 @@ namespace Positions {
 		return retval;
 	}
 	bool Position::is_attacked_by_hopper(const bb& movers,
-		const bitboard_set& all_moves, const uint8_t& square) {
+		const bitboard_set& all_moves, const square_t& square) {
 		const bb& raw_moves = all_moves[square];
 		const bb moves = raw_moves & movers;
 		return moves != 0x00;
 	}
 
-	bool Position::is_anything_between(uint8_t from, uint8_t to,
+	bool Position::is_anything_between(square_t from, square_t to,
 		const bb& occupied) {
 		uint16_t index = calc_index(from, to);
 		return between[index] & occupied;

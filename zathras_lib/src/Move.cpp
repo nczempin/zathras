@@ -5,12 +5,12 @@
  *      Author: nczempin
  */
 
-#include "Move.h"
-#include <iostream>
-#include <string>
+//#include "Move.h"
+//#include <iostream>
+//#include <string>
 namespace Moves {
-	using namespace std;
-	using namespace Positions;
+	//using namespace std;
+	//using namespace Positions;
 
 	/*Move::Move(int8_t moving, uint8_t from, uint8_t to, int8_t captured, bool en_passant_capture) :
 		from(from), to(to), moving(moving), captured(captured), en_passant_capture(en_passant_capture) {

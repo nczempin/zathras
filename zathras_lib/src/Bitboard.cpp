@@ -30,7 +30,7 @@ namespace Positions {
 			}
 			coord = look_up(l);
 
-			f(coord);
+			f(square_t(coord)); //TODO handle cast better
 			tmp &= tmp - 1; //clear LS1B
 		}
 	}

@@ -41,7 +41,7 @@ namespace Moves {
 		m.set_promoted_to(promoted_to);
 		++index;
 	}*/
-	void Move_container::add_move(const uint8_t& from, const uint8_t& to)
+	void Move_container::add_move(const square_t& from, const square_t& to)
 	{
 		Move& m = container[index];
 		m.set_from(from);
