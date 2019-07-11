@@ -8,6 +8,7 @@
 #include "misc.h"
 
 namespace Moves {
+
 	class Move
 	{
 	public:
@@ -36,7 +37,7 @@ namespace Moves {
 		inline void set_to(uint8_t to) {
 			this->to = to;
 		}
-		string to_string()const; //TODO move outside class?
+		
 		//int value{ 0 };
 
 
@@ -69,4 +70,17 @@ int8_t get_captured() const {
 
 
 	};
+
+	static string to_string(Move move) {
+		/*static const string pieces("-PNBRQK");
+		char p = pieces[moving > 0 ? moving : -moving];
+		string moving_string = string(1, p);*/
+
+		string retval = Positions::Square::mailbox_index_to_square(move.get_from());
+		retval += Positions::Square::mailbox_index_to_square(move.get_to());
+
+
+		return retval;
+	}
+
 }

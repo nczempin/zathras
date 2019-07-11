@@ -689,13 +689,14 @@ namespace Positions {
 			bb& pbb = piece_bb[moving - 1];
 			clear_bit(pbb, to);
 			set_bit(pbb, from);
-				switch (moving) {
+			switch (moving) {
 			case Piece::WHITE_PAWN: {
 				// move pawn back
 				//TODO clearing can be saved when move was a capture. find out which is faster
 				if (is_in_back_rank_black(to)) {
-					piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
-					un_promote(promoted_to, to);
+					//piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
+					//un_promote(promoted_to, to);
+					clear_bit(queens, to);
 				}
 				else {
 					// handle capturing by e. p.
@@ -712,6 +713,7 @@ namespace Positions {
 			}
 			case Piece::WHITE_KNIGHT:
 			case Piece::WHITE_BISHOP:
+			case Piece::WHITE_QUEEN:
 				break;
 			case Piece::WHITE_ROOK:
 				if (move_state.is_cleared_kingside_castling()) {
@@ -720,8 +722,6 @@ namespace Positions {
 				if (move_state.is_cleared_queenside_castling()) {
 					castling[1] = true;
 				}
-				break;
-			case Piece::WHITE_QUEEN:
 				break;
 			case Piece::WHITE_KING:
 				if (to == from - 2) { //queenside castle
@@ -754,7 +754,8 @@ namespace Positions {
 			case Piece::BLACK_PAWN: {
 
 				if (is_in_back_rank_white(to)) {
-					un_promote(Piece::BLACK_QUEEN, to);
+					//un_promote(Piece::BLACK_QUEEN, to);
+					clear_bit(queens, to);
 				}
 				else {
 					//TODO BIG TODO
@@ -772,19 +773,18 @@ namespace Positions {
 									break;
 			case Piece::BLACK_KNIGHT:
 			case Piece::BLACK_BISHOP:
-					break;
+			case Piece::BLACK_QUEEN:
+				break;
 			case Piece::BLACK_ROOK:
-					if (move_state.is_cleared_kingside_castling()) {
+				if (move_state.is_cleared_kingside_castling()) {
 					castling[2] = true;
 				}
 				if (move_state.is_cleared_queenside_castling()) {
 					castling[3] = true;
 				}
 				break;
-			case Piece::BLACK_QUEEN:
-				break;
-			case Piece::BLACK_KING:
-					if (to == from - 2) { //queenside castle
+				case Piece::BLACK_KING:
+				if (to == from - 2) { //queenside castle
 					update_bits(black, rooks, 59, 56);//TODO constants, not magics
 				}
 				else if (from == to - 2) { // kingside castle
@@ -873,7 +873,7 @@ namespace Positions {
 			if (is_set_square(black, i)) {
 				cout << "1";
 			}
-			else {
+			else {        
 				cout << "0";
 			}
 			if (i % 8 == 7) {

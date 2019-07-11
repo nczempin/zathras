@@ -40,7 +40,7 @@ public:
 		}
 		else if (move_container.size() == 1) {
 			auto move = moves[0];
-			cout << move.to_string() << endl;
+			cout << to_string(move) << endl;
 			return move;
 		}
 		else {

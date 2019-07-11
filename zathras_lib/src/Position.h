@@ -192,18 +192,18 @@ namespace Positions {
 					bb& pbb = piece_bb[moving - 1];
 					set_bit(pbb, to);
 					clear_bit(pbb, from);
-					if (moving != Piece::WHITE_PAWN) {
-						save_en_passant_square(move_state); //TODO don't do this twice
-					}
+					
 					switch (moving) {
 					case Piece::WHITE_PAWN: {
-						clear_bit(pawns, from);
+						//clear_bit(pawns, from);
 
 						if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
-							promote(Piece::WHITE_QUEEN, to);
+							//promote(Piece::WHITE_QUEEN, to);
+							set_bit(queens, to);
+							clear_bit(pawns, to);
 						}
 						else {
-							set_bit(pawns, to);
+							//set_bit(pawns, to);
 							// handle capturing by e. p.
 							int target = to - 8;
 							if (get_piece_on(to) == 0) { // en passant capture
@@ -225,9 +225,7 @@ namespace Positions {
 					case Piece::WHITE_BISHOP:
 					case Piece::WHITE_QUEEN:
 					{
-						bb& pbb = piece_bb[moving - 1];
-						set_bit(pbb, to);
-						clear_bit(pbb, from);
+						
 						save_en_passant_square(move_state);
 						break;
 					}case Piece::WHITE_ROOK:
@@ -239,6 +237,7 @@ namespace Positions {
 							castling[1] = false;
 							move_state.set_cleared_queenside_castling(true);
 						}
+						save_en_passant_square(move_state);
 						break;
 					case Piece::WHITE_KING:
 						if (to == from - 2) { //queenside castle
@@ -256,22 +255,28 @@ namespace Positions {
 							move_state.set_cleared_queenside_castling(true);
 							castling[1] = false;
 						}
+						save_en_passant_square(move_state);
 						break;
 					}
 				}
 				else {
 					clear_bit(black, from);
 					set_bit(black, to);
+					bb& pbb = piece_bb[-moving - 1];
+					set_bit(pbb, to);
+					clear_bit(pbb, from);
 					switch (moving) {
 					case Piece::BLACK_PAWN: {
-						clear_bit(pawns, from);
+						//clear_bit(pawns, from);
 						/*int8_t promoted_to = move.get_promoted_to();
 						if (promoted_to != 0) {*/
 						if (is_in_back_rank_white(to)) {
-							promote(Piece::BLACK_QUEEN, to); // TODO underpromote
+							set_bit(queens, to);
+							clear_bit(pawns, to); // that was eagerly set previously
+//							promote(Piece::BLACK_QUEEN, to); // TODO underpromote
 						}
 						else {
-							set_bit(pawns, to);
+							
 							// handle capturing by e. p.
 							int target = to + 8;
 
@@ -295,15 +300,12 @@ namespace Positions {
 					case Piece::BLACK_BISHOP:
 					case Piece::BLACK_QUEEN:
 					{
-					    bb& pbb = piece_bb[-moving - 1];
-						set_bit(pbb, to);
-						clear_bit(pbb, from);
+					    
 						save_en_passant_square(move_state);
 						break;
 					}
 					case Piece::BLACK_ROOK:
-						set_bit(rooks, to);
-						clear_bit(rooks, from);
+						
 						if (from == 63 && castling[2]) { // H8 //TODO
 							move_state.set_cleared_kingside_castling(true);
 							castling[2] = false;
@@ -315,7 +317,7 @@ namespace Positions {
 						save_en_passant_square(move_state);
 						break;
 					case Piece::BLACK_KING:
-						update_bits(black, kings, from, to);
+						
 						if (to == from - 2) { //queenside castle
 							update_bits(black, rooks, 56, 59);//TODO constants, not magics
 						}

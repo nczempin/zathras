@@ -187,7 +187,7 @@ namespace Interface {
 				searcher.done = true; // ask the thread to finish
 				Move move = fut.get(); //wait until the thread is finished
 				cout << "hurz!" << endl;
-				cout << "bestmove " << move.to_string() << endl;
+				cout << "bestmove " << to_string(move) << endl;
 
 			}
 			else {
@@ -202,7 +202,7 @@ namespace Interface {
 				cout << "purzel" << endl;
 				Move move = fut.get(); //wait until the thread is finished
 				cout << "hurzel" << endl;
-				cout << "bestmove " << move.to_string() << endl;
+				cout << "bestmove " << to_string(move) << endl;
 			}
 		}
 		static void startBrain() {

@@ -105,7 +105,7 @@ namespace Interface {
 				}
 
 				uint64_t perft_result = perft(depth - 1);
-				string s = move.to_string();
+				string s = to_string(move);
 				cout << s << ": " << perft_result << endl;
 				total_result += perft_result;
 				pp->unmake_move(move, ms);
