@@ -523,9 +523,7 @@ namespace Moves {
 			}
 		}
 	}
-	void Move_generator::visit_capture_ray_moves(const bb& sub_position,
-		const bitboard_set& all_moves, const move_visitor& f,
-		const bb& occupied, const bb& other_colour, const int8_t& moving) {
+	void Move_generator::visit_capture_ray_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& occupied, const bb& other_colour) {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO proper cast
@@ -611,6 +609,37 @@ namespace Moves {
 			}
 		}
 	}
+	void Move_generator::add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bool& white_to_move) {
+		bb position = sub_position;
+		while (position != 0) {
+			const square_t from = square_t(Bitboard::extract_and_remove_square(position));
+			bb moveses = filter_occupied_squares(white_to_move, occupied, all_moves, from); // TODO name :-P
+			while (moveses != 0x00) {
+				square_t to = square_t(Bitboard::extract_and_remove_square(moveses));
+				if (to >= 56) { // promoting white pawn
+					moves.add_move(from, to);
+					//TODO switch subpromotions on/off here
+					/*f(moving, from, to, 0, Piece::WHITE_ROOK);
+					f(moving, from, to, 0, Piece::WHITE_BISHOP);
+					f(moving, from, to, 0, Piece::WHITE_KNIGHT);*/
+					// end switch subpromotions on/off
+
+				}
+				else if (to <= 7) { // promoting black pawn
+					moves.add_move(from, to);
+					//TODO switch subpromotions on/off here
+					//f(moving, from, to, 0, Piece::BLACK_ROOK);
+					//f(moving, from, to, 0, Piece::BLACK_BISHOP);
+					//f(moving, from, to, 0, Piece::BLACK_KNIGHT);
+					// end switch subpromotions on/off
+
+				}
+				else {
+					moves.add_move(from, to);
+				}
+			}
+		}
+	}
 
 	void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
 		const square_t king_square, const int8_t direction) {
@@ -692,9 +721,7 @@ namespace Moves {
 		return en_passant_capture;
 	}
 
-	void Move_generator::add_non_capture_ray_moves(Move_container& moves,
-		const int8_t& piece, bb position, const bitboard_set& pieceMoves,
-		const bb& occupied) {
+	void Move_generator::add_non_capture_ray_moves(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied) {
 		while (position != 0) {
 			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));  //TODO cast
 			const bb& raw_moves = pieceMoves[from]; //TODO potential bug flagged here: "C28020: The expression '0<=_Param_(1)&&_Param_(1)<=64-1' is not true at this call."
@@ -781,37 +808,39 @@ namespace Moves {
 			visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
 			visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
 			visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
-			add_non_capture_ray_moves(moves, Piece::WHITE_QUEEN, white_queens, Bitboard::rook_moves, occupied);
-			add_non_capture_ray_moves(moves, Piece::WHITE_ROOK, white_rooks, Bitboard::rook_moves, occupied);
+			add_non_capture_ray_moves(moves, white_queens | white_rooks, Bitboard::rook_moves, occupied);
+			//add_non_capture_ray_moves(moves, white_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(white_queens, Bitboard::rook_moves, f, occupied, p->black, Piece::WHITE_QUEEN);
-			visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black, Piece::WHITE_ROOK);
-			visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, p->black, Piece::WHITE_BISHOP);
-			visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black, Piece::WHITE_QUEEN);
-			add_non_capture_ray_moves(moves, Piece::WHITE_BISHOP, white_bishops, Bitboard::bishop_moves, occupied);
-			add_non_capture_ray_moves(moves, Piece::WHITE_QUEEN, white_queens, Bitboard::bishop_moves, occupied);
+			visit_capture_ray_moves(white_queens | white_rooks, Bitboard::rook_moves, f, occupied, p->black);
+			//visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_bishops | white_queens, Bitboard::bishop_moves, f, occupied, p->black);
+			//visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black);
+			add_non_capture_ray_moves(moves, white_bishops | white_queens, Bitboard::bishop_moves, occupied);
+			//add_non_capture_ray_moves(moves, white_queens, Bitboard::bishop_moves, occupied);
 			generate_castling(f, true);
 			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
-			visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
+			//visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
+			add_pawn_nocaps(moves, white_pawns, Bitboard::white_pawn_no_capture_moves, occupied, false);
 		}
 		else {
+			//visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
+			add_pawn_nocaps(moves, black_pawns, Bitboard::black_pawn_no_capture_moves, occupied, false);
 			visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
 			visit_non_capture_moves(black_knights, Bitboard::knight_moves, f, occupied, Piece::BLACK_KNIGHT);
 			visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
 			visit_non_capture_moves(black_kings, Bitboard::king_moves, f, occupied, Piece::BLACK_KING);
-			add_non_capture_ray_moves(moves, Piece::BLACK_QUEEN, black_queens, Bitboard::rook_moves, occupied);
-			add_non_capture_ray_moves(moves, Piece::BLACK_ROOK, black_rooks, Bitboard::rook_moves, occupied);
+			add_non_capture_ray_moves(moves, black_queens | black_rooks, Bitboard::rook_moves, occupied);
+			//add_non_capture_ray_moves(moves, black_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(black_queens, Bitboard::rook_moves, f, occupied, p->white, Piece::BLACK_QUEEN);
-			visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white, Piece::BLACK_ROOK);
-			visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, p->white, Piece::BLACK_BISHOP);
-			visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white, Piece::BLACK_QUEEN);
-			add_non_capture_ray_moves(moves, Piece::BLACK_BISHOP, black_bishops, Bitboard::bishop_moves, occupied);
-			add_non_capture_ray_moves(moves, Piece::BLACK_QUEEN, black_queens, Bitboard::bishop_moves, occupied);
+			visit_capture_ray_moves(black_queens | black_rooks, Bitboard::rook_moves, f, occupied, p->white);
+			//visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_bishops | black_queens, Bitboard::bishop_moves, f, occupied, p->white);
+			//visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white);
+			add_non_capture_ray_moves(moves, black_bishops | black_queens, Bitboard::bishop_moves, occupied);
+			//add_non_capture_ray_moves(moves, black_queens, Bitboard::bishop_moves, occupied);
 
 			generate_castling(f, false);
 			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
-			visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
 
 		}
 		return moves;
@@ -852,10 +881,10 @@ namespace Moves {
 			//add_non_capture_ray_moves(moves, Piece::WHITE_QUEEN, white_queens, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::WHITE_ROOK, white_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(white_queens, Bitboard::rook_moves, f, occupied, p->black, Piece::WHITE_QUEEN);
-			visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black, Piece::WHITE_ROOK);
-			visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, p->black, Piece::WHITE_BISHOP);
-			visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black, Piece::WHITE_QUEEN);
+			visit_capture_ray_moves(white_queens, Bitboard::rook_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black);
 			//add_non_capture_ray_moves(moves, Piece::Piece::WHITE_BISHOP, white_bishops, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::WHITE_QUEEN, white_queens, Bitboard::bishop_moves, occupied);
 			//generate_castling(f, true);
@@ -870,10 +899,10 @@ namespace Moves {
 			//add_non_capture_ray_moves(moves, Piece::BLACK_QUEEN, black_queens, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::BLACK_ROOK, black_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(black_queens, Bitboard::rook_moves, f, occupied, p->white, Piece::BLACK_QUEEN);
-			visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white, Piece::BLACK_ROOK);
-			visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, p->white, Piece::BLACK_BISHOP);
-			visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white, Piece::BLACK_QUEEN);
+			visit_capture_ray_moves(black_queens, Bitboard::rook_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white);
 			//add_non_capture_ray_moves(moves, Piece::Piece::BLACK_BISHOP, black_bishops, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::BLACK_QUEEN, black_queens, Bitboard::bishop_moves, occupied);
 
@@ -889,13 +918,13 @@ namespace Moves {
 		const bb& occupied) {
 		//TODO, BIG TODO: all this stuff is incredibly repetitive and should really be done with templates.
 		while (position != 0) {
-			const square_t& from = square_t( Bitboard::extract_and_remove_square(position));
+			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));
 			const bb& raw_moves = all_moves[from];
 			bb kpsq = 0;
 			Position::set_bit(kpsq, square);
 			bb moves = raw_moves & kpsq;
 			while (moves != 0x00) {
-				const square_t& to = square_t( Bitboard::extract_and_remove_square(moves));
+				const square_t& to = square_t(Bitboard::extract_and_remove_square(moves));
 				const bool& b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
 					return true;

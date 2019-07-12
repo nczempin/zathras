@@ -22,6 +22,7 @@ namespace Moves {
 		Move_container generate_legal_moves(Position position, size_t depth);
 		Move_container generate_pseudolegal_moves(Position position, size_t depth);
 		Move_container generate_pseudolegal_captures(Position position, size_t depth);
+		void add_non_capture_ray_moves1(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
 		Move_container generate_legal_captures(Position position, int depth);
 
 		bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
@@ -70,18 +71,17 @@ namespace Moves {
 			const bitboard_set& all_moves, const move_visitor& f,
 			const bb& occupied, const int8_t& moving);
 		void visit_capture_ray_moves(const bb& sub_position,
-			const bitboard_set& all_moves, const move_visitor& f,
-			const bb& occupied, const bb& other_colour, const int8_t& moving);
+
+			const bitboard_set& all_moves,
+ const move_visitor& f,
+			const bb& occupied, const bb& other_colour);
 		void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
 			move_visitor f, int8_t moving);
 		void visit_pawn_caps(const bb& sub_position, const bitboard_set& all_moves,
 			const move_visitor& f, const bb& other_colour,
 			const int8_t& moving);
-		void visit_pawn_nocaps(const bb& sub_position,
-			const bitboard_set& all_moves, const move_visitor& f,
-			const bb& occupied, const int8_t& moving,
-			const bool& white_to_move);
-		static bb filter_occupied_squares(bool white_to_move, bb occupied,
+		void visit_pawn_nocaps(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& occupied, const int8_t& moving, const bool& white_to_move);
+			static bb filter_occupied_squares(bool white_to_move, bb occupied,
 			const bitboard_set& all_moves, int x);
 
 	public:
@@ -100,7 +100,8 @@ namespace Moves {
 		bool is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves, const square_t square, bool side_to_move);
 		bool will_be_en_passant(square_t to, int8_t moving);
 
-		void add_non_capture_ray_moves(Move_container& moves, const int8_t& piece, bb position, const bitboard_set& pieceMoves, const bb& occupied);
+		void add_non_capture_ray_moves(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
+		void add_pawn_nocaps(Move_container&moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied,const bool& white_to_move);
 
 
 
