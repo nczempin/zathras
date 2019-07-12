@@ -16,7 +16,7 @@
 namespace Interface {
 	class Perft_command : public Abstract_command {
 	public:
-		Perft_command();
+		Perft_command(size_t depth) :depth(depth) {}
 		virtual ~Perft_command();
 		void execute() override;
 
@@ -27,6 +27,7 @@ namespace Interface {
 		shared_ptr<Positions::Position> pp;
 		Moves::Move_generator mg;
 		size_t illegal_moves_generated = 0;
+		size_t depth = 6;
 	};
 }
 #endif /* PERFT_COMMAND_H_ */

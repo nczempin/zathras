@@ -48,7 +48,13 @@ namespace Interface {
 				cout << "uciok" << endl;
 			}
 			else if (startsWith("perft ", toParse)) { //TODO not really UCI
-				Perft_command pc;
+				string pattern = "perft ";
+				size_t index = toParse.find(pattern);
+
+				string depth_param = toParse.substr(index + pattern.length());
+
+				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
+				Perft_command pc{ depth };
 				pc.execute();
 				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
 				//int perftDepth = Character::getNumericValue(perftDepthParameter);
