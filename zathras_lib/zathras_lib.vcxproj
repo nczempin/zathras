@@ -124,11 +124,15 @@
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <ExceptionHandling>false</ExceptionHandling>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <DisableSpecificWarnings>4530;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <AssemblerOutput>All</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

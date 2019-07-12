@@ -16,9 +16,6 @@
     <Filter Include="Move">
       <UniqueIdentifier>{99641f8a-1979-4af1-b433-0f36c17f10fe}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Position">
-      <UniqueIdentifier>{b43fcf27-fcea-48aa-bd6b-52e63584912f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Search">
       <UniqueIdentifier>{847fb096-54d4-4620-8fa8-a73ee5498acf}</UniqueIdentifier>
     </Filter>
@@ -27,6 +24,9 @@
     </Filter>
     <Filter Include="Eval">
       <UniqueIdentifier>{a9a345ae-7f23-45e5-ab7a-7f3c45aed28a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Positions">
+      <UniqueIdentifier>{b43fcf27-fcea-48aa-bd6b-52e63584912f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -43,19 +43,19 @@
       <Filter>Move</Filter>
     </ClCompile>
     <ClCompile Include="src\Bitboard.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Bitboard_test.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Piece.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Position.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Square.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Searcher.cpp">
       <Filter>Search</Filter>
@@ -81,16 +81,16 @@
       <Filter>Move</Filter>
     </ClInclude>
     <ClInclude Include="src\Bitboard.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Piece.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Position.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Square.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Searcher.h">
       <Filter>Search</Filter>
