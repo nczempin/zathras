@@ -75,7 +75,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <CompileAs>CompileAsCpp</CompileAs>
-      <Optimization>Full</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <CallingConvention>FastCall</CallingConvention>
       <DisableSpecificWarnings>26429;4530;26426;26432;26440;26443;26446;26455;26472;26482;26486;26494;26496;26497%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>

@@ -804,6 +804,7 @@ namespace Moves {
 		const bb occupied = p->white | p->black;
 
 		if (p->white_to_move) {
+			add_pawn_nocaps(moves, white_pawns, Bitboard::white_pawn_no_capture_moves, occupied, false);
 			visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
 			visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
 			visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
@@ -820,7 +821,6 @@ namespace Moves {
 			generate_castling(f, true);
 			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
 			//visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
-			add_pawn_nocaps(moves, white_pawns, Bitboard::white_pawn_no_capture_moves, occupied, false);
 		}
 		else {
 			//visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
