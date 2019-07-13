@@ -54,7 +54,7 @@ namespace Interface {
 				string depth_param = toParse.substr(index + pattern.length());
 
 				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
-				Perft_command pc{ depth };
+				Perft_command pc{p,  depth };
 				pc.execute();
 				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
 				//int perftDepth = Character::getNumericValue(perftDepthParameter);

@@ -67,14 +67,14 @@ namespace Interface {
 	void Perft_command::execute() {
 		//vector<string> path = receiver->getArguments();
 		//uint8_t depth = 6; //TODO get this from arguments, but use a reasonable default
-		Position position;
-		const string perft_string =
-			"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-		//"k7/8/8/8/8/8/8/5B1K w - -";
-		position = Position::create_position(perft_string);
-		position = Position::create_start_position();
+		//Position position;
+		//const string perft_string =
+		//	"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+		////"k7/8/8/8/8/8/8/5B1K w - -";
+		//position = Position::create_position(perft_string);
+		//position = Position::create_start_position();
 		cout << "Perft " << to_string(depth) << " for this position:\n";
-		cout << perft_string << "\n" << endl;
+//		cout << perft_string << "\n" << endl;
 		//cout << position << "\n";
 		cout << position.print_board();
 		//mg.pregenerate_moves();
