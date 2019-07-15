@@ -26,13 +26,11 @@ namespace Positions {
 		//TODO clear piece bitboards?
 
 		//TODO statically initialize
-		for (int i = 0; i < 64; ++i) {
-			squares[i] = 0;
-			preset_bit(squares[i], square_t(i));
-		}
+
+		Square::init_squares(); //TODO this seems to be a braindead hack
+		
 	}
 
-	bb Position::squares[64];
 	//
 	Position::~Position() {
 		// TODO Auto-generated destructor stub
@@ -54,54 +52,6 @@ namespace Positions {
 	}
 	bool is_digit(const char c) {
 		return '0' <= c && c <= '9';
-	}
-
-	void Position::set_square(bitset<64> & bs, const square_t to) {
-		bs[to] = true;
-	}
-
-	void Position::clear_square(bitset<64> & bs, square_t to) {
-		bs[to] = false;
-	}
-	void Position::set_square(bb& b, square_t to) {
-		bb tmp = 1ULL << to;
-		b |= tmp;
-	}
-	void Position::clear_square(bb& b, square_t to) {
-		bb tmp = ~(1ULL << to);
-		b &= tmp;
-	}
-	void Position::set_bit(bb& b, const square_t& to) {
-		b |= squares[to];
-	}
-	void Position::preset_bit(bb& b, const square_t& to) {
-
-		uint8_t rank = to / 8;
-		uint8_t file = (to % 8);
-		set_square(file, rank, b);
-	}
-	void Position::clear_bit(bb& b, const square_t& to) {
-		b &= ~squares[to];
-	}
-	bool Position::is_set_square(bb b, square_t to) {
-		return b & squares[to];
-		//uint8_t t2 = (to / 8) * 8 + (7 - (to % 8)); // mirror row
-		//bb ttt = 1ULL << (t2);
-		//bb aaa = b & ttt;
-		//return aaa != 0;
-	}
-
-
-	void Position::set_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
-		uint8_t to_twisted = 7 - file + rank * 8;
-		//uint8_t to = file + rank * 8;
-		Position::set_square(bbs, square_t(to_twisted));
-	}
-
-	void Position::clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
-		uint8_t to_twisted = 7 - file + rank * 8;
-		//uint8_t to = file + rank * 8;
-		Position::clear_square(bbs, square_t( to_twisted));
 	}
 
 	Position Position::create_position(const string& fen) {
@@ -142,7 +92,7 @@ namespace Positions {
 			uint8_t file = file_string - 'a';
 			char rank_string = en_passant[1];
 			uint8_t rank = rank_string - '1';
-			set_square(file, rank, en_passant_square);
+			Square::set_square(file, rank, en_passant_square);
 			position.en_passant_square = en_passant_square;
 		}
 
@@ -161,63 +111,63 @@ namespace Positions {
 				else {
 					switch (c) {
 					case 'P':
-						set_square(f, r, position.pawns);
-						set_square(f, r, position.white);
+						Square::set_square(f, r, position.pawns);
+						Square::set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_PAWN; //TODO encapsulate
 						break;
 					case 'N':
-						set_square(f, r, position.knights);
-						set_square(f, r, position.white);
+						Square::set_square(f, r, position.knights);
+						Square::set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_KNIGHT; //TODO encapsulate
 						break;
 					case 'B':
-						set_square(f, r, position.bishops);
-						set_square(f, r, position.white);
+						Square::set_square(f, r, position.bishops);
+						Square::set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_BISHOP; //TODO encapsulate
 						break;
 					case 'R':
-						set_square(f, r, position.rooks);
-						set_square(f, r, position.white);
+						Square::set_square(f, r, position.rooks);
+						Square::set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_ROOK; //TODO encapsulate
 						break;
 					case 'Q':
-						set_square(f, r, position.queens);
-						set_square(f, r, position.white);
+						Square::set_square(f, r, position.queens);
+						Square::set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_QUEEN; //TODO encapsulate
 						break;
 					case 'K':
-						set_square(f, r, position.kings);
-						set_square(f, r, position.white);
+						Square::set_square(f, r, position.kings);
+						Square::set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_KING; //TODO encapsulate
 						break;
 					case 'p':
-						set_square(f, r, position.pawns);
-						set_square(f, r, position.black);
+						Square::set_square(f, r, position.pawns);
+						Square::set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_PAWN; //TODO encapsulate
 						break;
 					case 'n':
-						set_square(f, r, position.knights);
-						set_square(f, r, position.black);
+						Square::set_square(f, r, position.knights);
+						Square::set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_KNIGHT; //TODO encapsulate
 						break;
 					case 'b':
-						set_square(f, r, position.bishops);
-						set_square(f, r, position.black);
+						Square::set_square(f, r, position.bishops);
+						Square::set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_BISHOP; //TODO encapsulate
 						break;
 					case 'r':
-						set_square(f, r, position.rooks);
-						set_square(f, r, position.black);
+						Square::set_square(f, r, position.rooks);
+						Square::set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_ROOK; //TODO encapsulate
 						break;
 					case 'q':
-						set_square(f, r, position.queens);
-						set_square(f, r, position.black);
+						Square::set_square(f, r, position.queens);
+						Square::set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_QUEEN; //TODO encapsulate
 						break;
 					case 'k':
-						set_square(f, r, position.kings);
-						set_square(f, r, position.black);
+						Square::set_square(f, r, position.kings);
+						Square::set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_KING; //TODO encapsulate
 						break;
 					default:
@@ -513,13 +463,7 @@ namespace Positions {
 		}
 	}
 
-	void Position::update_bits(bb& colour, bb& piece, square_t clear, square_t set) { //TODO castling rights on regular rook move
-
-		set_bit(piece, set);
-		set_bit(colour, set);
-		clear_bit(piece, clear);
-		clear_bit(colour, clear);
-	}
+	
 
 	inline void Position::save_en_passant_square(Move_state& move_state) {
 		if (en_passant_square != 0x00) {
@@ -537,19 +481,19 @@ namespace Positions {
 		switch (promoted_to) {
 		case Piece::WHITE_QUEEN:
 		case Piece::BLACK_QUEEN:
-			set_bit(queens, to);
+			Square::set_bit(queens, to);
 			break;
 		case Piece::WHITE_ROOK:
 		case Piece::BLACK_ROOK:
-			set_bit(rooks, to);
+			Square::set_bit(rooks, to);
 			break;
 		case Piece::WHITE_BISHOP:
 		case Piece::BLACK_BISHOP:
-			set_bit(bishops, to);
+			Square::set_bit(bishops, to);
 			break;
 		case Piece::WHITE_KNIGHT:
 		case Piece::BLACK_KNIGHT:
-			set_bit(knights, to);
+			Square::set_bit(knights, to);
 			break;
 		}
 	}
@@ -557,19 +501,19 @@ namespace Positions {
 		switch (promoted_to) {
 		case Piece::WHITE_QUEEN:
 		case Piece::BLACK_QUEEN:
-			clear_bit(queens, to);
+			Square::clear_bit(queens, to);
 			break;
 		case Piece::WHITE_ROOK:
 		case Piece::BLACK_ROOK:
-			clear_bit(rooks, to);
+			Square::clear_bit(rooks, to);
 			break;
 		case Piece::WHITE_BISHOP:
 		case Piece::BLACK_BISHOP:
-			clear_bit(bishops, to);
+			Square::clear_bit(bishops, to);
 			break;
 		case Piece::WHITE_KNIGHT:
 		case Piece::BLACK_KNIGHT:
-			clear_bit(knights, to);
+			Square::clear_bit(knights, to);
 			break;
 		}
 
@@ -580,19 +524,19 @@ namespace Positions {
 		move_state.captured = taken;
 		switch (taken) {
 		case Piece::WHITE_PAWN:
-			clear_bit(white, to);
-			clear_bit(pawns, to);
+			Square::clear_bit(white, to);
+			Square::clear_bit(pawns, to);
 			break;
 		case Piece::WHITE_KNIGHT:
-			clear_bit(white, to);
-			clear_bit(knights, to);
+			Square::clear_bit(white, to);
+			Square::clear_bit(knights, to);
 			break;
 		case Piece::WHITE_BISHOP:
-			clear_bit(white, to);
-			clear_bit(bishops, to);
+			Square::clear_bit(white, to);
+			Square::clear_bit(bishops, to);
 			break;
 		case Piece::WHITE_ROOK:
-			clear_bit(white, to);
+			Square::clear_bit(white, to);
 			//TODO use constants, not magics
 			if (castling[0] && to == 7) {
 				castling[0] = false;
@@ -603,26 +547,26 @@ namespace Positions {
 				move_state.set_cleared_queenside_castling(true);
 			}
 
-			clear_bit(rooks, to);
+			Square::clear_bit(rooks, to);
 			break;
 		case Piece::WHITE_QUEEN:
-			clear_bit(white, to);
-			clear_bit(queens, to);
+			Square::clear_bit(white, to);
+			Square::clear_bit(queens, to);
 			break;
 		case Piece::BLACK_PAWN:
-			clear_bit(black, to);
-			clear_bit(pawns, to);
+			Square::clear_bit(black, to);
+			Square::clear_bit(pawns, to);
 			break;
 		case Piece::BLACK_KNIGHT:
-			clear_bit(black, to);
-			clear_bit(knights, to);
+			Square::clear_bit(black, to);
+			Square::clear_bit(knights, to);
 			break;
 		case Piece::BLACK_BISHOP:
-			clear_bit(black, to);
-			clear_bit(bishops, to);
+			Square::clear_bit(black, to);
+			Square::clear_bit(bishops, to);
 			break;
 		case Piece::BLACK_ROOK:
-			clear_bit(black, to);
+			Square::clear_bit(black, to);
 			//TODO use constants, not magics
 			if (castling[2] && to == 63) {
 				castling[2] = false;
@@ -632,11 +576,11 @@ namespace Positions {
 				castling[3] = false;
 				move_state.set_cleared_queenside_castling(true);
 			}
-			clear_bit(rooks, to);
+			Square::clear_bit(rooks, to);
 			break;
 		case Piece::BLACK_QUEEN:
-			clear_bit(black, to);
-			clear_bit(queens, to);
+			Square::clear_bit(black, to);
+			Square::clear_bit(queens, to);
 			break;
 		default:
 			cerr << "mmc??" << to_string(taken) << "\n";
@@ -684,11 +628,11 @@ namespace Positions {
 		white_to_move = !white_to_move;
 
 		if (white_to_move) {
-			clear_bit(white, to);
-			set_bit(white, from);
+			Square::clear_bit(white, to);
+			Square::set_bit(white, from);
 			bb& pbb = piece_bb[moving - 1];
-			clear_bit(pbb, to);
-			set_bit(pbb, from);
+			Square::clear_bit(pbb, to);
+			Square::set_bit(pbb, from);
 			switch (moving) {
 			case Piece::WHITE_PAWN: {
 				// move pawn back
@@ -696,16 +640,16 @@ namespace Positions {
 				if (is_in_back_rank_black(to)) {
 					//piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
 					//un_promote(promoted_to, to);
-					clear_bit(queens, to);
+					Square::clear_bit(queens, to);
 				}
 				else {
 					// handle capturing by e. p.
 					//TODO BIG TODO
 					if (move_state.get_en_passant_square() == to) {
 						square_t target = square_t(to - 8); //TODO
-						set_bit(en_passant_square, to);
-						set_bit(pawns, target);
-						set_bit(black, target);
+						Square::set_bit(en_passant_square, to);
+						Square::set_bit(pawns, target);
+						Square::set_bit(black, target);
 					}
 
 				}
@@ -725,10 +669,10 @@ namespace Positions {
 				break;
 			case Piece::WHITE_KING:
 				if (to == from - 2) { //queenside castle
-					update_bits(white, rooks, C1, A1);
+					Square::update_bits(white, rooks, C1, A1);
 				}
 				else if (from == to - 2) { // kingside castle
-					update_bits(white, rooks, F1, H1);
+					Square::update_bits(white, rooks, F1, H1);
 				}
 				if (move_state.is_cleared_kingside_castling()) {
 					castling[0] = true;
@@ -745,26 +689,26 @@ namespace Positions {
 			}
 		}
 		else {
-			clear_bit(black, to);
-			set_bit(black, from);
+			Square::clear_bit(black, to);
+			Square::set_bit(black, from);
 			bb& pbb = piece_bb[-moving - 1];
-			clear_bit(pbb, to);
-			set_bit(pbb, from);
+			Square::clear_bit(pbb, to);
+			Square::set_bit(pbb, from);
 			switch (moving) {
 			case Piece::BLACK_PAWN: {
 
 				if (is_in_back_rank_white(to)) {
 					//un_promote(Piece::BLACK_QUEEN, to);
-					clear_bit(queens, to);
+					Square::clear_bit(queens, to);
 				}
 				else {
 					//TODO BIG TODO
 					// handle capturing by e. p.
 					if (move_state.get_en_passant_square() == to) {
 						square_t target = square_t( to + 8);
-						set_bit(en_passant_square, to);
-						set_bit(pawns, target);
-						set_bit(white, target);
+						Square::set_bit(en_passant_square, to);
+						Square::set_bit(pawns, target);
+						Square::set_bit(white, target);
 						//          cout << "unmade epcap to this: " << endl << (*this) << endl;
 					}
 				}
@@ -785,10 +729,10 @@ namespace Positions {
 				break;
 				case Piece::BLACK_KING:
 				if (to == from - 2) { //queenside castle
-					update_bits(black, rooks, C8, A8);//TODO constants, not magics
+					Square::update_bits(black, rooks, C8, A8);//TODO constants, not magics
 				}
 				else if (from == to - 2) { // kingside castle
-					update_bits(black, rooks, F8, H8);//TODO constants, not magics
+					Square::update_bits(black, rooks, F8, H8);//TODO constants, not magics
 				}
 				if (move_state.is_cleared_kingside_castling()) {
 					castling[2] = true;
@@ -816,21 +760,21 @@ namespace Positions {
 				//cout << "untaken: " << (int)captured << endl;
 				bool colour = determine_colour(captured);
 				if (colour) {
-					set_bit(white, to);
+					Square::set_bit(white, to);
 				}
 				else {
-					set_bit(black, to);
+					Square::set_bit(black, to);
 				}
 				int8_t p = determine_piece(captured);
 				switch (p) {
 				case 1:
-					set_bit(pawns, to);
+					Square::set_bit(pawns, to);
 					break;
 				case 2:
-					set_bit(knights, to);
+					Square::set_bit(knights, to);
 					break;
 				case 3:
-					set_bit(bishops, to);
+					Square::set_bit(bishops, to);
 					break;
 				case Piece::ROOK:
 					//TODO use constants, not magics
@@ -846,13 +790,13 @@ namespace Positions {
 					else if (move_state.is_cleared_queenside_castling() && to == 0) {
 						castling[1] = true;
 					}
-					set_bit(rooks, to);
+					Square::set_bit(rooks, to);
 					break;
 				case 5:
-					set_bit(queens, to);
+					Square::set_bit(queens, to);
 					break;
 				case 6:
-					set_bit(kings, to);
+					Square::set_bit(kings, to);
 					break;
 				default:
 					cerr << "un??" << p << endl;
@@ -870,7 +814,7 @@ namespace Positions {
 		cout << print_bitboard(black);
 		cout << print_bitboard(pawns);
 		for (uint8_t i = 0; i < 64; ++i) {
-			if (is_set_square(black, square_t(i))) {
+			if (Square::is_set_square(black, square_t(i))) {
 				cout << "1";
 			}
 			else {        
@@ -882,7 +826,7 @@ namespace Positions {
 		}
 		cout << "\n";
 		for (uint8_t i = 0; i < 64; ++i) {
-			if (is_set_square(white, square_t(i))) {
+			if (Square::is_set_square(white, square_t(i))) {
 				cout << "1";
 			}
 			else {
@@ -958,7 +902,7 @@ namespace Positions {
 			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));
 			const bb& raw_moves = all_moves[from];
 			bb kpsq = 0;
-			Position::set_bit(kpsq, square);
+			Square::set_bit(kpsq, square);
 			bb moves = raw_moves & kpsq;
 			while (moves != 0x00) {
 				const square_t& to = square_t(Bitboard::extract_and_remove_square(moves));
@@ -1007,5 +951,162 @@ namespace Positions {
 
 	bb Position::between[BETWEEN_ARRAY_SIZE];
 	const bitboard_set Position::rook_moves = Move_generator::pregenerate_rook_moves();
+	template<bool white_or_not>
+	inline void Position::make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
+		{
+			board[from] = 0; //TODO encapsulate
+			board[to] = moving; //TODO encapsulate
+			if (white_or_not) {
+				Square::clear_bit(white, from);
+				Square::set_bit(white, to);
+				bb& pbb = piece_bb[moving - 1];
+				Square::set_bit(pbb, to);
+				Square::clear_bit(pbb, from);
 
+				switch (moving) {
+				case Piece::WHITE_PAWN: {
+					//clear_bit(pawns, from);
+
+					if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
+													 //promote(Piece::WHITE_QUEEN, to);
+						Square::set_bit(queens, to);
+						Square::clear_bit(pawns, to);
+					}
+					else {
+						//set_bit(pawns, to);
+						// handle capturing by e. p.
+						square_t target = square_t(to - 8);
+						if (get_piece_on(to) == 0) { // en passant capture
+							Square::clear_bit(pawns, target);
+							Square::clear_bit(black, target);
+						}
+						else {
+							save_en_passant_square(move_state);
+							// handle double step preparing the e. p.
+							if (to - from == 16) {
+								set_en_passant = true;
+								Square::set_bit(en_passant_square, target);
+							}
+						}
+					}
+					break;
+				}
+				case Piece::WHITE_KNIGHT:
+				case Piece::WHITE_BISHOP:
+				case Piece::WHITE_QUEEN:
+				{
+
+					save_en_passant_square(move_state);
+					break;
+				}case Piece::WHITE_ROOK:
+					if (from == 7 && castling[0]) { // H1 //TODO
+						castling[0] = false;
+						move_state.set_cleared_kingside_castling(true);
+					}
+					else if (from == 0 && castling[1]) { //A1 // TODO
+						castling[1] = false;
+						move_state.set_cleared_queenside_castling(true);
+					}
+					save_en_passant_square(move_state);
+					break;
+				case Piece::WHITE_KING:
+					if (to == from - 2) { //queenside castle
+						Square::update_bits(white, rooks, A1, C1);//TODO constants, not magics
+
+					}
+					else if (from == to - 2) { // kingside castle
+						Square::update_bits(white, rooks, H1, F1);//TODO constants, not magics
+					}
+					if (castling[0]) {
+						move_state.set_cleared_kingside_castling(true);
+						castling[0] = false;
+					}
+					if (castling[1]) {
+						move_state.set_cleared_queenside_castling(true);
+						castling[1] = false;
+					}
+					save_en_passant_square(move_state);
+					break;
+				}
+			}
+			else {
+				Square::clear_bit(black, from);
+				Square::set_bit(black, to);
+				bb& pbb = piece_bb[-moving - 1];
+				Square::set_bit(pbb, to);
+				Square::clear_bit(pbb, from);
+				switch (moving) {
+				case Piece::BLACK_PAWN: {
+					//clear_bit(pawns, from);
+					/*int8_t promoted_to = move.get_promoted_to();
+					if (promoted_to != 0) {*/
+					if (is_in_back_rank_white(to)) {
+						Square::set_bit(queens, to);
+						Square::clear_bit(pawns, to); // that was eagerly set previously
+													  //							promote(Piece::BLACK_QUEEN, to); // TODO underpromote
+					}
+					else {
+
+						// handle capturing by e. p.
+						square_t target = square_t(to + 8);
+
+
+						if (get_piece_on(to) == 0) { // en passant capture
+							Square::clear_bit(pawns, target);
+							Square::clear_bit(white, target);
+						}
+						else {
+							// handle double step preparing the e. p.
+							save_en_passant_square(move_state);
+							if (to - from == -16) {
+								Square::set_bit(en_passant_square, target);
+								set_en_passant = true;
+							}
+						}
+					}
+					break;
+				}
+				case Piece::BLACK_KNIGHT:
+				case Piece::BLACK_BISHOP:
+				case Piece::BLACK_QUEEN:
+				{
+
+					save_en_passant_square(move_state);
+					break;
+				}
+				case Piece::BLACK_ROOK:
+
+					if (from == 63 && castling[2]) { // H8 //TODO
+						move_state.set_cleared_kingside_castling(true);
+						castling[2] = false;
+					}
+					else if (from == 56 && castling[3]) { //A8 // TODO
+						move_state.set_cleared_queenside_castling(true);
+						castling[3] = false;
+					}
+					save_en_passant_square(move_state);
+					break;
+				case Piece::BLACK_KING:
+
+					if (to == from - 2) { //queenside castle
+						Square::update_bits(black, rooks, A8, C8);//TODO constants, not magics
+					}
+					else if (from == to - 2) { // kingside castle
+						Square::update_bits(black, rooks, H8, F8);//TODO constants, not magics
+					}
+					if (castling[2]) {
+						move_state.set_cleared_kingside_castling(true);
+						castling[2] = false;
+					}
+					if (castling[3]) {
+						move_state.set_cleared_queenside_castling(true);
+						castling[3] = false;
+					}
+					save_en_passant_square(move_state);
+					break;
+				}
+			}
+		}
+
+	}
 }

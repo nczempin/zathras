@@ -10,6 +10,11 @@
 
 #include <cstdint>
 #include <string>
+
+#include <bitset>
+#include <array>
+
+
 namespace Positions {
 	enum Squares : int {
 		A1, B1, C1, D1, E1, F1, G1, H1,
@@ -25,15 +30,33 @@ namespace Positions {
 	};
 
 	using square_t = Squares;
+	using std::bitset;
+	using bb = uint_fast64_t;
 
 	class Square
 	{
 	public:
 		Square();
+		static void init_squares();
 		virtual ~Square();
 		static void print_square(uint8_t square);
 		static std::string mailbox_index_to_square(uint8_t x);
 		
+		static void set_square(bitset<64> & bs, square_t to);
+		static void clear_square(bitset<64> & bs, square_t to);
+		static void set_square(bb& bs, square_t to);
+		static bool is_set_square(bb bs, square_t to);
+		static void clear_square(bb& bs, square_t to);
+		static void set_bit(bb& bs, const square_t& to);
+		static void preset_bit(bb& bs, const square_t& to);
+		static void clear_bit(bb& bs, const square_t& to);
+		static void set_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
+		static void clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
+
+		static void update_bits(bb& colour, bb& piece, square_t clear, square_t set);
+
+		static std::array<bb, 64> squares;
+
 
 	};
 }

@@ -6,6 +6,8 @@
  */
 
 #include "Bitboard.h"
+#include "typedefs.h"
+
 
 #include "Move_generator.h" //TODO cyclic dependency
 

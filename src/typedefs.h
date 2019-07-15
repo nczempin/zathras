@@ -5,7 +5,8 @@
 #include <array>
 #include <functional>
 
-using namespace std;
+using  std::array;
+using std::function;
 
 using bb = uint_fast64_t;
 
@@ -14,5 +15,5 @@ using square_visitor = function<void(uint8_t)>;
 using move_visitor = function<void(int8_t moving, uint8_t from, uint8_t to, int8_t captured, int8_t promoted_to)>;
 
 using piece_t = int8_t;
-using square_t = uint8_t;
+//using square_t = uint8_t;
 
