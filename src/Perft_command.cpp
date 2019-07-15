@@ -69,7 +69,8 @@ namespace Interface {
 		//uint8_t depth = 6; //TODO get this from arguments, but use a reasonable default
 		//Position position;
 		const string perft_string =
-			"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+			"8/1K6/8/kp6/pP6/P7/8/8 b - b3 0 1";
+			//"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
 		//"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
 		////"k7/8/8/8/8/8/8/5B1K w - -";
 		position = Position::create_position(perft_string);
