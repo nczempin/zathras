@@ -107,5 +107,8 @@
     <ClInclude Include="src\Character.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="src\zathras_lib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

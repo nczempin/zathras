@@ -46,6 +46,7 @@
     <ClInclude Include="src\Position.h" />
     <ClInclude Include="src\Searcher.h" />
     <ClInclude Include="src\Square.h" />
+    <ClInclude Include="src\zathras_lib.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

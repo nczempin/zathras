@@ -27,7 +27,6 @@ namespace Positions {
 
 		//TODO statically initialize
 
-		Square::init_squares(); //TODO this seems to be a braindead hack
 		
 	}
 
