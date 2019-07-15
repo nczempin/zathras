@@ -822,7 +822,7 @@ namespace Moves {
 			//visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black);
 			add_non_capture_ray_moves(moves, white_bishops | white_queens, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, white_queens, Bitboard::bishop_moves, occupied);
-			//TODO generate_castling(f, true);
+			generate_castling(f, true);
 		}
 		else {
 			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
@@ -842,7 +842,7 @@ namespace Moves {
 			add_non_capture_ray_moves(moves, black_bishops | black_queens, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, black_queens, Bitboard::bishop_moves, occupied);
 
-			//TODO generate_castling(f, false);
+			generate_castling(f, false);
 
 		}
 		return moves;
