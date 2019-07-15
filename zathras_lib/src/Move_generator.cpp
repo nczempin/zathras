@@ -346,10 +346,9 @@ namespace Moves {
 			}
 			const bb raw_moves = all_moves[from];
 			bb moves = raw_moves & other_colour;
-			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO handle cast better
-				f(from, to);
+				f(from, to, NONE);
 			}
 		}
 	}
@@ -359,24 +358,24 @@ namespace Moves {
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO handle cast better
 			const bb& raw_moves = all_moves[from];
-			bb moves = raw_moves & other_colour;
 
 			if ((moving == Piece::BLACK_PAWN
 				&& (p->en_passant_square & Bitboard::BB_RANK3))
 				|| (moving == Piece::WHITE_PAWN
 					&& (p->en_passant_square & Bitboard::BB_RANK6))) {
-				moves = raw_moves & (other_colour | p->en_passant_square);
-				if (moves != 0x00) {
-					int y = 37;
+				bb moves = raw_moves & (p->en_passant_square);
+				while (moves != 0x00) {
+					square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO handle cast better
+					f(from, to, Move_type::EN_PASSANT);
 				}
-				//TODO: for e.p. capture we know the captured piece is opposing pawn
 			}
+			bb moves = raw_moves & other_colour;
 			while (moves != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO handle cast better
 				int8_t captured = has_captured_piece(to, moving);
 				if (captured) {
 					if (to >= 56) { // promoting white pawn
-						f(from, to);
+						f(from, to, NONE); //TODO find out how to use defaults on function objects
 						//TODO switch subpromotions on/off here
 	/*					f(moving, from, to, captured, Piece::WHITE_ROOK);
 						f(moving, from, to, captured, Piece::WHITE_BISHOP);
@@ -385,7 +384,7 @@ namespace Moves {
 
 					}
 					else if (to <= 7) { // promoting black pawn
-						f(from, to);
+						f(from, to, NONE);
 						//TODO switch subpromotions on/off here
 						//f(moving, from, to, captured, Piece::BLACK_ROOK);
 						//f(moving, from, to, captured, Piece::BLACK_BISHOP);
@@ -394,7 +393,7 @@ namespace Moves {
 
 					}
 					else {
-						f(from, to);
+						f(from, to, NONE);
 					}
 				}
 			}
@@ -414,7 +413,7 @@ namespace Moves {
 			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
 				uint8_t to = Bitboard::extract_and_remove_square(moves);
-				f(square_t(from), square_t(to)); //TODO
+				f(square_t(from), square_t(to), NONE); //TODO
 			}
 		}
 	}
@@ -520,7 +519,7 @@ namespace Moves {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves)); // TODO proper cast
 				bool b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
-					f(from, to);
+					f(from, to, NONE);
 				}
 			}
 		}
@@ -536,7 +535,7 @@ namespace Moves {
 				bool b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
 					//int8_t captured = find_captured_piece(to, moving);
-					f(from, to);
+					f(from, to, NONE);
 				}
 			}
 		}
@@ -549,7 +548,7 @@ namespace Moves {
 			[&all_moves, &f, &moving](square_t x) {
 				Bitboard::visit_bitboard(all_moves[x], [&x, &f, &moving](square_t y) {
 					int8_t captured = -98;
-					f(x, y);
+					f(x, y, NONE);
 					});
 
 			});
@@ -588,7 +587,7 @@ namespace Moves {
 			while (moves != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves));
 				if (to >= 56) { // promoting white pawn
-					f(from, to);
+					f(from, to, NONE);
 					//TODO switch subpromotions on/off here
 					/*f(moving, from, to, 0, Piece::WHITE_ROOK);
 					f(moving, from, to, 0, Piece::WHITE_BISHOP);
@@ -597,7 +596,7 @@ namespace Moves {
 
 				}
 				else if (to <= 7) { // promoting black pawn
-					f(from, to);
+					f(from, to, NONE);
 					//TODO switch subpromotions on/off here
 					//f(moving, from, to, 0, Piece::BLACK_ROOK);
 					//f(moving, from, to, 0, Piece::BLACK_BISHOP);
@@ -606,7 +605,7 @@ namespace Moves {
 
 				}
 				else {
-					f(from, to);
+					f(from, to, NONE);
 				}
 			}
 		}
@@ -621,7 +620,7 @@ namespace Moves {
 			while (moveses != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moveses));
 				if (to >= 56) { // promoting white pawn
-					moves.add_move(from, to);
+					moves.add_move(from, to, NONE);
 					//TODO switch subpromotions on/off here
 					/*f(moving, from, to, 0, Piece::WHITE_ROOK);
 					f(moving, from, to, 0, Piece::WHITE_BISHOP);
@@ -630,7 +629,7 @@ namespace Moves {
 
 				}
 				else if (to <= 7) { // promoting black pawn
-					moves.add_move(from, to);
+					moves.add_move(from, to, NONE);
 					//TODO switch subpromotions on/off here
 					//f(moving, from, to, 0, Piece::BLACK_ROOK);
 					//f(moving, from, to, 0, Piece::BLACK_BISHOP);
@@ -639,7 +638,7 @@ namespace Moves {
 
 				}
 				else {
-					moves.add_move(from, to);
+					moves.add_move(from, to, NONE);
 				}
 			}
 		}
@@ -685,7 +684,7 @@ namespace Moves {
 		p->white_to_move = !p->white_to_move;
 
 		//f(piece, king_square, king_square + direction * 2, 0, 0);
-		f(king_square, square_t(uint8_t(king_square) + direction * 2));
+		f(king_square, square_t(uint8_t(king_square) + direction * 2), NONE);
 
 	}
 
@@ -710,7 +709,7 @@ namespace Moves {
 		//bool en_passant_capture = will_be_en_passant(to, moving);
 
 //		moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
-		moves.add_move(from, to);
+		moves.add_move(from, to, NONE);
 	}
 
 	bool Move_generator::will_be_en_passant(square_t to, int8_t moving) {
@@ -734,7 +733,7 @@ namespace Moves {
 				const bool& b = Position::is_anything_between(from, to, occupied);
 				if (!b) {
 					//moves.add_move(piece, from, to, 0, false, 0);
-					moves.add_move(from, to);
+					moves.add_move(from, to, NONE);
 				}
 			}
 		}
@@ -785,11 +784,11 @@ namespace Moves {
 		//moves.reserve(35);
 		moves.reset();
 		const move_visitor& f =
-			[&moves](const square_t& from, const square_t& to) {
+			[&moves](const square_t& from, const square_t& to, const Move_type& move_type) {
 
 			//bool en_passant_capture = will_be_en_passant(to, moving);
 			//moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
-			moves.add_move(from, to);
+			moves.add_move(from, to, move_type);
 		};
 		//TODO generalize, obviously
 		const bb white_pawns = p->pawns & p->white;
@@ -854,11 +853,11 @@ namespace Moves {
 		//moves.reserve(35);
 		moves.reset();
 		const move_visitor& f =
-			[&moves](const square_t& from, const square_t& to) {
+			[&moves](const square_t& from, const square_t& to, const move_type_t& move_type) {
 
 			//			bool en_passant_capture = will_be_en_passant(to, moving);
 			//			moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
-			moves.add_move(from, to);
+			moves.add_move(from, to, move_type);
 		};
 		//TODO generalize, obviously
 		const bb white_pawns = p->pawns & p->white;

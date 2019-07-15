@@ -41,11 +41,12 @@ namespace Moves {
 		m.set_promoted_to(promoted_to);
 		++index;
 	}*/
-	void Move_container::add_move(const square_t& from, const square_t& to)
+	void Move_container::add_move(const square_t& from, const square_t& to, const move_type_t& move_type)
 	{
 		Move& m = container[index];
 		m.set_from(from);
 		m.set_to(to);
+		m.set_move_type(move_type);
 		++index;
 	}
 

@@ -27,7 +27,7 @@ namespace Positions {
 
 		//TODO statically initialize
 
-		
+
 	}
 
 	//
@@ -462,7 +462,7 @@ namespace Positions {
 		}
 	}
 
-	
+
 
 	inline void Position::save_en_passant_square(Move_state& move_state) {
 		if (en_passant_square != 0x00) {
@@ -704,7 +704,7 @@ namespace Positions {
 					//TODO BIG TODO
 					// handle capturing by e. p.
 					if (move_state.get_en_passant_square() == to) {
-						square_t target = square_t( to + 8);
+						square_t target = square_t(to + 8);
 						Square::set_bit(en_passant_square, to);
 						Square::set_bit(pawns, target);
 						Square::set_bit(white, target);
@@ -726,7 +726,7 @@ namespace Positions {
 					castling[3] = true;
 				}
 				break;
-				case Piece::BLACK_KING:
+			case Piece::BLACK_KING:
 				if (to == from - 2) { //queenside castle
 					Square::update_bits(black, rooks, C8, A8);//TODO constants, not magics
 				}
@@ -816,7 +816,7 @@ namespace Positions {
 			if (Square::is_set_square(black, square_t(i))) {
 				cout << "1";
 			}
-			else {        
+			else {
 				cout << "0";
 			}
 			if (i % 8 == 7) {
@@ -974,8 +974,11 @@ namespace Positions {
 					else {
 						//set_bit(pawns, to);
 						// handle capturing by e. p.
-						square_t target = square_t(to - 8);
-						if (get_piece_on(to) == 0) { // en passant capture
+
+						//TODO: find out which method is faster
+						//if (get_piece_on(to) == 0xff) { // en passant capture
+						if (move.get_move_type() == EN_PASSANT) { // en passant capture
+							square_t target = square_t(to - 8);
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(black, target);
 						}
@@ -983,6 +986,7 @@ namespace Positions {
 							save_en_passant_square(move_state);
 							// handle double step preparing the e. p.
 							if (to - from == 16) {
+								square_t target = square_t(to - 8);
 								set_en_passant = true;
 								Square::set_bit(en_passant_square, target);
 							}
@@ -1050,7 +1054,9 @@ namespace Positions {
 						square_t target = square_t(to + 8);
 
 
-						if (get_piece_on(to) == 0) { // en passant capture
+						//TODO: find out which method is faster
+						//if (get_piece_on(to) == 0xff) { // en passant capture
+						if (move.get_move_type() == EN_PASSANT) { // en passant capture
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(white, target);
 						}

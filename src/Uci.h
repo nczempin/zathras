@@ -321,7 +321,7 @@ namespace Interface {
 			int captured = 0;
 
 			//Move m(0, from, to, captured, false);
-			Move m(from, to);/// , captured, false);
+			Move m(from, to, NONE);/// , captured, false);
 			//m.set_promoted_to(promoted_to);
 			return m;
 		}
