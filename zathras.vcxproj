@@ -107,6 +107,7 @@
     <ClInclude Include="src\Command_receiver.h" />
     <ClInclude Include="src\Info.h" />
     <ClInclude Include="src\Perft_command.h" />
+    <ClInclude Include="src\Sf.h" />
     <ClInclude Include="src\Uci.h" />
   </ItemGroup>
   <ItemGroup>

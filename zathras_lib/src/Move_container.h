@@ -27,7 +27,7 @@ namespace Moves {
 		Move_container();
 		virtual ~Move_container();
 
-		static const size_t SIZE = 127;
+		static const size_t SIZE = 128;
 
 		static Move_container& get(size_t index);
 //		void add_move(const int8_t& moving, const uint8_t& from, const uint8_t& to, const int8_t& captured, const bool& en_passant_capture, const int8_t& promoted_to);

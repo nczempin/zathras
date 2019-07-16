@@ -404,7 +404,7 @@ namespace Moves {
 		const bb& other_colour, const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
-			const uint8_t from = Bitboard::extract_and_remove_square(position);
+			const square_t& from = static_cast<square_t>(Bitboard::extract_and_remove_square(position));
 			if (from == 255) { //TODO
 				break;
 			}
@@ -412,8 +412,8 @@ namespace Moves {
 			bb moves = raw_moves & ~other_colour;
 			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
-				uint8_t to = Bitboard::extract_and_remove_square(moves);
-				f(square_t(from), square_t(to), NONE); //TODO
+				const square_t& to = static_cast<square_t>(Bitboard::extract_and_remove_square(moves));
+				f(from, to, NONE); //TODO
 			}
 		}
 	}
@@ -806,12 +806,11 @@ namespace Moves {
 		const bb occupied = p->white | p->black;
 
 		if (p->white_to_move) {
-			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
 			visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
 			visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
 			visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
 			visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
-			visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
+			//visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
 			add_non_capture_ray_moves(moves, white_queens | white_rooks, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, white_rooks, Bitboard::rook_moves, occupied);
 
@@ -822,6 +821,8 @@ namespace Moves {
 			add_non_capture_ray_moves(moves, white_bishops | white_queens, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, white_queens, Bitboard::bishop_moves, occupied);
 			generate_castling(f, true);
+			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
+			visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
 		}
 		else {
 			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);

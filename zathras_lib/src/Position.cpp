@@ -637,6 +637,7 @@ namespace Positions {
 				// move pawn back
 				//TODO clearing can be saved when move was a capture. find out which is faster
 				if (is_in_back_rank_black(to)) {
+					//TODO move_type = promotion
 					//piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
 					//un_promote(promoted_to, to);
 					Square::clear_bit(queens, to);
@@ -644,8 +645,9 @@ namespace Positions {
 				else {
 					// handle capturing by e. p.
 					//TODO BIG TODO
-					if (move_state.get_en_passant_square() == to) {
+					if (move.get_move_type() == EN_PASSANT) {
 						square_t target = square_t(to - 8); //TODO
+						en_passant_square = 0;
 						Square::set_bit(en_passant_square, to);
 						Square::set_bit(pawns, target);
 						Square::set_bit(black, target);
@@ -703,12 +705,12 @@ namespace Positions {
 				else {
 					//TODO BIG TODO
 					// handle capturing by e. p.
-					if (move_state.get_en_passant_square() == to) {
-						square_t target = square_t(to + 8);
+					if (move.get_move_type() == EN_PASSANT) {
+						square_t target = square_t(to + 8); //TODO
+						en_passant_square = 0;
 						Square::set_bit(en_passant_square, to);
 						Square::set_bit(pawns, target);
 						Square::set_bit(white, target);
-						//          cout << "unmade epcap to this: " << endl << (*this) << endl;
 					}
 				}
 			}

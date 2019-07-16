@@ -37,6 +37,9 @@
     <ClInclude Include="src\Perft_command.h">
       <Filter>Interface</Filter>
     </ClInclude>
+    <ClInclude Include="src\Sf.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Interface">
