@@ -324,10 +324,25 @@ namespace Interface {
 			piece_t captured = board[to];
 
 			// TODO stupid way of doing this
-			if (moving == Piece::WHITE_PAWN||moving==Piece::BLACK_PAWN) {
-				if (to == Bitboard::extract_square(p.en_passant_square)) {
-					mt = EN_PASSANT;
+			if (moving == Piece::WHITE_PAWN) {
+				if (board[to] == 0) {
+					if (to - from == 9 || to - from == 7) {
+						mt = EN_PASSANT;
+					}
 				}
+				//if (to == Bitboard::extract_square(p.en_passant_square)) {
+				//	mt = EN_PASSANT;
+				//}
+			}
+			if (moving == Piece::BLACK_PAWN) {
+				if (board[to] == 0) {
+					if (from -to == 9 || from -to == 7) {
+						mt = EN_PASSANT;
+					}
+				}
+				//if (to == Bitboard::extract_square(p.en_passant_square)) {
+				//	mt = EN_PASSANT;
+				//}
 			}
 			Move m(from, to, mt);/// , captured, false);
 			//m.set_promoted_to(promoted_to);
