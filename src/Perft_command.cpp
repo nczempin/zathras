@@ -42,6 +42,8 @@ namespace Interface {
 				pp->unmake_move(move, ms);
 				continue;
 			}
+			//string s = to_string(move);
+			//cout << s  << endl;
 			// the move was legal
 			if (depth == 1) {
 				++total_result;
@@ -112,6 +114,7 @@ namespace Interface {
 				uint64_t perft_result = perft(depth - 1);
 				string s = to_string(move);
 				cout << s << ": " << perft_result << endl;
+				//pp->debugPosition();
 				total_result += perft_result;
 				pp->unmake_move(move, ms);
 			}
