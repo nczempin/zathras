@@ -78,6 +78,7 @@ namespace Positions {
 
 
 		static string print_mailbox_board(const piece_t board[64]);
+		static string debug_mailbox_board(const piece_t board[64]);
 
 		static void visualize_bitboard(bb my_bb, ostream& stream);
 		static string print_bitboard(bb my_bb);
@@ -102,6 +103,8 @@ namespace Positions {
 		bool white_to_move = true; //TODO public for now
 
 		void mailbox_from_bitboard(piece_t board[64]) const;
+
+		string debug_board() const;
 
 		void debugPosition();
 	private:

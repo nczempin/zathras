@@ -257,7 +257,7 @@ namespace Positions {
 	string Position::print_mailbox_board(const piece_t board[64]) {
 		string retval;
 		retval += "  +-----------------+\n";
-		const char* symbols = ".PNBRQKpnbrqk*";
+		const char* symbols = ".pnrbqkPNBRQK*";
 		for (int i = 0; i < 8; ++i) {
 			retval.append(to_string(8 - i));
 			retval.append(" |");
@@ -265,6 +265,24 @@ namespace Positions {
 				int coord = (7 - i) * 8 + j;
 				retval.append(" ");
 				retval.append(1, symbols[board[coord]]);
+			}
+			retval.append(" |\n");
+		}
+		retval.append("  +-----------------+\n");
+		retval.append("    a b c d e f g h\n");
+		return retval;
+	}
+	string Position::debug_mailbox_board(const piece_t board[64]) {
+		string retval;
+		retval += "  +-----------------+\n";
+		const char* symbols = ".PNBRQKpnbrqk*";
+		for (int i = 0; i < 8; ++i) {
+			retval.append(to_string(8 - i));
+			retval.append(" |");
+			for (int j = 0; j < 8; ++j) {
+				int coord = (7 - i) * 8 + j;
+				retval.append(" ");
+				retval.append(to_string(int(board[coord])));
 			}
 			retval.append(" |\n");
 		}
@@ -400,6 +418,23 @@ namespace Positions {
 		);
 	}
 
+	string Position::debug_board() const {
+		// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
+		string retval("");
+		retval += debug_mailbox_board(board);
+		retval += "wtm: " + to_string(white_to_move) + "\n";
+		retval += "\n";
+		retval += "Castling: ";
+		static char castling_chars[] = "KQkq";
+		for (int i = 0; i < 4; ++i) {
+			if (castling[i]) {
+				retval += castling_chars[i];
+			}
+		}
+		retval += "\n";
+		return retval;
+	}
+	
 	string Position::print_board() const {
 		// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 		string retval("");
@@ -409,7 +444,7 @@ namespace Positions {
 		}
 		mailbox_from_bitboard(mboard);
 		retval += print_mailbox_board(mboard);
-		retval += print_mailbox_board(board);
+		retval += debug_mailbox_board(board);
 		retval += "wtm: " + to_string(white_to_move) + "\n";
 		retval += "\n";
 		retval += "Castling: ";
@@ -592,9 +627,7 @@ namespace Positions {
 		const square_t& from = move.get_from();
 		const square_t& to = move.get_to();
 		int8_t moving = get_piece_on(from);
-		if (moving == 0) {
-
-		}
+		assert(moving != 0);
 
 		const int8_t& taken = get_piece_on(to);
 		if (taken != 0) {
@@ -621,6 +654,7 @@ namespace Positions {
 		square_t from = move.get_from();
 		square_t to = move.get_to();
 		int8_t moving = get_piece_on(to);
+		assert(moving != 0);
 
 
 		restore_en_passant_square(move_state);
@@ -651,6 +685,7 @@ namespace Positions {
 						Square::set_bit(en_passant_square, to);
 						Square::set_bit(pawns, target);
 						Square::set_bit(black, target);
+						board[target] = Piece::BLACK_PAWN;
 					}
 
 				}
@@ -711,6 +746,8 @@ namespace Positions {
 						Square::set_bit(en_passant_square, to);
 						Square::set_bit(pawns, target);
 						Square::set_bit(white, target);
+						board[target] = Piece::WHITE_PAWN;
+
 					}
 				}
 			}
@@ -810,6 +847,10 @@ namespace Positions {
 	}
 
 	void Position::debugPosition() {
+		//for (int i = 0; i < 64; ++i) {
+		//	mboard[i] = 0;
+		//}
+
 		cout << print_board();
 		cout << print_bitboard(white);
 		cout << print_bitboard(black);
@@ -957,6 +998,7 @@ namespace Positions {
 		{
 			board[from] = 0; //TODO encapsulate
 			board[to] = moving; //TODO encapsulate
+			assert(moving != 0);
 			if (white_or_not) {
 				Square::clear_bit(white, from);
 				Square::set_bit(white, to);
@@ -983,6 +1025,7 @@ namespace Positions {
 							square_t target = square_t(to - 8);
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(black, target);
+							board[target] = 0;
 						}
 						else {
 							save_en_passant_square(move_state);
@@ -1015,12 +1058,15 @@ namespace Positions {
 					save_en_passant_square(move_state);
 					break;
 				case Piece::WHITE_KING:
-					if (to == from - 2) { //queenside castle
-						Square::update_bits(white, rooks, A1, C1);//TODO constants, not magics
-
+					if (to == C1) { //queenside castle
+						Square::update_bits(white, rooks, A1, D1);
+						board[A1] = 0;
+						board[D1] = Piece::WHITE_ROOK;
 					}
-					else if (from == to - 2) { // kingside castle
-						Square::update_bits(white, rooks, H1, F1);//TODO constants, not magics
+					else if (to == G1) { // kingside castle
+						Square::update_bits(white, rooks, H1, F1);
+						board[H1] = 0;
+						board[F1] = Piece::WHITE_ROOK;
 					}
 					if (castling[0]) {
 						move_state.set_cleared_kingside_castling(true);
@@ -1061,6 +1107,8 @@ namespace Positions {
 						if (move.get_move_type() == EN_PASSANT) { // en passant capture
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(white, target);
+							
+							board[target] = 0;
 						}
 						else {
 							// handle double step preparing the e. p.
@@ -1095,11 +1143,16 @@ namespace Positions {
 					break;
 				case Piece::BLACK_KING:
 
-					if (to == from - 2) { //queenside castle
+					
+					if (to == C8) { //queenside castle
 						Square::update_bits(black, rooks, A8, C8);//TODO constants, not magics
+						board[A8] = 0;
+						board[D8] = Piece::BLACK_ROOK;
 					}
-					else if (from == to - 2) { // kingside castle
+					else if (to == G8) { // kingside castle
 						Square::update_bits(black, rooks, H8, F8);//TODO constants, not magics
+						board[H8] = 0;
+						board[F8] = Piece::BLACK_ROOK;
 					}
 					if (castling[2]) {
 						move_state.set_cleared_kingside_castling(true);

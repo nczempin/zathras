@@ -84,6 +84,8 @@ namespace Interface {
 //		cout << perft_string << "\n" << endl;
 		//cout << position << "\n";
 		cout << position.print_board();
+		cout << position.debug_board();
+		position.debugPosition();
 		//mg.pregenerate_moves();
 		clock_t begin = clock();
 
