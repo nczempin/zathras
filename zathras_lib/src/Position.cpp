@@ -704,11 +704,15 @@ namespace Positions {
 				}
 				break;
 			case Piece::WHITE_KING:
-				if (to == from - 2) { //queenside castle
-					Square::update_bits(white, rooks, C1, A1);
+				if (from == E1 && to == C1) { //queenside castle
+					Square::update_bits(white, rooks, D1, A1);
+					board[D1] = 0;
+					board[A1] = Piece::WHITE_ROOK;
 				}
-				else if (from == to - 2) { // kingside castle
+				else if (from == E1 && to == G1) { // kingside castle
 					Square::update_bits(white, rooks, F1, H1);
+					board[F1] = 0;
+					board[H1] = Piece::WHITE_ROOK;
 				}
 				if (move_state.is_cleared_kingside_castling()) {
 					castling[0] = true;
@@ -766,11 +770,15 @@ namespace Positions {
 				}
 				break;
 			case Piece::BLACK_KING:
-				if (to == from - 2) { //queenside castle
-					Square::update_bits(black, rooks, C8, A8);//TODO constants, not magics
+				if (from == E8 && to == C8) { //queenside castle
+					Square::update_bits(black, rooks, D8, A8);//TODO constants, not magics
+					board[D8] = 0;
+					board[A8] = Piece::BLACK_ROOK;
 				}
-				else if (from == to - 2) { // kingside castle
+				else if (from == E8 && to == G8) { // kingside castle
 					Square::update_bits(black, rooks, F8, H8);//TODO constants, not magics
+					board[F8] = 0;
+					board[H8] = Piece::BLACK_ROOK;
 				}
 				if (move_state.is_cleared_kingside_castling()) {
 					castling[2] = true;
@@ -885,8 +893,16 @@ namespace Positions {
 		//TODO this is a somewhat naive way of doing this, it needs to be much more efficient
 		const bb colour = side ? white : black;
 		const bb kpbb = kings & colour;
+		if (kpbb == 0) {
+			cout << print_bitboard(kings);
+			cout << print_bitboard(colour);
+			cout << print_bitboard(white);
+			cout << print_bitboard(black);
+		}
+		assert(kpbb != 0);
 		const square_t& king_pos = square_t(Bitboard::extract_square(kpbb));
-		if (king_pos > 64) {
+		assert(king_pos < 64);
+		if (king_pos >= 64) {
 			debugPosition();
 			throw king_pos;
 		}
@@ -1046,7 +1062,8 @@ namespace Positions {
 
 					save_en_passant_square(move_state);
 					break;
-				}case Piece::WHITE_ROOK:
+				}
+				case Piece::WHITE_ROOK:
 					if (from == 7 && castling[0]) { // H1 //TODO
 						castling[0] = false;
 						move_state.set_cleared_kingside_castling(true);
@@ -1058,12 +1075,12 @@ namespace Positions {
 					save_en_passant_square(move_state);
 					break;
 				case Piece::WHITE_KING:
-					if (to == C1) { //queenside castle
+					if (from == E1 && to == C1) { //queenside castle
 						Square::update_bits(white, rooks, A1, D1);
 						board[A1] = 0;
 						board[D1] = Piece::WHITE_ROOK;
 					}
-					else if (to == G1) { // kingside castle
+					else if (from == E1 && to == G1) { // kingside castle
 						Square::update_bits(white, rooks, H1, F1);
 						board[H1] = 0;
 						board[F1] = Piece::WHITE_ROOK;
@@ -1144,12 +1161,12 @@ namespace Positions {
 				case Piece::BLACK_KING:
 
 					
-					if (to == C8) { //queenside castle
+					if (from == E8 && to == C8) { //queenside castle
 						Square::update_bits(black, rooks, A8, C8);//TODO constants, not magics
 						board[A8] = 0;
 						board[D8] = Piece::BLACK_ROOK;
 					}
-					else if (to == G8) { // kingside castle
+					else if (from == E8 && to == G8) { // kingside castle
 						Square::update_bits(black, rooks, H8, F8);//TODO constants, not magics
 						board[H8] = 0;
 						board[F8] = Piece::BLACK_ROOK;
