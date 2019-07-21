@@ -434,7 +434,7 @@ namespace Positions {
 		retval += "\n";
 		return retval;
 	}
-	
+
 	string Position::print_board() const {
 		// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 		string retval("");
@@ -587,6 +587,10 @@ namespace Positions {
 			Square::clear_bit(white, to);
 			Square::clear_bit(queens, to);
 			break;
+		case Piece::WHITE_KING:
+			Square::clear_bit(white, to);
+			Square::clear_bit(kings, to);
+			break;
 		case Piece::BLACK_PAWN:
 			Square::clear_bit(black, to);
 			Square::clear_bit(pawns, to);
@@ -616,6 +620,10 @@ namespace Positions {
 			Square::clear_bit(black, to);
 			Square::clear_bit(queens, to);
 			break;
+		case Piece::BLACK_KING:
+			Square::clear_bit(black, to);
+			Square::clear_bit(kings, to);
+			break;
 		default:
 			cerr << "mmc??" << to_string(taken) << "\n";
 			throw taken;
@@ -627,6 +635,9 @@ namespace Positions {
 		const square_t& from = move.get_from();
 		const square_t& to = move.get_to();
 		int8_t moving = get_piece_on(from);
+		//if (moving == 0) {
+		//	debugPosition();
+		//}
 		assert(moving != 0);
 
 		const int8_t& taken = get_piece_on(to);
@@ -651,12 +662,13 @@ namespace Positions {
 
 
 	void Position::unmake_move(const Move& move, const Move_state& move_state) {
+		//TODO such a mess
 		square_t from = move.get_from();
 		square_t to = move.get_to();
-		int8_t moving = get_piece_on(to);
+		piece_t moving = get_piece_on(to);
 		assert(moving != 0);
 
-
+		board[from] = moving;
 		restore_en_passant_square(move_state);
 		white_to_move = !white_to_move;
 
@@ -678,7 +690,6 @@ namespace Positions {
 				}
 				else {
 					// handle capturing by e. p.
-					//TODO BIG TODO
 					if (move.get_move_type() == EN_PASSANT) {
 						square_t target = square_t(to - 8); //TODO
 						en_passant_square = 0;
@@ -686,6 +697,7 @@ namespace Positions {
 						Square::set_bit(pawns, target);
 						Square::set_bit(black, target);
 						board[target] = Piece::BLACK_PAWN;
+						board[to] = 0;
 					}
 
 				}
@@ -729,10 +741,10 @@ namespace Positions {
 			}
 		}
 		else {
-			Square::clear_bit(black, to);
+			Square::clear_bit(black, to); //TODO unnecessary when capture
 			Square::set_bit(black, from);
 			bb& pbb = piece_bb[-moving - 1];
-			Square::clear_bit(pbb, to);
+			Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
 			Square::set_bit(pbb, from);
 			switch (moving) {
 			case Piece::BLACK_PAWN: {
@@ -742,7 +754,6 @@ namespace Positions {
 					Square::clear_bit(queens, to);
 				}
 				else {
-					//TODO BIG TODO
 					// handle capturing by e. p.
 					if (move.get_move_type() == EN_PASSANT) {
 						square_t target = square_t(to + 8); //TODO
@@ -751,7 +762,7 @@ namespace Positions {
 						Square::set_bit(pawns, target);
 						Square::set_bit(white, target);
 						board[target] = Piece::WHITE_PAWN;
-
+						board[to] = 0;
 					}
 				}
 			}
@@ -795,11 +806,11 @@ namespace Positions {
 				break;
 			}
 		}
+		assert(get_piece_on(move.get_from()) != 0);
+		if (move.get_move_type() != EN_PASSANT) {
 
-		//BIG TODOif (!move.is_en_passant_capture()) {
-		{
 			int8_t captured = move_state.captured;// get_captured();
-			board[from] = moving; //TODO encapsulate
+			//board[from] = moving; //TODO encapsulate
 			board[to] = captured; //TODO encapsulate
 
 			if (captured != 0) {
@@ -848,8 +859,13 @@ namespace Positions {
 					cerr << "un??" << p << endl;
 					throw p;
 				}
+				assert(get_piece_on(move.get_from()) != 0);
+				assert(get_piece_on(move.get_to()) != 0);
 			}
 		}
+
+
+		assert(get_piece_on(move.get_from()) != 0);
 		// TODO update 3 repetitions
 		// TODO update 50 moves
 	}
@@ -1030,9 +1046,9 @@ namespace Positions {
 													 //promote(Piece::WHITE_QUEEN, to);
 						Square::set_bit(queens, to);
 						Square::clear_bit(pawns, to);
+						board[to] = Piece::WHITE_QUEEN;
 					}
 					else {
-						//set_bit(pawns, to);
 						// handle capturing by e. p.
 
 						//TODO: find out which method is faster
@@ -1124,7 +1140,7 @@ namespace Positions {
 						if (move.get_move_type() == EN_PASSANT) { // en passant capture
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(white, target);
-							
+
 							board[target] = 0;
 						}
 						else {
@@ -1160,14 +1176,14 @@ namespace Positions {
 					break;
 				case Piece::BLACK_KING:
 
-					
+
 					if (from == E8 && to == C8) { //queenside castle
-						Square::update_bits(black, rooks, A8, C8);//TODO constants, not magics
+						Square::update_bits(black, rooks, A8, C8);
 						board[A8] = 0;
 						board[D8] = Piece::BLACK_ROOK;
 					}
 					else if (from == E8 && to == G8) { // kingside castle
-						Square::update_bits(black, rooks, H8, F8);//TODO constants, not magics
+						Square::update_bits(black, rooks, H8, F8);
 						board[H8] = 0;
 						board[F8] = Piece::BLACK_ROOK;
 					}

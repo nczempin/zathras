@@ -15,10 +15,11 @@
 
 #include "Position.h"
 #include "Move_generator.h"
+#include <cassert>
 
 namespace Interface {
 	using namespace Moves;
-	
+
 
 	Perft_command::~Perft_command() {
 		// TODO Auto-generated destructor stub
@@ -32,18 +33,19 @@ namespace Interface {
 		array<Move, Move_container::SIZE> moves = move_container.get_moves();
 		uint64_t total_result = 0;
 		size_t size = move_container.size();
-		
+
 		for (size_t i = 0; i < size; ++i) {
 			Move& move = moves[i];
 			Move_state ms;
 			pp->make_move(move, ms);
+			assert(pp->get_piece_on(move.get_from()) == 0);
+			assert(pp->get_piece_on(move.get_to()) != 0);
+
 			if (pp->is_in_check(!pp->white_to_move)) {
-				//++illegal_moves_generated;
 				pp->unmake_move(move, ms);
 				continue;
 			}
-			//string s = to_string(move);
-			//cout << s  << endl;
+
 			// the move was legal
 			if (depth == 1) {
 				++total_result;
@@ -52,7 +54,10 @@ namespace Interface {
 				uint64_t perft_result = perft(depth - 1);
 				total_result += perft_result;
 			}
+			assert(pp->get_piece_on(move.get_from()) == 0);
+			assert(pp->get_piece_on(move.get_to()) != 0);
 			pp->unmake_move(move, ms);
+			assert(pp->get_piece_on(move.get_from()) != 0);
 		}
 		return total_result;
 	}
@@ -74,15 +79,15 @@ namespace Interface {
 		const string perft_string =
 			//"8/1K6/8/kp6/pP6/P7/8/8 b - b3 0 1";
 			"rnbqkbnr/ppp2ppp/8/3pP3/8/8/PPP1PPPP/RNBQKBNR w KQkq d6 0 3";
-			//"6qk/8/8/6pP/8/8/8/7K w - g6 0 3 ";
-			//"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-		//"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
-		////"k7/8/8/8/8/8/8/5B1K w - -";
-		//position = Position::create_position(perft_string);
-		//position = Position::create_start_position();
+		//"6qk/8/8/6pP/8/8/8/7K w - g6 0 3 ";
+		//"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
+	//"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
+	////"k7/8/8/8/8/8/8/5B1K w - -";
+	//position = Position::create_position(perft_string);
+	//position = Position::create_start_position();
 		cout << "Perft " << to_string(depth) << " for this position:\n";
-//		cout << perft_string << "\n" << endl;
-		//cout << position << "\n";
+		//		cout << perft_string << "\n" << endl;
+				//cout << position << "\n";
 		cout << position.print_board();
 		cout << position.debug_board();
 		position.debugPosition();
@@ -96,7 +101,7 @@ namespace Interface {
 		size_t move_count = move_container.size();
 
 		if (depth == 0) {
-//			total_result = move_count;
+			//			total_result = move_count;
 			++total_result;
 		}
 		else {
