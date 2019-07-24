@@ -27,7 +27,7 @@
 namespace Positions {
 
 	//TODO find better way to do this
-#define pawns  piece_bb[0];
+#define pawns  piece_bb[0]
 #define knights piece_bb[1]
 #define bishops piece_bb[2]
 #define rooks piece_bb[3]
