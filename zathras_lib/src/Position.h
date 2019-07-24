@@ -1,10 +1,3 @@
-/*
- * Position.h
- *
- *  Created on: Apr 9, 2016
- *      Author: nczempin
- */
-#pragma once
 #ifndef POSITION_H_
 #define POSITION_H_
 
@@ -102,7 +95,8 @@ namespace Positions {
 
 		string debug_board() const;
 
-		void debug_position();		static bb between[BETWEEN_ARRAY_SIZE];
+		void debug_position();		
+		static bb between[BETWEEN_ARRAY_SIZE];
 		inline static uint16_t calc_index(const uint8_t& x, const uint8_t& y) {
 			return x + 64 * y;
 		}

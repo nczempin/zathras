@@ -69,7 +69,7 @@ namespace Positions {
 	string Position::mailbox_board_simple_representation(const piece_t board[64]) {
 		string retval;
 		retval += "  +-----------------+\n";
-		const char* symbols = ".pnrbqkPNBRQK*";
+		const char* symbols = ".pnbrqkPNBRQK*";
 		for (int i = 0; i < 8; ++i) {
 			retval.append(to_string(8 - i));
 			retval.append(" |");
@@ -179,6 +179,7 @@ namespace Positions {
 	}
 
 	void Position::mailbox_from_bitboard(piece_t board[64]) const {
+		
 		Bitboard::visit_bitboard(white & pawns, [&board](int x) {
 			board[x] = 1;
 			}
