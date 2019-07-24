@@ -54,17 +54,50 @@ namespace Positions {
 		bs[to] = true;
 	}
 
-	void Square::clear_square(bitset<64> & bs, square_t to) {
-		bs[to] = false;
-	}
 	void Square::set_square(bb& b, square_t to) {
 		bb tmp = 1ULL << to;
 		b |= tmp;
+	}
+	void Square::set_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
+		//uint8_t to_twisted = 7 - file + rank * 8;
+		const uint8_t to = file + rank * 8;
+		Square::set_square(bbs, square_t(to));
+	}
+	void Square::set_square(const uint8_t& file, const uint8_t& rank, bitset<64> & bs) {
+		Square::set_square(bs, file, rank);
+	}
+	void Square::set_square(bitset<64> & bs, const uint8_t& file, const uint8_t& rank) {
+		//uint8_t to_twisted = 7 - file + rank * 8;
+		const uint8_t to = file + rank * 8;
+		Square::set_square(bs, square_t(to));
+	}
+	void Square::set_square_hurz(bitset<64> & bs, const uint8_t& file, const uint8_t& rank) {
+		//uint8_t to_twisted = 7 - file + rank * 8;
+		const uint8_t to = file + rank * 8;
+		Square::set_square(bs, square_t(to));
+	}
+
+
+	void Square::clear_square(bitset<64> & bs, square_t to) {
+		bs[to] = false;
 	}
 	void Square::clear_square(bb& b, square_t to) {
 		bb tmp = ~(1ULL << to);
 		b &= tmp;
 	}
+	void Square::clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
+		//uint8_t to_twisted = 7 - file + rank * 8;
+		uint8_t to = file + rank * 8;
+		Square::clear_square(bbs, square_t(to));
+	}
+	void Square::clear_square(const uint8_t& file, const uint8_t& rank, bitset<64> & bs) {
+		const uint8_t to = file + rank * 8;
+		Square::clear_square(bs, square_t(to));
+	}
+
+	
+	
+	
 	void Square::set_bit(bb& b, const square_t& to) {
 		b |= squares[to];
 	}
@@ -86,18 +119,9 @@ namespace Positions {
 	}
 
 
-	void Square::set_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
-		uint8_t to_twisted = 7 - file + rank * 8;
-		//uint8_t to = file + rank * 8;
-		Square::set_square(bbs, square_t(to_twisted));
-	}
+	
 
-	void Square::clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs) {
-		uint8_t to_twisted = 7 - file + rank * 8;
-		//uint8_t to = file + rank * 8;
-		Square::clear_square(bbs, square_t(to_twisted));
-	}
-	void Square::update_bits(bb& colour, bb& piece, square_t clear, square_t set) { //TODO castling rights on regular rook move
+		void Square::update_bits(bb& colour, bb& piece, square_t clear, square_t set) { //TODO castling rights on regular rook move
 
 		set_bit(piece, set);
 		set_bit(colour, set);

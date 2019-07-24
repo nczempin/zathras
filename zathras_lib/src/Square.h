@@ -41,17 +41,23 @@ namespace Positions {
 		virtual ~Square();
 		static void print_square(uint8_t square);
 		static std::string mailbox_index_to_square(uint8_t x);
-		
+
 		static void set_square(bitset<64> & bs, square_t to);
-		static void clear_square(bitset<64> & bs, square_t to);
+		static void set_square(bitset<64> & bs, const uint8_t& file, const uint8_t& rank);
+		static void set_square(const uint8_t& file, const uint8_t& rank, bitset<64> & bs);
+		static void set_square_hurz(bitset<64> & bs, const uint8_t& file, const uint8_t& rank);
 		static void set_square(bb& bs, square_t to);
-		static bool is_set_square(bb bs, square_t to);
+		static void set_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
+
 		static void clear_square(bb& bs, square_t to);
+		static void clear_square(bitset<64> & bs, square_t to);
+		static void clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
+		static void clear_square(const uint8_t& file, const uint8_t& rank, bitset<64> & bs);
+
+		static bool is_set_square(bb bs, square_t to);
 		static void set_bit(bb& bs, const square_t& to);
 		static void preset_bit(bb& bs, const square_t& to);
 		static void clear_bit(bb& bs, const square_t& to);
-		static void set_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
-		static void clear_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
 
 		static void update_bits(bb& colour, bb& piece, square_t clear, square_t set);
 

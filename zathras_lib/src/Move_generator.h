@@ -73,7 +73,7 @@ namespace Moves {
 		void visit_capture_ray_moves(const bb& sub_position,
 
 			const bitboard_set& all_moves,
- const move_visitor& f,
+			const move_visitor& f,
 			const bb& occupied, const bb& other_colour);
 		void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
 			move_visitor f, int8_t moving);
@@ -81,15 +81,14 @@ namespace Moves {
 			const move_visitor& f, const bb& other_colour,
 			const int8_t& moving);
 		void visit_pawn_nocaps(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& occupied, const int8_t& moving, const bool& white_to_move);
-			static bb filter_occupied_squares(bool white_to_move, bb occupied,
+		static bb filter_occupied_squares(bool white_to_move, bb occupied,
 			const bitboard_set& all_moves, int x);
 
 	public:
 	private:
 		static bb possibly_between_pre(const square_t& x, const square_t& y);
-		static void set_square(const int& file_to, const int& rank_to,
-			bitset<64> & bbs);
-		static int clear_square(int file_to, int rank_to, bitset<64> & bbs);
+		//static void set_square(const uint8_t& file_to, const uint8_t& rank_to, bb & bbs);
+		//static int clear_square(int file_to, int rank_to, bitset<64> & bbs);
 		int8_t find_captured_piece(square_t square, int8_t moving);
 		bool has_captured_piece(square_t square, int8_t moving);
 		void generate_castling(const move_visitor& f, bool white);
@@ -101,7 +100,7 @@ namespace Moves {
 		bool will_be_en_passant(square_t to, int8_t moving);
 
 		void add_non_capture_ray_moves(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
-		void add_pawn_nocaps(Move_container&moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied,const bool& white_to_move);
+		void add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bool& white_to_move);
 
 
 

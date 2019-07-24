@@ -42,17 +42,17 @@ namespace Moves {
 	bool Move_generator::between_initialized = init_between(); // TODO workaround for missing static initializer block
 
 	// TODO move these outside
-	void Move_generator::set_square(const int& file_to, const int& rank_to, bitset<64> & bbs) {
-		const unsigned int to_twisted = 7 - file_to + rank_to * 8;
-		Square::set_square(bbs, square_t(to_twisted));
-	}
+	//void Move_generator::set_square(const uint8_t& file_to, const uint8_t& rank_to, bb & bbs) {
+	//	//const unsigned int to_twisted = 7 - file_to + rank_to * 8;
+	//	Square::set_square(file_to, rank_to, bbs);
+	//}
 
-	int Move_generator::clear_square(int file_to, int rank_to, bitset<64> & bbs) {
-		int to_twisted = 7 - file_to + rank_to * 8;
-		int to = file_to + rank_to * 8;
-		Square::clear_square(bbs, square_t(to_twisted));
-		return to;
-	}
+	//int Move_generator::clear_square(int file_to, int rank_to, bitset<64> & bbs) {
+	//	int to_twisted = 7 - file_to + rank_to * 8;
+	//	int to = file_to + rank_to * 8;
+	//	Square::clear_square(bbs, square_t(to_twisted));
+	//	return to;
+	//}
 
 	bitboard_set Move_generator::pregenerate_rays(int8_t direction) {
 		bitboard_set rays;
@@ -70,12 +70,12 @@ namespace Moves {
 				const int to = 7 - file_to + rank_to * 8;
 
 				if (candidate >= 0 && candidate < 64) {
-					set_square(file_to, rank_to, bbs);
+					Square::set_square_hurz(bbs, file_to, rank_to);
 					if (from % 8 == 7 && candidate % 8 == 0) {
-						clear_square(file_to, rank_to, bbs);
+						Square::clear_square(file_to, rank_to, bbs);
 					}
 					if (from % 8 == 0 && candidate % 8 == 7) {
-						clear_square(file_to, rank_to, bbs);
+						Square::clear_square(file_to, rank_to, bbs);
 					}
 				}
 				if (!bbs[to]) { // as soon as we hit an illegal target,
@@ -99,12 +99,12 @@ namespace Moves {
 					int file_from = i % 8;
 					int file_to = candidate % 8;
 					int rank_to = candidate / 8;
-					set_square(file_to, rank_to, attacking[i]);
+					Square::set_square(file_to, rank_to, attacking[i]);
 					if (file_from >= 6 && file_to <= 1) {
-						clear_square(file_to, rank_to, attacking[i]);
+						Square::clear_square(file_to, rank_to, attacking[i]);
 					}
 					if (file_from <= 1 && file_to >= 6) {
-						clear_square(file_to, rank_to, attacking[i]);
+						Square::clear_square(file_to, rank_to, attacking[i]);
 					}
 				}
 			}
@@ -195,32 +195,31 @@ namespace Moves {
 		int rank_to = candidate / 8;
 
 		if (candidate >= 0 && candidate < 64) {
-			set_square(file_to, rank_to, bs[from]);
+			Square::set_square(file_to, rank_to, bs[from]);
 			if (from % 8 == 7 && candidate % 8 == 0) {
-				clear_square(file_to, rank_to, bs[from]);
+				Square::clear_square(file_to, rank_to, bs[from]);
 			}
 			if (from % 8 == 0 && candidate % 8 == 7) {
-				clear_square(file_to, rank_to, bs[from]);
+				Square::clear_square(file_to, rank_to, bs[from]);
 			}
 		}
 	}
 
-	bitboard_set Move_generator::pregen_pawn_nocaps(int start, int stop,
-		int8_t direction) {
+	bitboard_set Move_generator::pregen_pawn_nocaps(int start, int stop, int8_t direction) {
 		bitset<64> bs[64];
 
 		for (int i = start; i != 64 - start; i += direction) {
 			int candidate = i + 8 * direction; // single step
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
-			set_square(file_to, rank_to, bs[i]);
+			Square::set_square(file_to, rank_to, bs[i]);
 		}
 		bitboard_set pawn_no_capture_moves;
 		for (int i = start; i != stop; i += direction) {
 			int candidate = i + 16 * direction; // double step
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
-			set_square(file_to, rank_to, bs[i]);
+			Square::set_square(file_to, rank_to, bs[i]);
 		}
 		for (int i = 0; i < 64; ++i) {
 			unsigned long long as_int = bs[i].to_ullong();
@@ -469,7 +468,7 @@ namespace Moves {
 			bitset<64> between = 0;
 			for (uint8_t i = 1; i < diff; ++i) {
 
-				set_square(file + i, rank, between);
+				Square::set_square(file + i, rank, between);
 			}
 			const bb intersection = between.to_ullong();
 			return intersection;
@@ -484,7 +483,7 @@ namespace Moves {
 			uint8_t ranks = diff >> 3; // divide by 8
 			for (uint8_t i = 1; i < ranks; ++i) {
 				++rank_to;
-				set_square(file, rank_to, between);
+				Square::set_square(file, rank_to, between);
 			}
 			const bb intersection = between.to_ullong();
 			return intersection;
@@ -501,7 +500,7 @@ namespace Moves {
 			if (diagonal == 1 && rank + i * diagonal % 8 == 0) {
 				break;
 			}
-			set_square(file + i * diagonal, rank + i, between_l);
+			Square::set_square(file + i * diagonal, rank + i, between_l);
 			++i;
 		}
 		const bb intersection = between_l.to_ullong();
