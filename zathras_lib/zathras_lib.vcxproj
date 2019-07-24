@@ -25,6 +25,7 @@
     <ClCompile Include="src\Move.cpp" />
     <ClCompile Include="src\Move_container.cpp" />
     <ClCompile Include="src\Move_generator.cpp" />
+    <ClCompile Include="src\Move_generator_pregen.cpp" />
     <ClCompile Include="src\Move_state.cpp" />
     <ClCompile Include="src\Piece.cpp" />
     <ClCompile Include="src\Position.cpp" />

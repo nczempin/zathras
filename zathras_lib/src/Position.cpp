@@ -532,7 +532,7 @@ namespace Positions {
 			uint8_t l = 0;
 			while (tmp) {
 				l = Bitboard::ffs(tmp);
-				attacker = Bitboard::look_up(l);
+				attacker = l;
 				if (!is_anything_between(king_pos, square_t(attacker), occupied)) {
 					return true;
 				}

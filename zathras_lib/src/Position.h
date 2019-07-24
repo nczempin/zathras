@@ -92,6 +92,7 @@ namespace Positions {
 
 	public:
 		void mailbox_from_bitboard(piece_t board[64]) const;
+		static void mailbox_from_bitboard(piece_t board[64], const bb bb);
 
 		string debug_board() const;
 

@@ -52,7 +52,7 @@ namespace Positions {
 		}
 #endif
 
-		inline static constexpr uint8_t look_up(uint8_t index) {
+		inline static constexpr uint8_t look_up1(uint8_t index) {
 			//TODO eliminate entirely
 			return index;
 			/*uint8_t m = index - 1;
@@ -75,14 +75,13 @@ namespace Positions {
 		}
 
 		inline static uint8_t extract_square(const bb& my_bb) {
-			//return look_up(ffs(my_bb));
 			return ffs(my_bb);
 		}
 
 		inline static uint8_t extract_and_remove_square(bb& my_bb) {
 			const uint8_t l = ffs(my_bb);
 			my_bb &= my_bb - 1;
-			return look_up(l);
+			return l;
 		}
 
 

@@ -69,6 +69,9 @@
     <ClCompile Include="src\Position_fen.cpp">
       <Filter>Positions</Filter>
     </ClCompile>
+    <ClCompile Include="src\Move_generator_pregen.cpp">
+      <Filter>Move</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Move.h">

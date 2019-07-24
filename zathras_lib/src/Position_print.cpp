@@ -22,17 +22,23 @@ namespace Positions {
 	}
 
 	void Position::visualize_bitboard(bb my_bb, ostream& stream) {
-		stream << "  +-----------------+" << endl;
-		for (int i = 7; i >= 0; --i) {
-			bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
-			my_bb = my_bb << 8;
-			stream << (i + 1) << " |";
-			string row_string = extract_row_string(tmp, " *");
-			stream << row_string;
-			stream << " |" << endl;
+		piece_t mboard[64];
+		for (int i = 0; i < 64; ++i) {
+			mboard[i] = 0;
 		}
-		stream << "  +-----------------+" << endl;
-		stream << "    a b c d e f g h" << endl;
+		mailbox_from_bitboard(mboard,my_bb);
+		stream <<  mailbox_board_simple_representation(mboard);
+		//stream << "  +-----------------+" << endl;
+		//for (int i = 0; i <8; ++i) {
+		//	bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
+		//	my_bb = my_bb << 8;
+		//	stream << (i + 1) << " |";
+		//	string row_string = extract_row_string(tmp, " *");
+		//	stream << row_string;
+		//	stream << " |" << endl;
+		//}
+		//stream << "  +-----------------+" << endl;
+		//stream << "    a b c d e f g h" << endl;
 	}
 	string Position::print_bitboard(bb my_bb) {
 		string retval;
@@ -178,8 +184,16 @@ namespace Positions {
 		cout << endl;
 	}
 
-	void Position::mailbox_from_bitboard(piece_t board[64]) const {
+	void Position::mailbox_from_bitboard(piece_t board[64], const bb bb){
+
+		Bitboard::visit_bitboard(bb, [&board](int x) {
+			board[x] = 1;
+			}
+		);
 		
+	}
+	void Position::mailbox_from_bitboard(piece_t board[64]) const {
+
 		Bitboard::visit_bitboard(white & pawns, [&board](int x) {
 			board[x] = 1;
 			}
