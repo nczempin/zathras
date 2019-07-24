@@ -7,6 +7,7 @@
 
 #include "Bitboard.h"
 #include "typedefs.h"
+#include <cassert>
 
 
 #include "Move_generator.h" //TODO cyclic dependency
@@ -22,15 +23,17 @@ namespace Positions {
 		// TODO Auto-generated destructor stub
 	}
 	void Bitboard::visit_bitboard(const bb my_bb, const square_visitor& f) {
+		assert(my_bb != 0);
 		bb tmp = my_bb;
 		uint8_t coord = 0;
 		uint8_t l = 0;
-		while (true) {
+		while (tmp!=0) {
 			l = ffs(tmp);
-			if (l == 0) {
-				return;
-			}
+			//if (l == 0) {
+			//	return;
+			//}
 			coord = look_up(l);
+			uint8_t coord2 = look_up2(l);
 
 			f(square_t(coord)); //TODO handle cast better
 			tmp &= tmp - 1; //clear LS1B

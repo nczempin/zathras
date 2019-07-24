@@ -2,7 +2,7 @@
 #ifndef BITBOARD_H_
 #define BITBOARD_H_
 
-
+#include <cassert>
 
 //TODO mac
 #if defined(__GNUC__)
@@ -39,14 +39,11 @@ namespace Positions {
 		}
 #elif defined(_WIN64) && (_MSC_VER >= 1500) 
 		inline static uint8_t ffs(const bb& my_bb)noexcept {
+			assert(my_bb != 0);
 			unsigned long index;
 			const bool isNonZero = _BitScanForward64(&index, my_bb);
-			if (isNonZero) {
-				return static_cast<uint8_t> (index + 1);
-			}
-			else {
-				return 0;
-			}
+			assert(isNonZero);
+			return static_cast<uint8_t> (index);
 		}
 
 #else
@@ -56,6 +53,18 @@ namespace Positions {
 #endif
 
 		inline static constexpr uint8_t look_up(uint8_t index) {
+			//TODO eliminate entirely
+			return index;
+			/*uint8_t m = index - 1;
+			uint8_t rank = m / 8;
+			uint8_t file = m % 8;
+			rank *= 8;
+			file = 7 - file;
+			return file + rank;*/
+
+		}
+		inline static constexpr uint8_t look_up2(uint8_t index) {
+			
 			uint8_t m = index - 1;
 			uint8_t rank = m / 8;
 			uint8_t file = m % 8;
@@ -66,7 +75,8 @@ namespace Positions {
 		}
 
 		inline static uint8_t extract_square(const bb& my_bb) {
-			return look_up(ffs(my_bb));
+			//return look_up(ffs(my_bb));
+			return ffs(my_bb);
 		}
 
 		inline static uint8_t extract_and_remove_square(bb& my_bb) {
