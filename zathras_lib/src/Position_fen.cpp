@@ -2,7 +2,7 @@
 namespace Positions {
 	Position Position::create_position(const string& fen) {
 		Position position;
-		vector<string> split_fen = split(fen, ' ');
+		vector<string> split_fen = Util::split(fen, ' ');
 		string to_move = split_fen[1];
 		string castling_string = split_fen[2];
 		for (int i = 0; i < 4; ++i) {
@@ -44,7 +44,7 @@ namespace Positions {
 
 		position.white_to_move = to_move == "w" ? true : false;
 		string fen_board = split_fen[0];
-		vector<string> ranks = split(fen_board, '/');
+		vector<string> ranks = Util::split(fen_board, '/');
 		int r = 7;
 		fill_n(position.board, 64, 0);
 		for (auto& rank : ranks) {

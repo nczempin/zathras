@@ -63,7 +63,7 @@ Move Searcher::findBestmove(move_container_t moves, Position position) {
 			//cout << "trying " << move.toString() << endl;
 			int value = -alphabeta(1, position, -9999999, -bestValue, lineDown);
 			//TODO
-			//if (Util::timeUp()) {
+			//if (Util::time_up()) {
 			//	//return lastIterationBestMove;
 			//	done = true;
 			//	break;
@@ -107,7 +107,7 @@ Move Searcher::findBestmove(move_container_t moves, Position position) {
 }
 
 int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
-	if (done /* ||(Util::timeUp())*/) {
+	if (done /* ||(Util::time_up())*/) {
 		//	timeIsUp = true;
 		done = true;
 		const int& value = Eval::Evaluator::getValue(position);
@@ -162,7 +162,7 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 		}
 		//}
 
-		if (done ) /*||Util::timeUp()*/ {
+		if (done ) /*||Util::time_up()*/ {
 			done = true;
 			return alpha;
 		}

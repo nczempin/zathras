@@ -95,7 +95,7 @@ namespace Interface {
 				//cout << position << "\n";
 		cout << position.print_board();
 		//cout << position.debug_board();
-		//position.debugPosition();
+		//position.debug_position();
 		//mg.pregenerate_moves();
 		clock_t begin = clock();
 
@@ -126,7 +126,7 @@ namespace Interface {
 				uint64_t perft_result = perft(depth - 1);
 				string s = to_string(move);
 				cout << s << ": " << perft_result << endl;
-				//pp->debugPosition();
+				//pp->debug_position();
 				total_result += perft_result;
 				pp->unmake_move(move, ms);
 			}

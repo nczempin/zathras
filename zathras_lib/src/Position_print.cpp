@@ -283,7 +283,7 @@ namespace Positions {
 			});
 	}
 
-	void Position::debugPosition() {
+	void Position::debug_position() {
 		//for (int i = 0; i < 64; ++i) {
 		//	mboard[i] = 0;
 		//}

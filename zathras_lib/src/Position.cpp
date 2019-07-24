@@ -34,39 +34,24 @@ namespace Positions {
 	Position::~Position() {
 		// TODO Auto-generated destructor stub
 	}
-	vector<string>& Position::split(const string& s, char delim, vector<string>& elems) {
-		//TODO why am I both passing and returning elems? copy in between?
-		stringstream ss(s);
-		string item;
-		while (getline(ss, item, delim)) {
-			elems.push_back(item);
-		}
-		return elems;
-	}
-
-	vector<string> Position::split(const string& s, char delim) {
-		vector<string> elems;
-		split(s, delim, elems);
-		return elems;
-	}
+	
 
 
+	//array<bb, 9> Position::getPieceBitboards() const {
+	//	array<bb, 9> retval;
+	//	//TODO figure out what to do with [0]
+	//	retval[0] = 0x00;
+	//	retval[1] = pawns;
+	//	retval[2] = knights;
+	//	retval[3] = bishops;
+	//	retval[4] = rooks;
+	//	retval[5] = queens;
+	//	retval[6] = kings;
+	//	retval[7] = white;
+	//	retval[8] = black;
 
-	array<bb, 9> Position::getPieceBitboards() const {
-		array<bb, 9> retval;
-		//TODO figure out what to do with [0]
-		retval[0] = 0x00;
-		retval[1] = pawns;
-		retval[2] = knights;
-		retval[3] = bishops;
-		retval[4] = rooks;
-		retval[5] = queens;
-		retval[6] = kings;
-		retval[7] = white;
-		retval[8] = black;
-
-		return retval;
-	}
+	//	return retval;
+	//}
 
 	static constexpr bool determine_colour(int piece) {
 		return piece > 0; // makes == 0 black, deal with it
@@ -132,7 +117,7 @@ namespace Positions {
 
 	}
 
-	void Position::handleCapture(const square_t& to, const int8_t& taken,
+	void Position::handle_capture(const square_t& to, const int8_t& taken,
 		Move_state& move_state) {
 		move_state.captured = taken;
 		switch (taken) {
@@ -215,14 +200,14 @@ namespace Positions {
 		const square_t& to = move.get_to();
 		int8_t moving = get_piece_on(from);
 		//if (moving == 0) {
-		//	debugPosition();
+		//	debug_position();
 		//}
 		assert(moving != 0);
 
 		const int8_t& taken = get_piece_on(to);
 		if (taken != 0) {
 			//cout << "capturing: " << taken << endl;
-			handleCapture(to, taken, move_state);
+			handle_capture(to, taken, move_state);
 		}
 		if (white_to_move) {
 			make_move_for_colour<true>(from, to, moving, move, move_state, set_en_passant);
@@ -313,7 +298,7 @@ namespace Positions {
 				}
 				break;
 			default:
-				debugPosition();
+				debug_position();
 				cerr << "unexpected white piece: " << ((int)moving) << endl;
 				throw moving;
 				break;
@@ -378,7 +363,7 @@ namespace Positions {
 				}
 				break;
 			default:
-				debugPosition();
+				debug_position();
 				double error = ((double)moving);
 				cerr << "umm: unexpected black piece: " << error << endl;
 				throw - moving;
@@ -465,7 +450,7 @@ namespace Positions {
 		const square_t& king_pos = square_t(Bitboard::extract_square(kpbb));
 		assert(king_pos < 64);
 		if (king_pos >= 64) {
-			debugPosition();
+			debug_position();
 			throw king_pos;
 		}
 		if (white_to_move) {
@@ -563,8 +548,7 @@ namespace Positions {
 		return moves != 0x00;
 	}
 
-	bool Position::is_anything_between(square_t from, square_t to,
-		const bb& occupied) {
+	bool Position::is_anything_between(const square_t from, const square_t to, const bb& occupied) {
 		uint16_t index = calc_index(from, to);
 		return between[index] & occupied;
 	}

@@ -1,10 +1,11 @@
 #include "misc.h"
+#include <vector>
 
 namespace Util {
 	using namespace std;
 
 
-	int decodeSquare(string square) {
+	int decode_square(string square) {
 		char letter = square[0];
 		char digit = square[1];
 		int one = letter - 'a';
@@ -15,7 +16,7 @@ namespace Util {
 
 
 
-	int decodePiece(string promotedTo) {
+	int decode_piece(string promotedTo) {
 		int retValue = 0;
 		if (promotedTo == "q") {
 			retValue = 5;
@@ -33,5 +34,21 @@ namespace Util {
 
 	bool is_digit(const char c) {
 		return '0' <= c && c <= '9';
+	}
+
+	vector<string>& split(const string& s, char delim, vector<string>& elems) {
+		//TODO why am I both passing and returning elems? copy in between?
+		stringstream ss(s);
+		string item;
+		while (getline(ss, item, delim)) {
+			elems.push_back(item);
+		}
+		return elems;
+	}
+
+	vector<string> split(const string& s, char delim) {
+		vector<string> elems;
+		split(s, delim, elems);
+		return elems;
 	}
 }

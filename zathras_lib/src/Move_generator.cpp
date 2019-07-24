@@ -277,7 +277,7 @@ namespace Moves {
 		else {
 			if (!Square::is_set_square(p->white, square)) {
 				if (p->en_passant_square == 0) {
-					p->debugPosition();
+					p->debug_position();
 					throw 68;
 				}
 			}
@@ -298,7 +298,7 @@ namespace Moves {
 
 		//cout << "found: " << captured << endl;
 		if ((moving < 0 && captured < 0) || (moving > 0 && captured > 0)) {
-			p->debugPosition();
+			p->debug_position();
 			throw 27;
 		}
 
@@ -938,7 +938,7 @@ namespace Moves {
 
 	bool Move_generator::is_attacked(const square_t& square) {
 		if (square > 64) {
-			p->debugPosition();
+			p->debug_position();
 		}
 		const bb occupied = p->white | p->black;
 

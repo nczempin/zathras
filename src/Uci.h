@@ -153,7 +153,7 @@ namespace Interface {
 					p.print(cout);
 				}
 				string movesString = extractMoves(toParse);
-				vector<string> moves = Position::split(movesString, ' ');
+				vector<string> moves = Util::split(movesString, ' ');
 				//p.clearThreeDraws();
 				if ((movesString != "") && (moves.size() != 0))
 				{
@@ -309,13 +309,13 @@ namespace Interface {
 		}
 		//
 		static Move convert_move(string move, piece_t * board, const Position& p) {
-			square_t from = static_cast<square_t> (Util::decodeSquare(move.substr(0, 2)));
+			square_t from = static_cast<square_t> (Util::decode_square(move.substr(0, 2)));
 
-			square_t to = static_cast<square_t> (Util::decodeSquare(move.substr(2, 4)));
+			square_t to = static_cast<square_t> (Util::decode_square(move.substr(2, 4)));
 			string promotedTo = move.substr(4);
 			int promoted_to = 0;
 			if (promotedTo != "") {
-				promoted_to = static_cast<piece_t> (Util::decodePiece(promotedTo));
+				promoted_to = static_cast<piece_t> (Util::decode_piece(promotedTo));
 			}
 
 			
