@@ -23,7 +23,9 @@ namespace Positions {
 		// TODO Auto-generated destructor stub
 	}
 	void Bitboard::visit_bitboard(const bb my_bb, const square_visitor& f) {
-		assert(my_bb != 0);
+		if (my_bb == 0) {
+			return;
+		}
 		bb tmp = my_bb;
 		uint8_t coord = 0;
 		uint8_t l = 0;
