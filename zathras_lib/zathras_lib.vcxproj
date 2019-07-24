@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Position_print.cpp" />
     <ClCompile Include="src\Bitboard.cpp" />
     <ClCompile Include="src\Bitboard_test.cpp" />
     <ClCompile Include="src\misc.cpp" />
@@ -29,6 +28,8 @@
     <ClCompile Include="src\Move_state.cpp" />
     <ClCompile Include="src\Piece.cpp" />
     <ClCompile Include="src\Position.cpp" />
+    <ClCompile Include="src\Position_fen.cpp" />
+    <ClCompile Include="src\Position_print.cpp" />
     <ClCompile Include="src\Searcher.cpp" />
     <ClCompile Include="src\Square.cpp" />
   </ItemGroup>

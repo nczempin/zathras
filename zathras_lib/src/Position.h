@@ -38,7 +38,7 @@ namespace Positions {
 	using namespace Moves;
 
 	class Position {
-		static const bitboard_set rook_moves;
+		//static const bitboard_set rook_moves;
 
 	public:
 		Position();

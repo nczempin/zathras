@@ -63,7 +63,10 @@
     <ClCompile Include="src\misc.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="Position_print.cpp">
+    <ClCompile Include="src\Position_print.cpp">
+      <Filter>Positions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Position_fen.cpp">
       <Filter>Positions</Filter>
     </ClCompile>
   </ItemGroup>
