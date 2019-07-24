@@ -60,7 +60,7 @@ namespace Moves {
 		return index;
 	}
 
-	array<Move, Move_container::SIZE> Move_container::get_moves()const
+	move_container_t Move_container::get_moves()const
 	{
 		return container; //TODO unsafe?
 	}

@@ -23,7 +23,7 @@ Searcher::~Searcher(void)
 }
 
 
-Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position position) {
+Move Searcher::findBestmove(move_container_t moves, Position position) {
 	// assumption: moves.size() > 1
 	
 	idDepth = 1;
@@ -105,6 +105,7 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 	} while (!done);
 	return bestMove;
 }
+
 int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
 	if (done /* ||(Util::timeUp())*/) {
 		//	timeIsUp = true;

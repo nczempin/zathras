@@ -22,7 +22,7 @@ public:
 	bool kingCapture = false;
 	deque<Move> pv;
 	
-	Move findBestmove(array<Move, Move_container::SIZE> moves, Position p);
+	Move findBestmove(move_container_t moves, Position p);
 
 	int alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp);
 

@@ -780,7 +780,7 @@ namespace Moves {
 	Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
 		p = &position;
 
-		Move_container& moves = Move_container::get(depth);
+		Move_container moves = Move_container::get(depth);
 		//moves.reserve(35);
 		moves.reset();
 		const move_visitor& f =

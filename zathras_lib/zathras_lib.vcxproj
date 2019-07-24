@@ -32,7 +32,6 @@
     <ClCompile Include="src\Square.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\typedefs.h" />
     <ClInclude Include="src\Bitboard.h" />
     <ClInclude Include="src\Character.h" />
     <ClInclude Include="src\Evaluator.h" />
@@ -46,6 +45,7 @@
     <ClInclude Include="src\Position.h" />
     <ClInclude Include="src\Searcher.h" />
     <ClInclude Include="src\Square.h" />
+    <ClInclude Include="src\typedefs.h" />
     <ClInclude Include="src\zathras_lib.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

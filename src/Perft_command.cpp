@@ -30,9 +30,14 @@ namespace Interface {
 			return 1;
 		}
 		Move_container move_container = mg.generate_pseudolegal_moves(*pp, depth);
-		array<Move, Move_container::SIZE> moves = move_container.get_moves();
+		move_container_t moves = move_container.get_moves();
 		uint64_t total_result = 0;
 		size_t size = move_container.size();
+
+		////Only works when all moves are legal
+		//if (depth == 1) {
+		//	return size;
+		//}
 
 		for (size_t i = 0; i < size; ++i) {
 			Move& move = moves[i];
@@ -89,8 +94,8 @@ namespace Interface {
 		//		cout << perft_string << "\n" << endl;
 				//cout << position << "\n";
 		cout << position.print_board();
-		cout << position.debug_board();
-		position.debugPosition();
+		//cout << position.debug_board();
+		//position.debugPosition();
 		//mg.pregenerate_moves();
 		clock_t begin = clock();
 
@@ -105,7 +110,7 @@ namespace Interface {
 			++total_result;
 		}
 		else {
-			array<Move, Move_container::SIZE> moves = move_container.get_moves();
+			move_container_t moves = move_container.get_moves();
 
 			for (size_t i = 0; i < move_count; ++i) {
 				Move& move = moves[i];

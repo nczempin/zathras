@@ -281,8 +281,11 @@ namespace Positions {
 			retval.append(" |");
 			for (int j = 0; j < 8; ++j) {
 				int coord = (7 - i) * 8 + j;
-				retval.append(" ");
-				retval.append(to_string(int(board[coord])));
+				int val = int(board[coord]);
+				if (val >= 0) {
+					retval.append(" ");
+				}
+				retval.append(to_string(val));
 			}
 			retval.append(" |\n");
 		}

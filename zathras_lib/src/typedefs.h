@@ -6,6 +6,7 @@
 #include <functional>
 #include "Square.h"
 
+
 using namespace std;
 
 enum Move_type  {
