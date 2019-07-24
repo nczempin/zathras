@@ -49,9 +49,7 @@ namespace Positions {
 		split(s, delim, elems);
 		return elems;
 	}
-	bool is_digit(const char c) {
-		return '0' <= c && c <= '9';
-	}
+	
 
 	Position Position::create_position(const string& fen) {
 		Position position;
@@ -103,7 +101,7 @@ namespace Positions {
 		for (auto& rank : ranks) {
 			int f = 0;
 			for (auto& c : rank) {
-				if (is_digit(c)) {
+				if (Util::is_digit(c)) {
 					int digit = c - '0'; //convert from ascii
 					f += digit;
 				}
@@ -185,8 +183,7 @@ namespace Positions {
 	Position Position::create_start_position() {
 		const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-		//const char* p = "r3r1k1/1p3nqp/2pp4/p4p2/Pn3P1Q/2N4P/1PPR2P1/3R1BK1 w - - 0 1";
-
+	
 		Position start_position = create_position(p);
 		return start_position;
 	}
@@ -254,7 +251,7 @@ namespace Positions {
 		stream << "    a b c d e f g h\n";
 
 	}
-	string Position::print_mailbox_board(const piece_t board[64]) {
+	string Position::mailbox_board_simple_representation(const piece_t board[64]) {
 		string retval;
 		retval += "  +-----------------+\n";
 		const char* symbols = ".pnrbqkPNBRQK*";
@@ -272,7 +269,7 @@ namespace Positions {
 		retval.append("    a b c d e f g h\n");
 		return retval;
 	}
-	string Position::debug_mailbox_board(const piece_t board[64]) {
+	string Position::mailbox_board_debug_representation(const piece_t board[64]) {
 		string retval;
 		retval += "  +-----------------+\n";
 		const char* symbols = ".PNBRQKpnbrqk*";
@@ -282,7 +279,7 @@ namespace Positions {
 			for (int j = 0; j < 8; ++j) {
 				int coord = (7 - i) * 8 + j;
 				int val = int(board[coord]);
-				if (val >= 0) {
+				if (0 <= val && val <= 9) { // TODO use proper string formatting
 					retval.append(" ");
 				}
 				retval.append(to_string(val));
@@ -424,7 +421,7 @@ namespace Positions {
 	string Position::debug_board() const {
 		// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 		string retval("");
-		retval += debug_mailbox_board(board);
+		retval += mailbox_board_debug_representation(board);
 		retval += "wtm: " + to_string(white_to_move) + "\n";
 		retval += "\n";
 		retval += "Castling: ";
@@ -446,8 +443,8 @@ namespace Positions {
 			mboard[i] = 0;
 		}
 		mailbox_from_bitboard(mboard);
-		retval += print_mailbox_board(mboard);
-		retval += debug_mailbox_board(board);
+		retval += mailbox_board_simple_representation(mboard);
+		retval += mailbox_board_debug_representation(board);
 		retval += "wtm: " + to_string(white_to_move) + "\n";
 		retval += "\n";
 		retval += "Castling: ";

@@ -77,8 +77,8 @@ namespace Positions {
 
 
 
-		static string print_mailbox_board(const piece_t board[64]);
-		static string debug_mailbox_board(const piece_t board[64]);
+		static string mailbox_board_simple_representation(const piece_t board[64]);
+		static string mailbox_board_debug_representation(const piece_t board[64]);
 
 		static void visualize_bitboard(bb my_bb, ostream& stream);
 		static string print_bitboard(bb my_bb);

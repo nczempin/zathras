@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Position_print.cpp" />
     <ClCompile Include="src\Bitboard.cpp" />
     <ClCompile Include="src\Bitboard_test.cpp" />
     <ClCompile Include="src\misc.cpp" />

@@ -9,12 +9,12 @@
 
 
 using namespace std;
-const string VERSION = "0.0.4";
 
 //TODO deal with these globals
 Position p;
 Searcher searcher;
 future<Move> fut;
+extern const std::string VERSION;
 
 int main()
 {

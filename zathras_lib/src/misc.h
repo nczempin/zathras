@@ -7,6 +7,6 @@ namespace Util {
 	int decodePiece(std::string promotedTo);
 	bool timeUp();
 
-	
+	bool is_digit(const char c);
 
 }

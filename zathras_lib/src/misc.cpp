@@ -30,4 +30,8 @@ namespace Util {
 			retValue = 2;
 		return retValue;
 	}
+
+	bool is_digit(const char c) {
+		return '0' <= c && c <= '9';
+	}
 }
