@@ -528,15 +528,14 @@ namespace Positions {
 		const bb& moves = raw_moves & slider;
 		if (moves != 0) {
 			bb tmp = moves;
-			uint8_t attacker = 0;
 			uint8_t l = 0;
 			while (tmp) {
 				l = Bitboard::ffs(tmp);
-				attacker = l;
-				if (!is_anything_between(king_pos, square_t(attacker), occupied)) {
+				
+				if (!is_anything_between(king_pos, square_t(l), occupied)) {
 					return true;
 				}
-				tmp &= tmp - 1ULL; //clear LS1B
+				tmp &= tmp - 1ULL; //clear LS1B //TODO intrinsic?
 			}
 		}
 		return retval;
