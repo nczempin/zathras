@@ -71,13 +71,6 @@ namespace Positions {
 		static bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
 		static bool is_anything_between(square_t from, square_t to, const bb& occupied);
 
-		//TODO template?
-		static bool is_in_back_rank_black(square_t square) {
-			return Squares::A8 <= square && square <= Squares::H8;
-		}
-		static bool is_in_back_rank_white(square_t square) {
-			return Squares::A1 <= square && square <= Squares::H1;
-		}
 
 	private:
 		template<bool white_or_not> void make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant);
@@ -124,6 +117,13 @@ namespace Positions {
 
 
 	};
+	//TODO template?
+	constexpr bool is_in_back_rank_black(square_t square) {
+		return Squares::A8 <= square && square <= Squares::H8;
+	}
+	constexpr bool is_in_back_rank_white(square_t square) {
+		return Squares::A1 <= square && square <= Squares::H1;
+	}
 
 }
 #endif /* POSITION_H_ */

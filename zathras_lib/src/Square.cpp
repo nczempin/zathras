@@ -19,13 +19,13 @@ namespace Positions {
 	{
 	}
 	void Square::init_squares() {
-		
+
 		for (int i = 0; i < 64; ++i) {
 			squares[i] = 0;
 			Square::preset_bit(squares[i], square_t(i));
 		}
 	}
-	array<bb, 64> Square::squares; 
+	array<bb, 64> Square::squares;
 
 	Square::~Square()
 	{
@@ -71,11 +71,6 @@ namespace Positions {
 		const uint8_t to = file + rank * 8;
 		Square::set_square(bs, square_t(to));
 	}
-	void Square::set_square_hurz(bitset<64> & bs, const uint8_t& file, const uint8_t& rank) {
-		//uint8_t to_twisted = 7 - file + rank * 8;
-		const uint8_t to = file + rank * 8;
-		Square::set_square(bs, square_t(to));
-	}
 
 
 	void Square::clear_square(bitset<64> & bs, square_t to) {
@@ -95,39 +90,46 @@ namespace Positions {
 		Square::clear_square(bs, square_t(to));
 	}
 
-	
-	
-	
+
+
+
+
 	void Square::set_bit(bb& b, const square_t& to) {
-		b |= squares[to];
+		Square::set_square(b, square_t(to));
+		//b |= squares[to];
 	}
 	void Square::preset_bit(bb& b, const square_t& to) {
-
-		uint8_t rank = to / 8;
-		uint8_t file = (to % 8);
-		set_square(file, rank, b);
+		Square::set_square(b, square_t(to));
+		//uint8_t rank = to / 8;
+		//uint8_t file = (to % 8);
+		//set_square(file, rank, b);
 	}
 	void Square::clear_bit(bb& b, const square_t& to) {
+
 		assert(to < 64);
-		b &= ~squares[to];
+		clear_square(b, to);
+		//b &= ~squares[to];
 	}
 	bool Square::is_set_square(bb b, square_t to) {
 		return b & squares[to];
-		//uint8_t t2 = (to / 8) * 8 + (7 - (to % 8)); // mirror row
-		//bb ttt = 1ULL << (t2);
-		//bb aaa = b & ttt;
-		//return aaa != 0;
+
 	}
 
 
-	
 
-		void Square::update_bits(bb& colour, bb& piece, square_t clear, square_t set) { //TODO castling rights on regular rook move
+
+	void Square::update_bits(bb& colour, bb& piece, square_t clear, square_t set) { //TODO castling rights on regular rook move
 
 		set_bit(piece, set);
 		set_bit(colour, set);
 		clear_bit(piece, clear);
 		clear_bit(colour, clear);
 	}
+
+	void toggle_square(bb& b, const square_t& from, const square_t& to) {
+		const bb tmp = (1ULL << from) ^ (1ULL << to);
+		b ^= tmp;
+	}
+
 }
 

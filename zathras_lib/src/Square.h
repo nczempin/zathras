@@ -45,7 +45,6 @@ namespace Positions {
 		static void set_square(bitset<64> & bs, square_t to);
 		static void set_square(bitset<64> & bs, const uint8_t& file, const uint8_t& rank);
 		static void set_square(const uint8_t& file, const uint8_t& rank, bitset<64> & bs);
-		static void set_square_hurz(bitset<64> & bs, const uint8_t& file, const uint8_t& rank);
 		static void set_square(bb& bs, square_t to);
 		static void set_square(const uint8_t& file, const uint8_t& rank, bb& bbs);
 
@@ -65,5 +64,8 @@ namespace Positions {
 
 
 	};
+
+	void toggle_square(bb& b, const square_t& from, const square_t& to);
+
 }
 #endif /* SQUARE_H_ */

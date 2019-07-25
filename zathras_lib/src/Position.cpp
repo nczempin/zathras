@@ -560,10 +560,10 @@ namespace Positions {
 	template<bool white_or_not>
 	inline void Position::make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
 		{
+			assert(moving != 0);
 			assert(to < 64);
 			board[from] = 0; //TODO encapsulate
 			board[to] = moving; //TODO encapsulate
-			assert(moving != 0);
 			if (white_or_not) {
 				Square::clear_bit(white, from);
 				Square::set_bit(white, to);
