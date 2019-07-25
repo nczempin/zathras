@@ -34,7 +34,7 @@ namespace Positions {
 	Position::~Position() {
 		// TODO Auto-generated destructor stub
 	}
-	
+
 
 
 	//array<bb, 9> Position::getPieceBitboards() const {
@@ -194,249 +194,6 @@ namespace Positions {
 		}
 	}
 
-	void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
-		bool set_en_passant = false;
-		const square_t& from = get_from(move);
-		assert(from < 64);
-		const square_t& to = get_to(move);
-		assert(to < 64);
-		int8_t moving = get_piece_on(from);
-		//if (moving == 0) {
-		//	debug_position();
-		//}
-		assert(moving != 0);
-
-		const int8_t& taken = get_piece_on(to);
-		if (taken != 0) {
-			//cout << "capturing: " << taken << endl;
-			handle_capture(to, taken, move_state);
-		}
-		if (white_to_move) {
-			make_move_for_colour<true>(from, to, moving, move, move_state, set_en_passant);
-		}
-		else {
-			make_move_for_colour<false>(from, to, moving, move, move_state, set_en_passant);
-
-		}
-		if (!set_en_passant) {
-			en_passant_square = 0x00;
-		}
-		// TODO update 3 repetitions
-		// TODO update 50 moves
-		white_to_move = !white_to_move;
-	}
-
-
-	void Position::unmake_move(const Move& move, const Move_state& move_state) {
-		//TODO such a mess
-		square_t from = get_from(move);
-		square_t to = get_to(move);
-		piece_t moving = get_piece_on(to);
-		assert(moving != 0);
-
-		board[from] = moving;
-		restore_en_passant_square(move_state);
-		white_to_move = !white_to_move;
-
-		if (white_to_move) {
-			Square::clear_bit(white, to);
-			Square::set_bit(white, from);
-			bb& pbb = piece_bb[moving - 1];
-			Square::clear_bit(pbb, to);
-			Square::set_bit(pbb, from);
-			switch (moving) {
-			case Piece::WHITE_PAWN: {
-				// move pawn back
-				//TODO clearing can be saved when move was a capture. find out which is faster
-				if (is_in_back_rank_black(to)) {
-					//TODO move_type = promotion
-					//piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
-					//un_promote(promoted_to, to);
-					Square::clear_bit(queens, to);
-				}
-				else {
-					// handle capturing by e. p.
-					if (is_en_passant(move)){//.get_move_type() == EN_PASSANT) {
-						square_t target = square_t(to - 8); //TODO
-						en_passant_square = 0;
-						Square::set_bit(en_passant_square, to);
-						Square::set_bit(pawns, target);
-						Square::set_bit(black, target);
-						board[target] = Piece::BLACK_PAWN;
-						board[to] = 0;
-					}
-
-				}
-				break;
-			}
-			case Piece::WHITE_KNIGHT:
-			case Piece::WHITE_BISHOP:
-			case Piece::WHITE_QUEEN:
-				break;
-			case Piece::WHITE_ROOK:
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[0] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[1] = true;
-				}
-				break;
-			case Piece::WHITE_KING:
-				if (from == E1 && to == C1) { //queenside castle
-					Square::update_bits(white, rooks, D1, A1);
-					board[D1] = 0;
-					board[A1] = Piece::WHITE_ROOK;
-				}
-				else if (from == E1 && to == G1) { // kingside castle
-					Square::update_bits(white, rooks, F1, H1);
-					board[F1] = 0;
-					board[H1] = Piece::WHITE_ROOK;
-				}
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[0] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[1] = true;
-				}
-				break;
-			default:
-				debug_position();
-				cerr << "unexpected white piece: " << ((int)moving) << endl;
-				throw moving;
-				break;
-			}
-		}
-		else {
-			Square::clear_bit(black, to); //TODO unnecessary when capture
-			Square::set_bit(black, from);
-			bb& pbb = piece_bb[-moving - 1];
-			Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
-			Square::set_bit(pbb, from);
-			switch (moving) {
-			case Piece::BLACK_PAWN: {
-
-				if (is_in_back_rank_white(to)) {
-					//un_promote(Piece::BLACK_QUEEN, to);
-					Square::clear_bit(queens, to);
-				}
-				else {
-					// handle capturing by e. p.
-					if (is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
-						square_t target = square_t(to + 8); //TODO
-						en_passant_square = 0;
-						Square::set_bit(en_passant_square, to);
-						Square::set_bit(pawns, target);
-						Square::set_bit(white, target);
-						board[target] = Piece::WHITE_PAWN;
-						board[to] = 0;
-					}
-				}
-			}
-
-									break;
-			case Piece::BLACK_KNIGHT:
-			case Piece::BLACK_BISHOP:
-			case Piece::BLACK_QUEEN:
-				break;
-			case Piece::BLACK_ROOK:
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[2] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[3] = true;
-				}
-				break;
-			case Piece::BLACK_KING:
-				if (from == E8 && to == C8) { //queenside castle
-					Square::update_bits(black, rooks, D8, A8);//TODO constants, not magics
-					board[D8] = 0;
-					board[A8] = Piece::BLACK_ROOK;
-				}
-				else if (from == E8 && to == G8) { // kingside castle
-					Square::update_bits(black, rooks, F8, H8);//TODO constants, not magics
-					board[F8] = 0;
-					board[H8] = Piece::BLACK_ROOK;
-				}
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[2] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[3] = true;
-				}
-				break;
-			default:
-				debug_position();
-				double error = ((double)moving);
-				cerr << "umm: unexpected black piece: " << error << endl;
-				throw - moving;
-				break;
-			}
-		}
-		assert(get_piece_on(get_from(move)) != 0);
-		if (!is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
-
-			int8_t captured = move_state.captured;// get_captured();
-			//board[from] = moving; //TODO encapsulate
-			board[to] = captured; //TODO encapsulate
-
-			if (captured != 0) {
-				//cout << "untaken: " << (int)captured << endl;
-				bool colour = determine_colour(captured);
-				if (colour) {
-					Square::set_bit(white, to);
-				}
-				else {
-					Square::set_bit(black, to);
-				}
-				int8_t p = determine_piece(captured);
-				switch (p) {
-				case 1:
-					Square::set_bit(pawns, to);
-					break;
-				case 2:
-					Square::set_bit(knights, to);
-					break;
-				case 3:
-					Square::set_bit(bishops, to);
-					break;
-				case Piece::ROOK:
-					//TODO use constants, not magics
-					if (move_state.is_cleared_kingside_castling() && to == 63) {
-						castling[2] = true;
-					}
-					else if (move_state.is_cleared_queenside_castling()) {
-						castling[3] = true;
-					}
-					else if (move_state.is_cleared_kingside_castling() && to == 7) {
-						castling[0] = true;
-					}
-					else if (move_state.is_cleared_queenside_castling() && to == 0) {
-						castling[1] = true;
-					}
-					Square::set_bit(rooks, to);
-					break;
-				case 5:
-					Square::set_bit(queens, to);
-					break;
-				case 6:
-					Square::set_bit(kings, to);
-					break;
-				default:
-					cerr << "un??" << p << endl;
-					throw p;
-				}
-				assert(get_piece_on(get_from(move)) != 0);
-				assert(get_piece_on(get_to(move)) != 0);
-			}
-		}
-
-
-		assert(get_piece_on(get_from(move)) != 0);
-		// TODO update 3 repetitions
-		// TODO update 50 moves
-	}
-
-
 
 	bool Position::is_in_check(const bool side) {
 		//TODO this is a somewhat naive way of doing this, it needs to be much more efficient
@@ -533,7 +290,7 @@ namespace Positions {
 			uint8_t l = 0;
 			while (tmp) {
 				l = Bitboard::ffs(tmp);
-				
+
 				if (!is_anything_between(king_pos, square_t(l), occupied)) {
 					return true;
 				}
@@ -735,4 +492,228 @@ namespace Positions {
 		}
 
 	}
+
+	void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
+		bool set_en_passant = false;
+		const square_t& from = get_from(move);
+		assert(from < 64);
+		const square_t& to = get_to(move);
+		assert(to < 64);
+		int8_t moving = get_piece_on(from);
+		//if (moving == 0) {
+		//	debug_position();
+		//}
+		assert(moving != 0);
+
+		const int8_t& taken = get_piece_on(to);
+		if (taken != 0) {
+			//cout << "capturing: " << taken << endl;
+			handle_capture(to, taken, move_state);
+		}
+		if (white_to_move) {
+			make_move_for_colour<true>(from, to, moving, move, move_state, set_en_passant);
+		}
+		else {
+			make_move_for_colour<false>(from, to, moving, move, move_state, set_en_passant);
+
+		}
+		if (!set_en_passant) {
+			en_passant_square = 0x00;
+		}
+		// TODO update 3 repetitions
+		// TODO update 50 moves
+		white_to_move = !white_to_move;
+	}
+
+
+	void Position::unmake_move(const Move& move, const Move_state& move_state) {
+		//TODO such a mess
+		square_t from = get_from(move);
+		square_t to = get_to(move);
+		piece_t moving = get_piece_on(to);
+		assert(moving != 0);
+
+		board[from] = moving;
+		restore_en_passant_square(move_state);
+		white_to_move = !white_to_move;
+
+		if (white_to_move) {
+			Square::clear_bit(white, to);
+			Square::set_bit(white, from);
+			bb& pbb = piece_bb[moving - 1];
+			Square::clear_bit(pbb, to);
+			Square::set_bit(pbb, from);
+			switch (moving) {
+			case Piece::WHITE_PAWN: {
+				// move pawn back
+				//TODO clearing can be saved when move was a capture. find out which is faster
+				if (is_in_back_rank_black(to)) {
+					//TODO move_type = promotion
+					//piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
+					//un_promote(promoted_to, to);
+					Square::clear_bit(queens, to);
+				}
+				else {
+					// handle capturing by e. p.
+					if (is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
+						square_t target = square_t(to - 8); //TODO
+						en_passant_square = 0;
+						Square::set_bit(en_passant_square, to);
+						Square::set_bit(pawns, target);
+						Square::set_bit(black, target);
+						board[target] = Piece::BLACK_PAWN;
+						board[to] = 0;
+					}
+
+				}
+				break;
+			}
+			case Piece::WHITE_KNIGHT:
+			case Piece::WHITE_BISHOP:
+			case Piece::WHITE_QUEEN:
+				break;
+			case Piece::WHITE_ROOK:
+				if (move_state.is_cleared_kingside_castling()) {
+					castling[0] = true;
+				}
+				if (move_state.is_cleared_queenside_castling()) {
+					castling[1] = true;
+				}
+				break;
+			case Piece::WHITE_KING:
+				if (from == E1 && to == C1) { //queenside castle
+					Square::update_bits(white, rooks, D1, A1);
+					board[D1] = 0;
+					board[A1] = Piece::WHITE_ROOK;
+				}
+				else if (from == E1 && to == G1) { // kingside castle
+					Square::update_bits(white, rooks, F1, H1);
+					board[F1] = 0;
+					board[H1] = Piece::WHITE_ROOK;
+				}
+				if (move_state.is_cleared_kingside_castling()) {
+					castling[0] = true;
+				}
+				if (move_state.is_cleared_queenside_castling()) {
+					castling[1] = true;
+				}
+				break;
+			default:
+				debug_position();
+				cerr << "unexpected white piece: " << ((int)moving) << endl;
+				throw moving;
+				break;
+			}
+		}
+		else {
+			Square::clear_bit(black, to); //TODO unnecessary when capture
+			Square::set_bit(black, from);
+			bb& pbb = piece_bb[-moving - 1];
+			Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
+			Square::set_bit(pbb, from);
+			switch (moving) {
+			case Piece::BLACK_PAWN: {
+
+				if (is_in_back_rank_white(to)) {
+					//un_promote(Piece::BLACK_QUEEN, to);
+					Square::clear_bit(queens, to);
+				}
+				else {
+					// handle capturing by e. p.
+					if (is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
+						square_t target = square_t(to + 8); //TODO
+						en_passant_square = 0;
+						Square::set_bit(en_passant_square, to);
+						Square::set_bit(pawns, target);
+						Square::set_bit(white, target);
+						board[target] = Piece::WHITE_PAWN;
+						board[to] = 0;
+					}
+				}
+			}
+
+									break;
+			case Piece::BLACK_KNIGHT:
+			case Piece::BLACK_BISHOP:
+			case Piece::BLACK_QUEEN:
+				break;
+			case Piece::BLACK_ROOK:
+				if (move_state.is_cleared_kingside_castling()) {
+					castling[2] = true;
+				}
+				if (move_state.is_cleared_queenside_castling()) {
+					castling[3] = true;
+				}
+				break;
+			case Piece::BLACK_KING:
+				if (from == E8 && to == C8) { //queenside castle
+					Square::update_bits(black, rooks, D8, A8);//TODO constants, not magics
+					board[D8] = 0;
+					board[A8] = Piece::BLACK_ROOK;
+				}
+				else if (from == E8 && to == G8) { // kingside castle
+					Square::update_bits(black, rooks, F8, H8);//TODO constants, not magics
+					board[F8] = 0;
+					board[H8] = Piece::BLACK_ROOK;
+				}
+				if (move_state.is_cleared_kingside_castling()) {
+					castling[2] = true;
+				}
+				if (move_state.is_cleared_queenside_castling()) {
+					castling[3] = true;
+				}
+				break;
+			default:
+				debug_position();
+				double error = ((double)moving);
+				cerr << "umm: unexpected black piece: " << error << endl;
+				throw - moving;
+				break;
+			}
+		}
+		assert(get_piece_on(get_from(move)) != 0);
+		if (!is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
+
+			const piece_t& captured = move_state.captured;// get_captured();
+			//board[from] = moving; //TODO encapsulate
+			board[to] = captured; //TODO encapsulate
+
+			if (captured != 0) {
+				//cout << "untaken: " << (int)captured << endl;
+				//bool colour = determine_colour(captured);
+				if (!white_to_move) {
+					Square::set_bit(white, to);
+				}
+				else {
+					Square::set_bit(black, to);
+				}
+
+				int8_t p = determine_piece(captured);
+				assert(0 <= p && p <= 6);
+				Square::set_bit(piece_bb[p - 1], to);
+				if (p == Piece::ROOK) {
+					if (move_state.is_cleared_kingside_castling() && to == H8) {
+						castling[2] = true;
+					}
+					else if (move_state.is_cleared_queenside_castling() && to == A8) {
+						castling[3] = true;
+					}
+					else if (move_state.is_cleared_kingside_castling() && to == H1) {
+						castling[0] = true;
+					}
+					else if (move_state.is_cleared_queenside_castling() && to == A1) {
+						castling[1] = true;
+					}
+					assert(get_piece_on(get_from(move)) != 0);
+					assert(get_piece_on(get_to(move)) != 0);
+				}
+			}
+
+
+			assert(get_piece_on(get_from(move)) != 0);
+			// TODO update 3 repetitions
+			// TODO update 50 moves
+		}
+	}
+
 }
