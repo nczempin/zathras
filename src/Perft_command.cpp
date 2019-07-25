@@ -43,8 +43,8 @@ namespace Interface {
 			Move& move = moves[i];
 			Move_state ms;
 			pp->make_move(move, ms);
-			assert(pp->get_piece_on(move.get_from()) == 0);
-			assert(pp->get_piece_on(move.get_to()) != 0);
+			assert(pp->get_piece_on(get_from(move)) == 0);
+			assert(pp->get_piece_on(get_to(move)) != 0);
 
 			if (pp->is_in_check(!pp->white_to_move)) {
 				pp->unmake_move(move, ms);
@@ -59,10 +59,10 @@ namespace Interface {
 				uint64_t perft_result = perft(depth - 1);
 				total_result += perft_result;
 			}
-			assert(pp->get_piece_on(move.get_from()) == 0);
-			assert(pp->get_piece_on(move.get_to()) != 0);
+			assert(pp->get_piece_on(get_from(move)) == 0);
+			assert(pp->get_piece_on(get_to(move)) != 0);
 			pp->unmake_move(move, ms);
-			assert(pp->get_piece_on(move.get_from()) != 0);
+			assert(pp->get_piece_on(get_from(move)) != 0);
 		}
 		return total_result;
 	}
@@ -129,6 +129,8 @@ namespace Interface {
 				//pp->debug_position();
 				total_result += perft_result;
 				pp->unmake_move(move, ms);
+				//pp->debug_position();
+
 			}
 		}
 

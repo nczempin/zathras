@@ -44,9 +44,12 @@ namespace Moves {
 	void Move_container::add_move(const square_t& from, const square_t& to, const move_type_t& move_type)
 	{
 		Move& m = container[index];
-		m.set_from(from);
-		m.set_to(to);
-		m.set_move_type(move_type);
+		set_from(m, from);
+		set_to(m, to);
+		auto is_ep = move_type == EN_PASSANT;
+		if (move_type) {
+			set_en_passant(m, is_ep);
+		}
 		++index;
 	}
 

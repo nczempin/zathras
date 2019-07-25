@@ -32,7 +32,7 @@ namespace Positions {
 	}
 
 	using namespace Moves;
-
+	using Move = uint16_t;//TODO
 	class Position {
 
 	public:
@@ -40,7 +40,7 @@ namespace Positions {
 		virtual ~Position();
 
 
-		void make_move(const Move& move, Move_state& move_state);
+		void make_move(const Move & move, Move_state& move_state);
 
 		void unmake_move(const Move& move, const Move_state& move_state);
 

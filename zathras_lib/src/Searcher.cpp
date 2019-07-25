@@ -218,7 +218,7 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 		//}
 		//const int& capture = newMove.get_captured();
 		//assert(capture != 0);
-		//const int& capturing = newMove.get_moving_piece();// abs(position.board[newMove.get_from()]);
+		//const int& capturing = newMove.get_moving_piece();// abs(position.board[newget_from(move)]);
 
 		//if (!shouldBeIgnored(position, newMove, capture, capturing)) {
 

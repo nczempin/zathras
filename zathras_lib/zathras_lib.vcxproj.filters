@@ -30,9 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Move.cpp">
-      <Filter>Move</Filter>
-    </ClCompile>
     <ClCompile Include="src\Move_container.cpp">
       <Filter>Move</Filter>
     </ClCompile>
@@ -74,9 +71,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Move.h">
-      <Filter>Move</Filter>
-    </ClInclude>
     <ClInclude Include="src\Move_container.h">
       <Filter>Move</Filter>
     </ClInclude>
@@ -118,6 +112,9 @@
     </ClInclude>
     <ClInclude Include="src\misc.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Move.h">
+      <Filter>Move</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

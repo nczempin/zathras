@@ -16,6 +16,8 @@
 #include <array>
 
 namespace Moves {
+	using Move = uint16_t;
+
 	const size_t CONTAINER_COUNT = 32; //TODO this needs to be the maximum depth
 	const size_t CONTAINER_SIZE = 127;
 	using Positions::square_t;
@@ -35,11 +37,16 @@ namespace Moves {
 //		void add_move(const int8_t& moving, const uint8_t& from, const uint8_t& to, const int8_t& captured, const bool& en_passant_capture, const int8_t& promoted_to);
 		void add_move(const square_t& from, const square_t& to, const Move_type& move_type);
 		void add_move(const Move& move) {
+			auto type = NONE;
+			bool todo = is_en_passant(move);
+			if (todo) {
+				type = EN_PASSANT;
+			}
 			add_move(
 				//move.get_moving_piece(),
-				move.get_from(),
-				move.get_to(),
-				move.get_move_type()
+				get_from(move),
+				get_to(move),
+				type
 				/*,
 				move.get_captured(), 
 				move.is_en_passant_capture(), 

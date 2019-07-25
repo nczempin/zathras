@@ -5,11 +5,11 @@
  *      Author: nczempin
  */
 
-#include "Square.h"
 #include <iostream>
-
+#include <cassert>
 #include <bitset>
 
+#include "Square.h"
 #include "typedefs.h"
 
 namespace Positions {
@@ -108,6 +108,7 @@ namespace Positions {
 		set_square(file, rank, b);
 	}
 	void Square::clear_bit(bb& b, const square_t& to) {
+		assert(to < 64);
 		b &= ~squares[to];
 	}
 	bool Square::is_set_square(bb b, square_t to) {

@@ -196,8 +196,10 @@ namespace Positions {
 
 	void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
 		bool set_en_passant = false;
-		const square_t& from = move.get_from();
-		const square_t& to = move.get_to();
+		const square_t& from = get_from(move);
+		assert(from < 64);
+		const square_t& to = get_to(move);
+		assert(to < 64);
 		int8_t moving = get_piece_on(from);
 		//if (moving == 0) {
 		//	debug_position();
@@ -227,8 +229,8 @@ namespace Positions {
 
 	void Position::unmake_move(const Move& move, const Move_state& move_state) {
 		//TODO such a mess
-		square_t from = move.get_from();
-		square_t to = move.get_to();
+		square_t from = get_from(move);
+		square_t to = get_to(move);
 		piece_t moving = get_piece_on(to);
 		assert(moving != 0);
 
@@ -254,7 +256,7 @@ namespace Positions {
 				}
 				else {
 					// handle capturing by e. p.
-					if (move.get_move_type() == EN_PASSANT) {
+					if (is_en_passant(move)){//.get_move_type() == EN_PASSANT) {
 						square_t target = square_t(to - 8); //TODO
 						en_passant_square = 0;
 						Square::set_bit(en_passant_square, to);
@@ -319,7 +321,7 @@ namespace Positions {
 				}
 				else {
 					// handle capturing by e. p.
-					if (move.get_move_type() == EN_PASSANT) {
+					if (is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
 						square_t target = square_t(to + 8); //TODO
 						en_passant_square = 0;
 						Square::set_bit(en_passant_square, to);
@@ -370,8 +372,8 @@ namespace Positions {
 				break;
 			}
 		}
-		assert(get_piece_on(move.get_from()) != 0);
-		if (move.get_move_type() != EN_PASSANT) {
+		assert(get_piece_on(get_from(move)) != 0);
+		if (!is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
 
 			int8_t captured = move_state.captured;// get_captured();
 			//board[from] = moving; //TODO encapsulate
@@ -423,13 +425,13 @@ namespace Positions {
 					cerr << "un??" << p << endl;
 					throw p;
 				}
-				assert(get_piece_on(move.get_from()) != 0);
-				assert(get_piece_on(move.get_to()) != 0);
+				assert(get_piece_on(get_from(move)) != 0);
+				assert(get_piece_on(get_to(move)) != 0);
 			}
 		}
 
 
-		assert(get_piece_on(move.get_from()) != 0);
+		assert(get_piece_on(get_from(move)) != 0);
 		// TODO update 3 repetitions
 		// TODO update 50 moves
 	}
@@ -558,6 +560,7 @@ namespace Positions {
 	template<bool white_or_not>
 	inline void Position::make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
 		{
+			assert(to < 64);
 			board[from] = 0; //TODO encapsulate
 			board[to] = moving; //TODO encapsulate
 			assert(moving != 0);
@@ -583,7 +586,7 @@ namespace Positions {
 
 						//TODO: find out which method is faster
 						//if (get_piece_on(to) == 0xff) { // en passant capture
-						if (move.get_move_type() == EN_PASSANT) { // en passant capture
+						if (is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
 							square_t target = square_t(to - 8);
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(black, target);
@@ -667,7 +670,7 @@ namespace Positions {
 
 						//TODO: find out which method is faster
 						//if (get_piece_on(to) == 0xff) { // en passant capture
-						if (move.get_move_type() == EN_PASSANT) { // en passant capture
+						if (is_en_passant(move)) {//.get_move_type() == EN_PASSANT) {
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(white, target);
 

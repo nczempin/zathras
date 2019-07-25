@@ -22,7 +22,6 @@
     <ClCompile Include="src\Bitboard.cpp" />
     <ClCompile Include="src\Bitboard_test.cpp" />
     <ClCompile Include="src\misc.cpp" />
-    <ClCompile Include="src\Move.cpp" />
     <ClCompile Include="src\Move_container.cpp" />
     <ClCompile Include="src\Move_generator.cpp" />
     <ClCompile Include="src\Move_generator_pregen.cpp" />
@@ -38,8 +37,8 @@
     <ClInclude Include="src\Bitboard.h" />
     <ClInclude Include="src\Character.h" />
     <ClInclude Include="src\Evaluator.h" />
-    <ClInclude Include="src\misc.h" />
     <ClInclude Include="src\Move.h" />
+    <ClInclude Include="src\misc.h" />
     <ClInclude Include="src\Move_container.h" />
     <ClInclude Include="src\Move_generator.h" />
     <ClInclude Include="src\Move_state.h" />
