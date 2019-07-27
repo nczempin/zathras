@@ -171,7 +171,7 @@ namespace Positions {
 		cout << "wtm: " << white_to_move << endl;
 		cout << "ep: ";
 		Bitboard::visit_bitboard(en_passant_square, [](uint8_t y) {
-			cout << Square::mailbox_index_to_square(y) << endl;
+			cout << mailbox_index_to_square(y) << endl;
 			});
 		cout << endl;
 		cout << "Castling: ";
@@ -290,10 +290,10 @@ namespace Positions {
 
 	void Position::display_all_moves(const bitboard_set& moves) {
 		Bitboard::visit_bitboard(0xffffffffffffffff, [moves](uint8_t x) {
-			Square::print_square(x);
+			print_square(x);
 			Position::visualize_bitboard(moves[x], cout);
 			Bitboard::visit_bitboard(moves[x], [](uint8_t y) {
-				Square::print_square(y);
+				print_square(y);
 				});
 			});
 	}
@@ -308,7 +308,7 @@ namespace Positions {
 		cout << print_bitboard(black);
 		cout << print_bitboard(pawns);
 		for (uint8_t i = 0; i < 64; ++i) {
-			if (Square::is_set_square(black, square_t(i))) {
+			if (is_set_square(black, square_t(i))) {
 				cout << "1";
 			}
 			else {
@@ -320,7 +320,7 @@ namespace Positions {
 		}
 		cout << "\n";
 		for (uint8_t i = 0; i < 64; ++i) {
-			if (Square::is_set_square(white, square_t(i))) {
+			if (is_set_square(white, square_t(i))) {
 				cout << "1";
 			}
 			else {

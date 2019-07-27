@@ -43,29 +43,29 @@ namespace Moves {
 
 	int8_t Move_generator::find_captured_piece(square_t square, int8_t moving) {
 		int8_t captured = 0;
-		if (Square::is_set_square(p->pawns, square)) {
+		if (is_set_square(p->pawns, square)) {
 			captured = Piece::PAWN;
 		}
-		else if (Square::is_set_square(p->knights, square)) {
+		else if (is_set_square(p->knights, square)) {
 			captured = Piece::KNIGHT;
 		}
-		else if (Square::is_set_square(p->bishops, square)) {
+		else if (is_set_square(p->bishops, square)) {
 			captured = Piece::BISHOP;
 		}
-		else if (Square::is_set_square(p->rooks, square)) {
+		else if (is_set_square(p->rooks, square)) {
 			captured = Piece::ROOK;
 		}
-		else if (Square::is_set_square(p->queens, square)) {
+		else if (is_set_square(p->queens, square)) {
 			captured = Piece::QUEEN;
 		}
-		else if (Square::is_set_square(p->kings, square)) {
+		else if (is_set_square(p->kings, square)) {
 			captured = Piece::KING; // should this even happen? exception?
 		}
-		if (Square::is_set_square(p->black, square)) { //black
+		if (is_set_square(p->black, square)) { //black
 			captured = -captured;
 		}
 		else {
-			//if (!Square::is_set_square(p->white, square)) {
+			//if (!is_set_square(p->white, square)) {
 			//	if (p->en_passant_square == 0) {
 			//		p->debug_position();
 			//		throw 68;
@@ -94,7 +94,7 @@ namespace Moves {
 	}
 	bool Move_generator::has_captured_piece(square_t square, int8_t moving) {
 
-		if (Square::is_set_square(p->black | p->white, square)) { //black
+		if (is_set_square(p->black | p->white, square)) { //black
 			return true;
 		}
 
@@ -252,7 +252,7 @@ namespace Moves {
 			bitset<64> between = 0;
 			for (uint8_t i = 1; i < diff; ++i) {
 
-				Square::set_square(file + i, rank, between);
+				set_square(file + i, rank, between);
 			}
 			const bb intersection = between.to_ullong();
 			return intersection;
@@ -267,7 +267,7 @@ namespace Moves {
 			uint8_t ranks = diff >> 3; // divide by 8
 			for (uint8_t i = 1; i < ranks; ++i) {
 				++rank_to;
-				Square::set_square(file, rank_to, between);
+				set_square(file, rank_to, between);
 			}
 			const bb intersection = between.to_ullong();
 			return intersection;
@@ -284,7 +284,7 @@ namespace Moves {
 			if (diagonal == 1 && rank + i * diagonal % 8 == 0) {
 				break;
 			}
-			Square::set_square(file + i * diagonal, rank + i, between_l);
+			set_square(file + i * diagonal, rank + i, between_l);
 			++i;
 		}
 		const bb intersection = between_l.to_ullong();
@@ -433,14 +433,14 @@ namespace Moves {
 		square_t next_square = square_t(uint8_t(king_square) + direction); //TODO proper cast
 		square_t target_square = square_t(uint8_t(king_square) + direction * 2);//TODO proper cast
 
-		if (Square::is_set_square(p->white | p->black, next_square)) {
+		if (is_set_square(p->white | p->black, next_square)) {
 			return;
 		}
-		if (Square::is_set_square(p->white | p->black, target_square)) {
+		if (is_set_square(p->white | p->black, target_square)) {
 			return;
 		}
 		if (direction == -1) { // queen side
-			if (Square::is_set_square(p->white | p->black, square_t(target_square - 1))) { // b1/b8
+			if (is_set_square(p->white | p->black, square_t(target_square - 1))) { // b1/b8
 				return;
 			}
 
@@ -493,7 +493,7 @@ namespace Moves {
 
 	bool Move_generator::will_be_en_passant(square_t to, int8_t moving) {
 		bool en_passant_capture = false;
-		if (Square::is_set_square(p->en_passant_square, to)) {
+		if (is_set_square(p->en_passant_square, to)) {
 			if ((moving == Piece::WHITE_PAWN && to > 31)
 				|| (moving == Piece::BLACK_PAWN && to < 31)) {
 				en_passant_capture = true;
@@ -667,7 +667,7 @@ namespace Moves {
 			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));
 			const bb& raw_moves = all_moves[from];
 			bb kpsq = 0;
-			Square::set_bit(kpsq, square);
+			set_bit(kpsq, square);
 			bb moves = raw_moves & kpsq;
 			while (moves != 0x00) {
 				const square_t& to = square_t(Bitboard::extract_and_remove_square(moves));

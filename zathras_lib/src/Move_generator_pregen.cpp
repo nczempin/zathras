@@ -27,12 +27,12 @@ namespace Moves {
 				const int to = 7 - file_to + rank_to * 8;*/
 
 				if (candidate >= 0 && candidate < 64) {
-					Square::set_square(bbs, candidate);
+					set_square(bbs, candidate);
 					if (from % 8 == 7 && candidate % 8 == 0) {
-						Square::clear_square(bbs, candidate);
+						clear_square(bbs, candidate);
 					}
 					if (from % 8 == 0 && candidate % 8 == 7) {
-						Square::clear_square(bbs, candidate);
+						clear_square(bbs, candidate);
 					}
 				}
 				if (!bbs[candidate]) { // as soon as we hit an illegal target,
@@ -56,12 +56,12 @@ namespace Moves {
 					int file_from = i % 8;
 					int file_to = candidate % 8;
 					int rank_to = candidate / 8;
-					Square::set_square(file_to, rank_to, attacking[i]);
+					set_square(file_to, rank_to, attacking[i]);
 					if (file_from >= 6 && file_to <= 1) {
-						Square::clear_square(file_to, rank_to, attacking[i]);
+						clear_square(file_to, rank_to, attacking[i]);
 					}
 					if (file_from <= 1 && file_to >= 6) {
-						Square::clear_square(file_to, rank_to, attacking[i]);
+						clear_square(file_to, rank_to, attacking[i]);
 					}
 				}
 			}
@@ -151,12 +151,12 @@ namespace Moves {
 		int rank_to = candidate / 8;
 
 		if (candidate >= 0 && candidate < 64) {
-			Square::set_square(file_to, rank_to, bs[from]);
+			set_square(file_to, rank_to, bs[from]);
 			if (from % 8 == 7 && candidate % 8 == 0) {
-				Square::clear_square(file_to, rank_to, bs[from]);
+				clear_square(file_to, rank_to, bs[from]);
 			}
 			if (from % 8 == 0 && candidate % 8 == 7) {
-				Square::clear_square(file_to, rank_to, bs[from]);
+				clear_square(file_to, rank_to, bs[from]);
 			}
 		}
 	}
@@ -168,14 +168,14 @@ namespace Moves {
 			int candidate = i + 8 * direction; // single step
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
-			Square::set_square(file_to, rank_to, bs[i]);
+			set_square(file_to, rank_to, bs[i]);
 		}
 		bitboard_set pawn_no_capture_moves;
 		for (int i = start; i != stop; i += direction) {
 			int candidate = i + 16 * direction; // double step
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
-			Square::set_square(file_to, rank_to, bs[i]);
+			set_square(file_to, rank_to, bs[i]);
 		}
 		for (int i = 0; i < 64; ++i) {
 			unsigned long long as_int = bs[i].to_ullong();

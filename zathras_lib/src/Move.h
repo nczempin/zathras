@@ -37,13 +37,13 @@ namespace Moves {
 	}
 
 	inline constexpr bool is_en_passant(Move mm) {
-		return static_cast<bool>((mm >> 6)&1);// will need to change if we add CASTLING
+		return static_cast<bool>((mm >> 6) & 1);// will need to change if we add CASTLING
 	}
 	inline constexpr bool is_promotion(Move mm) {
 		return static_cast<bool>(mm >> 7); // will need to change if we add CASTLING
 	}
 	inline constexpr piece_t get_promoted(Move mm) {
-		piece_t tmp = Piece::QUEEN - (mm >> 14 && 0b11);
+		piece_t tmp = Piece::QUEEN - (mm >> 14 & 0b11);
 		// 0 -> queen
 		// 1 -> rook
 		// 2 -> bishop
@@ -104,8 +104,8 @@ namespace Moves {
 		char p = pieces[moving > 0 ? moving : -moving];
 		string moving_string = string(1, p);*/
 
-		std::string retval = Positions::Square::mailbox_index_to_square(get_from(move));
-		retval += Positions::Square::mailbox_index_to_square(get_to(move));
+		std::string retval = Positions::mailbox_index_to_square(get_from(move));
+		retval += Positions::mailbox_index_to_square(get_to(move));
 
 
 		return retval;

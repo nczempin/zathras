@@ -38,7 +38,7 @@ namespace Positions {
 			uint8_t file = file_string - 'a';
 			char rank_string = en_passant[1];
 			uint8_t rank = rank_string - '1';
-			Square::set_square(file, rank, en_passant_square);
+			set_square(file, rank, en_passant_square);
 			position.en_passant_square = en_passant_square;
 		}
 
@@ -57,63 +57,63 @@ namespace Positions {
 				else {
 					switch (c) {
 					case 'P':
-						Square::set_square(f, r, position.pawns);
-						Square::set_square(f, r, position.white);
+						set_square(f, r, position.pawns);
+						set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_PAWN; //TODO encapsulate
 						break;
 					case 'N':
-						Square::set_square(f, r, position.knights);
-						Square::set_square(f, r, position.white);
+						set_square(f, r, position.knights);
+						set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_KNIGHT; //TODO encapsulate
 						break;
 					case 'B':
-						Square::set_square(f, r, position.bishops);
-						Square::set_square(f, r, position.white);
+						set_square(f, r, position.bishops);
+						set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_BISHOP; //TODO encapsulate
 						break;
 					case 'R':
-						Square::set_square(f, r, position.rooks);
-						Square::set_square(f, r, position.white);
+						set_square(f, r, position.rooks);
+						set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_ROOK; //TODO encapsulate
 						break;
 					case 'Q':
-						Square::set_square(f, r, position.queens);
-						Square::set_square(f, r, position.white);
+						set_square(f, r, position.queens);
+						set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_QUEEN; //TODO encapsulate
 						break;
 					case 'K':
-						Square::set_square(f, r, position.kings);
-						Square::set_square(f, r, position.white);
+						set_square(f, r, position.kings);
+						set_square(f, r, position.white);
 						position.board[f + r * 8] = Piece::WHITE_KING; //TODO encapsulate
 						break;
 					case 'p':
-						Square::set_square(f, r, position.pawns);
-						Square::set_square(f, r, position.black);
+						set_square(f, r, position.pawns);
+						set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_PAWN; //TODO encapsulate
 						break;
 					case 'n':
-						Square::set_square(f, r, position.knights);
-						Square::set_square(f, r, position.black);
+						set_square(f, r, position.knights);
+						set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_KNIGHT; //TODO encapsulate
 						break;
 					case 'b':
-						Square::set_square(f, r, position.bishops);
-						Square::set_square(f, r, position.black);
+						set_square(f, r, position.bishops);
+						set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_BISHOP; //TODO encapsulate
 						break;
 					case 'r':
-						Square::set_square(f, r, position.rooks);
-						Square::set_square(f, r, position.black);
+						set_square(f, r, position.rooks);
+						set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_ROOK; //TODO encapsulate
 						break;
 					case 'q':
-						Square::set_square(f, r, position.queens);
-						Square::set_square(f, r, position.black);
+						set_square(f, r, position.queens);
+						set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_QUEEN; //TODO encapsulate
 						break;
 					case 'k':
-						Square::set_square(f, r, position.kings);
-						Square::set_square(f, r, position.black);
+						set_square(f, r, position.kings);
+						set_square(f, r, position.black);
 						position.board[f + r * 8] = Piece::BLACK_KING; //TODO encapsulate
 						break;
 					default:
