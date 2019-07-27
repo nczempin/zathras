@@ -20,12 +20,15 @@
 namespace Positions {
 
 	//TODO find better way to do this
-#define pawns  piece_bb[0]
-#define knights piece_bb[1]
-#define bishops piece_bb[2]
-#define rooks piece_bb[3]
-#define queens piece_bb[4]
-#define kings piece_bb[5]
+#define pawns  pos_bb[0]
+#define knights pos_bb[1]
+#define bishops pos_bb[2]
+#define rooks pos_bb[3]
+#define queens pos_bb[4]
+#define kings pos_bb[5]
+#define white pos_bb[6]
+#define black pos_bb[7]
+
 
 	namespace {
 		const int BETWEEN_ARRAY_SIZE = 64 * 64;
@@ -40,12 +43,12 @@ namespace Positions {
 		virtual ~Position();
 
 
-		void make_move(const Move & move, Move_state& move_state);
+		void make_move(const Move & move, Move_state& move_state); // TODO move semantics?
 
 		void unmake_move(const Move& move, const Move_state& move_state);
 
-		bool is_in_check(const bool side);
-		piece_t get_piece_on(square_t sq) {
+		bool is_in_check(const bool& side);
+		inline constexpr piece_t get_piece_on(const square_t& sq) {
 			return board[sq];
 		}
 
@@ -54,27 +57,17 @@ namespace Positions {
 		bool is_white_to_move() const {
 			return white_to_move;
 		}
-		bool white_to_move = true;
 
 
 		//TODO public for now
-		bb piece_bb[6] = {};
-		bb white = 0x00;
-		bb black = 0x00;
+		bb pos_bb[8] {0};//TODO use std::array
+		piece_t board[64]{0}; //TODO use std::array
 		bb en_passant_square = 0x00;
 		bitset<4> castling;
-
-		//TODO: move all the static stuff out of the class
-		static bool is_attacked_by_hopper(const bb& movers, const bitboard_set& all_moves, const square_t& square);
-		static bool is_check_from_slider(const bitboard_set& sliding_moves, const square_t& king_pos, const bb& slider, const bb& occupied);
-
-		static bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
-		static bool is_anything_between(square_t from, square_t to, const bb& occupied);
-
+		bool white_to_move = true;
 
 	private:
 		template<bool white_or_not> void make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant);
-		piece_t board[64]; //TODO use std::array
 
 		void save_en_passant_square(Move_state& move_state);
 		void restore_en_passant_square(const Move_state& move_state);
@@ -113,6 +106,15 @@ namespace Positions {
 
 		static string mailbox_board_simple_representation(const piece_t board[64]);
 		static string mailbox_board_debug_representation(const piece_t board[64]);
+	public:
+		//TODO: move all the static stuff out of the class
+		static bool is_attacked_by_hopper(const bb& movers, const bitboard_set& all_moves, const square_t& square);
+		static bool is_check_from_slider(const bitboard_set& sliding_moves, const square_t& king_pos, const bb& slider, const bb& occupied);
+
+		static bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
+		static bool is_anything_between(square_t from, square_t to, const bb& occupied);
+
+
 
 
 

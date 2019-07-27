@@ -728,9 +728,9 @@ namespace Moves {
 	}
 
 	bool Move_generator::is_attacked(const square_t& square) {
-		if (square > 64) {
-			p->debug_position();
-		}
+		//if (square > 64) {
+		//	p->debug_position();
+		//}
 		const bb occupied = p->white | p->black;
 
 		if (p->white_to_move) {

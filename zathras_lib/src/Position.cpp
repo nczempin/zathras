@@ -20,9 +20,7 @@
 #include "Bitboard.h"
 namespace Positions {
 	Position::Position() {
-		for (int i = 0; i < 6; ++i) {
-			piece_bb[i] = 0;
-		}
+
 		//TODO clear piece bitboards?
 
 		//TODO statically initialize
@@ -195,7 +193,7 @@ namespace Positions {
 	}
 
 
-	bool Position::is_in_check(const bool side) {
+	bool Position::is_in_check(const bool& side) {
 		//TODO this is a somewhat naive way of doing this, it needs to be much more efficient
 		const bb colour = side ? white : black;
 		const bb kpbb = kings & colour;
@@ -208,10 +206,10 @@ namespace Positions {
 		assert(kpbb != 0);
 		const square_t& king_pos = square_t(Bitboard::extract_square(kpbb));
 		assert(king_pos < 64);
-		if (king_pos >= 64) {
-			debug_position();
-			throw king_pos;
-		}
+		//if (king_pos >= 64) {
+		//	debug_position();
+		//	throw king_pos;
+		//}
 		if (white_to_move) {
 			const bb white_knights = knights & white;
 			if (is_attacked_by_hopper(white_knights, Bitboard::knight_moves, king_pos)) {
@@ -324,7 +322,7 @@ namespace Positions {
 			if (white_or_not) {
 				Square::clear_bit(white, from);
 				Square::set_bit(white, to);
-				bb& pbb = piece_bb[moving - 1];
+				bb& pbb = pos_bb[moving - 1];
 				Square::set_bit(pbb, to);
 				Square::clear_bit(pbb, from);
 
@@ -406,7 +404,7 @@ namespace Positions {
 			else {
 				Square::clear_bit(black, from);
 				Square::set_bit(black, to);
-				bb& pbb = piece_bb[-moving - 1];
+				bb& pbb = pos_bb[-moving - 1];
 				Square::set_bit(pbb, to);
 				Square::clear_bit(pbb, from);
 				switch (moving) {
@@ -528,7 +526,7 @@ namespace Positions {
 
 	void Position::unmake_move(const Move& move, const Move_state& move_state) {
 		//TODO such a mess
-		square_t from = get_from(move);
+		const square_t& from = get_from(move);
 		square_t to = get_to(move);
 		piece_t moving = get_piece_on(to);
 		assert(moving != 0);
@@ -540,7 +538,7 @@ namespace Positions {
 		if (white_to_move) {
 			Square::clear_bit(white, to);
 			Square::set_bit(white, from);
-			bb& pbb = piece_bb[moving - 1];
+			bb& pbb = pos_bb[moving - 1];
 			Square::clear_bit(pbb, to);
 			Square::set_bit(pbb, from);
 			switch (moving) {
@@ -608,7 +606,7 @@ namespace Positions {
 		else {
 			Square::clear_bit(black, to); //TODO unnecessary when capture
 			Square::set_bit(black, from);
-			bb& pbb = piece_bb[-moving - 1];
+			bb& pbb = pos_bb[-moving - 1];
 			Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
 			Square::set_bit(pbb, from);
 			switch (moving) {
@@ -690,7 +688,7 @@ namespace Positions {
 
 				int8_t p = determine_piece(captured);
 				assert(0 <= p && p <= 6);
-				Square::set_bit(piece_bb[p - 1], to);
+				Square::set_bit(pos_bb[p - 1], to);
 				if (p == Piece::ROOK) {
 					if (move_state.is_cleared_kingside_castling() && to == H8) {
 						castling[2] = true;

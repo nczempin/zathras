@@ -86,11 +86,11 @@ namespace Moves {
 	public:
 	private:
 		static bb possibly_between_pre(const square_t& x, const square_t& y);
-		//static void set_square(const uint8_t& file_to, const uint8_t& rank_to, bb & bbs);
-		//static int clear_square(int file_to, int rank_to, bitset<64> & bbs);
-		int8_t find_captured_piece(square_t square, int8_t moving);
-		bool has_captured_piece(square_t square, int8_t moving);
-		void generate_castling(const move_visitor& f, bool white);
+
+
+		piece_t find_captured_piece(square_t square, int8_t piece_t);
+		bool has_captured_piece(square_t square, int8_t piece_t);
+		void generate_castling(const move_visitor& f, bool white_to_move);
 		bool is_attacked(const square_t& square);
 		void attempt_castle(const move_visitor f, const int8_t piece, const square_t king_square, const int8_t direction);
 		void f(Move_container& moves, const int8_t moving, const square_t from, const square_t to, const int8_t captured, int8_t promoted_to);
