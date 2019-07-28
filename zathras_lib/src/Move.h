@@ -29,7 +29,7 @@ namespace Moves {
 	//TODO when we add castling, bits 6 & 7 will have to be re-used
 
 
-	inline constexpr square_t get_from(const Move mm) {
+	inline constexpr square_t get_from(const Move& mm) {
 		return static_cast<square_t>((mm >> 8) & 0b111111); //TODO just AND and SHIFT it?
 	}
 	inline constexpr square_t get_to(Move mm) {
