@@ -43,7 +43,7 @@ namespace Positions {
 		virtual ~Position();
 
 
-		void make_move(const Move & move, Move_state& move_state); // TODO move semantics?
+		void make_move(const Move& move, Move_state& move_state); // TODO move semantics?
 
 		void unmake_move(const Move& move, const Move_state& move_state);
 
@@ -60,11 +60,21 @@ namespace Positions {
 
 
 		//TODO public for now
-		bb pos_bb[8] {0};//TODO use std::array
-		piece_t board[64]{0}; //TODO use std::array
+		bb pos_bb[8]{ 0 };//TODO use std::array
+		piece_t board[64]{ 0 }; //TODO use std::array
 		bb en_passant_square = 0x00;
 		bitset<4> castling;
 		bool white_to_move = true;
+		////TODO find better way to do this
+		//bb& pawns = pos_bb[0];
+		//bb& knights = pos_bb[1];
+		//bb& bishops = pos_bb[2];
+		//bb& rooks = pos_bb[3];
+		//bb& queens = pos_bb[4];
+		//bb& kings = pos_bb[5];
+		//bb& white = pos_bb[6];
+		//bb& black = pos_bb[7];
+
 
 	private:
 		template<bool white_or_not> void make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant);
@@ -82,7 +92,7 @@ namespace Positions {
 
 		string debug_board() const;
 
-		void debug_position();		
+		void debug_position();
 		static bb between[BETWEEN_ARRAY_SIZE];
 		inline static uint16_t calc_index(const uint8_t& x, const uint8_t& y) {
 			return x + 64 * y;
@@ -90,8 +100,6 @@ namespace Positions {
 
 		//TODO: move all the static stuff out of the class
 		static string print_bitboard(bb my_bb);
-		static Position create_start_position();
-		static Position create_position(const string& fen);
 		void print(ostream& stream) const;
 		static void visualize_bitboard(bb my_bb, ostream& stream);
 		static void visualize_mailbox_board(const piece_t board[64], ostream& stream);
@@ -119,6 +127,8 @@ namespace Positions {
 
 
 	};
+	 void write_position(Position& position, const string& fen);
+	 void write_start_position(Position& position);
 	//TODO template?
 	constexpr bool is_in_back_rank_black(square_t square) {
 		return Squares::A8 <= square && square <= Squares::H8;

@@ -27,7 +27,7 @@ int main()
 	Positions::Position::visualize_bitboard(Bitboard::bishop_moves[4], cout);
 	Positions::Position::visualize_bitboard(Bitboard::bishop_moves[7], cout);*/
 	
-	p = p.create_start_position();
+	write_start_position(p);
 	//std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 
 	//Perft_command pc{ p,  6 };

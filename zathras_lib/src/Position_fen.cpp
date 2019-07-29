@@ -1,7 +1,6 @@
 #include "Position.h"
 namespace Positions {
-	Position Position::create_position(const string& fen) {
-		Position position;
+	void write_position(Position& position, const string& fen) {
 		vector<string> split_fen = Util::split(fen, ' ');
 		string to_move = split_fen[1];
 		string castling_string = split_fen[2];
@@ -126,14 +125,10 @@ namespace Positions {
 			}
 			--r;
 		}
-		return position;
 	}
 
-	Position Position::create_start_position() {
-		const char* p = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-
-		Position start_position = create_position(p);
-		return start_position;
+	 void write_start_position(Position &position) {
+		string start_fen{ "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" };
+		write_position(position, start_fen);
 	}
 }

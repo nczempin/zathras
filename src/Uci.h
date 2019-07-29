@@ -138,18 +138,18 @@ namespace Interface {
 				exit(0); //TODO more elegance
 			}
 			else if (startsWith("ucinewgame", toParse)) {
-				p = p.create_start_position(); //TODO warning C26444 avoid unnamed objects with custom construction
+				write_start_position(p); //TODO warning C26444 avoid unnamed objects with custom construction
 				//cout << "!" << endl;
 			}
 			else if (startsWith("position", toParse)) {
 				//pos.clear();//TODO hopefully the other methods will have taken care of this
 				string positionString = extractPosition(toParse);
 				if (startsWith("startpos", positionString)) {
-					p = p.create_start_position();
+					write_start_position(p);
 				}
 				else if (startsWith("fen", positionString)) {
 					string positionFen = extractFen(positionString);
-					p = p.create_position(positionFen);//TODO warning C26444 avoid unnamed objects with custom construction
+					write_position(p,positionFen);//TODO warning C26444 avoid unnamed objects with custom construction
 					p.print(cout);
 				}
 				string movesString = extractMoves(toParse);
