@@ -53,7 +53,7 @@ namespace Interface {
 
 				string depth_param = toParse.substr(index + pattern.length());
 
-				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
+				uint8_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
 				Perft_command pc{p,  depth };
 				pc.execute();
 				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
@@ -65,7 +65,7 @@ namespace Interface {
 				////TODO do this more elegantly
 				//for (int i = 0; i < perftDepth; ++i) {
 				//	Info::start = chrono::system_clock::now();
-				//	int nodes = perft(p, i + 1);
+				//	int nodes = perft(pos, i + 1);
 				//	end = chrono::system_clock::now();
 				//	chrono::duration<double> elapsed_seconds = end - Info::start;
 				//	cout << i + 1 << ", " << nodes << " @ " << elapsed_seconds.count() << endl;
@@ -79,15 +79,15 @@ namespace Interface {
 			//	int perftDepth = Character::getNumericValue(perftDepthParameter);
 			//	//TODO do this more elegantly
 			//	MoveGenerator mg;
-			//	vector<Move> moves = mg.generateLegalMoves(p);
+			//	vector<Move> moves = mg.generateLegalMoves(pos);
 			//	int count = 0;
-			//	Position tmpPos = p;
-			//	for (Move moveString : moves) {
-			//		tmpPos = p; //simple but inefficient way to undo the moveString
-			//		tmpPos.makeMove(moveString);
+			//	Position tmpPos = pos;
+			//	for (Move textual_move : moves) {
+			//		tmpPos = pos; //simple but inefficient way to undo the textual_move
+			//		tmpPos.make_uci_move(textual_move);
 
 			//		count = perft(tmpPos, perftDepth - 1);
-			//		cout << moveString.toString() << ": " << count << endl;
+			//		cout << textual_move.toString() << ": " << count << endl;
 			//	}
 
 			//	cout << "Done." << endl;
@@ -111,7 +111,7 @@ namespace Interface {
 				}
 
 				long tpm;
-				if (p.white_to_move) {
+				if (pos.white_to_move) {
 					tpm = calculateTimePerMove(wtime, winc, mtg);
 				}
 				else {
@@ -142,7 +142,7 @@ namespace Interface {
 				//cout << "!" << endl;
 			}
 			else if (startsWith("position", toParse)) {
-				//p.clear();//TODO hopefully the other methods will have taken care of this
+				//pos.clear();//TODO hopefully the other methods will have taken care of this
 				string positionString = extractPosition(toParse);
 				if (startsWith("startpos", positionString)) {
 					p = p.create_start_position();
@@ -154,15 +154,15 @@ namespace Interface {
 				}
 				string movesString = extractMoves(toParse);
 				vector<string> moves = Util::split(movesString, ' ');
-				//p.clearThreeDraws();
+				//pos.clearThreeDraws();
 				if ((movesString != "") && (moves.size() != 0))
 				{
 					for (string move : moves) {
-						//p.print();
+						//pos.print();
 
 
-						//cout << "making moveString: "<<moveString<<endl;
-						makeMove(p, move);
+						//cout << "making textual_move: "<<textual_move<<endl;
+						make_uci_move(p, move);
 					}
 				}
 			}
@@ -172,9 +172,9 @@ namespace Interface {
 			/*else if (toParse == "sm") {
 				cout << "Moves: " << endl;
 				MoveGenerator mg;
-				vector<Move> moves = mg.generateLegalMoves(p);
-				for (Move moveString : moves) {
-					moveString.print(cout);
+				vector<Move> moves = mg.generateLegalMoves(pos);
+				for (Move textual_move : moves) {
+					textual_move.print(cout);
 				}
 			}*/
 			else {
@@ -268,24 +268,22 @@ namespace Interface {
 		}
 
 
-		void static makeMove(Position& p, string moveString) {
+		void static make_uci_move(Position& pos, string textual_move) {
 			piece_t board[64];
 			for (int i = 0; i < 64; ++i) {
 				board[i] = 0;
 			}
-			p.mailbox_from_bitboard(board);
-			Move m = convert_move(moveString, board, p);
+			pos.mailbox_from_bitboard(board);
+			Move m = convert_move(textual_move, board);
 
 			//TODO make this more elegant
 			int from = get_from(m);
-			uint8_t moving = board[from];
+			piece_t moving = board[from];
 			if (moving > 6) {
 				moving = -(moving - 6);
 			}
-			p.visualize_mailbox_board(board, cout);
-			//m.set_moving_piece(moving);
+			pos.visualize_mailbox_board(board, cout);
 			int to = get_to(m);
-			//cout << "to: " << to << endl;
 			int captured = board[to];
 			//cout << "captured: " << captured << endl;
 			if (captured > 6) {
@@ -295,20 +293,20 @@ namespace Interface {
 
 			//cout << "from: " << from << endl;
 			//cout << "moving piece: " << moving << endl;
-			//cout << "makeMove: " << moveString << endl;
+			//cout << "make_uci_move: " << textual_move << endl;
 			Move_state ms;
 			ms.captured = captured;
-			p.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
+			pos.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
 
 
 	//			++Interface::Info::nodes;
 
 				//isGivingCheck = null;
 				//isReceivingCheck = null;
-			p.print(cout);
+			pos.print(cout);
 		}
 		//
-		static Move convert_move(string moveString, piece_t* board, const Position& p) {
+		static Move convert_move(string moveString, piece_t* board) {
 			square_t from = static_cast<square_t> (Util::decode_square(moveString.substr(0, 2)));
 
 			square_t to = static_cast<square_t> (Util::decode_square(moveString.substr(2, 4)));
@@ -321,7 +319,7 @@ namespace Interface {
 
 			move_type_t mt = NONE;
 			piece_t moving = board[from];
-			piece_t captured = board[to];
+			//piece_t captured = board[to];
 
 			// TODO stupid way of doing this
 			if (moving == Piece::WHITE_PAWN) {
@@ -330,7 +328,7 @@ namespace Interface {
 						mt = EN_PASSANT;
 					}
 				}
-				//if (to == Bitboard::extract_square(p.en_passant_square)) {
+				//if (to == Bitboard::extract_square(pos.en_passant_square)) {
 				//	mt = EN_PASSANT;
 				//}
 			}
@@ -340,7 +338,7 @@ namespace Interface {
 						mt = EN_PASSANT;
 					}
 				}
-				//if (to == Bitboard::extract_square(p.en_passant_square)) {
+				//if (to == Bitboard::extract_square(pos.en_passant_square)) {
 				//	mt = EN_PASSANT;
 				//}
 			}

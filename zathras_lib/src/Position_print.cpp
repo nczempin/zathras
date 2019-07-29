@@ -44,11 +44,11 @@ namespace Positions {
 		string retval;
 		retval += "  +-----------------+\n";
 		for (int i = 7; i >= 0; --i) {
-			bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
+			const bb tmp = (my_bb & 0xff00000000000000) >> 8 * 7; // slightly less efficient/elegant because I want the most significant byte to be on the top left
 			my_bb = my_bb << 8;
 			retval += to_string(i + 1);
 			retval += " |";
-			string row_string = extract_row_string(tmp, " *");
+			string row_string = extract_row_string(static_cast<uint_fast8_t>(tmp), " *"); //TODO analysse all casts
 			retval += row_string;
 			retval += " |\n";
 		}

@@ -58,7 +58,7 @@
       <AdditionalIncludeDirectories>C:\Users\nczempin\git\C++\zathras\zathras_lib\src</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <Profile>true</Profile>
+      <AssemblyDebug>true</AssemblyDebug>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -85,12 +85,13 @@
       <AdditionalIncludeDirectories>C:\Users\nczempin\git\C++\zathras\zathras_lib\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <Profile>true</Profile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <SubSystem>Console</SubSystem>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <Version>
       </Version>
+      <AssemblyDebug>false</AssemblyDebug>
+      <Profile>true</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
