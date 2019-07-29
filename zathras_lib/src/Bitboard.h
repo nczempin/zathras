@@ -38,12 +38,12 @@ namespace Positions {
 			return __builtin_ffsll(my_bb);
 		}
 #elif defined(_WIN64) && (_MSC_VER >= 1500) 
-		inline static uint8_t ffs(const bb& my_bb)noexcept {
+		inline static square_t ffs(const bb& my_bb)noexcept {
 			assert(my_bb != 0);
 			unsigned long index;
 			const bool isNonZero = _BitScanForward64(&index, my_bb);
 			assert(isNonZero);
-			return static_cast<uint8_t> (index);
+			return static_cast<square_t> (index);
 		}
 
 #else
@@ -78,8 +78,8 @@ namespace Positions {
 			return ffs(my_bb);
 		}
 
-		inline static uint8_t extract_and_remove_square(bb& my_bb) {
-			const uint8_t l = ffs(my_bb);
+		inline static square_t extract_and_remove_square(bb& my_bb) {
+			const square_t l = ffs(my_bb);
 			my_bb &= my_bb - 1;
 			return l;
 		}
@@ -87,11 +87,13 @@ namespace Positions {
 
 
 		static const bb BB_FULL_BOARD = 0xffffffffffffffff;
-		static const bb BB_RANK8 = 0xff00000000000000;
+		static const bb BB_RANK2 = 0x000000000000ff00;
 		static const bb BB_RANK3 = 0x0000000000ff0000;
 		static const bb BB_RANK4 = 0x00000000ff000000;
 		static const bb BB_RANK5 = 0x000000ff00000000;
 		static const bb BB_RANK6 = 0x0000ff0000000000;
+		static const bb BB_RANK7 = 0x00ff000000000000;
+		static const bb BB_RANK8 = 0xff00000000000000;
 		static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
 
 

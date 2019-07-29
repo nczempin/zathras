@@ -194,5 +194,93 @@ namespace Moves {
 			Piece::BLACK_PAWN);
 		return black_pawn_no_capture_moves;
 	}
+	static bool on_same_file(const int& x, const int& y) {
+		return (x % 8) == (y % 8);
+	}
+	static bool on_same_rank(const int& x, const int& y) {
+		return (x / 8) == (y / 8);
+	}
 
+	static int determine_diagonal(const int& x, const int& y) {
+		int smaller;
+		int larger;
+		if (y < x) {
+			smaller = y;
+			larger = x;
+		}
+		else {
+			smaller = x;
+			larger = y;
+		}
+		const int diff = larger - smaller;
+		if (diff % 9 == 0) {
+			return 1;
+		}
+		else if (diff % 7 == 0) {
+			return -1;
+		}
+		return 0;
+	}
+	bb Move_generator::possibly_between_pre(const square_t& x, const square_t& y) {
+		if (x == y) {
+			return false;
+		}
+		//TODO this can be done much more elegantly and much more efficiently
+		uint8_t smaller = uint8_t(x); // TODO proper cast
+		uint8_t larger = uint8_t(y); // TODO proper cast
+		if (y < x) {
+			smaller = y;
+			larger = x;
+		}
+		const uint8_t rank = smaller >> 3; // divide by 8
+		const uint8_t file = smaller % 8;
+		const uint8_t diff = larger - smaller;
+
+		if (on_same_rank(x, y)) {
+			//again with the elegance
+			if (diff == 1) {
+				return 0;
+			}
+			// evil magic numbers
+			bitset<64> between = 0;
+			for (uint8_t i = 1; i < diff; ++i) {
+
+				set_square(file + i, rank, between);
+			}
+			const bb intersection = between.to_ullong();
+			return intersection;
+		}
+		if (on_same_file(x, y)) {
+			if (diff == 8) {
+				return 0;
+			}
+			// evil magic numbers
+			bitset<64> between = 0;
+			uint8_t rank_to = rank;
+			uint8_t ranks = diff >> 3; // divide by 8
+			for (uint8_t i = 1; i < ranks; ++i) {
+				++rank_to;
+				set_square(file, rank_to, between);
+			}
+			const bb intersection = between.to_ullong();
+			return intersection;
+		}
+
+		const int8_t diagonal = determine_diagonal(x, y);
+		if (diff == 8 + diagonal) {
+			return 0; // adjacent
+		}
+		bitset<64> between_l = 0;
+		const uint8_t rank_larger = larger / 8;
+		int i = 1;
+		while (rank + i < rank_larger) {
+			if (diagonal == 1 && rank + i * diagonal % 8 == 0) {
+				break;
+			}
+			set_square(file + i * diagonal, rank + i, between_l);
+			++i;
+		}
+		const bb intersection = between_l.to_ullong();
+		return intersection;
+	}
 }

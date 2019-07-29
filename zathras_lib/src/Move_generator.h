@@ -80,7 +80,8 @@ namespace Moves {
 			const move_visitor& f, const bb& other_colour,
 			const int8_t& moving);
 		void visit_pawn_nocaps(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& occupied, const int8_t& moving, const bool& white_to_move);
-		static bb filter_occupied_squares(bool white_to_move, bb occupied,
+		void add_pawn_nocaps2(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bool& white_to_move);
+		static bb filter_occupied_squares_for_pawns(bool white_to_move, bb occupied,
 			const bitboard_set& all_moves, int x);
 
 	public:
@@ -104,5 +105,6 @@ namespace Moves {
 
 
 	};
+
 }
 #endif /* MOVE_GENERATOR_H_ */
