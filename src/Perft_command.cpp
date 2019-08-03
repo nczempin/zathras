@@ -37,21 +37,20 @@ namespace Interface {
 		size_t size = moves - hurz; //TODO
 
 		////Only works when all moves are legal
-		if (depth == 1) {
+	/*	if (depth == 1) {
 			return size;
-		}
+		}*/
 
 		for (Move* move = hurz; move != moves; move++) {
-//			Move& move = hurz[i];
 			Move_state ms;
 			pp->make_move(*move, ms);
 			assert(pp->get_piece_on(get_from(*move)) == 0);
 			assert(pp->get_piece_on(get_to(*move)) != 0);
 
-	/*		if (pp->is_in_check(!pp->white_to_move)) {
-				pp->unmake_move(move, ms);
+			if (pp->is_in_check(!pp->white_to_move)) {
+				pp->unmake_move(*move, ms);
 				continue;
-			}*/
+			}
 
 			// the move was legal
 			if (depth == 1) {
@@ -98,22 +97,20 @@ namespace Interface {
 		size_t move_count = size;
 		
 
-		if (depth == 1) {
-						total_result = move_count;
-			//++total_result;
+		if (depth == 0) {
+						//total_result = move_count;
+			++total_result;
 		}
 		else {
 
 			for (Move* move = hurz; move != moves; move++) {
-//				Move& move = hurz[i];
 				Move_state ms;
 				pp->make_move(*move, ms);
-//				mg.outside = true;
-				//if (pp->is_in_check(!pp->white_to_move)) {
-				//	//++illegal_moves_generated;
-				//	pp->unmake_move(move, ms);
-				//	continue;
-				//}
+				if (pp->is_in_check(!pp->white_to_move)) {
+					//++illegal_moves_generated;
+					pp->unmake_move(*move, ms);
+					continue;
+				}
 
 				uint64_t perft_result = perft(depth - 1);
 				string s = move_to_string(*move);
