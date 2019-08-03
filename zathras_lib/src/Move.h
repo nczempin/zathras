@@ -53,13 +53,13 @@ namespace Moves {
 
 	//void set_captured(int8_t taken);
 
-	inline void set_from(Move& mm, square_t from) {
+	inline void set_from(Move& mm, const square_t from) {
 		mm = (0b1100000011111111 & mm) | from << 8; // adding faster? probably not
 	}
-	inline void set_to(Move& mm, square_t to) {
+	inline void set_to(Move& mm, const square_t to) {
 		mm = (0b1111111111000000 & mm) | to; // adding faster? probably not
 	}
-	inline void set_en_passant(Move& mm, bool en_passant) {
+	inline void set_en_passant(Move& mm, const bool en_passant) {
 		//TODO avoid the if?
 		if (en_passant) {
 			mm |= 0b0000000001000000;
@@ -68,6 +68,11 @@ namespace Moves {
 			mm &= 0b1111111110111111;
 		}
 		//		mm = (0b1111111110111111 & mm) | en_passant << 6;
+	}
+
+	inline void set_move_type(Move& m, const move_type_t move_type) {
+		m = (m & 0b1111111100111111) | move_type << 6;
+
 	}
 
 

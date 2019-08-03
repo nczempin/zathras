@@ -100,7 +100,7 @@ namespace Moves {
 		bool will_be_en_passant(square_t to, int8_t moving);
 
 		void add_non_capture_ray_moves(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
-		void add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bool& white_to_move);
+		template<bool white_or_not> void add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bb& enemies);
 
 
 

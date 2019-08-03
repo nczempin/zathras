@@ -33,10 +33,11 @@ namespace Moves {
 		Move& m = container[index];
 		set_from(m, from);
 		set_to(m, to);
-		auto is_ep = move_type == EN_PASSANT;
-		if (move_type) {
-			set_en_passant(m, is_ep);
-		}
+		set_move_type(m, move_type);
+		//auto is_ep = move_type == EN_PASSANT;
+		//if (move_type) {
+		//	set_en_passant(m, is_ep);
+		//}
 		++index;
 	}
 

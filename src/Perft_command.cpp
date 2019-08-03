@@ -35,9 +35,9 @@ namespace Interface {
 		size_t size = move_container.size();
 
 		////Only works when all moves are legal
-		//if (depth == 1) {
-		//	return size;
-		//}
+		if (depth == 1) {
+			return size;
+		}
 
 		for (size_t i = 0; i < size; ++i) {
 			Move& move = moves[i];
@@ -46,10 +46,10 @@ namespace Interface {
 			assert(pp->get_piece_on(get_from(move)) == 0);
 			assert(pp->get_piece_on(get_to(move)) != 0);
 
-			if (pp->is_in_check(!pp->white_to_move)) {
+	/*		if (pp->is_in_check(!pp->white_to_move)) {
 				pp->unmake_move(move, ms);
 				continue;
-			}
+			}*/
 
 			// the move was legal
 			if (depth == 1) {
@@ -99,6 +99,7 @@ namespace Interface {
 		pp = make_shared < Position >(position);
 		Move_container move_container = mg.generate_pseudolegal_moves(position, depth);
 		size_t move_count = move_container.size();
+		
 
 		if (depth == 1) {
 						total_result = move_count;
@@ -112,11 +113,11 @@ namespace Interface {
 				Move_state ms;
 				pp->make_move(move, ms);
 				mg.outside = true;
-				if (pp->is_in_check(!pp->white_to_move)) {
-					//++illegal_moves_generated;
-					pp->unmake_move(move, ms);
-					continue;
-				}
+				//if (pp->is_in_check(!pp->white_to_move)) {
+				//	//++illegal_moves_generated;
+				//	pp->unmake_move(move, ms);
+				//	continue;
+				//}
 
 				uint64_t perft_result = perft(depth - 1);
 				string s = to_string(move);

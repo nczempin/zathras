@@ -333,380 +333,379 @@ namespace Moves {
 	}
 
 
-	void Move_generator::add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bool& white_to_move) {
+	template<bool white_or_not>void Move_generator::add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bb& enemies) {
 		//TODO subpromotions
 
-		Position pos = *p;
+		//Position pos = *p;
 
-		int8_t up = (white_to_move ? 8 : -8);
+		constexpr int8_t up = (white_or_not ? -8 : 8);
 
-			const bb non_promoters = white_to_move ?
+		const bb non_promoters = white_or_not ?
 			(p->pawns & p->white) & ~Bitboard::BB_RANK7 :
 			(p->pawns & p->black) & ~Bitboard::BB_RANK2;
 
-		bb enemies = white_to_move ? p->black : p->white;
 		const bb unoccupied = ~occupied;
 
-		bb single_step = white_to_move ? non_promoters << 8 & unoccupied : non_promoters >> 8 & unoccupied;
-		bb double_step = white_to_move ?
-			(single_step & Bitboard::BB_RANK3) << 8 & unoccupied :
-			(single_step & Bitboard::BB_RANK6) >> 8 & unoccupied;
+		bb single_step = white_or_not ? non_promoters << 8 & unoccupied : non_promoters >> 8 & unoccupied;
+		//bb double_step = white_to_move ?
+		//	(single_step & Bitboard::BB_RANK3) << 8 & unoccupied :
+		//	(single_step & Bitboard::BB_RANK6) >> 8 & unoccupied;
 
 
 		while (single_step)
 		{
 			square_t to = Bitboard::extract_and_remove_square(single_step);
-			moves.add_move(static_cast<square_t>(to - up), to, NONE);
+			moves.add_move(static_cast<square_t>(to + up), to, NONE);
 		}
 
-		while (double_step)
-		{
-			square_t to = Bitboard::extract_and_remove_square(double_step);
-			moves.add_move(static_cast<square_t>(to - 2 * up), to, NONE);
+		//while (double_step)
+		//{
+		//	square_t to = Bitboard::extract_and_remove_square(double_step);
+		//	moves.add_move(static_cast<square_t>(to + 2 * up), to, NONE);
+		//}
+
+
+		//const bb potential_promoters = white_to_move ?
+		//	(p->pawns & p->white) & Bitboard::BB_RANK7 :
+		//	(p->pawns & p->black) & Bitboard::BB_RANK2;
+		//if (potential_promoters)
+		//{
+
+
+
+		//	bb non_capture_promotions = white_to_move ?
+		//		potential_promoters << 8 & unoccupied :
+		//		potential_promoters >> 8 & unoccupied;
+
+
+
+		//	while (non_capture_promotions) {
+		//		square_t to = Bitboard::extract_and_remove_square(non_capture_promotions);
+		//		moves.add_move(static_cast<square_t>(to - up), to, NONE); //TODO sub-promotions
+
+		//	}
+
+		//}
+
+
+
+	}
+
+
+	void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
+		const square_t king_square, const int8_t direction) {
+		//1. check if squares between king and rook are free.
+		square_t next_square = square_t(uint8_t(king_square) + direction); //TODO proper cast
+		square_t target_square = square_t(uint8_t(king_square) + direction * 2);//TODO proper cast
+
+		if (is_set_square(p->white | p->black, next_square)) {
+			return;
 		}
-
-
-		const bb potential_promoters = white_to_move ?
-			(p->pawns & p->white) & Bitboard::BB_RANK7 :
-			(p->pawns & p->black) & Bitboard::BB_RANK2;
-		if (potential_promoters)
-		{
-
-
-
-			bb non_capture_promotions = white_to_move ?
-				potential_promoters << 8 & unoccupied :
-				potential_promoters >> 8 & unoccupied;
-
-
-
-			while (non_capture_promotions) {
-				square_t to = Bitboard::extract_and_remove_square(non_capture_promotions);
-				moves.add_move(static_cast<square_t>(to - up), to, NONE); //TODO sub-promotions
-
-			}
-
+		if (is_set_square(p->white | p->black, target_square)) {
+			return;
 		}
-
-
-
-		}
-
-
-		void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
-			const square_t king_square, const int8_t direction) {
-			//1. check if squares between king and rook are free.
-			square_t next_square = square_t(uint8_t(king_square) + direction); //TODO proper cast
-			square_t target_square = square_t(uint8_t(king_square) + direction * 2);//TODO proper cast
-
-			if (is_set_square(p->white | p->black, next_square)) {
+		if (direction == -1) { // queen side
+			if (is_set_square(p->white | p->black, square_t(target_square - 1))) { // single_step/b8
 				return;
 			}
-			if (is_set_square(p->white | p->black, target_square)) {
-				return;
-			}
-			if (direction == -1) { // queen side
-				if (is_set_square(p->white | p->black, square_t(target_square - 1))) { // single_step/b8
-					return;
-				}
 
-			}
+		}
 
-			//2. check if squares between king and rook are attacked.
+		//2. check if squares between king and rook are attacked.
+		p->white_to_move = !p->white_to_move;
+
+		bool attacked = is_attacked(king_square);
+		if (attacked) {
 			p->white_to_move = !p->white_to_move;
-
-			bool attacked = is_attacked(king_square);
-			if (attacked) {
-				p->white_to_move = !p->white_to_move;
-				return;
-			}
-			bool next = is_attacked(next_square);
-			if (next) {
-				p->white_to_move = !p->white_to_move;
-				return;
-			}
-			bool target = is_attacked(target_square);
-			if (target) {
-				p->white_to_move = !p->white_to_move;
-				return;
-			}
+			return;
+		}
+		bool next = is_attacked(next_square);
+		if (next) {
 			p->white_to_move = !p->white_to_move;
-
-			f(king_square, square_t(uint8_t(king_square) + direction * 2), NONE);
-
+			return;
 		}
-
-		void Move_generator::generate_castling(const move_visitor & f, bool white_to_move) {
-			int8_t piece = Piece::WHITE_KING;
-			square_t king_square = Squares::E1;
-			if (!white_to_move) {
-				piece = Piece::BLACK_KING;
-				king_square = Squares::E8;
-			}
-			static int8_t king_jump_direction[] = { 1, -1, 1, -1 };
-			static bool colour[] = { true, true, false, false };
-			for (size_t i = 0; i < 4; ++i) {
-				if (white_to_move == colour[i] && p->castling[i]) {
-					attempt_castle(f, piece, king_square, king_jump_direction[i]);
-				}
-			}
+		bool target = is_attacked(target_square);
+		if (target) {
+			p->white_to_move = !p->white_to_move;
+			return;
 		}
-		void Move_generator::f(Move_container & moves, const int8_t moving,
-			const square_t from, const square_t to, const int8_t captured,
-			const int8_t promoted_to) {
-			moves.add_move(from, to, NONE);
+		p->white_to_move = !p->white_to_move;
+
+		f(king_square, square_t(uint8_t(king_square) + direction * 2), NONE);
+
+	}
+
+	void Move_generator::generate_castling(const move_visitor& f, bool white_to_move) {
+		int8_t piece = Piece::WHITE_KING;
+		square_t king_square = Squares::E1;
+		if (!white_to_move) {
+			piece = Piece::BLACK_KING;
+			king_square = Squares::E8;
 		}
-
-		bool Move_generator::will_be_en_passant(square_t to, int8_t moving) {
-			bool en_passant_capture = false;
-			if (is_set_square(p->en_passant_square, to)) {
-				if ((moving == Piece::WHITE_PAWN && to > 31)
-					|| (moving == Piece::BLACK_PAWN && to < 31)) {
-					en_passant_capture = true;
-				}
+		static int8_t king_jump_direction[] = { 1, -1, 1, -1 };
+		static bool colour[] = { true, true, false, false };
+		for (size_t i = 0; i < 4; ++i) {
+			if (white_to_move == colour[i] && p->castling[i]) {
+				attempt_castle(f, piece, king_square, king_jump_direction[i]);
 			}
-			return en_passant_capture;
-		}
-
-		void Move_generator::add_non_capture_ray_moves(Move_container & moves, bb position, const bitboard_set & pieceMoves, const bb & occupied) {
-			while (position != 0) {
-				const square_t& from = square_t(Bitboard::extract_and_remove_square(position));  //TODO cast
-				const bb& raw_moves = pieceMoves[from]; //TODO potential bug flagged here: "C28020: The expression '0<=_Param_(1)&&_Param_(1)<=64-1' is not true at this call."
-				bb moves_bb = raw_moves & ~occupied;
-				while (moves_bb != 0x00) {
-					const square_t& to = square_t(Bitboard::extract_and_remove_square(moves_bb));  //TODO cast
-					const bool& b = Position::is_anything_between(from, to, occupied);
-					if (!b) {
-						moves.add_move(from, to, NONE);
-					}
-				}
-			}
-		}
-		Move_container Move_generator::generate_legal_captures(Position position, int depth) {
-			//TODO this is all terrible
-			Move_container pseudolegal_moves = generate_pseudolegal_captures(position, depth);
-			Move_container legal_moves;
-			auto moves = pseudolegal_moves.get_moves();
-			for (int i = 0; i < pseudolegal_moves.size(); ++i) {
-				Move move = moves[i];
-				Move_state ms;
-				position.make_move(move, ms);
-				//TODO++Interface::Info::nodes;
-				if (!position.is_in_check(!position.is_white_to_move())) {
-					legal_moves.add_move(move);
-				}
-				position.unmake_move(move, ms);
-
-			}
-			return legal_moves;
-		}
-		Move_container Move_generator::generate_legal_moves(Position position, size_t depth) {
-			//TODO this is all terrible
-			Move_container pseudolegal_moves = generate_pseudolegal_moves(position, depth);
-			Move_container legal_moves;
-			auto moves = pseudolegal_moves.get_moves();
-			for (int i = 0; i < pseudolegal_moves.size(); ++i) {
-				Move move = moves[i];
-				Move_state ms;
-				position.make_move(move, ms);
-				//TODO++Interface::Info::nodes;
-
-				if (!position.is_in_check(!position.is_white_to_move())) {
-					legal_moves.add_move(move);
-				}
-				position.unmake_move(move, ms);
-			}
-			return legal_moves;
-		}
-
-		Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
-			p = &position;
-
-			Move_container moves = Move_container::get(depth);
-			//moves.reserve(35);
-			moves.reset();
-			const move_visitor& f =
-				[&moves](const square_t& from, const square_t& to, const Move_type& move_type) {
-
-				moves.add_move(from, to, move_type);
-			};
-			//TODO generalize, obviously
-			const bb white_pawns = p->pawns & p->white;
-			const bb white_knights = p->knights & p->white;
-			const bb white_bishops = p->bishops & p->white;
-			const bb white_rooks = p->rooks & p->white;
-			const bb white_queens = p->queens & p->white;
-			const bb white_kings = p->kings & p->white;
-			const bb black_pawns = p->pawns & p->black;
-			const bb black_knights = p->knights & p->black;
-			const bb black_bishops = p->bishops & p->black;
-			const bb black_rooks = p->rooks & p->black;
-			const bb black_queens = p->queens & p->black;
-			const bb black_kings = p->kings & p->black;
-			const bb occupied = p->white | p->black;
-
-			if (p->white_to_move) {
-				//visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
-				add_pawn_nocaps(moves, white_pawns, Bitboard::white_pawn_no_capture_moves, occupied, true);
-				visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
-				visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
-				visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
-				add_non_capture_ray_moves(moves, white_queens | white_rooks, Bitboard::rook_moves, occupied);
-
-				visit_capture_ray_moves(white_queens | white_rooks, Bitboard::rook_moves, f, occupied, p->black);
-				visit_capture_ray_moves(white_bishops | white_queens, Bitboard::bishop_moves, f, occupied, p->black);
-				add_non_capture_ray_moves(moves, white_bishops | white_queens, Bitboard::bishop_moves, occupied);
-				generate_castling(f, true);
-				visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
-				visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
-			}
-			else {
-				visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
-				//			visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
-				add_pawn_nocaps(moves, black_pawns, Bitboard::black_pawn_no_capture_moves, occupied, false);
-				visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
-				visit_non_capture_moves(black_knights, Bitboard::knight_moves, f, occupied, Piece::BLACK_KNIGHT);
-				visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
-				visit_non_capture_moves(black_kings, Bitboard::king_moves, f, occupied, Piece::BLACK_KING);
-				add_non_capture_ray_moves(moves, black_queens | black_rooks, Bitboard::rook_moves, occupied);
-
-				visit_capture_ray_moves(black_queens | black_rooks, Bitboard::rook_moves, f, occupied, p->white);
-				visit_capture_ray_moves(black_bishops | black_queens, Bitboard::bishop_moves, f, occupied, p->white);
-				add_non_capture_ray_moves(moves, black_bishops | black_queens, Bitboard::bishop_moves, occupied);
-
-				generate_castling(f, false);
-
-			}
-			return moves;
-		}
-		Move_container Move_generator::generate_pseudolegal_captures(Position position, size_t depth) {
-			p = &position;
-
-			Move_container& moves = Move_container::get(depth);
-			moves.reset();
-			const move_visitor& f =
-				[&moves](const square_t& from, const square_t& to, const move_type_t& move_type) {
-				moves.add_move(from, to, move_type);
-			};
-			//TODO generalize, obviously
-			const bb white_pawns = p->pawns & p->white;
-			const bb white_knights = p->knights & p->white;
-			const bb white_bishops = p->bishops & p->white;
-			const bb white_rooks = p->rooks & p->white;
-			const bb white_queens = p->queens & p->white;
-			const bb white_kings = p->kings & p->white;
-			const bb black_pawns = p->pawns & p->black;
-			const bb black_knights = p->knights & p->black;
-			const bb black_bishops = p->bishops & p->black;
-			const bb black_rooks = p->rooks & p->black;
-			const bb black_queens = p->queens & p->black;
-			const bb black_kings = p->kings & p->black;
-			const bb occupied = p->white | p->black;
-
-			if (p->white_to_move) {
-				visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
-				visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
-
-				visit_capture_ray_moves(white_queens, Bitboard::rook_moves, f, occupied, p->black);
-				visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black);
-				visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, p->black);
-				visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black);
-				visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
-			}
-			else {
-				visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
-				visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
-
-				visit_capture_ray_moves(black_queens, Bitboard::rook_moves, f, occupied, p->white);
-				visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white);
-				visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, p->white);
-				visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white);
-
-				visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
-
-			}
-			return moves;
-		}
-		bool Move_generator::is_attacked_by_slider(bb position,
-			const bitboard_set & all_moves, const square_t & square,
-			const bb & occupied) {
-			//TODO, BIG TODO: all this stuff is incredibly repetitive and should really be done with templates.
-			while (position != 0) {
-				const square_t& from = square_t(Bitboard::extract_and_remove_square(position));
-				const bb& raw_moves = all_moves[from];
-				bb kpsq = 0;
-				set_bit(kpsq, square);
-				bb moves = raw_moves & kpsq;
-				while (moves != 0x00) {
-					const square_t& to = square_t(Bitboard::extract_and_remove_square(moves));
-					const bool& b = Position::is_anything_between(from, to, occupied);
-					if (!b) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-		bool Move_generator::is_attacked(const square_t & square) {
-			const bb occupied = p->white | p->black;
-
-			if (p->white_to_move) {
-				const bb white_pawns = p->pawns & p->white;
-				const bb white_knights = p->knights & p->white;
-				const bb white_bishops = p->bishops & p->white;
-				const bb white_rooks = p->rooks & p->white;
-				const bb white_queens = p->queens & p->white;
-				const bb white_kings = p->kings & p->white;
-
-				if (is_attacked_by_pawn(white_pawns, Bitboard::black_pawn_capture_moves, square, true)) {
-					return true;
-				}
-				if (Position::is_attacked_by_hopper(white_knights, Bitboard::knight_moves, square)) {
-					return true;
-				}
-				if (Position::is_attacked_by_hopper(white_kings, Bitboard::king_moves, square)) {
-					return true;
-				}
-				if (Position::is_attacked_by_slider(white_rooks | white_queens, Bitboard::rook_moves, square, occupied)) {
-					return true;
-				}
-				if (Position::is_attacked_by_slider(white_bishops | white_queens, Bitboard::bishop_moves, square, occupied)) {
-					return true;
-				}
-			}
-			else {
-				const bb black_pawns = p->pawns & p->black;
-				const bb black_knights = p->knights & p->black;
-				const bb black_bishops = p->bishops & p->black;
-				const bb black_rooks = p->rooks & p->black;
-				const bb black_queens = p->queens & p->black;
-				const bb black_kings = p->kings & p->black;
-				if (is_attacked_by_pawn(black_pawns, Bitboard::white_pawn_capture_moves, square, false)) {
-					return true;
-				}
-				if (Position::is_attacked_by_hopper(black_knights, Bitboard::knight_moves, square)) {
-					return true;
-				}
-				if (Position::is_attacked_by_hopper(black_kings, Bitboard::king_moves, square)) {
-					return true;
-				}
-				if (is_attacked_by_slider(black_rooks | black_queens, Bitboard::rook_moves, square, occupied)) {
-					return true;
-				}
-				if (is_attacked_by_slider(black_bishops | black_queens, Bitboard::bishop_moves, square, occupied)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		bool Move_generator::is_attacked_by_pawn(const bb movers, const bitboard_set & all_moves, const square_t square, bool side_to_move) {
-			bb raw_moves = all_moves[square];
-			if ((side_to_move && square > 31) || (!side_to_move && square < 31)) { //TODO bit test rather than lt/gt
-				raw_moves |= p->en_passant_square;
-			}
-			bb moves = raw_moves & movers;
-			return moves != 0x00;
 		}
 	}
+	void Move_generator::f(Move_container& moves, const int8_t moving,
+		const square_t from, const square_t to, const int8_t captured,
+		const int8_t promoted_to) {
+		moves.add_move(from, to, NONE);
+	}
+
+	bool Move_generator::will_be_en_passant(square_t to, int8_t moving) {
+		bool en_passant_capture = false;
+		if (is_set_square(p->en_passant_square, to)) {
+			if ((moving == Piece::WHITE_PAWN && to > 31)
+				|| (moving == Piece::BLACK_PAWN && to < 31)) {
+				en_passant_capture = true;
+			}
+		}
+		return en_passant_capture;
+	}
+
+	void Move_generator::add_non_capture_ray_moves(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied) {
+		while (position != 0) {
+			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));  //TODO cast
+			const bb& raw_moves = pieceMoves[from]; //TODO potential bug flagged here: "C28020: The expression '0<=_Param_(1)&&_Param_(1)<=64-1' is not true at this call."
+			bb moves_bb = raw_moves & ~occupied;
+			while (moves_bb != 0x00) {
+				const square_t& to = square_t(Bitboard::extract_and_remove_square(moves_bb));  //TODO cast
+				const bool& b = Position::is_anything_between(from, to, occupied);
+				if (!b) {
+					moves.add_move(from, to, NONE);
+				}
+			}
+		}
+	}
+	Move_container Move_generator::generate_legal_captures(Position position, int depth) {
+		//TODO this is all terrible
+		Move_container pseudolegal_moves = generate_pseudolegal_captures(position, depth);
+		Move_container legal_moves;
+		auto moves = pseudolegal_moves.get_moves();
+		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
+			Move move = moves[i];
+			Move_state ms;
+			position.make_move(move, ms);
+			//TODO++Interface::Info::nodes;
+			if (!position.is_in_check(!position.is_white_to_move())) {
+				legal_moves.add_move(move);
+			}
+			position.unmake_move(move, ms);
+
+		}
+		return legal_moves;
+	}
+	Move_container Move_generator::generate_legal_moves(Position position, size_t depth) {
+		//TODO this is all terrible
+		Move_container pseudolegal_moves = generate_pseudolegal_moves(position, depth);
+		Move_container legal_moves;
+		auto moves = pseudolegal_moves.get_moves();
+		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
+			Move move = moves[i];
+			Move_state ms;
+			position.make_move(move, ms);
+			//TODO++Interface::Info::nodes;
+
+			if (!position.is_in_check(!position.is_white_to_move())) {
+				legal_moves.add_move(move);
+			}
+			position.unmake_move(move, ms);
+		}
+		return legal_moves;
+	}
+
+	Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
+		p = &position;
+
+		Move_container moves = Move_container::get(depth);
+		//moves.reserve(35);
+		moves.reset();
+		const move_visitor& f =
+			[&moves](const square_t& from, const square_t& to, const Move_type& move_type) {
+
+			moves.add_move(from, to, move_type);
+		};
+		//TODO generalize, obviously
+		const bb white_pawns = p->pawns & p->white;
+		const bb white_knights = p->knights & p->white;
+		const bb white_bishops = p->bishops & p->white;
+		const bb white_rooks = p->rooks & p->white;
+		const bb white_queens = p->queens & p->white;
+		const bb white_kings = p->kings & p->white;
+		const bb black_pawns = p->pawns & p->black;
+		const bb black_knights = p->knights & p->black;
+		const bb black_bishops = p->bishops & p->black;
+		const bb black_rooks = p->rooks & p->black;
+		const bb black_queens = p->queens & p->black;
+		const bb black_kings = p->kings & p->black;
+		const bb occupied = p->white | p->black;
+
+		if (p->white_to_move) {
+			//visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
+			add_pawn_nocaps<true>(moves, white_pawns, Bitboard::white_pawn_no_capture_moves, occupied, p->black);
+			//visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
+			//visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
+			//visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
+			//add_non_capture_ray_moves(moves, white_queens | white_rooks, Bitboard::rook_moves, occupied);
+
+			//visit_capture_ray_moves(white_queens | white_rooks, Bitboard::rook_moves, f, occupied, p->black);
+			//visit_capture_ray_moves(white_bishops | white_queens, Bitboard::bishop_moves, f, occupied, p->black);
+			//add_non_capture_ray_moves(moves, white_bishops | white_queens, Bitboard::bishop_moves, occupied);
+			//generate_castling(f, true);
+			//visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
+			//visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
+		}
+		else {
+			//visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
+			////			visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
+			add_pawn_nocaps<false>(moves, black_pawns, Bitboard::black_pawn_no_capture_moves, occupied, p->white);
+			//visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
+			//visit_non_capture_moves(black_knights, Bitboard::knight_moves, f, occupied, Piece::BLACK_KNIGHT);
+			//visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
+			//visit_non_capture_moves(black_kings, Bitboard::king_moves, f, occupied, Piece::BLACK_KING);
+			//add_non_capture_ray_moves(moves, black_queens | black_rooks, Bitboard::rook_moves, occupied);
+
+			//visit_capture_ray_moves(black_queens | black_rooks, Bitboard::rook_moves, f, occupied, p->white);
+			//visit_capture_ray_moves(black_bishops | black_queens, Bitboard::bishop_moves, f, occupied, p->white);
+			//add_non_capture_ray_moves(moves, black_bishops | black_queens, Bitboard::bishop_moves, occupied);
+
+			//generate_castling(f, false);
+
+		}
+		return moves;
+	}
+	Move_container Move_generator::generate_pseudolegal_captures(Position position, size_t depth) {
+		p = &position;
+
+		Move_container& moves = Move_container::get(depth);
+		moves.reset();
+		const move_visitor& f =
+			[&moves](const square_t& from, const square_t& to, const move_type_t& move_type) {
+			moves.add_move(from, to, move_type);
+		};
+		//TODO generalize, obviously
+		const bb white_pawns = p->pawns & p->white;
+		const bb white_knights = p->knights & p->white;
+		const bb white_bishops = p->bishops & p->white;
+		const bb white_rooks = p->rooks & p->white;
+		const bb white_queens = p->queens & p->white;
+		const bb white_kings = p->kings & p->white;
+		const bb black_pawns = p->pawns & p->black;
+		const bb black_knights = p->knights & p->black;
+		const bb black_bishops = p->bishops & p->black;
+		const bb black_rooks = p->rooks & p->black;
+		const bb black_queens = p->queens & p->black;
+		const bb black_kings = p->kings & p->black;
+		const bb occupied = p->white | p->black;
+
+		if (p->white_to_move) {
+			visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
+			visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
+
+			visit_capture_ray_moves(white_queens, Bitboard::rook_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black);
+			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
+		}
+		else {
+			visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
+			visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
+
+			visit_capture_ray_moves(black_queens, Bitboard::rook_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white);
+
+			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
+
+		}
+		return moves;
+	}
+	bool Move_generator::is_attacked_by_slider(bb position,
+		const bitboard_set& all_moves, const square_t& square,
+		const bb& occupied) {
+		//TODO, BIG TODO: all this stuff is incredibly repetitive and should really be done with templates.
+		while (position != 0) {
+			const square_t& from = square_t(Bitboard::extract_and_remove_square(position));
+			const bb& raw_moves = all_moves[from];
+			bb kpsq = 0;
+			set_bit(kpsq, square);
+			bb moves = raw_moves & kpsq;
+			while (moves != 0x00) {
+				const square_t& to = square_t(Bitboard::extract_and_remove_square(moves));
+				const bool& b = Position::is_anything_between(from, to, occupied);
+				if (!b) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	bool Move_generator::is_attacked(const square_t& square) {
+		const bb occupied = p->white | p->black;
+
+		if (p->white_to_move) {
+			const bb white_pawns = p->pawns & p->white;
+			const bb white_knights = p->knights & p->white;
+			const bb white_bishops = p->bishops & p->white;
+			const bb white_rooks = p->rooks & p->white;
+			const bb white_queens = p->queens & p->white;
+			const bb white_kings = p->kings & p->white;
+
+			if (is_attacked_by_pawn(white_pawns, Bitboard::black_pawn_capture_moves, square, true)) {
+				return true;
+			}
+			if (Position::is_attacked_by_hopper(white_knights, Bitboard::knight_moves, square)) {
+				return true;
+			}
+			if (Position::is_attacked_by_hopper(white_kings, Bitboard::king_moves, square)) {
+				return true;
+			}
+			if (Position::is_attacked_by_slider(white_rooks | white_queens, Bitboard::rook_moves, square, occupied)) {
+				return true;
+			}
+			if (Position::is_attacked_by_slider(white_bishops | white_queens, Bitboard::bishop_moves, square, occupied)) {
+				return true;
+			}
+		}
+		else {
+			const bb black_pawns = p->pawns & p->black;
+			const bb black_knights = p->knights & p->black;
+			const bb black_bishops = p->bishops & p->black;
+			const bb black_rooks = p->rooks & p->black;
+			const bb black_queens = p->queens & p->black;
+			const bb black_kings = p->kings & p->black;
+			if (is_attacked_by_pawn(black_pawns, Bitboard::white_pawn_capture_moves, square, false)) {
+				return true;
+			}
+			if (Position::is_attacked_by_hopper(black_knights, Bitboard::knight_moves, square)) {
+				return true;
+			}
+			if (Position::is_attacked_by_hopper(black_kings, Bitboard::king_moves, square)) {
+				return true;
+			}
+			if (is_attacked_by_slider(black_rooks | black_queens, Bitboard::rook_moves, square, occupied)) {
+				return true;
+			}
+			if (is_attacked_by_slider(black_bishops | black_queens, Bitboard::bishop_moves, square, occupied)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool Move_generator::is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves, const square_t square, bool side_to_move) {
+		bb raw_moves = all_moves[square];
+		if ((side_to_move && square > 31) || (!side_to_move && square < 31)) { //TODO bit test rather than lt/gt
+			raw_moves |= p->en_passant_square;
+		}
+		bb moves = raw_moves & movers;
+		return moves != 0x00;
+	}
+}
