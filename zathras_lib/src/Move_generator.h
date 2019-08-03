@@ -20,7 +20,10 @@ namespace Moves {
 		virtual ~Move_generator();
 		static void pregenerate_moves();
 		Move_container generate_legal_moves(Position position, size_t depth);
-		Move_container generate_pseudolegal_moves(Position position, size_t depth);
+		//Move_container generate_pseudolegal_moves(Position position, size_t depth);
+
+		Move* generate_pseudolegal_moves(Position position, Move* moves);
+
 		Move_container generate_pseudolegal_captures(Position position, size_t depth);
 		//void add_non_capture_ray_moves1(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
 		Move_container generate_legal_captures(Position position, int depth);
@@ -69,13 +72,8 @@ namespace Moves {
 		void visit_non_capture_ray_moves(const bb& sub_position,
 			const bitboard_set& all_moves, const move_visitor& f,
 			const bb& occupied, const int8_t& moving);
-		void visit_capture_ray_moves(const bb& sub_position,
-
-			const bitboard_set& all_moves,
-			const move_visitor& f,
-			const bb& occupied, const bb& other_colour);
-		void visit_moves_raw(const bb sub_position, const bitboard_set all_moves,
-			move_visitor f, int8_t moving);
+		void visit_capture_ray_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& occupied, const bb& other_colour);
+		void visit_moves_raw(const bb sub_position, const bitboard_set all_moves, move_visitor f, int8_t moving);
 		void visit_pawn_caps(const bb& sub_position, const bitboard_set& all_moves,
 			const move_visitor& f, const bb& other_colour,
 			const int8_t& moving);
@@ -100,7 +98,7 @@ namespace Moves {
 		bool will_be_en_passant(square_t to, int8_t moving);
 
 		void add_non_capture_ray_moves(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
-		template<bool white_or_not> void add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bb& enemies);
+		template<bool white_or_not> Move* add_pawn_nocaps(Move* moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bb& enemies);
 
 
 

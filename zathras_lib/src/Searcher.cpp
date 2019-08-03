@@ -42,14 +42,15 @@ Move Searcher::findBestmove(move_container_t moves, Position position) {
 		
 
 		//TODOInfo::currmovenumber = 0;
-		for (Move& move : moves) {
+		//for (Move& move : moves) 
+		{
 			// TODO this is a workaround because of garbage
 			/*if (move.get_moving_piece() == 0) {
 				break;
 			}*/
 			//Position newPos = position;
 			Move_state ms;
-			position.make_move(move, ms);
+			//position.make_move(move, ms);
 
 
 
@@ -74,9 +75,9 @@ Move Searcher::findBestmove(move_container_t moves, Position position) {
 				
 
 				bestValue = value;
-				bestMove = move;
+				//bestMove = move;
 				pv = lineDown;
-				pv.push_front(move);
+				//pv.push_front(move);
 				
 				//printInfo();
 				
@@ -87,7 +88,7 @@ Move Searcher::findBestmove(move_container_t moves, Position position) {
 			}
 			
 
-			position.unmake_move(move, ms);
+//			position.unmake_move(move, ms);
 		}
 
 		//printInfo();
@@ -122,23 +123,24 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	}
 	Move_generator mg;
 	Move_container mc = mg.generate_legal_moves(position, 1);
-	auto moves = mc.get_moves();// AllMoves(position, moves);
+	Move* moves;//TODO = mc.get_moves();// AllMoves(position, moves);
 	int actualMoves = 0;
 	int moveCount = 0;
-	for (const Move& newMove : moves) {
+	//TODOfor (const Move& newMove : moves) 
+	{
 		if (moveCount++ >= mc.size()) {
-			break;
+			//break;
 		}
 
 		//expensive way to make next move
 		//Position nextPos = position;// .copyPosition();
 		Move_state ms;
-		position.make_move(newMove, ms);
+		//position.make_move(newMove, ms);
 		//TODO++Info::nodes;
 		//cout << "making " << newMove.toString() << endl;
 		deque<Move> lineDown;
 		value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown);
-		position.unmake_move(newMove, ms);
+		//position.unmake_move(newMove, ms);
 
 
 
@@ -152,7 +154,7 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 			//cout << "new best: " << newMove.toString() << ", " << value << " > " << alpha << endl;
 			alpha = value;
 			lineUp = lineDown;
-			lineUp.push_front(newMove);
+			//lineUp.push_front(newMove);
 
 
 			//bestMove = newMove;
@@ -209,10 +211,11 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 	Move_generator mg;
 
 	auto mc = mg.generate_legal_captures(position, 1);
-	auto moves = mc.get_moves();
+	Move* moves;//TODO = mc.get_moves();
 
 	//vector<Move> legalMoves = MoveGenerator::removeIllegalMoves(moves);
-	for (const Move& newMove : moves) {
+	//TODOfor (const Move& newMove : moves)
+	{
 		//if (newMove.get_moving_piece() == 0) {
 		//	break;
 		//}
@@ -223,11 +226,11 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 		//if (!shouldBeIgnored(position, newMove, capture, capturing)) {
 
 			Move_state ms;
-			position.make_move(newMove, ms);
+			//TODOposition.make_move(newMove, ms);
 			//TODO++Info::nodes;
 			deque<Move> lineDown;
 			const int value = -quiescence_alphabeta(depth + 1, position, -beta, -alpha, lineDown);
-			position.unmake_move(newMove, ms);
+			//TODOposition.unmake_move(newMove, ms);
 
 
 			if (value >= beta) {
@@ -236,7 +239,7 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 			if (value > alpha) {
 				alpha = value;
 				lineUp = lineDown;
-				lineUp.push_front(newMove);
+				//TODOlineUp.push_front(newMove);
 
 			}
 

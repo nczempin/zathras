@@ -33,6 +33,7 @@ namespace Positions {
 			}
 			return retval;
 		}
+
 #if defined(__GNUC__)
 		inline static uint8_t ffs(const bb& my_bb) {
 			return __builtin_ffsll(my_bb);
@@ -52,29 +53,8 @@ namespace Positions {
 		}
 #endif
 
-		inline static constexpr uint8_t look_up1(uint8_t index) {
-			//TODO eliminate entirely
-			return index;
-			/*uint8_t m = index - 1;
-			uint8_t rank = m / 8;
-			uint8_t file = m % 8;
-			rank *= 8;
-			file = 7 - file;
-			return file + rank;*/
-
-		}
-		inline static constexpr uint8_t look_up2(uint8_t index) {
-			
-			uint8_t m = index - 1;
-			uint8_t rank = m / 8;
-			uint8_t file = m % 8;
-			rank *= 8;
-			file = 7 - file;
-			return file + rank;
-
-		}
-
-		inline static uint8_t extract_square(const bb& my_bb) {
+		
+		inline static square_t extract_square(const bb& my_bb) {
 			return ffs(my_bb);
 		}
 
@@ -92,7 +72,7 @@ namespace Positions {
 		static const bb BB_RANK4 = 0x00000000ff000000;
 		static const bb BB_RANK5 = 0x000000ff00000000;
 		static const bb BB_RANK6 = 0x0000ff0000000000;
-		static const bb BB_RANK7 = 0x00ff000000000000;
+		static constexpr bb BB_RANK7 = 0x00ff000000000000;
 		static const bb BB_RANK8 = 0xff00000000000000;
 		static const bb BB_RANK3N6 = BB_RANK3 | BB_RANK6;
 
@@ -112,5 +92,39 @@ namespace Positions {
 	private:
 
 	};
+
+
+
+#if defined(__GNUC__)
+	inline static uint8_t ffs(const bb& my_bb) {
+		return __builtin_ffsll(my_bb);
+	}
+#elif defined(_WIN64) && (_MSC_VER >= 1500) 
+	inline static square_t ffs(const bb my_bb)noexcept {
+		assert(my_bb != 0);
+		unsigned long index;
+		const bool isNonZero = _BitScanForward64(&index, my_bb);
+		assert(isNonZero);
+		return static_cast<square_t> (index);
+	}
+
+#else
+	inline static uint8_t ffs(const bb& my_bb) {
+		return ffs_software(my_bb);
+	}
+#endif
+
+
+	inline static square_t extract_square(bb* my_bb) {
+		return ffs(*my_bb);
+	}
+
+	inline static square_t extract_and_remove_square(bb* my_bb) {
+		const square_t l = ffs(*my_bb);
+		*my_bb &= *my_bb - 1;
+		return l;
+	}
+
+
 }
 #endif /* BITBOARD_H_ */

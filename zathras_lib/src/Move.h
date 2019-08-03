@@ -16,7 +16,7 @@ namespace Moves {
 
 
 
-	using Move = uint16_t;
+	using Move = int;
 
 
 	// promoted piece: 2 (0 = queen, 1 = rook, 2 = bishop, 3 = knight)
@@ -104,7 +104,7 @@ namespace Moves {
 
 
 
-	static std::string to_string(Move move) {
+	static std::string move_to_string(Move move) {
 		/*static const string pieces("-PNBRQK");
 		char p = pieces[moving > 0 ? moving : -moving];
 		string moving_string = string(1, p);*/

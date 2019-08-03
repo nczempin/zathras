@@ -34,7 +34,7 @@ public:
 			return Move();
 		}
 		const Move_container move_container = mg.generate_legal_moves(p, 1);
-		auto moves = move_container.get_moves();
+		Move* moves;//TODO = move_container.get_moves();
 		if (move_container.size() == 0) {
 			return Move();// -1, -1, 0); //TODO
 		}

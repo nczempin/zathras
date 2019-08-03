@@ -35,7 +35,7 @@ namespace Positions {
 	}
 
 	using namespace Moves;
-	using Move = uint16_t;//TODO
+	using Move = int;//TODO
 	class Position {
 
 	public:

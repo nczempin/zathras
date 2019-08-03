@@ -27,7 +27,7 @@ namespace Interface {
 		static void printInfo(int bestValue, int oldBestValue, int idDepth, deque<Move> pv) {
 			cout << "info depth " << idDepth;
 			cout << " seldepth " << Info::seldepth;
-			cout << " currmove " << Moves::to_string(Info::currmove);
+			cout << " currmove " << Moves::move_to_string(Info::currmove);
 			cout << " currmovenumber " << Info::currmovenumber;
 			cout << " nodes " << Info::nodes;
 			updateNps();
@@ -44,7 +44,7 @@ namespace Interface {
 			}
 			cout << " pv ";
 			for (const Move& m : pv) {
-				cout << Moves::to_string(m) << " ";
+				cout << Moves::move_to_string(m) << " ";
 			}
 			cout << endl;
 		}

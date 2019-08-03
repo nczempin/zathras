@@ -29,22 +29,24 @@ namespace Interface {
 		if (depth == 0) {
 			return 1;
 		}
-		Move_container move_container = mg.generate_pseudolegal_moves(*pp, depth);
-		move_container_t moves = move_container.get_moves();
+
+		Move hurz[127]; //TODO
+		Move* moves = hurz; //TODO
+		moves = mg.generate_pseudolegal_moves(*pp, moves);
 		uint64_t total_result = 0;
-		size_t size = move_container.size();
+		size_t size = moves - hurz; //TODO
 
 		////Only works when all moves are legal
 		if (depth == 1) {
 			return size;
 		}
 
-		for (size_t i = 0; i < size; ++i) {
-			Move& move = moves[i];
+		for (Move* move = hurz; move != moves; move++) {
+//			Move& move = hurz[i];
 			Move_state ms;
-			pp->make_move(move, ms);
-			assert(pp->get_piece_on(get_from(move)) == 0);
-			assert(pp->get_piece_on(get_to(move)) != 0);
+			pp->make_move(*move, ms);
+			assert(pp->get_piece_on(get_from(*move)) == 0);
+			assert(pp->get_piece_on(get_to(*move)) != 0);
 
 	/*		if (pp->is_in_check(!pp->white_to_move)) {
 				pp->unmake_move(move, ms);
@@ -59,10 +61,10 @@ namespace Interface {
 				uint64_t perft_result = perft(depth - 1);
 				total_result += perft_result;
 			}
-			assert(pp->get_piece_on(get_from(move)) == 0);
-			assert(pp->get_piece_on(get_to(move)) != 0);
-			pp->unmake_move(move, ms);
-			assert(pp->get_piece_on(get_from(move)) != 0);
+			assert(pp->get_piece_on(get_from(*move)) == 0);
+			assert(pp->get_piece_on(get_to(*move)) != 0);
+			pp->unmake_move(*move, ms);
+			assert(pp->get_piece_on(get_from(*move)) != 0);
 		}
 		return total_result;
 	}
@@ -78,27 +80,22 @@ namespace Interface {
 	}
 
 	void Perft_command::execute() {
-		//const string perft_string =			"rnbqkbnr/ppp2ppp/8/3pP3/8/8/PPP1PPPP/RNBQKBNR w KQkq d6 0 3";
-		//"6qk/8/8/6pP/8/8/8/7K w - g6 0 3 ";
-		//"r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1";
-	//"8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - ";
-	////"k7/8/8/8/8/8/8/5B1K w - -";
-	//position = Position::write_position(perft_string);
-	//position = Position::write_start_position();
+	
 		cout << "Perft " << to_string(depth) << " for this position:\n";
-		//		cout << perft_string << "\n" << endl;
-				//cout << position << "\n";
 		cout << position.print_board();
-		//cout << position.debug_board();
-		//position.debug_position();
-		//mg.pregenerate_moves();
 		clock_t begin = clock();
 
 		///////////////////////////////
 		uint64_t total_result = 0;
 		pp = make_shared < Position >(position);
-		Move_container move_container = mg.generate_pseudolegal_moves(position, depth);
-		size_t move_count = move_container.size();
+
+		Move hurz[127]; //TODO
+		Move* moves = hurz; //TODO
+		moves = mg.generate_pseudolegal_moves(*pp, moves);
+		
+		size_t size = moves - hurz; //TODO
+
+		size_t move_count = size;
 		
 
 		if (depth == 1) {
@@ -106,13 +103,12 @@ namespace Interface {
 			//++total_result;
 		}
 		else {
-			move_container_t moves = move_container.get_moves();
 
-			for (size_t i = 0; i < move_count; ++i) {
-				Move& move = moves[i];
+			for (Move* move = hurz; move != moves; move++) {
+//				Move& move = hurz[i];
 				Move_state ms;
-				pp->make_move(move, ms);
-				mg.outside = true;
+				pp->make_move(*move, ms);
+//				mg.outside = true;
 				//if (pp->is_in_check(!pp->white_to_move)) {
 				//	//++illegal_moves_generated;
 				//	pp->unmake_move(move, ms);
@@ -120,11 +116,11 @@ namespace Interface {
 				//}
 
 				uint64_t perft_result = perft(depth - 1);
-				string s = to_string(move);
+				string s = move_to_string(*move);
 				cout << s << ": " << perft_result << endl;
 				//pp->debug_position();
 				total_result += perft_result;
-				pp->unmake_move(move, ms);
+				pp->unmake_move(*move, ms);
 				//pp->debug_position();
 
 			}

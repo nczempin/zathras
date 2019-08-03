@@ -333,12 +333,12 @@ namespace Moves {
 	}
 
 
-	template<bool white_or_not>void Move_generator::add_pawn_nocaps(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bb& enemies) {
+	template<bool white_or_not>/*__declspec(noinline)*/ Move* Move_generator::add_pawn_nocaps(Move* moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bb& enemies) {
 		//TODO subpromotions
 
 		//Position pos = *p;
 
-		constexpr int8_t up = (white_or_not ? -8 : 8);
+		constexpr int up = (white_or_not ? -8 : 8);
 
 		const bb non_promoters = white_or_not ?
 			(p->pawns & p->white) & ~Bitboard::BB_RANK7 :
@@ -347,22 +347,26 @@ namespace Moves {
 		const bb unoccupied = ~occupied;
 
 		bb single_step = white_or_not ? non_promoters << 8 & unoccupied : non_promoters >> 8 & unoccupied;
-		//bb double_step = white_to_move ?
-		//	(single_step & Bitboard::BB_RANK3) << 8 & unoccupied :
-		//	(single_step & Bitboard::BB_RANK6) >> 8 & unoccupied;
+
+		// it's crucial to determine this now, as later single_step gets modified
+		bb double_step = white_or_not ?
+			(single_step & Bitboard::BB_RANK3) << 8 & unoccupied :
+			(single_step & Bitboard::BB_RANK6) >> 8 & unoccupied;
 
 
 		while (single_step)
 		{
-			square_t to = Bitboard::extract_and_remove_square(single_step);
-			moves.add_move(static_cast<square_t>(to + up), to, NONE);
+			square_t to = extract_and_remove_square(&single_step);
+			auto from = to + up;
+			auto from_sq = static_cast<square_t>(from);
+			*moves++ = make_move(from_sq, to);
 		}
 
-		//while (double_step)
-		//{
-		//	square_t to = Bitboard::extract_and_remove_square(double_step);
-		//	moves.add_move(static_cast<square_t>(to + 2 * up), to, NONE);
-		//}
+		while (double_step)
+		{
+			square_t to = extract_and_remove_square(&double_step);
+			*moves++ = make_move(static_cast<square_t>(to + 2 * up), to);
+		}
 
 
 		//const bb potential_promoters = white_to_move ?
@@ -387,7 +391,7 @@ namespace Moves {
 
 		//}
 
-
+		return moves;
 
 	}
 
@@ -485,9 +489,9 @@ namespace Moves {
 		//TODO this is all terrible
 		Move_container pseudolegal_moves = generate_pseudolegal_captures(position, depth);
 		Move_container legal_moves;
-		auto moves = pseudolegal_moves.get_moves();
+		Move* moves;//TODO = pseudolegal_moves.get_moves();
 		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
-			Move move = moves[i];
+			Move move;// = moves[i];
 			Move_state ms;
 			position.make_move(move, ms);
 			//TODO++Interface::Info::nodes;
@@ -501,11 +505,11 @@ namespace Moves {
 	}
 	Move_container Move_generator::generate_legal_moves(Position position, size_t depth) {
 		//TODO this is all terrible
-		Move_container pseudolegal_moves = generate_pseudolegal_moves(position, depth);
+		Move_container pseudolegal_moves;//TODO = generate_pseudolegal_moves(position, depth);
 		Move_container legal_moves;
-		auto moves = pseudolegal_moves.get_moves();
+		Move* moves;//TODO = pseudolegal_moves.get_moves();
 		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
-			Move move = moves[i];
+			Move move;//TODO = moves[i];
 			Move_state ms;
 			position.make_move(move, ms);
 			//TODO++Interface::Info::nodes;
@@ -518,16 +522,13 @@ namespace Moves {
 		return legal_moves;
 	}
 
-	Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
+	Move* Move_generator::generate_pseudolegal_moves(Position position, Move* moves) {
 		p = &position;
 
-		Move_container moves = Move_container::get(depth);
-		//moves.reserve(35);
-		moves.reset();
 		const move_visitor& f =
 			[&moves](const square_t& from, const square_t& to, const Move_type& move_type) {
 
-			moves.add_move(from, to, move_type);
+			*moves++ = make_move(from, to, move_type);
 		};
 		//TODO generalize, obviously
 		const bb white_pawns = p->pawns & p->white;
@@ -546,7 +547,7 @@ namespace Moves {
 
 		if (p->white_to_move) {
 			//visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
-			add_pawn_nocaps<true>(moves, white_pawns, Bitboard::white_pawn_no_capture_moves, occupied, p->black);
+			moves = add_pawn_nocaps<true>(moves, white_pawns, Bitboard::white_pawn_no_capture_moves, occupied, p->black);
 			//visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
 			//visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
 			//visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
@@ -562,7 +563,7 @@ namespace Moves {
 		else {
 			//visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
 			////			visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
-			add_pawn_nocaps<false>(moves, black_pawns, Bitboard::black_pawn_no_capture_moves, occupied, p->white);
+			moves = add_pawn_nocaps<false>(moves, black_pawns, Bitboard::black_pawn_no_capture_moves, occupied, p->white);
 			//visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
 			//visit_non_capture_moves(black_knights, Bitboard::knight_moves, f, occupied, Piece::BLACK_KNIGHT);
 			//visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
@@ -581,7 +582,7 @@ namespace Moves {
 	Move_container Move_generator::generate_pseudolegal_captures(Position position, size_t depth) {
 		p = &position;
 
-		Move_container& moves = Move_container::get(depth);
+		Move_container moves;//TODO = Move_container::get(depth);
 		moves.reset();
 		const move_visitor& f =
 			[&moves](const square_t& from, const square_t& to, const move_type_t& move_type) {
