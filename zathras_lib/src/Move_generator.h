@@ -66,19 +66,20 @@ namespace Moves {
 		void visit_capture_moves(const bb& sub_position,
 			const bitboard_set& all_moves, const move_visitor& f,
 			const bb& other_colour, const int8_t& moving);
-		void visit_non_capture_moves(const bb& sub_position,
-			const bitboard_set& all_moves, const move_visitor& f,
-			const bb& other_colour, const int8_t& moving);
+		void visit_non_capture_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& other_colour, const int8_t& moving);
+		Move* add_non_capture_moves(const bb& sub_position, const bitboard_set& all_moves, const bb& other_colour, const int8_t& moving, Move* moves);
 		void visit_non_capture_ray_moves(const bb& sub_position,
-			const bitboard_set& all_moves, const move_visitor& f,
-			const bb& occupied, const int8_t& moving);
+
+			const bitboard_set& all_moves,
+ const move_visitor& f,
+			const bb& occupied);
 		void visit_capture_ray_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& occupied, const bb& other_colour);
 		void visit_moves_raw(const bb sub_position, const bitboard_set all_moves, move_visitor f, int8_t moving);
 		void visit_pawn_caps(const bb& sub_position, const bitboard_set& all_moves,
 			const move_visitor& f, const bb& other_colour,
 			const int8_t& moving);
 		void visit_pawn_nocaps(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& occupied, const int8_t& moving, const bool& white_to_move);
-		void add_pawn_nocaps2(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bool& white_to_move);
+		//void add_pawn_nocaps2(Move_container& moves, const bb& sub_position, const bitboard_set& all_moves, const bb& occupied, const bool& white_to_move);
 		static bb filter_occupied_squares_for_pawns(bool white_to_move, bb occupied,
 			const bitboard_set& all_moves, int x);
 
