@@ -48,7 +48,7 @@ namespace Positions {
 			my_bb = my_bb << 8;
 			retval += to_string(i + 1);
 			retval += " |";
-			string row_string = extract_row_string(tmp, " *");
+			string row_string = extract_row_string(static_cast<uint_fast8_t>(tmp), " *");
 			retval += row_string;
 			retval += " |\n";
 		}

@@ -123,7 +123,7 @@ namespace Interface {
 					continue;
 				}
 
-				uint64_t perft_result = perft(depth - 1);
+				uint64_t perft_result = perft(static_cast<uint8_t>(depth - 1));
 				string s = to_string(move);
 				cout << s << ": " << perft_result << endl;
 				//pp->debug_position();

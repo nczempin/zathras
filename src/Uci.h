@@ -268,13 +268,13 @@ namespace Interface {
 		}
 
 
-		void static makeMove(Position& p, string moveString) {
+		void static makeMove(Position& position, string moveString) {
 			piece_t board[64];
 			for (int i = 0; i < 64; ++i) {
 				board[i] = 0;
 			}
-			p.mailbox_from_bitboard(board);
-			Move m = convert_move(moveString, board, p);
+			position.mailbox_from_bitboard(board);
+			Move m = convert_move(moveString, board, position);
 
 			//TODO make this more elegant
 			int from = get_from(m);
@@ -282,7 +282,7 @@ namespace Interface {
 			if (moving > 6) {
 				moving = -(moving - 6);
 			}
-			p.visualize_mailbox_board(board, cout);
+			position.visualize_mailbox_board(board, cout);
 			//m.set_moving_piece(moving);
 			int to = get_to(m);
 			//cout << "to: " << to << endl;
@@ -298,17 +298,17 @@ namespace Interface {
 			//cout << "makeMove: " << moveString << endl;
 			Move_state ms;
 			ms.captured = captured;
-			p.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
+			position.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
 
 
 	//			++Interface::Info::nodes;
 
 				//isGivingCheck = null;
 				//isReceivingCheck = null;
-			p.print(cout);
+			position.print(cout);
 		}
 		//
-		static Move convert_move(string moveString, piece_t* board, const Position& p) {
+		static Move convert_move(string moveString, piece_t* board, const Position& position) {
 			square_t from = static_cast<square_t> (Util::decode_square(moveString.substr(0, 2)));
 
 			square_t to = static_cast<square_t> (Util::decode_square(moveString.substr(2, 4)));
@@ -321,7 +321,7 @@ namespace Interface {
 
 			move_type_t mt = NONE;
 			piece_t moving = board[from];
-			piece_t captured = board[to];
+			//TODO unused for now: piece_t captured = board[to];
 
 			// TODO stupid way of doing this
 			if (moving == Piece::WHITE_PAWN) {

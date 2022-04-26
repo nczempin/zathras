@@ -327,14 +327,14 @@ namespace Eval {
 			const bb white_bishops = p->bishops & p->white;
 			const bb white_rooks = p->rooks & p->white;
 			const bb white_queens = p->queens & p->white;
-			const bb white_kings = p->kings & p->white;
+			// TODO not used for now: const bb white_kings = p->kings & p->white;
 			const bb black_pawns = p->pawns & p->black;
 			const bb black_knights = p->knights & p->black;
 			const bb black_bishops = p->bishops & p->black;
 			const bb black_rooks = p->rooks & p->black;
 			const bb black_queens = p->queens & p->black;
-			const bb black_kings = p->kings & p->black;
-			const bb occupied = p->white | p->black;
+			//TODO not used for now: const bb black_kings = p->kings & p->black;
+			//TODO not used for now: const bb occupied = p->white | p->black;
 			int whiteValue = 0;
 			int blackValue = 0;
 			int whiteMValue = 0;
