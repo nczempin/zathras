@@ -17,6 +17,9 @@
     <ClCompile Include="src\clock.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
+    <ClCompile Include="src\Uci.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Uci.h">

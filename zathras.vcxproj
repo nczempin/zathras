@@ -101,6 +101,7 @@
     <ClCompile Include="src\Info.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Perft_command.cpp" />
+    <ClCompile Include="src\Uci.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Abstract_command.h" />
