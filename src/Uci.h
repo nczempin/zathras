@@ -56,43 +56,9 @@ namespace Interface {
 				uint8_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
 				Perft_command pc{p,  depth };
 				pc.execute();
-				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
-				//int perftDepth = Character::getNumericValue(perftDepthParameter);
-
-				//chrono::time_point<chrono::system_clock> end;
-
-
-				////TODO do this more elegantly
-				//for (int i = 0; i < perftDepth; ++i) {
-				//	Info::start = chrono::system_clock::now();
-				//	int nodes = perft(pos, i + 1);
-				//	end = chrono::system_clock::now();
-				//	chrono::duration<double> elapsed_seconds = end - Info::start;
-				//	cout << i + 1 << ", " << nodes << " @ " << elapsed_seconds.count() << endl;
-				//	//time_t end_time = chrono::system_clock::to_time_t(end);
-				//}
-				//cout << "Done." << endl;
+				
 
 			}
-			//else if (startsWith("divide ", toParse)) {
-			//	char perftDepthParameter = toParse[7];
-			//	int perftDepth = Character::getNumericValue(perftDepthParameter);
-			//	//TODO do this more elegantly
-			//	MoveGenerator mg;
-			//	vector<Move> moves = mg.generateLegalMoves(pos);
-			//	int count = 0;
-			//	Position tmpPos = pos;
-			//	for (Move textual_move : moves) {
-			//		tmpPos = pos; //simple but inefficient way to undo the textual_move
-			//		tmpPos.make_uci_move(textual_move);
-
-			//		count = perft(tmpPos, perftDepth - 1);
-			//		cout << textual_move.toString() << ": " << count << endl;
-			//	}
-
-			//	cout << "Done." << endl;
-
-			//}
 			else if (toParse == "isready") {
 				cout << "readyok" << endl;
 			}
@@ -101,22 +67,6 @@ namespace Interface {
 				cout << "Value: " << v << endl;
 			}
 			else if (startsWith("go", toParse)) {
-				/*int wtime = extractIntValue(toParse, "wtime");
-				int btime = extractIntValue(toParse, "btime");
-				int winc = extractIntValue(toParse, "winc");
-				int binc = extractIntValue(toParse, "binc");
-				int mtg = extractIntValue(toParse, "movestogo");
-				if (mtg == 0) {
-					mtg = 25;
-				}
-
-				long tpm;
-				if (pos.white_to_move) {
-					tpm = calculateTimePerMove(wtime, winc, mtg);
-				}
-				else {
-					tpm = calculateTimePerMove(btime, binc, mtg);
-				}*/
 
 				auto tpm = 5000;
 
@@ -124,11 +74,6 @@ namespace Interface {
 
 				cout << "tpm: " << tpm << endl;
 
-
-				/*    this.engine.setMovesToGo(mtg);
-				this.engine.setTimes(wtime, btime, winc, binc);
-				int depth = extractIntValue(parameters, "depth");
-				this.engine.setDepth(depth);*/
 				startBrain();
 			}
 			else if (startsWith("stop", toParse)) {
@@ -169,14 +114,6 @@ namespace Interface {
 			else if (toParse == "sp") {
 				p.print(cout);
 			}
-			/*else if (toParse == "sm") {
-				cout << "Moves: " << endl;
-				MoveGenerator mg;
-				vector<Move> moves = mg.generateLegalMoves(pos);
-				for (Move textual_move : moves) {
-					textual_move.print(cout);
-				}
-			}*/
 			else {
 				cout << "???" << endl;
 			}
@@ -289,23 +226,12 @@ namespace Interface {
 			if (captured > 6) {
 				captured = -(captured - 6);
 			}
-			//cout << "captured: " << captured << endl;
-
-			//cout << "from: " << from << endl;
-			//cout << "moving piece: " << moving << endl;
-			//cout << "make_uci_move: " << textual_move << endl;
 			Move_state ms;
 			ms.captured = captured;
 			pos.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
 
-
-	//			++Interface::Info::nodes;
-
-				//isGivingCheck = null;
-				//isReceivingCheck = null;
 			pos.print(cout);
 		}
-		//
 		static Move convert_move(string moveString, piece_t* board) {
 			square_t from = static_cast<square_t> (Util::decode_square(moveString.substr(0, 2)));
 
@@ -319,8 +245,6 @@ namespace Interface {
 
 			move_type_t mt = NONE;
 			piece_t moving = board[from];
-			//piece_t captured = board[to];
-
 			// TODO stupid way of doing this
 			if (moving == Piece::WHITE_PAWN) {
 				if (board[to] == 0) {
@@ -328,9 +252,6 @@ namespace Interface {
 						mt = EN_PASSANT;
 					}
 				}
-				//if (to == Bitboard::extract_square(pos.en_passant_square)) {
-				//	mt = EN_PASSANT;
-				//}
 			}
 			if (moving == Piece::BLACK_PAWN) {
 				if (board[to] == 0) {
@@ -338,9 +259,6 @@ namespace Interface {
 						mt = EN_PASSANT;
 					}
 				}
-				//if (to == Bitboard::extract_square(pos.en_passant_square)) {
-				//	mt = EN_PASSANT;
-				//}
 			}
 			Move m{ 0 }; //TODO
 			set_from(m, from);
@@ -348,8 +266,6 @@ namespace Interface {
 			auto is_ep = mt == EN_PASSANT;
 			set_en_passant(m, is_ep);
 			
-//			(from, to, mt);/// , captured, false);
-			//m.set_promoted_to(promoted_to);
 			return m;
 		}
 	};
