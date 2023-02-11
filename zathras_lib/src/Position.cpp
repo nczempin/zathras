@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <array>
 #include <cassert>
+#include <stack>
 
 #include "Position.h"
 #include "Square.h"
@@ -18,6 +19,8 @@
 #include "Move_generator.h"
 
 #include "Bitboard.h"
+
+
 namespace Positions {
 	Position::Position() {
 		for (int i = 0; i < 6; ++i) {
@@ -195,16 +198,23 @@ namespace Positions {
 	}
 
 
-	bool Position::is_in_check(const bool side) {
+	bool Position::is_in_check(const bool side, std::stack<Move>* move_stack) {
 		//TODO this is a somewhat naive way of doing this, it needs to be much more efficient
 		const bb colour = side ? white : black;
 		const bb kpbb = kings & colour;
-		//if (kpbb == 0) { //TODO debug flag
-		//	cout << print_bitboard(kings);
-		//	cout << print_bitboard(colour);
-		//	cout << print_bitboard(white);
-		//	cout << print_bitboard(black);
-		//}
+		if (kpbb == 0) { //TODO debug flag
+			cout << print_bitboard(kings);
+			cout << print_bitboard(colour);
+			cout << print_bitboard(white);
+			cout << print_bitboard(black);
+			cout << print_board();
+			while (!move_stack->empty()) {
+				Move m = move_stack->top();
+				cout << to_string(m) << endl;
+				move_stack->pop();
+			}
+			
+		}
 		assert(kpbb != 0);
 		const square_t& king_pos = square_t(Bitboard::extract_square(kpbb));
 		assert(king_pos < 64);
@@ -409,6 +419,23 @@ namespace Positions {
 				bb& pbb = piece_bb[-moving - 1];
 				Square::set_bit(pbb, to);
 				Square::clear_bit(pbb, from);
+
+				const bb colour = white_to_move ? white : black;
+				bb kpbb = kings & colour;
+				if (kpbb == 0) { //TODO debug flag
+					cout << "#########################" << endl;
+					cout << print_bitboard(kings);
+					cout << print_bitboard(colour);
+					cout << print_bitboard(white);
+					cout << print_bitboard(black);
+					cout << print_board();
+					cout << to_string(move) << endl;
+					
+
+				}
+				assert(kpbb != 0);
+
+
 				switch (moving) {
 				case Piece::BLACK_PAWN: {
 					//clear_bit(pawns, from);
@@ -468,7 +495,7 @@ namespace Positions {
 
 
 					if (from == E8 && to == C8) { //queenside castle
-						Square::update_bits(black, rooks, A8, C8);
+						Square::update_bits(black, rooks, A8, D8);
 						board[A8] = 0;
 						board[D8] = Piece::BLACK_ROOK;
 					}
@@ -486,14 +513,58 @@ namespace Positions {
 						castling[3] = false;
 					}
 					save_en_passant_square(move_state);
+
+
+					kpbb = kings & colour;
+					if (kpbb == 0) { //TODO debug flag
+						cout << "#########################" << endl;
+						cout << print_bitboard(kings);
+						cout << print_bitboard(colour);
+						cout << print_bitboard(white);
+						cout << print_bitboard(black);
+						cout << print_board();
+						cout << to_string(move) << endl;
+
+
+					}
+					assert(kpbb != 0);
+
+
 					break;
 				}
+				//const bb colour = white_to_move ? white : black;
+				 kpbb = kings & colour;
+				if (kpbb == 0) { //TODO debug flag
+					cout << "#########################" << endl;
+					cout << print_bitboard(kings);
+					cout << print_bitboard(colour);
+					cout << print_bitboard(white);
+					cout << print_bitboard(black);
+					cout << print_board();
+					cout << to_string(move) << endl;
+
+
+				}
+				assert(kpbb != 0);
 			}
 		}
+		const bb colour = white_to_move ? white : black;
+		bb kpbb = kings & colour;
+		if (kpbb == 0) { //TODO debug flag
+			cout << "#########################" << endl;
+			cout << print_bitboard(kings);
+			cout << print_bitboard(colour);
+			cout << print_bitboard(white);
+			cout << print_bitboard(black);
+			cout << print_board();
+			cout << to_string(move) << endl;
 
+
+		}
+		assert(kpbb != 0);
 	}
 
-	void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
+	void Position::make_move(const Move& move, Move_state& move_state, std::stack<Move>* move_stack) { //TODO move state as return value?
 		bool set_en_passant = false;
 		const square_t& from = get_from(move);
 		assert(from < 64);
@@ -505,8 +576,35 @@ namespace Positions {
 		//}
 		assert(moving != 0);
 
+		 bb colour = white_to_move ? white : black;
+		bb kpbb = kings & colour;
+		if (kpbb == 0) { //TODO debug flag
+			cout << print_bitboard(kings);
+			cout << print_bitboard(colour);
+			cout << print_bitboard(white);
+			cout << print_bitboard(black);
+			cout << print_board();
+			while (!move_stack->empty()) {
+				Move m = move_stack->top();
+				cout << to_string(m) << endl;
+				move_stack->pop();
+			}
+
+		}
+		assert(kpbb != 0);
+
 		const int8_t& taken = get_piece_on(to);
 		if (taken != 0) {
+			if (moving * taken > 0) {
+				cout << to_string(move) << endl;
+				cout << print_bitboard(kings);
+				cout << print_bitboard(colour);
+				cout << print_bitboard(white);
+				cout << print_bitboard(black);
+				cout << print_board();
+				
+			}
+			assert(moving * taken < 0);
 			//cout << "capturing: " << taken << endl;
 			handle_capture(to, taken, move_state);
 		}
@@ -520,6 +618,26 @@ namespace Positions {
 		if (!set_en_passant) {
 			en_passant_square = 0x00;
 		}
+
+		colour = white_to_move ? white : black;
+		kpbb = kings & colour;
+		if (kpbb == 0) { //TODO debug flag
+			cout << "#########################" << endl;
+			cout << print_bitboard(kings);
+			cout << print_bitboard(colour);
+			cout << print_bitboard(white);
+			cout << print_bitboard(black);
+			cout << print_board();
+			cout << to_string(move) << endl;
+			while (move_stack!=nullptr && !move_stack->empty()) {
+				Move m = move_stack->top();
+				cout << to_string(m) << endl;
+				move_stack->pop();
+			}
+
+		}
+		assert(kpbb != 0);
+
 		// TODO update 3 repetitions
 		// TODO update 50 moves
 		white_to_move = !white_to_move;
@@ -632,7 +750,7 @@ namespace Positions {
 				}
 			}
 
-									break;
+				break;
 			case Piece::BLACK_KNIGHT:
 			case Piece::BLACK_BISHOP:
 			case Piece::BLACK_QUEEN:

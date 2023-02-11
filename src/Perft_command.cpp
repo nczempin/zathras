@@ -22,7 +22,7 @@ namespace Interface {
 
 
 	Perft_command::~Perft_command() {
-		// TODO Auto-generated destructor stub
+		
 	}
 
 	uint64_t Perft_command::perft(uint8_t depth) {
@@ -38,16 +38,19 @@ namespace Interface {
 		//if (depth == 1) {
 		//	return size;
 		//}
-
+		//cout << "down " << int(depth) << endl << endl;
 		for (size_t i = 0; i < size; ++i) {
 			Move& move = moves[i];
 			Move_state ms;
 			pp->make_move(move, ms);
+			s.push(move);
+			//cout << to_string(move) << endl;
 			assert(pp->get_piece_on(get_from(move)) == 0);
 			assert(pp->get_piece_on(get_to(move)) != 0);
 
-			if (pp->is_in_check(!pp->white_to_move)) {
+			if (pp->is_in_check(!pp->white_to_move, &s)) {
 				pp->unmake_move(move, ms);
+				s.pop();
 				continue;
 			}
 
@@ -62,8 +65,27 @@ namespace Interface {
 			assert(pp->get_piece_on(get_from(move)) == 0);
 			assert(pp->get_piece_on(get_to(move)) != 0);
 			pp->unmake_move(move, ms);
+			s.pop();
+			const bb colour = !pp->white_to_move ? pp->white : pp->black;
+			const bb kpbb = pp->kings & colour;
+			if (kpbb == 0) { //TODO debug flag
+				cout << pp->print_bitboard(pp->kings);
+				cout << pp->print_bitboard(colour);
+				cout << pp->print_bitboard(pp->white);
+				cout << pp->print_bitboard(pp->black);
+				cout << pp->print_board();
+				while (!s.empty()) {
+					Move m = s.top();
+					cout << to_string(m) << endl;
+					s.pop();
+				}
+
+			}
+			assert(kpbb != 0);
 			assert(pp->get_piece_on(get_from(move)) != 0);
 		}
+		//cout << "up " << int(depth) << endl << endl;
+
 		return total_result;
 	}
 

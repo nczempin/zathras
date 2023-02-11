@@ -168,9 +168,9 @@ namespace Moves {
 					if (to >= 56) { // promoting white pawn
 						f(from, to, NONE); //TODO find out how to use defaults on function objects
 						//TODO switch subpromotions on/off here
-	/*					f(moving, from, to, captured, Piece::WHITE_ROOK);
-						f(moving, from, to, captured, Piece::WHITE_BISHOP);
-						f(moving, from, to, captured, Piece::WHITE_KNIGHT);*/
+						//f(from, to, NONE, Piece::WHITE_ROOK);
+						//f(moving, from, to, captured, Piece::WHITE_BISHOP);
+						//f(moving, from, to, captured, Piece::WHITE_KNIGHT);
 						// end switch subpromotions on/off
 
 					}
@@ -626,7 +626,7 @@ namespace Moves {
 			add_non_capture_ray_moves(moves, black_queens | black_rooks, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, black_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(black_queens | black_rooks, Bitboard::rook_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_rooks| black_queens , Bitboard::rook_moves, f, occupied, p->white);
 			//visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white);
 			visit_capture_ray_moves(black_bishops | black_queens, Bitboard::bishop_moves, f, occupied, p->white);
 			//visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white);

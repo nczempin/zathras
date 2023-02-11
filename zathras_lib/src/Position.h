@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <stack>
 
 #include "typedefs.h"
 #include "Move.h"
@@ -40,11 +41,15 @@ namespace Positions {
 		virtual ~Position();
 
 
-		void make_move(const Move & move, Move_state& move_state);
+		void make_move(const Move& move, Move_state& move_state) {
+			make_move(move, move_state, nullptr);
+		}
+
+		void make_move(const Move& move, Move_state& move_state, std::stack<Move>* move_stack);
 
 		void unmake_move(const Move& move, const Move_state& move_state);
 
-		bool is_in_check(const bool side);
+		//bool is_in_check(const bool side);
 		piece_t get_piece_on(square_t sq) {
 			return board[sq];
 		}
@@ -67,6 +72,12 @@ namespace Positions {
 		//TODO: move all the static stuff out of the class
 		static bool is_attacked_by_hopper(const bb& movers, const bitboard_set& all_moves, const square_t& square);
 		static bool is_check_from_slider(const bitboard_set& sliding_moves, const square_t& king_pos, const bb& slider, const bb& occupied);
+
+		bool is_in_check(const bool side) {
+			return is_in_check(side, nullptr);
+		}
+
+		bool is_in_check(const bool side, std::stack<Move>* move_stack);
 
 		static bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
 		static bool is_anything_between(square_t from, square_t to, const bb& occupied);
