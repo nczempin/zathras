@@ -1,8 +1,6 @@
 #pragma once
 
 
-//  main.cpp
-
 
 #include <iostream>
 #include <chrono>
@@ -25,7 +23,6 @@ extern Position p;
 
 extern future<Move> fut;
 extern Searcher searcher;
-extern const std::string VERSION;
 
 namespace Interface {
 
@@ -43,7 +40,7 @@ namespace Interface {
 				toParse = "position startpos";
 			}
 			if (toParse == "uci") {
-				std::cout << "id name Zathras " + VERSION << endl;
+				std::cout << "id name Zathras " + Zathras_lib::VERSION << endl;
 				cout << "id author Nicolai Czempin" << endl;
 				cout << "uciok" << endl;
 			}
@@ -54,7 +51,7 @@ namespace Interface {
 				string depth_param = toParse.substr(index + pattern.length());
 
 				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
-				Perft_command pc{p,  depth };
+				Perft_command pc{ p,  depth };
 				pc.execute();
 				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
 				//int perftDepth = Character::getNumericValue(perftDepthParameter);
@@ -349,9 +346,9 @@ namespace Interface {
 			set_to(m, to);
 			auto is_ep = mt == EN_PASSANT;
 			set_en_passant(m, is_ep);
-			
-//			(from, to, mt);/// , captured, false);
-			//m.set_promoted_to(promoted_to);
+
+			//			(from, to, mt);/// , captured, false);
+						//m.set_promoted_to(promoted_to);
 			return m;
 		}
 	};
