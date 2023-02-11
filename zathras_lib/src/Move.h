@@ -5,92 +5,110 @@
 
 #include "typedefs.h"
 #include "Square.h"
+#include "Piece.h"
 #include "misc.h"
 
 namespace Moves {
-	class Move
-	{
-	public:
-		Move();
-		Move(int8_t piece, uint8_t from, uint8_t to, int8_t captured, bool en_passant_capture);
 
-		
-		inline uint8_t get_from() const {
-			return this->from;
+	using Positions::Squares;
+	using Positions::square_t;
+	using Positions::Piece;
+
+
+
+	using Move = uint16_t;
+
+
+	// promoted piece: 2 (0 = queen, 1 = rook, 2 = bishop, 3 = knight)
+	// from: 6
+	// MSB ^
+	// LSB V
+	// is_promotion: 1
+	// is_en_passant: 1
+	// to: 6
+	//TODO when we add castling, bits 6 & 7 will have to be re-used
+
+
+	inline constexpr square_t get_from(Move mm) {
+		return static_cast<square_t>((mm >> 8) & 0b111111); //TODO just AND and SHIFT it?
+	}
+	inline constexpr square_t get_to(Move mm) {
+		return static_cast<square_t>(mm & 0b111111); //TODO just AND it?
+	}
+
+	inline constexpr bool is_en_passant(Move mm) {
+		return static_cast<bool>((mm >> 6)&1);// will need to change if we add CASTLING
+	}
+	inline constexpr bool is_promotion(Move mm) {
+		return static_cast<bool>(mm >> 7); // will need to change if we add CASTLING
+	}
+	inline constexpr piece_t get_promoted(Move mm) {
+		piece_t tmp = Piece::QUEEN - (mm >> 14 && 0b11);
+		// 0 -> queen
+		// 1 -> rook
+		// 2 -> bishop
+		// 3 -> knight
+		return tmp;
+	}
+
+	//void set_captured(int8_t taken);
+
+	inline void set_from(Move& mm, square_t from) {
+		mm = (0b1100000011111111 & mm) | from << 8; // adding faster? probably not
+	}
+	inline void set_to(Move& mm, square_t to) {
+		mm = (0b1111111111000000 & mm) | to; // adding faster? probably not
+	}
+	inline void set_en_passant(Move& mm, bool en_passant) {
+		//TODO avoid the if?
+		if (en_passant) {
+			mm |= 0b0000000001000000;
 		}
-		inline uint8_t get_to() const {
-			return this->to;
+		else {
+			mm &= 0b1111111110111111;
 		}
-		int8_t get_moving_piece() const;
-
-		inline void set_moving_piece(int8_t moving) {
-			this->moving = moving;
-		}
-
-		void set_captured(int8_t taken);
-
-		inline void set_from(uint8_t from) {
-			this->from = from;
-		}
-		inline void set_to(uint8_t to) {
-			this->to = to;
-		}
-		string to_string() const;
-		int value{ 0 };
-		//  uint8_t get_en_passant_square() const  {
-		//    return en_passant_square;
-		//  }
-		//
-		//  void set_en_passant_square(uint8_t en_passant){
-		//    this->en_passant_square = en_passant;
-		//  }
+		//		mm = (0b1111111110111111 & mm) | en_passant << 6;
+	}
 
 
 
-		bool is_en_passant_capture() const;
-		void set_en_passant_capture(bool enPassantCapture);
 
-		int8_t get_promoted_to() const {
-			return promoted_to;
-		}
+	//bool is_en_passant_capture() const {
+	//	return this->move_type == EN_PASSANT;
+	//}
+	//void set_en_passant_capture(bool en_passant_capture) {
+	//	this->move_type = en_passant_capture ? EN_PASSANT : NONE;
+	//}
 
-		void set_promoted_to(int8_t promotedTo = 0) {
-			promoted_to = promotedTo;
-		}
+	/*int8_t get_promoted_to() const {
+		return promoted_to;
+	}
 
-		int8_t get_captured() const {
-			return captured;
-		}
+	void set_promoted_to(int8_t promotedTo = 0) {
+		promoted_to = promotedTo;
+	}
 
-		//  bool is_cleared_kingside_castling() const {
-		//	  return cleared_kingside_castling;
-		//  }
-		//
-		//  void set_cleared_kingside_castling(bool b) {
-		//	  this->cleared_kingside_castling = b;
-		//  }
-		//  void set_cleared_queenside_castling(bool b) {
-		//	  cleared_queenside_castling = b;
-		//  }
-		//
-		//  bool is_cleared_queenside_castling() const {
-		//	  return cleared_queenside_castling;
-		//  }
-
-	private:
-		square_t from = 0;
-		square_t to = 0;
-		piece_t moving = 0;
-		piece_t captured = 0; //TODO maybe also move this out
-		piece_t promoted_to = 0;
-
-		bool en_passant_capture = false;
-
-		//TODO all these are not directly part of the move, should probably put them in a separate structure
-	   //  square_t en_passant_square = 0; //TODO file would be sufficient
-	  //  bool cleared_queenside_castling = false;
-	  //  bool cleared_kingside_castling = false;
+	int8_t get_captured() const {
+		return captured;
+	}*/
 
 
-	};
+
+
+
+
+
+
+	static std::string to_string(Move move) {
+		/*static const string pieces("-PNBRQK");
+		char p = pieces[moving > 0 ? moving : -moving];
+		string moving_string = string(1, p);*/
+
+		std::string retval = Positions::Square::mailbox_index_to_square(get_from(move));
+		retval += Positions::Square::mailbox_index_to_square(get_to(move));
+
+
+		return retval;
+	}
+
 }

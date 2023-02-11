@@ -23,7 +23,7 @@ Searcher::~Searcher(void)
 }
 
 
-Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position position) {
+Move Searcher::findBestmove(move_container_t moves, Position position) {
 	// assumption: moves.size() > 1
 	
 	idDepth = 1;
@@ -44,9 +44,9 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 		//TODOInfo::currmovenumber = 0;
 		for (Move& move : moves) {
 			// TODO this is a workaround because of garbage
-			if (move.get_moving_piece() == 0) {
+			/*if (move.get_moving_piece() == 0) {
 				break;
-			}
+			}*/
 			//Position newPos = position;
 			Move_state ms;
 			position.make_move(move, ms);
@@ -63,12 +63,12 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 			//cout << "trying " << move.toString() << endl;
 			int value = -alphabeta(1, position, -9999999, -bestValue, lineDown);
 			//TODO
-			//if (Util::timeUp()) {
+			//if (Util::time_up()) {
 			//	//return lastIterationBestMove;
 			//	done = true;
 			//	break;
 			//}
-			move.value = value;
+			//TODO move with value move.value = value;
 			if (value > bestValue) {
 				//cout << "inserting " << move.toString() << "@" << value << endl;
 				
@@ -105,8 +105,9 @@ Move Searcher::findBestmove(array<Move, Move_container::SIZE> moves, Position po
 	} while (!done);
 	return bestMove;
 }
+
 int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
-	if (done /* ||(Util::timeUp())*/) {
+	if (done /* ||(Util::time_up())*/) {
 		//	timeIsUp = true;
 		done = true;
 		const int& value = Eval::Evaluator::getValue(position);
@@ -161,7 +162,7 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 		}
 		//}
 
-		if (done ) /*||Util::timeUp()*/ {
+		if (done ) /*||Util::time_up()*/ {
 			done = true;
 			return alpha;
 		}
@@ -212,14 +213,14 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 
 	//vector<Move> legalMoves = MoveGenerator::removeIllegalMoves(moves);
 	for (const Move& newMove : moves) {
-		if (newMove.get_moving_piece() == 0) {
-			break;
-		}
-		const int& capture = newMove.get_captured();
-		assert(capture != 0);
-		const int& capturing = newMove.get_moving_piece();// abs(position.board[newMove.get_from()]);
+		//if (newMove.get_moving_piece() == 0) {
+		//	break;
+		//}
+		//const int& capture = newMove.get_captured();
+		//assert(capture != 0);
+		//const int& capturing = newMove.get_moving_piece();// abs(position.board[newget_from(move)]);
 
-		if (!shouldBeIgnored(position, newMove, capture, capturing)) {
+		//if (!shouldBeIgnored(position, newMove, capture, capturing)) {
 
 			Move_state ms;
 			position.make_move(newMove, ms);
@@ -239,7 +240,7 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 
 			}
 
-		}
+	//	}
 	}
 	return alpha;
 }

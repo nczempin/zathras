@@ -16,9 +16,6 @@
     <Filter Include="Move">
       <UniqueIdentifier>{99641f8a-1979-4af1-b433-0f36c17f10fe}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Position">
-      <UniqueIdentifier>{b43fcf27-fcea-48aa-bd6b-52e63584912f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Search">
       <UniqueIdentifier>{847fb096-54d4-4620-8fa8-a73ee5498acf}</UniqueIdentifier>
     </Filter>
@@ -28,11 +25,11 @@
     <Filter Include="Eval">
       <UniqueIdentifier>{a9a345ae-7f23-45e5-ab7a-7f3c45aed28a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Positions">
+      <UniqueIdentifier>{b43fcf27-fcea-48aa-bd6b-52e63584912f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Move.cpp">
-      <Filter>Move</Filter>
-    </ClCompile>
     <ClCompile Include="src\Move_container.cpp">
       <Filter>Move</Filter>
     </ClCompile>
@@ -43,19 +40,19 @@
       <Filter>Move</Filter>
     </ClCompile>
     <ClCompile Include="src\Bitboard.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Bitboard_test.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Piece.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Position.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Square.cpp">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClCompile>
     <ClCompile Include="src\Searcher.cpp">
       <Filter>Search</Filter>
@@ -63,14 +60,17 @@
     <ClCompile Include="src\misc.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="src\Position_print.cpp">
+      <Filter>Positions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Position_fen.cpp">
+      <Filter>Positions</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Move_generator_pregen.cpp">
+      <Filter>Move</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\typedefs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Move.h">
-      <Filter>Move</Filter>
-    </ClInclude>
     <ClInclude Include="src\Move_container.h">
       <Filter>Move</Filter>
     </ClInclude>
@@ -81,16 +81,16 @@
       <Filter>Move</Filter>
     </ClInclude>
     <ClInclude Include="src\Bitboard.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Piece.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Position.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Square.h">
-      <Filter>Position</Filter>
+      <Filter>Positions</Filter>
     </ClInclude>
     <ClInclude Include="src\Searcher.h">
       <Filter>Search</Filter>
@@ -101,11 +101,20 @@
     <ClInclude Include="src\PieceCount.h">
       <Filter>Eval</Filter>
     </ClInclude>
-    <ClInclude Include="src\misc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Character.h">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\zathras_lib.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\typedefs.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\misc.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Move.h">
+      <Filter>Move</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

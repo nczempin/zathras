@@ -20,13 +20,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>PGOptimize</WholeProgramOptimization>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -44,6 +44,8 @@
     <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+    <IncludePath>zathras_lib\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CodeAnalysisRuleSet>1.ruleset</CodeAnalysisRuleSet>
@@ -75,7 +77,7 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <CompileAs>CompileAsCpp</CompileAs>
-      <Optimization>Full</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <CallingConvention>FastCall</CallingConvention>
       <DisableSpecificWarnings>26429;4530;26426;26432;26440;26443;26446;26455;26472;26482;26486;26494;26496;26497%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
@@ -107,6 +109,7 @@
     <ClInclude Include="src\Command_receiver.h" />
     <ClInclude Include="src\Info.h" />
     <ClInclude Include="src\Perft_command.h" />
+    <ClInclude Include="src\Sf.h" />
     <ClInclude Include="src\Uci.h" />
   </ItemGroup>
   <ItemGroup>

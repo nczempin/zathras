@@ -8,15 +8,20 @@
 #ifndef PERFT_COMMAND_H_
 #define PERFT_COMMAND_H_
 
+#include <memory>
+#include <stack>
+
+
 #include "Abstract_command.h"
 #include "Command_receiver.h"
 #include "Position.h"
 #include "Move_generator.h"
-#include <memory>
+#include "Move.h"
+
 namespace Interface {
 	class Perft_command : public Abstract_command {
 	public:
-		Perft_command();
+		Perft_command(Positions::Position position, size_t depth) :position(position),depth(depth) {}
 		virtual ~Perft_command();
 		void execute() override;
 
@@ -27,6 +32,10 @@ namespace Interface {
 		shared_ptr<Positions::Position> pp;
 		Moves::Move_generator mg;
 		size_t illegal_moves_generated = 0;
+		size_t depth = 6;
+		Positions::Position position;
+
+		std::stack<Moves::Move> s;
 	};
 }
 #endif /* PERFT_COMMAND_H_ */

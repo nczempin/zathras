@@ -1,8 +1,6 @@
 #pragma once
 
 
-//  main.cpp
-
 
 #include <iostream>
 #include <chrono>
@@ -25,7 +23,6 @@ extern Position p;
 
 extern future<Move> fut;
 extern Searcher searcher;
-extern const std::string VERSION;
 
 namespace Interface {
 
@@ -43,12 +40,18 @@ namespace Interface {
 				toParse = "position startpos";
 			}
 			if (toParse == "uci") {
-				std::cout << "id name Zathras " + VERSION << endl;
+				std::cout << "id name Zathras " + Zathras_lib::VERSION << endl;
 				cout << "id author Nicolai Czempin" << endl;
 				cout << "uciok" << endl;
 			}
 			else if (startsWith("perft ", toParse)) { //TODO not really UCI
-				Perft_command pc;
+				string pattern = "perft ";
+				size_t index = toParse.find(pattern);
+
+				string depth_param = toParse.substr(index + pattern.length());
+
+				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
+				Perft_command pc{ p,  depth };
 				pc.execute();
 				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
 				//int perftDepth = Character::getNumericValue(perftDepthParameter);
@@ -76,12 +79,12 @@ namespace Interface {
 			//	vector<Move> moves = mg.generateLegalMoves(p);
 			//	int count = 0;
 			//	Position tmpPos = p;
-			//	for (Move move : moves) {
-			//		tmpPos = p; //simple but inefficient way to undo the move
-			//		tmpPos.makeMove(move);
+			//	for (Move moveString : moves) {
+			//		tmpPos = p; //simple but inefficient way to undo the moveString
+			//		tmpPos.makeMove(moveString);
 
 			//		count = perft(tmpPos, perftDepth - 1);
-			//		cout << move.toString() << ": " << count << endl;
+			//		cout << moveString.toString() << ": " << count << endl;
 			//	}
 
 			//	cout << "Done." << endl;
@@ -147,7 +150,7 @@ namespace Interface {
 					p.print(cout);
 				}
 				string movesString = extractMoves(toParse);
-				vector<string> moves = Position::split(movesString, ' ');
+				vector<string> moves = Util::split(movesString, ' ');
 				//p.clearThreeDraws();
 				if ((movesString != "") && (moves.size() != 0))
 				{
@@ -155,7 +158,7 @@ namespace Interface {
 						//p.print();
 
 
-						//cout << "making move: "<<move<<endl;
+						//cout << "making moveString: "<<moveString<<endl;
 						makeMove(p, move);
 					}
 				}
@@ -167,8 +170,8 @@ namespace Interface {
 				cout << "Moves: " << endl;
 				MoveGenerator mg;
 				vector<Move> moves = mg.generateLegalMoves(p);
-				for (Move move : moves) {
-					move.print(cout);
+				for (Move moveString : moves) {
+					moveString.print(cout);
 				}
 			}*/
 			else {
@@ -187,8 +190,8 @@ namespace Interface {
 				searcher.done = true; // ask the thread to finish
 				Move move = fut.get(); //wait until the thread is finished
 				cout << "hurz!" << endl;
-				cout << "bestmove " << move.to_string() << endl;
-				
+				cout << "bestmove " << to_string(move) << endl;
+
 			}
 			else {
 				cout << "engine already stopped" << endl;
@@ -202,7 +205,7 @@ namespace Interface {
 				cout << "purzel" << endl;
 				Move move = fut.get(); //wait until the thread is finished
 				cout << "hurzel" << endl;
-				cout << "bestmove " << move.to_string() << endl;
+				cout << "bestmove " << to_string(move) << endl;
 			}
 		}
 		static void startBrain() {
@@ -210,7 +213,7 @@ namespace Interface {
 			searcher.done = false;
 			fut = async(asyncAnalyze);
 			thread(finishBrain).detach();
-		
+
 
 		}
 
@@ -262,23 +265,23 @@ namespace Interface {
 		}
 
 
-		void static makeMove(Position& p, string moveString) {
-			Move& m = convert_move(moveString);
-			int board[64];
+		void static makeMove(Position& position, string moveString) {
+			piece_t board[64];
 			for (int i = 0; i < 64; ++i) {
 				board[i] = 0;
 			}
-			p.mailbox_from_bitboard(board);
+			position.mailbox_from_bitboard(board);
+			Move m = convert_move(moveString, board, position);
 
 			//TODO make this more elegant
-			int from = m.get_from();
+			int from = get_from(m);
 			uint8_t moving = board[from];
 			if (moving > 6) {
 				moving = -(moving - 6);
 			}
-			p.visualize_mailbox_board(board, cout);
-			m.set_moving_piece(moving);
-			int to = m.get_to();
+			position.visualize_mailbox_board(board, cout);
+			//m.set_moving_piece(moving);
+			int to = get_to(m);
 			//cout << "to: " << to << endl;
 			int captured = board[to];
 			//cout << "captured: " << captured << endl;
@@ -286,35 +289,66 @@ namespace Interface {
 				captured = -(captured - 6);
 			}
 			//cout << "captured: " << captured << endl;
-			m.set_captured(captured);
+
 			//cout << "from: " << from << endl;
 			//cout << "moving piece: " << moving << endl;
 			//cout << "makeMove: " << moveString << endl;
 			Move_state ms;
-			p.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
+			ms.captured = captured;
+			position.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
 
 
 	//			++Interface::Info::nodes;
 
 				//isGivingCheck = null;
 				//isReceivingCheck = null;
-			p.print(cout);
+			position.print(cout);
 		}
 		//
-		static Move convert_move(string move) {
-			int from = static_cast<square_t> (Util::decodeSquare(move.substr(0, 2)));
+		static Move convert_move(string moveString, piece_t* board, const Position& position) {
+			square_t from = static_cast<square_t> (Util::decode_square(moveString.substr(0, 2)));
 
-			int to = static_cast<square_t> (Util::decodeSquare(move.substr(2, 4)));
-			string promotedTo = move.substr(4);
+			square_t to = static_cast<square_t> (Util::decode_square(moveString.substr(2, 4)));
+			string promotedTo = moveString.substr(4);
 			int promoted_to = 0;
 			if (promotedTo != "") {
-				promoted_to = static_cast<piece_t> (Util::decodePiece(promotedTo));
+				promoted_to = static_cast<piece_t> (Util::decode_piece(promotedTo));
 			}
 
-			int captured = 0;
 
-			Move m(0, from, to, captured, false);
-			m.set_promoted_to(promoted_to);
+			move_type_t mt = NONE;
+			piece_t moving = board[from];
+			//TODO unused for now: piece_t captured = board[to];
+
+			// TODO stupid way of doing this
+			if (moving == Piece::WHITE_PAWN) {
+				if (board[to] == 0) {
+					if (to - from == 9 || to - from == 7) {
+						mt = EN_PASSANT;
+					}
+				}
+				//if (to == Bitboard::extract_square(p.en_passant_square)) {
+				//	mt = EN_PASSANT;
+				//}
+			}
+			if (moving == Piece::BLACK_PAWN) {
+				if (board[to] == 0) {
+					if (from - to == 9 || from - to == 7) {
+						mt = EN_PASSANT;
+					}
+				}
+				//if (to == Bitboard::extract_square(p.en_passant_square)) {
+				//	mt = EN_PASSANT;
+				//}
+			}
+			Move m{ 0 }; //TODO
+			set_from(m, from);
+			set_to(m, to);
+			auto is_ep = mt == EN_PASSANT;
+			set_en_passant(m, is_ep);
+
+			//			(from, to, mt);/// , captured, false);
+						//m.set_promoted_to(promoted_to);
 			return m;
 		}
 	};

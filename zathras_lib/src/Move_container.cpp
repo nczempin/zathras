@@ -28,7 +28,7 @@ namespace Moves {
 		return container_pool[index];
 	}
 
-	void Move_container::add_move(const int8_t& moving, const uint8_t& from, const uint8_t& to,
+	/*void Move_container::add_move(const int8_t& moving, const uint8_t& from, const uint8_t& to,
 		const int8_t& captured, const bool& en_passant_capture, const int8_t& promoted_to)
 	{
 		Move& m = container[index];
@@ -39,6 +39,17 @@ namespace Moves {
 		m.set_en_passant_capture(en_passant_capture);
 
 		m.set_promoted_to(promoted_to);
+		++index;
+	}*/
+	void Move_container::add_move(const square_t& from, const square_t& to, const move_type_t& move_type)
+	{
+		Move& m = container[index];
+		set_from(m, from);
+		set_to(m, to);
+		auto is_ep = move_type == EN_PASSANT;
+		if (move_type) {
+			set_en_passant(m, is_ep);
+		}
 		++index;
 	}
 
@@ -52,7 +63,7 @@ namespace Moves {
 		return index;
 	}
 
-	array<Move, Move_container::SIZE> Move_container::get_moves()const
+	move_container_t Move_container::get_moves()const
 	{
 		return container; //TODO unsafe?
 	}

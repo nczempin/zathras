@@ -22,22 +22,23 @@
     <ClCompile Include="src\Bitboard.cpp" />
     <ClCompile Include="src\Bitboard_test.cpp" />
     <ClCompile Include="src\misc.cpp" />
-    <ClCompile Include="src\Move.cpp" />
     <ClCompile Include="src\Move_container.cpp" />
     <ClCompile Include="src\Move_generator.cpp" />
+    <ClCompile Include="src\Move_generator_pregen.cpp" />
     <ClCompile Include="src\Move_state.cpp" />
     <ClCompile Include="src\Piece.cpp" />
     <ClCompile Include="src\Position.cpp" />
+    <ClCompile Include="src\Position_fen.cpp" />
+    <ClCompile Include="src\Position_print.cpp" />
     <ClCompile Include="src\Searcher.cpp" />
     <ClCompile Include="src\Square.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\typedefs.h" />
     <ClInclude Include="src\Bitboard.h" />
     <ClInclude Include="src\Character.h" />
     <ClInclude Include="src\Evaluator.h" />
-    <ClInclude Include="src\misc.h" />
     <ClInclude Include="src\Move.h" />
+    <ClInclude Include="src\misc.h" />
     <ClInclude Include="src\Move_container.h" />
     <ClInclude Include="src\Move_generator.h" />
     <ClInclude Include="src\Move_state.h" />
@@ -46,6 +47,8 @@
     <ClInclude Include="src\Position.h" />
     <ClInclude Include="src\Searcher.h" />
     <ClInclude Include="src\Square.h" />
+    <ClInclude Include="src\typedefs.h" />
+    <ClInclude Include="src\zathras_lib.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -58,26 +61,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>PGOptimize</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -124,11 +127,15 @@
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
       <ExceptionHandling>false</ExceptionHandling>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
-      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <DisableLanguageExtensions>true</DisableLanguageExtensions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <DisableSpecificWarnings>4530;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <AssemblerOutput>All</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
