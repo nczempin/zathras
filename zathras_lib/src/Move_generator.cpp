@@ -5,19 +5,19 @@
  *      Author: nczempin
  */
 
-#include "Move_generator.h"
+#include "move_generator.h"
 
 #include <bitset>
 #include <utility>
 #include <vector>
 
-#include "Position.h"
-#include "Square.h"
-#include "Piece.h"
-#include "Bitboard.h"
+#include "position.h"
+#include "square.h"
+#include "piece.h"
+#include "bitboard.h"
 
 
-namespace Moves {
+namespace zathras_lib::moves {
 	Move_generator::Move_generator() {
 	}
 
@@ -539,7 +539,7 @@ namespace Moves {
 			//Position pos2 = position; //copied //TODO inefficient
 			Move_state ms;
 			position.make_move(move, ms);
-			//TODO++Interface::Info::nodes;
+			//TODO++zathras::interface::Info::nodes;
 			if (!position.is_in_check(!position.is_white_to_move())) {
 				legal_moves.add_move(move);// moving, from, to, captured, en_passant_capture, promoted_to);
 			}
@@ -558,7 +558,7 @@ namespace Moves {
 			//Position pos2 = position; //copied //TODO inefficient
 			Move_state ms;
 			position.make_move(move, ms);
-			//TODO++Interface::Info::nodes;
+			//TODO++zathras::interface::Info::nodes;
 
 			if (!position.is_in_check(!position.is_white_to_move())) {
 				legal_moves.add_move(move);// moving, from, to, captured, en_passant_capture, promoted_to);

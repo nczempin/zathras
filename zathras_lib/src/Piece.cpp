@@ -5,8 +5,8 @@
  *      Author: nczempin
  */
 
-#include "Piece.h"
-namespace Positions {
+#include "piece.h"
+namespace positions {
 	Piece::Piece()
 	{
 		// TODO Auto-generated constructor stub

@@ -12,16 +12,16 @@
 #include <cassert>
 #include <stack>
 
-#include "Position.h"
-#include "Square.h"
-#include "Piece.h"
+#include "position.h"
+#include "square.h"
+#include "piece.h"
 #include "typedefs.h"
-#include "Move_generator.h"
+#include "move_generator.h"
 
-#include "Bitboard.h"
+#include "bitboard.h"
 
 
-namespace Positions {
+namespace positions {
 	Position::Position() {
 		for (int i = 0; i < 6; ++i) {
 			piece_bb[i] = 0;
@@ -328,7 +328,7 @@ namespace Positions {
 	inline void Position::make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
 		{
 			assert(moving != 0);
-			assert(to < 64);
+			assert(0<= to && to < 64);
 			board[from] = 0; //TODO encapsulate
 			board[to] = moving; //TODO encapsulate
 			if (white_or_not) {

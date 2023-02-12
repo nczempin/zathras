@@ -5,15 +5,15 @@
  *      Author: nczempin
  */
 
-#include "Bitboard.h"
+#include "bitboard.h"
 #include "typedefs.h"
 #include <cassert>
 
 
-#include "Move_generator.h" //TODO cyclic dependency
+#include "move_generator.h" //TODO cyclic dependency
 
 
-namespace Positions {
+namespace positions {
 	Bitboard::Bitboard() noexcept {
 		// TODO Auto-generated constructor stub
 

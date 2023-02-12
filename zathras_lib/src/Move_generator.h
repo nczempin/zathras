@@ -8,12 +8,12 @@
 #ifndef MOVE_GENERATOR_H_
 #define MOVE_GENERATOR_H_
 
-#include "Position.h"
-#include "Move.h"
-#include "Move_container.h"
+#include "position.h"
+#include "move.h"
+#include "move_container.h"
 
-namespace Moves {
-	using namespace Positions;
+namespace zathras_lib::moves {
+	using namespace positions;
 	class Move_generator {
 	public:
 		Move_generator();

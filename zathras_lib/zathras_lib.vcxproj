@@ -19,34 +19,34 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Bitboard.cpp" />
-    <ClCompile Include="src\Bitboard_test.cpp" />
+    <ClCompile Include="src\bitboard.cpp" />
+    <ClCompile Include="src\bitboard_test.cpp" />
     <ClCompile Include="src\misc.cpp" />
-    <ClCompile Include="src\Move_container.cpp" />
-    <ClCompile Include="src\Move_generator.cpp" />
-    <ClCompile Include="src\Move_generator_pregen.cpp" />
-    <ClCompile Include="src\Move_state.cpp" />
-    <ClCompile Include="src\Piece.cpp" />
-    <ClCompile Include="src\Position.cpp" />
-    <ClCompile Include="src\Position_fen.cpp" />
-    <ClCompile Include="src\Position_print.cpp" />
-    <ClCompile Include="src\Searcher.cpp" />
-    <ClCompile Include="src\Square.cpp" />
+    <ClCompile Include="src\move_container.cpp" />
+    <ClCompile Include="src\move_generator.cpp" />
+    <ClCompile Include="src\move_generator_pregen.cpp" />
+    <ClCompile Include="src\move_state.cpp" />
+    <ClCompile Include="src\piece.cpp" />
+    <ClCompile Include="src\position.cpp" />
+    <ClCompile Include="src\position_fen.cpp" />
+    <ClCompile Include="src\position_print.cpp" />
+    <ClCompile Include="src\searcher.cpp" />
+    <ClCompile Include="src\square.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Bitboard.h" />
-    <ClInclude Include="src\Character.h" />
-    <ClInclude Include="src\Evaluator.h" />
-    <ClInclude Include="src\Move.h" />
+    <ClInclude Include="src\bitboard.h" />
+    <ClInclude Include="src\character.h" />
+    <ClInclude Include="src\evaluator.h" />
+    <ClInclude Include="src\move.h" />
     <ClInclude Include="src\misc.h" />
-    <ClInclude Include="src\Move_container.h" />
-    <ClInclude Include="src\Move_generator.h" />
-    <ClInclude Include="src\Move_state.h" />
-    <ClInclude Include="src\Piece.h" />
-    <ClInclude Include="src\PieceCount.h" />
-    <ClInclude Include="src\Position.h" />
-    <ClInclude Include="src\Searcher.h" />
-    <ClInclude Include="src\Square.h" />
+    <ClInclude Include="src\move_container.h" />
+    <ClInclude Include="src\move_generator.h" />
+    <ClInclude Include="src\move_state.h" />
+    <ClInclude Include="src\piece.h" />
+    <ClInclude Include="src\piece_count.h" />
+    <ClInclude Include="src\position.h" />
+    <ClInclude Include="src\searcher.h" />
+    <ClInclude Include="src\square.h" />
     <ClInclude Include="src\typedefs.h" />
     <ClInclude Include="src\zathras_lib.h" />
   </ItemGroup>
@@ -167,6 +167,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

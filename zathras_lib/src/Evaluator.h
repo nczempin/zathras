@@ -3,9 +3,9 @@
 
 #include <algorithm>
 
-#include "Position.h"
+#include "position.h"
 
-#include "PieceCount.h"
+#include "piece_count.h"
 namespace Eval {
 	class Evaluator
 	{

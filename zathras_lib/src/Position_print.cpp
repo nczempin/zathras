@@ -1,6 +1,6 @@
-#include "Position.h"
+#include "position.h"
 
-namespace Positions {
+namespace positions {
 
 	ostream& operator<<(ostream& stream, const Position& position) {
 		position.print(stream);

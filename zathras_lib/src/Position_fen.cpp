@@ -1,5 +1,5 @@
-#include "Position.h"
-namespace Positions {
+#include "position.h"
+namespace positions {
 	Position Position::create_position(const string& fen) {
 		Position position;
 		vector<string> split_fen = Util::split(fen, ' ');
