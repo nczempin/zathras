@@ -9,10 +9,10 @@
 #include <cassert>
 #include <bitset>
 
-#include "Square.h"
+#include "square.h"
 #include "typedefs.h"
 
-namespace Positions {
+namespace positions {
 	using namespace std;
 
 	Square::Square()

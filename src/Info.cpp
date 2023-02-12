@@ -1,6 +1,6 @@
-#include "Info.h"
-#include "Move.h"
-namespace Interface {
+#include "info.h"
+#include "move.h"
+namespace zathras::interface {
 	int Info::seldepth = 0;
 	Move Info::currmove;
 	int Info::currmovenumber;

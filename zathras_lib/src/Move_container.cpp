@@ -2,10 +2,10 @@
 #include <iostream>
 //#include <span>
 
-#include "Move_container.h"
-#include "Piece.h"
+#include "move_container.h"
+#include "piece.h"
 
-namespace Moves {
+namespace zathras_lib::moves {
 
 	array<Move_container, CONTAINER_COUNT> Move_container::container_pool; // TODO perhaps better to use vector, once we get to depth 10
 

@@ -3,7 +3,7 @@
 
 
 #include "zathras_lib.h"
-#include "Uci.h"
+#include "uci.h"
 
 
 using namespace std;
@@ -22,7 +22,7 @@ int main()
 	while (true) {
 		string command;
 		getline(cin, command);
-		Interface::Uci::parse(command);
+		zathras::interface::Uci::parse(command);
 	}
 	return 0;
 }

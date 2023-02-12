@@ -5,13 +5,13 @@
 #include <cassert>
 #include <cstdlib>
 
-#include "Searcher.h"
-#include "Evaluator.h"
-#include "Move.h"
+#include "searcher.h"
+#include "evaluator.h"
+#include "move.h"
 
 
 #include "misc.h"
-//using namespace Interface; //TODO
+//using namespace zathras::interface; //TODO
 
 Searcher::Searcher(void)
 {

@@ -1,5 +1,5 @@
 /*
- * Move_container.h
+ * move_container.h
  *
  *  Created on: Apr 28, 2016
  *      Author: nczempin
@@ -8,19 +8,19 @@
 #ifndef MOVE_CONTAINER_H_
 #define MOVE_CONTAINER_H_
 
-#include "Move.h"
+#include "move.h"
 
 #include <stddef.h>
 #include <cstdint>
 #include <vector>
 #include <array>
 
-namespace Moves {
+namespace zathras_lib::moves {
 	using Move = uint16_t;
 
 	const size_t CONTAINER_COUNT = 32; //TODO this needs to be the maximum depth
 	const size_t CONTAINER_SIZE = 127;
-	using Positions::square_t;
+	using positions::square_t;
 	using move_container_t = array<Move, CONTAINER_SIZE>;
 	//using move_container_t = vector<Move>; //TODO make this work? or make the array safer
 
