@@ -28,6 +28,9 @@ VTune*/
 #Visual Studio files
 *lastcodeanalysissucceeded
 .vs/
+.cproject
+.project
+.settings/
 *.pdb
 *.[Oo]bj
 *.user
