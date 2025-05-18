@@ -4,6 +4,7 @@
 
 
 #include "Move.h"
+#include <climits>
 #include "Position.h"
 #include "Move_generator.h"
 //#include "Info.h"
