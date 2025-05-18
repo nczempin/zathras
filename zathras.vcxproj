@@ -113,9 +113,6 @@
     <ClInclude Include="src\uci.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="zathras_lib\zathras_lib.vcxproj">
       <Project>{1624d07d-062b-41cd-ae93-d1e4c34d8b02}</Project>
     </ProjectReference>
