@@ -9,7 +9,7 @@
 #define COMMAND_H_
 #include <memory>
 
-#include "command_receiver.h"
+#include "Command_receiver.h"
 
 
 namespace zathras::interface {

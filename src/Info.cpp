@@ -1,5 +1,5 @@
-#include "info.h"
-#include "move.h"
+#include "Info.h"
+#include "Move.h"
 namespace zathras::interface {
 	int Info::seldepth = 0;
 	Move Info::currmove;

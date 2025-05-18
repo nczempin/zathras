@@ -12,10 +12,10 @@
 #include <stack>
 
 #include "typedefs.h"
-#include "move.h"
-#include "move_state.h"
-#include "bitboard.h"
-#include "piece.h"
+#include "Move.h"
+#include "Move_state.h"
+#include "Bitboard.h"
+#include "Piece.h"
 
 
 namespace positions {

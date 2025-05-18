@@ -1,4 +1,4 @@
-#include "command_receiver.h"
+#include "Command_receiver.h"
 
 namespace zathras::interface {
 	Command_receiver::Command_receiver()

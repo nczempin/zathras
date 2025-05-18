@@ -5,16 +5,16 @@
  *      Author: nczempin
  */
 
-#include "move_generator.h"
+#include "Move_generator.h"
 
 #include <bitset>
 #include <utility>
 #include <vector>
 
-#include "position.h"
-#include "square.h"
-#include "piece.h"
-#include "bitboard.h"
+#include "Position.h"
+#include "Square.h"
+#include "Piece.h"
+#include "Bitboard.h"
 
 
 namespace zathras_lib::moves {

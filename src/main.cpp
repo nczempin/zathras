@@ -3,7 +3,7 @@
 
 
 #include "zathras_lib.h"
-#include "uci.h"
+#include "Uci.h"
 
 
 using namespace std;
