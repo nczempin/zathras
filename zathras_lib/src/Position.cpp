@@ -12,13 +12,13 @@
 #include <cassert>
 #include <stack>
 
-#include "position.h"
-#include "square.h"
-#include "piece.h"
+#include "Position.h"
+#include "Square.h"
+#include "Piece.h"
 #include "typedefs.h"
-#include "move_generator.h"
+#include "Move_generator.h"
 
-#include "bitboard.h"
+#include "Bitboard.h"
 
 
 namespace positions {

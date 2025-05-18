@@ -1,4 +1,4 @@
-#include "position.h"
+#include "Position.h"
 namespace positions {
 	Position Position::create_position(const string& fen) {
 		Position position;

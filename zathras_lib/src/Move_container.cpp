@@ -2,8 +2,8 @@
 #include <iostream>
 //#include <span>
 
-#include "move_container.h"
-#include "piece.h"
+#include "Move_container.h"
+#include "Piece.h"
 
 namespace zathras_lib::moves {
 

@@ -1,7 +1,7 @@
 
 #ifndef ABSTRACT_COMMAND_H_
 #define ABSTRACT_COMMAND_H_
-#include "command.h"
+#include "Command.h"
 
 namespace zathras::interface {
 	class Abstract_command : public Command

@@ -12,11 +12,11 @@
 #include <stack>
 
 
-#include "abstract_command.h"
-#include "command_receiver.h"
-#include "position.h"
-#include "move_generator.h"
-#include "move.h"
+#include "Abstract_command.h"
+#include "Command_receiver.h"
+#include "Position.h"
+#include "Move_generator.h"
+#include "Move.h"
 
 namespace zathras::interface {
 	class Perft_command : public Abstract_command {
