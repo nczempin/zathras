@@ -43,4 +43,4 @@ test: $(TEST_BIN)
 
 .PHONY: clean
 clean:
-	rm -f $(BIN) $(OBJ) $(LIB)
+	rm -f $(BIN) $(OBJ) $(LIB) $(TEST_BIN)
