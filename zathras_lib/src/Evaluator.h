@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-#include "position.h"
+#include "Position.h"
 
 #include "piece_count.h"
 namespace Eval {

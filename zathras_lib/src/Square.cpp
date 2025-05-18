@@ -9,7 +9,7 @@
 #include <cassert>
 #include <bitset>
 
-#include "square.h"
+#include "Square.h"
 #include "typedefs.h"
 
 namespace positions {

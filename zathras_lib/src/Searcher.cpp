@@ -5,9 +5,9 @@
 #include <cassert>
 #include <cstdlib>
 
-#include "searcher.h"
-#include "evaluator.h"
-#include "move.h"
+#include "Searcher.h"
+#include "Evaluator.h"
+#include "Move.h"
 
 
 #include "misc.h"

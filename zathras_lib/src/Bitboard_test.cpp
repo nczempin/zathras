@@ -6,7 +6,7 @@
  */
 #include <iostream>
 
-#include "bitboard.h"
+#include "Bitboard.h"
 #include "typedefs.h"
 
 namespace positions {

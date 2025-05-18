@@ -5,7 +5,7 @@
  *      Author: nczempin
  */
 
-#include "piece.h"
+#include "Piece.h"
 namespace positions {
 	Piece::Piece()
 	{

@@ -4,8 +4,8 @@
 #include <cstdint>
 
 #include "typedefs.h"
-#include "square.h"
-#include "piece.h"
+#include "Square.h"
+#include "Piece.h"
 #include "misc.h"
 
 namespace zathras_lib::moves {
