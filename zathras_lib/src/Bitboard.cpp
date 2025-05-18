@@ -5,12 +5,12 @@
  *      Author: nczempin
  */
 
-#include "bitboard.h"
+#include "Bitboard.h"
 #include "typedefs.h"
 #include <cassert>
 
 
-#include "move_generator.h" //TODO cyclic dependency
+#include "Move_generator.h" //TODO cyclic dependency
 
 
 namespace positions {

@@ -5,7 +5,7 @@
  *      Author: nczempin
  */
 
-#include "perft_command.h"
+#include "Perft_command.h"
 
 #include <iostream>
 #include <memory>
@@ -13,8 +13,8 @@
 #include <vector>
 #include <ctime>
 
-#include "position.h"
-#include "move_generator.h"
+#include "Position.h"
+#include "Move_generator.h"
 #include <cassert>
 
 namespace zathras::interface {

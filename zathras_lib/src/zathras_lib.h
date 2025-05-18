@@ -1,5 +1,5 @@
 #pragma once
-#include "square.h"
+#include "Square.h"
 #include <string>
 const std::string VERSION = "0.0.5";
 

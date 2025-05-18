@@ -4,7 +4,7 @@
 #include <vector>
 #include <array>
 #include <functional>
-#include "square.h"
+#include "Square.h"
 
 
 using namespace std;

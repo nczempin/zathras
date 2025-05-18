@@ -8,12 +8,12 @@
 #include <thread>
 
 
-#include "character.h"
-#include "position.h"
-#include "move_generator.h"
-#include "searcher.h"
-#include "move.h"
-#include "evaluator.h"
+#include "Character.h"
+#include "Position.h"
+#include "Move_generator.h"
+#include "Searcher.h"
+#include "Move.h"
+#include "Evaluator.h"
 
 #include "Info.h"
 #include "Perft_command.h"

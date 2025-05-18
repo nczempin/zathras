@@ -1,4 +1,4 @@
-#include "info.h"
+#include "Info.h"
 void resetClock() {
 	zathras::interface::Info::start = chrono::system_clock::now();
 }

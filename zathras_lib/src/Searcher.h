@@ -4,10 +4,10 @@
 #include <climits>
 
 
-#include "move.h"
-#include "position.h"
-#include "move_generator.h"
-//#include "info.h"
+#include "Move.h"
+#include "Position.h"
+#include "Move_generator.h"
+//#include "Info.h"
 
 using namespace zathras_lib::moves;
 class Searcher
