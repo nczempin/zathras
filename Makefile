@@ -1,9 +1,15 @@
 CC=g++
-CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto -fno-builtin -m64 -malign-data=cacheline -march=sandybridge -pthread
+# Include paths needed for headers under src/ and zathras_lib/src
+INCLUDES=-Isrc -Izathras_lib/src
+CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto  -fno-builtin -m64 -malign-data=cacheline -march=sandybridge $(INCLUDES) #-fno-inline-small-functions #-fno-omit-frame-pointer
 CPPFLAGS=-Izathras_lib/src -Itests/external
 
-BIN=zathras
-LIB=libzathras.a
+BIN= zathras
+# Recursively gather all C++ sources under the project
+SRC=$(shell find src zathras_lib/src -name '*.cpp')
+GAS=$(wildcard *.s)
+NASM=$(wildcard *.asm)
+CPP_OBJ=$(SRC:.cpp=.o)
 
 LIB_SRCS := $(wildcard zathras_lib/src/*.cpp)
 LIB_OBJS := $(LIB_SRCS:.cpp=.o)
