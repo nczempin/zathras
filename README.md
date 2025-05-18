@@ -1,7 +1,6 @@
 # zathras
 
 [![CI](https://github.com/nczempin/zathras/actions/workflows/ci.yml/badge.svg)](https://github.com/nczempin/zathras/actions/workflows/ci.yml)
-
 I wanted to get more seriously into more modern C++, bitboards, and eventually a multithreaded chess engine.
 
 So I got started on Zathras, named after my favourite character from the Babylon 5 universe.
