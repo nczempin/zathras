@@ -18,7 +18,7 @@
 #include "Piece.h"
 
 
-namespace Positions {
+namespace positions {
 
 	//TODO find better way to do this
 #define pawns  piece_bb[0]
@@ -32,7 +32,7 @@ namespace Positions {
 		const int BETWEEN_ARRAY_SIZE = 64 * 64;
 	}
 
-	using namespace Moves;
+	using namespace zathras_lib::moves;
 	using Move = uint16_t;//TODO
 	class Position {
 

@@ -5,7 +5,7 @@
  *      Author: nczempin
  */
 #include "Move_state.h"
-namespace Moves {
+namespace zathras_lib::moves {
 
 	Move_state::Move_state() :en_passant_square(-1), cleared_kingside_castling(false), cleared_queenside_castling(false) {
 	}

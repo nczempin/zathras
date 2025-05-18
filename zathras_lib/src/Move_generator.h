@@ -12,8 +12,8 @@
 #include "Move.h"
 #include "Move_container.h"
 
-namespace Moves {
-	using namespace Positions;
+namespace zathras_lib::moves {
+	using namespace positions;
 	class Move_generator {
 	public:
 		Move_generator();

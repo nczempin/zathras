@@ -10,7 +10,7 @@
 #include "Bitboard.h"
 
 
-namespace Moves {
+namespace zathras_lib::moves {
 	bitboard_set Move_generator::pregenerate_rays(int8_t direction) {
 		bitboard_set rays;
 		bitset<64> bs[64];

@@ -13,108 +13,111 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Move">
-      <UniqueIdentifier>{99641f8a-1979-4af1-b433-0f36c17f10fe}</UniqueIdentifier>
+    <Filter Include="zathras_lib">
+      <UniqueIdentifier>{f0b2966e-65a5-4fca-9e31-f48e4dddc7e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Search">
-      <UniqueIdentifier>{847fb096-54d4-4620-8fa8-a73ee5498acf}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Util">
-      <UniqueIdentifier>{de798f5c-9518-4349-8e24-3fc611b77814}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Eval">
-      <UniqueIdentifier>{a9a345ae-7f23-45e5-ab7a-7f3c45aed28a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Positions">
+    <Filter Include="zathras_lib\positions">
       <UniqueIdentifier>{b43fcf27-fcea-48aa-bd6b-52e63584912f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="zathras_lib\moves">
+      <UniqueIdentifier>{99641f8a-1979-4af1-b433-0f36c17f10fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zathras_lib\eval">
+      <UniqueIdentifier>{a9a345ae-7f23-45e5-ab7a-7f3c45aed28a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zathras_lib\search">
+      <UniqueIdentifier>{847fb096-54d4-4620-8fa8-a73ee5498acf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zathras_lib\util">
+      <UniqueIdentifier>{de798f5c-9518-4349-8e24-3fc611b77814}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Move_container.cpp">
-      <Filter>Move</Filter>
+    <ClCompile Include="src\move_container.cpp">
+      <Filter>zathras_lib\moves</Filter>
     </ClCompile>
-    <ClCompile Include="src\Move_generator.cpp">
-      <Filter>Move</Filter>
+    <ClCompile Include="src\move_generator.cpp">
+      <Filter>zathras_lib\moves</Filter>
     </ClCompile>
-    <ClCompile Include="src\Move_state.cpp">
-      <Filter>Move</Filter>
+    <ClCompile Include="src\move_state.cpp">
+      <Filter>zathras_lib\moves</Filter>
     </ClCompile>
-    <ClCompile Include="src\Bitboard.cpp">
-      <Filter>Positions</Filter>
+    <ClCompile Include="src\bitboard.cpp">
+      <Filter>zathras_lib\positions</Filter>
     </ClCompile>
-    <ClCompile Include="src\Bitboard_test.cpp">
-      <Filter>Positions</Filter>
+    <ClCompile Include="src\bitboard_test.cpp">
+      <Filter>zathras_lib\positions</Filter>
     </ClCompile>
-    <ClCompile Include="src\Piece.cpp">
-      <Filter>Positions</Filter>
+    <ClCompile Include="src\piece.cpp">
+      <Filter>zathras_lib\positions</Filter>
     </ClCompile>
-    <ClCompile Include="src\Position.cpp">
-      <Filter>Positions</Filter>
+    <ClCompile Include="src\position.cpp">
+      <Filter>zathras_lib\positions</Filter>
     </ClCompile>
-    <ClCompile Include="src\Square.cpp">
-      <Filter>Positions</Filter>
+    <ClCompile Include="src\square.cpp">
+      <Filter>zathras_lib\positions</Filter>
     </ClCompile>
-    <ClCompile Include="src\Searcher.cpp">
-      <Filter>Search</Filter>
+    <ClCompile Include="src\searcher.cpp">
+      <Filter>zathras_lib\search</Filter>
     </ClCompile>
     <ClCompile Include="src\misc.cpp">
-      <Filter>Util</Filter>
+      <Filter>zathras_lib\util</Filter>
     </ClCompile>
-    <ClCompile Include="src\Position_print.cpp">
-      <Filter>Positions</Filter>
+    <ClCompile Include="src\position_print.cpp">
+      <Filter>zathras_lib\positions</Filter>
     </ClCompile>
-    <ClCompile Include="src\Position_fen.cpp">
-      <Filter>Positions</Filter>
+    <ClCompile Include="src\position_fen.cpp">
+      <Filter>zathras_lib\positions</Filter>
     </ClCompile>
-    <ClCompile Include="src\Move_generator_pregen.cpp">
-      <Filter>Move</Filter>
+    <ClCompile Include="src\move_generator_pregen.cpp">
+      <Filter>zathras_lib\moves</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Move_container.h">
-      <Filter>Move</Filter>
+    <ClInclude Include="src\move_container.h">
+      <Filter>zathras_lib\moves</Filter>
     </ClInclude>
-    <ClInclude Include="src\Move_generator.h">
-      <Filter>Move</Filter>
+    <ClInclude Include="src\move_generator.h">
+      <Filter>zathras_lib\moves</Filter>
     </ClInclude>
-    <ClInclude Include="src\Move_state.h">
-      <Filter>Move</Filter>
+    <ClInclude Include="src\move_state.h">
+      <Filter>zathras_lib\moves</Filter>
     </ClInclude>
-    <ClInclude Include="src\Bitboard.h">
-      <Filter>Positions</Filter>
+    <ClInclude Include="src\bitboard.h">
+      <Filter>zathras_lib\positions</Filter>
     </ClInclude>
-    <ClInclude Include="src\Piece.h">
-      <Filter>Positions</Filter>
+    <ClInclude Include="src\piece.h">
+      <Filter>zathras_lib\positions</Filter>
     </ClInclude>
-    <ClInclude Include="src\Position.h">
-      <Filter>Positions</Filter>
+    <ClInclude Include="src\position.h">
+      <Filter>zathras_lib\positions</Filter>
     </ClInclude>
-    <ClInclude Include="src\Square.h">
-      <Filter>Positions</Filter>
+    <ClInclude Include="src\square.h">
+      <Filter>zathras_lib\positions</Filter>
     </ClInclude>
-    <ClInclude Include="src\Searcher.h">
-      <Filter>Search</Filter>
+    <ClInclude Include="src\searcher.h">
+      <Filter>zathras_lib\search</Filter>
     </ClInclude>
-    <ClInclude Include="src\Evaluator.h">
-      <Filter>Eval</Filter>
+    <ClInclude Include="src\evaluator.h">
+      <Filter>zathras_lib\eval</Filter>
     </ClInclude>
-    <ClInclude Include="src\PieceCount.h">
-      <Filter>Eval</Filter>
+    <ClInclude Include="src\piece_count.h">
+      <Filter>zathras_lib\eval</Filter>
     </ClInclude>
-    <ClInclude Include="src\Character.h">
-      <Filter>Util</Filter>
+    <ClInclude Include="src\character.h">
+      <Filter>zathras_lib\util</Filter>
     </ClInclude>
     <ClInclude Include="src\zathras_lib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\typedefs.h">
-      <Filter>Util</Filter>
+      <Filter>zathras_lib\util</Filter>
     </ClInclude>
     <ClInclude Include="src\misc.h">
-      <Filter>Util</Filter>
+      <Filter>zathras_lib\util</Filter>
     </ClInclude>
-    <ClInclude Include="src\Move.h">
-      <Filter>Move</Filter>
+    <ClInclude Include="src\move.h">
+      <Filter>zathras_lib\moves</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

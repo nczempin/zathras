@@ -6,7 +6,7 @@
  */
 
 #include "Piece.h"
-namespace Positions {
+namespace positions {
 	Piece::Piece()
 	{
 		// TODO Auto-generated constructor stub

@@ -17,8 +17,8 @@
 #include "Move_generator.h"
 #include <cassert>
 
-namespace Interface {
-	using namespace Moves;
+namespace zathras::interface {
+	using namespace zathras_lib::moves;
 
 
 	Perft_command::~Perft_command() {
@@ -66,22 +66,7 @@ namespace Interface {
 			assert(pp->get_piece_on(get_to(move)) != 0);
 			pp->unmake_move(move, ms);
 			s.pop();
-			const bb colour = !pp->white_to_move ? pp->white : pp->black;
-			const bb kpbb = pp->kings & colour;
-			if (kpbb == 0) { //TODO debug flag
-				cout << pp->print_bitboard(pp->kings);
-				cout << pp->print_bitboard(colour);
-				cout << pp->print_bitboard(pp->white);
-				cout << pp->print_bitboard(pp->black);
-				cout << pp->print_board();
-				while (!s.empty()) {
-					Move m = s.top();
-					cout << to_string(m) << endl;
-					s.pop();
-				}
-
-			}
-			assert(kpbb != 0);
+			
 			assert(pp->get_piece_on(get_from(move)) != 0);
 		}
 		//cout << "up " << int(depth) << endl << endl;

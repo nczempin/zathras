@@ -20,7 +20,8 @@ APP_OBJS := $(APP_SRCS:.cpp=.o)
 
 OBJ=$(LIB_OBJS) $(APP_OBJS)
 
-TEST_SRCS := $(wildcard tests/unit/*.cpp)
+# Gather all test sources from the tests directory tree
+TEST_SRCS := $(shell find tests -name '*.cpp')
 TEST_OBJS := $(TEST_SRCS:.cpp=.o)
 TEST_BIN := run_tests
 

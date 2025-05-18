@@ -3,7 +3,7 @@
 #define ABSTRACT_COMMAND_H_
 #include "Command.h"
 
-namespace Interface {
+namespace zathras::interface {
 	class Abstract_command : public Command
 	{
 	public:

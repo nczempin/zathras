@@ -13,7 +13,7 @@
 #include "Move_generator.h" //TODO cyclic dependency
 
 
-namespace Positions {
+namespace positions {
 	Bitboard::Bitboard() noexcept {
 		// TODO Auto-generated constructor stub
 

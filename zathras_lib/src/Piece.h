@@ -1,5 +1,5 @@
 /*
- * Piece.h
+ * piece.h
  *
  *  Created on: Apr 23, 2016
  *      Author: nczempin
@@ -7,7 +7,7 @@
 
 #ifndef PIECE_H_
 #define PIECE_H_
-namespace Positions {
+namespace positions {
 	class Piece
 	{
 	public:

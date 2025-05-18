@@ -1,3 +1,5 @@
+[![CI](https://github.com/nczempin/zathras/actions/workflows/ci.yml/badge.svg)](https://github.com/nczempin/zathras/actions/workflows/ci.yml)
+
 # zathras
 
 I wanted to get more seriously into more modern C++, bitboards, and eventually a multithreaded chess engine.
@@ -52,6 +54,20 @@ After `make` finishes, execute:
 ```
 
 The program displays a welcome message and waits for UCI commands on standard input. Enter commands such as `uci`, `isready` or `quit` to interact with the engine.
+
+## Comparing perft with Stockfish
+
+The repository includes a small helper script named `stock.sh` for validating
+perft results against the [Stockfish](https://stockfishchess.org/) engine. The
+script sends a FEN position followed by a `perft` command. Ensure that the
+`stockfish` binary is available in your `PATH` and run:
+
+```bash
+./stock.sh
+```
+
+Stockfish will output the node count for `perft 6`, which can be compared
+against Zathras' own perft implementation.
 
 ## Project status
 

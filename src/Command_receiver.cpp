@@ -1,6 +1,6 @@
 #include "Command_receiver.h"
 
-namespace Interface {
+namespace zathras::interface {
 	Command_receiver::Command_receiver()
 	{
 	}
