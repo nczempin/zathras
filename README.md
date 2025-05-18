@@ -55,6 +55,20 @@ After `make` finishes, execute:
 
 The program displays a welcome message and waits for UCI commands on standard input. Enter commands such as `uci`, `isready` or `quit` to interact with the engine.
 
+## Comparing perft with Stockfish
+
+The repository includes a small helper script named `stock.sh` for validating
+perft results against the [Stockfish](https://stockfishchess.org/) engine. The
+script sends a FEN position followed by a `perft` command. Ensure that the
+`stockfish` binary is available in your `PATH` and run:
+
+```bash
+./stock.sh
+```
+
+Stockfish will output the node count for `perft 6`, which can be compared
+against Zathras' own perft implementation.
+
 ## Project status
 
 Zathras began as an experiment in modern C++ and bitboard-based chess programming. The long-term goal is a multithreaded engine, but development is currently incomplete and focuses on the core UCI functionality and basic search features.
