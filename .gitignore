@@ -97,3 +97,8 @@ packages/
 *.testsettings
 UserInterfaceState.xcuserstate
 /Default/
+
+# Build artifacts
+libzathras.a
+run_tests
+
