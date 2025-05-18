@@ -1,6 +1,6 @@
 CC=g++
 CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto -fno-builtin -m64 -malign-data=cacheline -march=sandybridge -pthread
-CPPFLAGS=-Izathras_lib/src
+CPPFLAGS=-Izathras_lib/src -Itests/external
 
 BIN=zathras
 LIB=libzathras.a
@@ -13,6 +13,10 @@ APP_OBJS := $(APP_SRCS:.cpp=.o)
 
 OBJ=$(LIB_OBJS) $(APP_OBJS)
 
+TEST_SRCS := $(wildcard tests/unit/*.cpp)
+TEST_OBJS := $(TEST_SRCS:.cpp=.o)
+TEST_BIN := run_tests
+
 all: $(BIN)
 
 $(LIB): $(LIB_OBJS)
@@ -23,6 +27,12 @@ $(BIN): $(APP_OBJS) $(LIB)
 
 %.o: %.cpp
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(TEST_BIN): $(TEST_OBJS) $(LIB)
+	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LIB)
+
+test: $(TEST_BIN)
+	./$(TEST_BIN)
 
 .PHONY: clean
 clean:
