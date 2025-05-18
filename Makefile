@@ -5,6 +5,7 @@ CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto  -fno-builtin -m64 -ma
 CPPFLAGS=-Izathras_lib/src -Itests/external
 
 BIN= zathras
+LIB= libzathras.a
 # Recursively gather all C++ sources under the project
 SRC=$(shell find src zathras_lib/src -name '*.cpp')
 GAS=$(wildcard *.s)
