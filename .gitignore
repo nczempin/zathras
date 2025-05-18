@@ -54,6 +54,8 @@ VTune*/
 *.opensdf
 *.unsuccessfulbuild
 ipch/
+*.VC.db*
+*.VC.VC.opendb
 [Oo]bj/
 [Bb]in
 [Dd]ebug*/
