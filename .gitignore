@@ -105,5 +105,6 @@ UserInterfaceState.xcuserstate
 
 # Build artifacts
 libzathras.a
-run_tests
+zathras
+run_tests*
 
