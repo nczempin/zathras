@@ -7,7 +7,6 @@
 #include "Move.h"
 #include "Position.h"
 #include "Move_generator.h"
-//#include "info.h"
 
 using namespace zathras_lib::moves;
 class Searcher
