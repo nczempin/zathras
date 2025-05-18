@@ -5,7 +5,7 @@ CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto  -fno-builtin -m64 -ma
 
 BIN= zathras
 # Recursively gather all C++ sources under the project
-SRC=$(shell find . -name '*.cpp')
+SRC=$(shell find src zathras_lib/src -name '*.cpp')
 GAS=$(wildcard *.s)
 NASM=$(wildcard *.asm)
 CPP_OBJ=$(SRC:.cpp=.o)
