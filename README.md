@@ -11,6 +11,14 @@ engine one day.
 - C++17 compiler (`g++` or `clang++`)
 - `make` and common build tools
 
+## Setup
+
+Install the required packages with:
+
+```bash
+./setup.sh
+```
+
 ## Build
 
 ```bash
