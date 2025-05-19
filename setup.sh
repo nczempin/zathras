@@ -12,7 +12,7 @@ apt-get install -y "${packages[@]}"
 
 echo "Verifying installations..."
 for pkg in "${packages[@]}"; do
-    if ! command -v ${pkg%%+*} >/dev/null 2>&1; then
+    if ! command -v "$pkg" >/dev/null 2>&1; then
         echo "Error: $pkg not found after installation" >&2
         exit 1
     fi
