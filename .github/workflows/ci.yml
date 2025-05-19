@@ -1,18 +1,33 @@
 name: CI
 on:
   push:
+    paths-ignore:
+      - '**/*.md'
   pull_request:
+    paths-ignore:
+      - '**/*.md'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
-      - name: Install dependencies
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y make g++ cppcheck
-      - name: Build
-        run: make
-      - name: Run tests
-        run: make test
-      - name: Static analysis
-        run: cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: choco install -y make mingw cppcheck
+      - name: Run pipeline
+        run: python run.py
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: zathras-${{ runner.os }}
+          path: zathras.zip
