@@ -26,6 +26,9 @@ make        # build the engine and static library
 make clean  # remove artifacts
 ```
 
+For Windows development, Visual Studio project files are located in the
+`msvc/` directory. Open `zathras.sln` from there.
+
 The `zathras` binary appears in the repository root. Run unit tests with
 `make test`.
 
