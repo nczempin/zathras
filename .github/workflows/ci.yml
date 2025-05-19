@@ -27,7 +27,7 @@ jobs:
       - name: Run pipeline
         run: python run.py
       - name: Upload package
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: zathras-${{ runner.os }}
           path: zathras.zip
