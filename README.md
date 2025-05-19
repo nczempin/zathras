@@ -8,18 +8,32 @@ engine one day.
 
 ## Requirements
 
-- C++17 compiler (`g++` or `clang++`)
-- `make` and common build tools
+- Python 3
+- C++17 compiler (`g++`, `clang++` or MSVC)
+- `make` on Unix-like systems or Visual Studio on Windows
+- `cppcheck` (optional for extra linting)
 
-## Build
+## Quickstart
+
+From a fresh clone run the following command to build, test and create a
+package archive:
+
+```bash
+python run.py
+```
+
+A `zathras.zip` archive will appear in the project root containing the
+engine executable and static library.
+
+## Manual Build
 
 ```bash
 make        # build the engine and static library
+make test   # run unit tests
 make clean  # remove artifacts
 ```
 
-The `zathras` binary appears in the repository root. Run unit tests with
-`make test`.
+The `zathras` binary appears in the repository root.
 
 ## Run
 
