@@ -8,13 +8,44 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Detect code changes
+        id: changes
+        run: |
+          set -eo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base="${{ github.event.pull_request.base.sha }}"
+          else
+            base="${{ github.event.before }}"
+          fi
+          git fetch origin "$base" --depth=1
+          files=$(git diff --name-only "$base" "$GITHUB_SHA")
+          non_docs=$(echo "$files" | grep -vE '\.md$' || true)
+          if [ -z "$non_docs" ]; then
+            echo "code_changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          diff_lines=$(git diff --unified=0 "$base" "$GITHUB_SHA" | \
+            grep -E '^[+-]' | grep -vE '^[+-]{3}' | \
+            grep -vE '^[+-][[:space:]]*(//|#|/\\*|\\*)' | \
+            grep -vE '^[+-][[:space:]]*$' || true)
+          if [ -n "$diff_lines" ]; then
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "code_changed=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Install dependencies
+        if: steps.changes.outputs.code_changed == 'true'
         run: sudo apt-get update && sudo apt-get install -y make g++ cppcheck
       - name: Build
+        if: steps.changes.outputs.code_changed == 'true'
         run: make
       - name: Run tests
+        if: steps.changes.outputs.code_changed == 'true'
         run: make test
       - name: Static analysis
+        if: steps.changes.outputs.code_changed == 'true'
         run: cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit
       - name: Upload zathras binary
         uses: actions/upload-artifact@v4
@@ -28,3 +59,6 @@ jobs:
           name: libzathras
           path: libzathras.a
           retention-days: 7
+      - name: No code changes detected
+        if: steps.changes.outputs.code_changed != 'true'
+        run: echo "Documentation or comment-only changes detected. Skipping build and tests."
