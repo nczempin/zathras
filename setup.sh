@@ -5,10 +5,10 @@ set -e
 packages=(g++ make cppcheck)
 
 echo "Updating package lists..."
-sudo apt-get update -y
+apt-get update
 
 echo "Installing required packages: ${packages[*]}"
-sudo apt-get install -y "${packages[@]}"
+apt-get install -y "${packages[@]}"
 
 echo "Verifying installations..."
 for pkg in "${packages[@]}"; do
