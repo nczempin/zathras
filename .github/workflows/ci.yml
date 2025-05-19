@@ -16,3 +16,15 @@ jobs:
         run: make test
       - name: Static analysis
         run: cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit
+      - name: Upload zathras binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: zathras
+          path: zathras
+          retention-days: 7
+      - name: Upload static library
+        uses: actions/upload-artifact@v4
+        with:
+          name: libzathras
+          path: libzathras.a
+          retention-days: 7
