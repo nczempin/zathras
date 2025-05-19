@@ -47,6 +47,18 @@ jobs:
       - name: Static analysis
         if: steps.changes.outputs.code_changed == 'true'
         run: cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit
+      - name: Upload zathras binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: zathras
+          path: zathras
+          retention-days: 7
+      - name: Upload static library
+        uses: actions/upload-artifact@v4
+        with:
+          name: libzathras
+          path: libzathras.a
+          retention-days: 7
       - name: No code changes detected
         if: steps.changes.outputs.code_changed != 'true'
         run: echo "Documentation or comment-only changes detected. Skipping build and tests."
