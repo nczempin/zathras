@@ -18,13 +18,14 @@
 #include "Info.h"
 #include "Perft_command.h"
 
+
 extern Position p;
 
 
 extern future<Move> fut;
 extern Searcher searcher;
 
-namespace Interface {
+namespace zathras::interface {
 
 	using namespace std;
 
@@ -167,7 +168,7 @@ namespace Interface {
 				p.print(cout);
 			}
 			/*else if (toParse == "sm") {
-				cout << "Moves: " << endl;
+				cout << "moves: " << endl;
 				MoveGenerator mg;
 				vector<Move> moves = mg.generateLegalMoves(p);
 				for (Move moveString : moves) {
@@ -253,7 +254,7 @@ namespace Interface {
 		}
 
 		void static resetClock() {
-			Interface::Info::start = chrono::system_clock::now();
+			zathras::interface::Info::start = chrono::system_clock::now();
 		}
 		static Move asyncAnalyze() {
 			resetClock();
@@ -271,7 +272,7 @@ namespace Interface {
 				board[i] = 0;
 			}
 			position.mailbox_from_bitboard(board);
-			Move m = convert_move(moveString, board, position);
+			Move m = convert_move(moveString, board);
 
 			//TODO make this more elegant
 			int from = get_from(m);
@@ -298,14 +299,14 @@ namespace Interface {
 			position.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
 
 
-	//			++Interface::Info::nodes;
+	//			++zathras::interface::Info::nodes;
 
 				//isGivingCheck = null;
 				//isReceivingCheck = null;
 			position.print(cout);
 		}
 		//
-		static Move convert_move(string moveString, piece_t* board, const Position& position) {
+		static Move convert_move(string moveString, piece_t* board) {
 			square_t from = static_cast<square_t> (Util::decode_square(moveString.substr(0, 2)));
 
 			square_t to = static_cast<square_t> (Util::decode_square(moveString.substr(2, 4)));

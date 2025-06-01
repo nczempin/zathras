@@ -1,5 +1,5 @@
 /*
- * Command_receiver.h
+ * command_receiver.h
  *
  *  Created on: Mar 31, 2016
  *      Author: nczempin
@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-namespace Interface {
+namespace zathras::interface {
 	using namespace std;
 	class Command_receiver
 	{

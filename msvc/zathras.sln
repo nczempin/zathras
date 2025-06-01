@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29009.5
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zathras", "zathras.vcxproj", "{F22C87DF-50DB-49A4-9779-8ECAAC7CA508}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zathras_lib", "zathras_lib\zathras_lib.vcxproj", "{1624D07D-062B-41CD-AE93-D1E4C34D8B02}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zathras_lib", "..\zathras_lib\zathras_lib.vcxproj", "{1624D07D-062B-41CD-AE93-D1E4C34D8B02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,15 +35,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {11E4658F-C932-49DB-BB15-24E6E7DB2882}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true

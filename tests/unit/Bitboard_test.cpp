@@ -9,7 +9,7 @@
 #include "Bitboard.h"
 #include "typedefs.h"
 
-namespace Positions {
+namespace positions {
 	int main_() {
 		for (int i = 0; i < 64; ++i) {
 			int x = Bitboard::ffs(i);

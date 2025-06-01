@@ -9,7 +9,7 @@
 #include "Move_generator.h"
 //#include "Info.h"
 
-using namespace Moves;
+using namespace zathras_lib::moves;
 class Searcher
 {
 public:

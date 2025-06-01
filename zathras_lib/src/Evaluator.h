@@ -5,7 +5,7 @@
 
 #include "Position.h"
 
-#include "PieceCount.h"
+#include "piece_count.h"
 namespace Eval {
 	class Evaluator
 	{

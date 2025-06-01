@@ -1,5 +1,5 @@
 /*
- * Command.h
+ * command.h
  *
  *  Created on: Apr 9, 2016
  *      Author: nczempin
@@ -12,7 +12,7 @@
 #include "Command_receiver.h"
 
 
-namespace Interface {
+namespace zathras::interface {
 	class Command
 	{
 	public:

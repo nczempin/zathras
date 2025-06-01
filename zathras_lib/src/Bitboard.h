@@ -13,7 +13,7 @@
 #endif
 
 #include "typedefs.h"
-namespace Positions {
+namespace positions {
 	class Bitboard {
 	public:
 		Bitboard()noexcept;

@@ -11,7 +11,7 @@
 
 
 #include "misc.h"
-//using namespace Interface; //TODO
+//using namespace zathras::interface; //TODO
 
 Searcher::Searcher(void)
 {

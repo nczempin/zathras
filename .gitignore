@@ -28,6 +28,9 @@ VTune*/
 #Visual Studio files
 *lastcodeanalysissucceeded
 .vs/
+.cproject
+.project
+.settings/
 *.pdb
 *.[Oo]bj
 *.user
@@ -54,6 +57,8 @@ VTune*/
 *.opensdf
 *.unsuccessfulbuild
 ipch/
+*.VC.db*
+*.VC.VC.opendb
 [Oo]bj/
 [Bb]in
 [Dd]ebug*/
@@ -83,7 +88,7 @@ _ReSharper*/
 *~
 
 #NuGet
-packages/
+msvc/packages/
 *.nupkg
 
 #ncrunch
@@ -97,3 +102,9 @@ packages/
 *.testsettings
 UserInterfaceState.xcuserstate
 /Default/
+
+# Build artifacts
+libzathras.a
+zathras
+run_tests*
+

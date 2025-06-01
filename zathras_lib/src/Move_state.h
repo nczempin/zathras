@@ -1,5 +1,5 @@
 /*
- * Move_state.h
+ * move_state.h
  *
  *  Created on: 02.12.2017
  *      Author: nczempin
@@ -10,7 +10,7 @@
 
 #include "typedefs.h"
 
-namespace Moves {
+namespace zathras_lib::moves {
 	class Move_state {
 	public:
 		Move_state();

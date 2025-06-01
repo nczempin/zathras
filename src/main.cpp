@@ -22,7 +22,7 @@ int main()
 	while (true) {
 		string command;
 		getline(cin, command);
-		Interface::Uci::parse(command);
+		zathras::interface::Uci::parse(command);
 	}
 	return 0;
 }

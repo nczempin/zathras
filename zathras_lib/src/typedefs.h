@@ -17,9 +17,9 @@ enum Move_type  {
 
 
 using bb = uint_fast64_t;
-//using square_t = uint8_t; //TODO this hides definition in Square.h
+//using square_t = uint8_t; //TODO this hides definition in square.h
 
-using square_t = Positions::Squares;
+using square_t = positions::Squares;
 
 using move_type_t = Move_type;
 

@@ -8,11 +8,11 @@
 #include "Piece.h"
 #include "misc.h"
 
-namespace Moves {
+namespace zathras_lib::moves {
 
-	using Positions::Squares;
-	using Positions::square_t;
-	using Positions::Piece;
+	using positions::Squares;
+	using positions::square_t;
+	using positions::Piece;
 
 
 
@@ -43,7 +43,7 @@ namespace Moves {
 		return static_cast<bool>(mm >> 7); // will need to change if we add CASTLING
 	}
 	inline constexpr piece_t get_promoted(Move mm) {
-		piece_t tmp = Piece::QUEEN - (mm >> 14 && 0b11);
+		piece_t tmp = Piece::QUEEN - (mm >> 14 & 0b11);
 		// 0 -> queen
 		// 1 -> rook
 		// 2 -> bishop
@@ -104,8 +104,8 @@ namespace Moves {
 		char p = pieces[moving > 0 ? moving : -moving];
 		string moving_string = string(1, p);*/
 
-		std::string retval = Positions::Square::mailbox_index_to_square(get_from(move));
-		retval += Positions::Square::mailbox_index_to_square(get_to(move));
+		std::string retval = positions::Square::mailbox_index_to_square(get_from(move));
+		retval += positions::Square::mailbox_index_to_square(get_to(move));
 
 
 		return retval;
