@@ -5,7 +5,7 @@ CPPFLAGS=-Izathras_lib/src -Itests/external
 BIN=zathras
 LIB=libzathras.a
 
-LIB_SRCS := $(filter-out zathras_lib/src/Bitboard_test.cpp,$(wildcard zathras_lib/src/*.cpp))
+LIB_SRCS := $(wildcard zathras_lib/src/*.cpp)
 LIB_OBJS := $(LIB_SRCS:.cpp=.o)
 
 TEST_SRCS := $(wildcard tests/*.cpp)
