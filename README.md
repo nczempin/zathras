@@ -69,8 +69,39 @@ script sends a FEN position followed by a `perft` command. Ensure that the
 Stockfish will output the node count for `perft 6`, which can be compared
 against Zathras' own perft implementation.
 
+## Architecture Overview
+
+Zathras is designed with modern C++ principles and focuses on:
+
+- **Bitboard representation**: Efficient board state using 64-bit integers
+- **Modern C++ features**: Leveraging C++17 capabilities for cleaner code
+- **Async I/O**: Non-blocking UCI communication for better responsiveness
+- **Modular design**: Clear separation between engine logic and UCI interface
+
+### Key Components
+
+- `src/`: Main engine application and UCI interface
+- `zathras_lib/`: Core chess logic as a reusable library
+- `tests/`: Comprehensive test suite using Catch2
+- `msvc/`: Windows Visual Studio project files
+
+## Development Roadmap
+
+Zathras is actively developed with these planned features:
+
+| Feature | Status | Priority |
+|---------|--------|----------|
+| UCI protocol basics | ✅ Complete | - |
+| Move generation & validation | ✅ Complete | - |
+| Bitboard operations | ✅ Complete | - |
+| Basic search (minimax/alpha-beta) | 🚧 In Progress | High |
+| Position evaluation | 🚧 In Progress | High |
+| Transposition tables | 📋 Planned | Medium |
+| Multithreaded search | 📋 Planned | Medium |
+| Advanced pruning techniques | 📋 Planned | Low |
+
 ## Project status
 
-Zathras began as an experiment in modern C++ and bitboard-based chess programming. The long-term goal is a multithreaded engine, but development is currently incomplete and focuses on the core UCI functionality and basic search features.
+Zathras is a semi-actively developed modern C++ chess engine exploring advanced techniques. While functional for basic UCI operations and move generation, search and evaluation components are still being refined.
 
 
