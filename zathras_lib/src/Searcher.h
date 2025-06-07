@@ -7,6 +7,7 @@
 #include "Position.h"
 #include "Move_generator.h"
 //#include "Info.h"
+#include <climits>
 
 using namespace Moves;
 class Searcher
