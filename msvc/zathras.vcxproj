@@ -45,7 +45,7 @@
     <RunCodeAnalysis>true</RunCodeAnalysis>
     <EnableCppCoreCheck>true</EnableCppCoreCheck>
     <LibraryPath>$(LibraryPath)</LibraryPath>
-    <IncludePath>zathras_lib\src;$(IncludePath)</IncludePath>
+    <IncludePath>..\zathras_lib\src;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CodeAnalysisRuleSet>1.ruleset</CodeAnalysisRuleSet>
@@ -97,26 +97,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\clock.cpp" />
-    <ClCompile Include="src\Command.cpp" />
-    <ClCompile Include="src\Command_receiver.cpp" />
-    <ClCompile Include="src\Info.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\perft_command.cpp" />
+    <ClCompile Include="..\src\clock.cpp" />
+    <ClCompile Include="..\src\Command.cpp" />
+    <ClCompile Include="..\src\Command_receiver.cpp" />
+    <ClCompile Include="..\src\Info.cpp" />
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\perft_command.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Abstract_command.h" />
-    <ClInclude Include="src\Command.h" />
-    <ClInclude Include="src\Command_receiver.h" />
-    <ClInclude Include="src\Info.h" />
-    <ClInclude Include="src\perft_command.h" />
-    <ClInclude Include="src\uci.h" />
+    <ClInclude Include="..\src\Abstract_command.h" />
+    <ClInclude Include="..\src\Command.h" />
+    <ClInclude Include="..\src\Command_receiver.h" />
+    <ClInclude Include="..\src\Info.h" />
+    <ClInclude Include="..\src\perft_command.h" />
+    <ClInclude Include="..\src\uci.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="zathras_lib\zathras_lib.vcxproj">
+    <ProjectReference Include="..\zathras_lib\zathras_lib.vcxproj">
       <Project>{1624d07d-062b-41cd-ae93-d1e4c34d8b02}</Project>
     </ProjectReference>
   </ItemGroup>

@@ -15,6 +15,10 @@ CPP_OBJ=$(SRC:.cpp=.o)
 LIB_SRCS := $(wildcard zathras_lib/src/*.cpp)
 LIB_OBJS := $(LIB_SRCS:.cpp=.o)
 
+TEST_SRCS := $(wildcard tests/*.cpp)
+TEST_OBJS := $(TEST_SRCS:.cpp=.o)
+TEST_BIN := tests/test_runner
+
 APP_SRCS := $(wildcard src/*.cpp)
 APP_OBJS := $(APP_SRCS:.cpp=.o)
 
@@ -26,6 +30,12 @@ TEST_OBJS := $(TEST_SRCS:.cpp=.o)
 TEST_BIN := run_tests
 
 all: $(BIN)
+
+test: $(TEST_BIN)
+	./$(TEST_BIN)
+
+$(TEST_BIN): $(LIB) $(TEST_OBJS)
+	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LIB)
 
 $(LIB): $(LIB_OBJS)
 	ar rcs $@ $^
@@ -44,4 +54,4 @@ test: $(TEST_BIN)
 
 .PHONY: clean
 clean:
-	rm -f $(BIN) $(OBJ) $(LIB) $(TEST_BIN)
+	rm -f $(BIN) $(OBJ) $(LIB) $(TEST_BIN) $(TEST_OBJS)

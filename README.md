@@ -6,6 +6,11 @@ Zathras is a small chess engine written in modern C++. It began as an
 exercise in async I/O and bitboards and may grow into a multithreaded
 engine one day.
 
+This repository is aimed at chess engine developers who have already
+built one or two engines and want to explore more advanced techniques.
+The code strives to be approachable while showcasing ideas used in
+engine design.
+
 ## Requirements
 
 - Python 3
@@ -33,6 +38,9 @@ make test   # run unit tests
 make clean  # remove artifacts
 ```
 
+For Windows development, Visual Studio project files are available in the
+repository root. Open `zathras.sln` from there.
+
 The `zathras` binary appears in the repository root.
 
 ## Run
@@ -46,6 +54,13 @@ The program prints a short greeting and waits for UCI commands like
 
 ## Project Status
 
-Development is exploratory and incomplete. Zathras currently offers only
-basic UCI handling and search routines, with multithreading planned for
-the future.
+Development is exploratory and incomplete. Core features work, but some
+areas remain experimental.
+
+| Feature                         | Status       |
+|---------------------------------|--------------|
+| UCI protocol basics             | Works        |
+| Move generation & perft command | Works        |
+| Search routines                 | Works        |
+| Asynchronous search             | Experimental |
+| Multithreading                  | Planned      |
