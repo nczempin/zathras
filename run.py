@@ -20,10 +20,22 @@ def build_and_test():
             run('cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit')
     elif shutil.which('msbuild'):
         sln = 'zathras.sln'
-        run(f'msbuild {sln} /p:Configuration=Release')
-        exe = os.path.join('Release', 'run_tests.exe')
-        if os.path.exists(exe):
-            run(exe)
+        run(f'msbuild {sln} /p:Configuration=Release /p:Platform=x64')
+        # Check for test executable in different possible locations
+        test_exe_paths = [
+            os.path.join('x64', 'Release', 'run_tests.exe'),
+            os.path.join('Release', 'run_tests.exe'),
+            'run_tests.exe'
+        ]
+        test_exe = None
+        for path in test_exe_paths:
+            if os.path.exists(path):
+                test_exe = path
+                break
+        if test_exe:
+            run(test_exe)
+        else:
+            print('Warning: Test executable not found, skipping tests')
     else:
         print('No suitable build tool found.')
         sys.exit(1)
@@ -38,11 +50,35 @@ def package():
     if os.path.exists(dist):
         shutil.rmtree(dist)
     os.makedirs(dist, exist_ok=True)
-    exe = 'zathras.exe' if os.name == 'nt' else 'zathras'
-    if os.path.exists(exe):
-        shutil.copy(exe, dist)
-    if os.path.exists('libzathras.a'):
-        shutil.copy('libzathras.a', dist)
+    
+    # Look for executables in different locations
+    if os.name == 'nt':
+        exe_paths = [
+            os.path.join('x64', 'Release', 'zathras.exe'),
+            os.path.join('Release', 'zathras.exe'),
+            'zathras.exe'
+        ]
+        lib_paths = [
+            os.path.join('x64', 'Release', 'zathras_lib.lib'),
+            os.path.join('Release', 'zathras_lib.lib'),
+            'zathras_lib.lib'
+        ]
+    else:
+        exe_paths = ['zathras']
+        lib_paths = ['libzathras.a']
+    
+    # Copy executable
+    for exe_path in exe_paths:
+        if os.path.exists(exe_path):
+            shutil.copy(exe_path, dist)
+            break
+    
+    # Copy library
+    for lib_path in lib_paths:
+        if os.path.exists(lib_path):
+            shutil.copy(lib_path, dist)
+            break
+    
     shutil.make_archive('zathras', 'zip', dist)
 
 
