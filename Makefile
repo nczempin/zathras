@@ -53,9 +53,13 @@ tests/%.o: tests/%.cpp
 simple_test: tests/simple_test.o $(TEST_LIB)
 	$(CC) $(CFLAGS) -fno-lto -o $@ $< $(TEST_LIB)
 
-test: simple_test
+bitboard_test: tests/bitboard_test.o $(TEST_LIB)
+	$(CC) $(CFLAGS) -fno-lto -o $@ $< $(TEST_LIB)
+
+test: simple_test bitboard_test
 	./simple_test
+	./bitboard_test
 
 .PHONY: clean
 clean:
-	rm -f $(BIN) $(OBJ) $(LIB) $(TEST_LIB) $(TEST_LIB_OBJS) $(TEST_BIN) $(TEST_OBJS)
+	rm -f $(BIN) $(OBJ) $(LIB) $(TEST_LIB) $(TEST_LIB_OBJS) $(TEST_BIN) $(TEST_OBJS) simple_test bitboard_test
