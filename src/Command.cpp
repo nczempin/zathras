@@ -1,4 +1,3 @@
-#pragma once
 #include "Command.h"
 namespace zathras::interface {
 	Command::Command() {
