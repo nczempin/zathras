@@ -568,6 +568,7 @@ namespace zathras_lib::moves {
 	}
 
 	Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
+		// cppcheck-suppress danglingLifetime - pointer is only used within this function scope
 		p = &position;
 
 		Move_container moves = Move_container::get(depth);
@@ -637,8 +638,9 @@ namespace zathras_lib::moves {
 		}
 		return moves;
 	}
-	Move_container Move_generator::generate_pseudolegal_captures(Position position, size_t depth) {
-		p = &position;
+	Move_container Move_generator::generate_pseudolegal_captures(const Position& position, size_t depth) {
+		// cppcheck-suppress danglingLifetime - pointer is only used within this function scope
+		p = const_cast<Position*>(&position);
 
 		Move_container& moves = Move_container::get(depth);
 		//moves.reserve(35);

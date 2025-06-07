@@ -13,7 +13,7 @@
 #include "misc.h"
 //using namespace zathras::interface; //TODO
 
-Searcher::Searcher(void)
+Searcher::Searcher(void) : bestMove(0)
 {
 }
 

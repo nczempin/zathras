@@ -100,7 +100,7 @@ namespace positions {
 
 		string debug_board() const;
 
-		void debug_position();		
+		void debug_position() const;		
 		static bb between[BETWEEN_ARRAY_SIZE];
 		inline static uint16_t calc_index(const uint8_t& x, const uint8_t& y) {
 			return x + 64 * y;
