@@ -95,7 +95,7 @@ namespace zathras_lib::moves {
 
 		return captured;
 	}
-	bool Move_generator::has_captured_piece(square_t square, int8_t moving) {
+	bool Move_generator::has_captured_piece(square_t square, [[maybe_unused]] int8_t moving) {
 
 		//		const bb pieces = p->pawns | p->knights | p->bishops | p->rooks | p->queens | p->kings;
 
@@ -128,7 +128,7 @@ namespace zathras_lib::moves {
 		return false;
 	}
 
-	void Move_generator::visit_capture_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& other_colour, const int8_t& moving) {
+	void Move_generator::visit_capture_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& other_colour, [[maybe_unused]] const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO handle cast better
@@ -192,7 +192,7 @@ namespace zathras_lib::moves {
 	}
 	void Move_generator::visit_non_capture_moves(const bb& sub_position,
 		const bitboard_set& all_moves, const move_visitor& f,
-		const bb& occupied_squares, const int8_t& moving) {
+		const bb& occupied_squares, [[maybe_unused]] const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t& from = static_cast<square_t>(Bitboard::extract_and_remove_square(position));
@@ -300,7 +300,7 @@ namespace zathras_lib::moves {
 	}
 	void Move_generator::visit_non_capture_ray_moves(const bb& sub_position,
 		const bitboard_set& all_moves, const move_visitor& f,
-		const bb& occupied, const int8_t& moving) {
+		const bb& occupied, [[maybe_unused]] const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO proper cast
@@ -338,7 +338,6 @@ namespace zathras_lib::moves {
 		Bitboard::visit_bitboard(sub_position,
 			[&all_moves, &f, &moving](square_t x) {
 				Bitboard::visit_bitboard(all_moves[x], [&x, &f, &moving](square_t y) {
-					int8_t captured = -98;
 					f(x, y, NONE);
 					});
 
@@ -369,7 +368,7 @@ namespace zathras_lib::moves {
 
 	void Move_generator::visit_pawn_nocaps(const bb& sub_position,
 		const bitboard_set& all_moves, const move_visitor& f,
-		const bb& occupied, const int8_t& moving, const bool& white_to_move) {
+		const bb& occupied, [[maybe_unused]] const int8_t& moving, const bool& white_to_move) {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position));
@@ -435,7 +434,7 @@ namespace zathras_lib::moves {
 		}
 	}
 
-	void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
+	void Move_generator::attempt_castle(const move_visitor f, [[maybe_unused]] const int8_t piece,
 		const square_t king_square, const int8_t direction) {
 		//1. check if squares between king and rook are free.
 		square_t next_square = square_t(uint8_t(king_square) + direction); //TODO proper cast
@@ -494,9 +493,9 @@ namespace zathras_lib::moves {
 			}
 		}
 	}
-	void Move_generator::f(Move_container& moves, const int8_t moving,
-		const square_t from, const square_t to, const int8_t captured,
-		const int8_t promoted_to) {
+	void Move_generator::f(Move_container& moves, [[maybe_unused]] const int8_t moving,
+		const square_t from, const square_t to, [[maybe_unused]] const int8_t captured,
+		[[maybe_unused]] const int8_t promoted_to) {
 		//bool en_passant_capture = will_be_en_passant(to, moving);
 
 //		moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
@@ -534,7 +533,7 @@ namespace zathras_lib::moves {
 		Move_container pseudolegal_moves = generate_pseudolegal_captures(position, depth);
 		Move_container legal_moves;
 		auto moves = pseudolegal_moves.get_moves();
-		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
+		for (size_t i = 0; i < pseudolegal_moves.size(); ++i) {
 			Move move = moves[i];
 			//Position pos2 = position; //copied //TODO inefficient
 			Move_state ms;
@@ -553,7 +552,7 @@ namespace zathras_lib::moves {
 		Move_container pseudolegal_moves = generate_pseudolegal_moves(position, depth);
 		Move_container legal_moves;
 		auto moves = pseudolegal_moves.get_moves();
-		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
+		for (size_t i = 0; i < pseudolegal_moves.size(); ++i) {
 			Move move = moves[i];
 			//Position pos2 = position; //copied //TODO inefficient
 			Move_state ms;
@@ -569,6 +568,7 @@ namespace zathras_lib::moves {
 	}
 
 	Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
+		// cppcheck-suppress danglingLifetime - pointer is only used within this function scope
 		p = &position;
 
 		Move_container moves = Move_container::get(depth);
@@ -638,8 +638,9 @@ namespace zathras_lib::moves {
 		}
 		return moves;
 	}
-	Move_container Move_generator::generate_pseudolegal_captures(Position position, size_t depth) {
-		p = &position;
+	Move_container Move_generator::generate_pseudolegal_captures(const Position& position, size_t depth) {
+		// cppcheck-suppress danglingLifetime - pointer is only used within this function scope
+		p = const_cast<Position*>(&position);
 
 		Move_container& moves = Move_container::get(depth);
 		//moves.reserve(35);

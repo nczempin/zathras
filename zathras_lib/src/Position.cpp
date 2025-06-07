@@ -28,6 +28,11 @@ namespace positions {
 		}
 		//TODO clear piece bitboards?
 
+		// Initialize board array
+		for (int i = 0; i < 64; ++i) {
+			board[i] = 0;
+		}
+
 		//TODO statically initialize
 
 

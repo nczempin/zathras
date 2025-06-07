@@ -21,7 +21,7 @@ namespace zathras_lib::moves {
 		static void pregenerate_moves();
 		Move_container generate_legal_moves(Position position, size_t depth);
 		Move_container generate_pseudolegal_moves(Position position, size_t depth);
-		Move_container generate_pseudolegal_captures(Position position, size_t depth);
+		Move_container generate_pseudolegal_captures(const Position& position, size_t depth);
 		//void add_non_capture_ray_moves1(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
 		Move_container generate_legal_captures(Position position, int depth);
 
