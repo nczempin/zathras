@@ -192,7 +192,7 @@ namespace zathras_lib::moves {
 	}
 	void Move_generator::visit_non_capture_moves(const bb& sub_position,
 		const bitboard_set& all_moves, const move_visitor& f,
-		const bb& other_colour, const int8_t& moving) {
+		const bb& occupied_squares, const int8_t& moving) {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t& from = static_cast<square_t>(Bitboard::extract_and_remove_square(position));
@@ -200,7 +200,7 @@ namespace zathras_lib::moves {
 				break;
 			}
 			const bb raw_moves = all_moves[from];
-			bb moves = raw_moves & ~other_colour;
+			bb moves = raw_moves & ~occupied_squares;
 			//TODO move this to a separate visit_pawn_caps method
 			while (moves != 0x00) {
 				const square_t& to = static_cast<square_t>(Bitboard::extract_and_remove_square(moves));

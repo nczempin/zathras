@@ -65,7 +65,7 @@ namespace zathras_lib::moves {
 			const bb& other_colour, const int8_t& moving);
 		void visit_non_capture_moves(const bb& sub_position,
 			const bitboard_set& all_moves, const move_visitor& f,
-			const bb& other_colour, const int8_t& moving);
+			const bb& occupied_squares, const int8_t& moving);
 		void visit_non_capture_ray_moves(const bb& sub_position,
 			const bitboard_set& all_moves, const move_visitor& f,
 			const bb& occupied, const int8_t& moving);
