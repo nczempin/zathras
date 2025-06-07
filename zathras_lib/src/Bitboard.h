@@ -75,13 +75,13 @@ namespace positions {
 		}
 
 		inline static uint8_t extract_square(const bb& my_bb) {
-			return ffs(my_bb);
+			return ffs(my_bb) - 1;  // ffs is 1-indexed, but chess squares are 0-indexed
 		}
 
 		inline static uint8_t extract_and_remove_square(bb& my_bb) {
 			const uint8_t l = ffs(my_bb);
 			my_bb &= my_bb - 1;
-			return l;
+			return l - 1;  // ffs is 1-indexed, but chess squares are 0-indexed
 		}
 
 
