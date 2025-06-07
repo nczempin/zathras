@@ -9,17 +9,14 @@
 #include "Bitboard.h"
 #include "typedefs.h"
 
-namespace positions {
-	int main_() {
-		for (int i = 0; i < 64; ++i) {
-			int x = Bitboard::ffs(i);
-			cout << i << ": " << x << "\n";
-		}
-
-		//	const bb& my_bb = Bitboard::BB_FULL_BOARD;
-		//	const uint8_t extracted = Bitboard::extract_square(my_bb);
-		//	std::cout << extracted << "\n";
-		return 0;
+void test_bitboard_ffs() {
+	using namespace positions;
+	for (int i = 0; i < 64; ++i) {
+		int x = Bitboard::ffs(i);
+		std::cout << i << ": " << x << "\n";
 	}
 
+	//	const bb& my_bb = Bitboard::BB_FULL_BOARD;
+	//	const uint8_t extracted = Bitboard::extract_square(my_bb);
+	//	std::cout << extracted << "\n";
 }
