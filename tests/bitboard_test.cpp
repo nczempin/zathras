@@ -1,10 +1,22 @@
-#include "external/catch_amalgamated.hpp"
+#include <iostream>
+#include <cassert>
 #include "Bitboard.h"
 #include "typedefs.h"
 
 using namespace Positions;
 
-TEST_CASE("Bitboard ffs finds first set bit", "[bitboard]") {
-    REQUIRE(Bitboard::ffs(1ULL) == 1);
-    REQUIRE(Bitboard::ffs(0x10ULL) == 5);
+void test_bitboard_ffs() {
+    std::cout << "Testing Bitboard::ffs..." << std::endl;
+    
+    // Test first set bit
+    assert(Bitboard::ffs(1ULL) == 1);
+    assert(Bitboard::ffs(0x10ULL) == 5);
+    
+    std::cout << "Bitboard::ffs tests passed!" << std::endl;
+}
+
+int main() {
+    test_bitboard_ffs();
+    std::cout << "All tests passed!" << std::endl;
+    return 0;
 }

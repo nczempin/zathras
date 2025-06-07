@@ -15,7 +15,7 @@
 #include "Move.h"
 #include "Evaluator.h"
 
-#include "info.h"
+#include "Info.h"
 #include "Perft_command.h"
 
 extern Position p;
