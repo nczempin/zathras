@@ -21,7 +21,7 @@
 namespace zathras::interface {
 	class Perft_command : public Abstract_command {
 	public:
-		Perft_command(positions::Position position, size_t depth) :depth(depth),position(position) {}
+		Perft_command(positions::Position position, size_t depth) :position(position),depth(depth) {}
 		virtual ~Perft_command();
 		void execute() override;
 
