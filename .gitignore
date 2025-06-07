@@ -108,3 +108,11 @@ libzathras.a
 zathras
 run_tests*
 
+
+# Python artifacts
+__pycache__/
+
+# Packaging
+dist/
+zathras.zip
+

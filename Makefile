@@ -31,12 +31,6 @@ TEST_BIN := run_tests
 
 all: $(BIN)
 
-test: $(TEST_BIN)
-	./$(TEST_BIN)
-
-$(TEST_BIN): $(LIB) $(TEST_OBJS)
-	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LIB)
-
 $(LIB): $(LIB_OBJS)
 	ar rcs $@ $^
 

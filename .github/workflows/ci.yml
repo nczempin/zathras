@@ -1,64 +1,36 @@
 name: CI
 on:
   push:
+    paths-ignore:
+      - '**/*.md'
   pull_request:
+    paths-ignore:
+      - '**/*.md'
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
-          fetch-depth: 0
-      - name: Detect code changes
-        id: changes
-        run: |
-          set -eo pipefail
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base="${{ github.event.pull_request.base.sha }}"
-          else
-            base="${{ github.event.before }}"
-          fi
-          git fetch origin "$base" --depth=1
-          files=$(git diff --name-only "$base" "$GITHUB_SHA")
-          non_docs=$(echo "$files" | grep -vE '\.md$' || true)
-          if [ -z "$non_docs" ]; then
-            echo "code_changed=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          diff_lines=$(git diff --unified=0 "$base" "$GITHUB_SHA" | \
-            grep -E '^[+-]' | grep -vE '^[+-]{3}' | \
-            grep -vE '^[+-][[:space:]]*(//|#|/\\*|\\*)' | \
-            grep -vE '^[+-][[:space:]]*$' || true)
-          if [ -n "$diff_lines" ]; then
-            echo "code_changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "code_changed=false" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Install dependencies
-        if: steps.changes.outputs.code_changed == 'true'
+          python-version: '3.x'
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y make g++ cppcheck
-      - name: Build
-        if: steps.changes.outputs.code_changed == 'true'
-        run: make
-      - name: Run tests
-        if: steps.changes.outputs.code_changed == 'true'
-        run: make test
-      - name: Static analysis
-        if: steps.changes.outputs.code_changed == 'true'
-        run: cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit
-      - name: Upload zathras binary
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: choco install -y cppcheck
+      - name: Setup MSBuild (Windows)
+        if: runner.os == 'Windows'
+        uses: microsoft/setup-msbuild@v1.1
+      - name: Run pipeline
+        run: python run.py
+      - name: Upload package
         uses: actions/upload-artifact@v4
         with:
-          name: zathras
-          path: zathras
-          retention-days: 7
-      - name: Upload static library
-        uses: actions/upload-artifact@v4
-        with:
-          name: libzathras
-          path: libzathras.a
-          retention-days: 7
-      - name: No code changes detected
-        if: steps.changes.outputs.code_changed != 'true'
-        run: echo "Documentation or comment-only changes detected. Skipping build and tests."
+          name: zathras-${{ runner.os }}
+          path: zathras.zip

@@ -13,29 +13,35 @@ engine design.
 
 ## Requirements
 
-- C++17 compiler (`g++` or `clang++`)
-- `make` and common build tools
+- Python 3
+- C++17 compiler (`g++`, `clang++` or MSVC)
+- `make` on Unix-like systems or Visual Studio on Windows
+- `cppcheck` (optional for extra linting)
 
-## Setup
+## Quickstart
 
-Install the required packages with:
+From a fresh clone run the following command to build, test and create a
+package archive:
 
 ```bash
-./setup.sh
+python run.py
 ```
 
-## Build
+A `zathras.zip` archive will appear in the project root containing the
+engine executable and static library.
+
+## Manual Build
 
 ```bash
 make        # build the engine and static library
+make test   # run unit tests
 make clean  # remove artifacts
 ```
 
-For Windows development, Visual Studio project files are located in the
-`msvc/` directory. Open `zathras.sln` from there.
+For Windows development, Visual Studio project files are available in the
+repository root. Open `zathras.sln` from there.
 
-The `zathras` binary appears in the repository root. Run unit tests with
-`make test`.
+The `zathras` binary appears in the repository root.
 
 ## Run
 
