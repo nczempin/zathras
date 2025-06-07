@@ -19,10 +19,12 @@ def build_and_test():
         if shutil.which('cppcheck'):
             run('cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit')
     elif shutil.which('msbuild'):
-        sln = 'zathras.sln'
+        sln = 'msvc/zathras.sln'
         run(f'msbuild {sln} /p:Configuration=Release /p:Platform=x64')
         # Check for test executable in different possible locations
         test_exe_paths = [
+            os.path.join('msvc', 'x64', 'Release', 'run_tests.exe'),
+            os.path.join('msvc', 'Release', 'run_tests.exe'),
             os.path.join('x64', 'Release', 'run_tests.exe'),
             os.path.join('Release', 'run_tests.exe'),
             'run_tests.exe'
@@ -54,11 +56,15 @@ def package():
     # Look for executables in different locations
     if os.name == 'nt':
         exe_paths = [
+            os.path.join('msvc', 'x64', 'Release', 'zathras.exe'),
+            os.path.join('msvc', 'Release', 'zathras.exe'),
             os.path.join('x64', 'Release', 'zathras.exe'),
             os.path.join('Release', 'zathras.exe'),
             'zathras.exe'
         ]
         lib_paths = [
+            os.path.join('msvc', 'x64', 'Release', 'zathras_lib.lib'),
+            os.path.join('msvc', 'Release', 'zathras_lib.lib'),
             os.path.join('x64', 'Release', 'zathras_lib.lib'),
             os.path.join('Release', 'zathras_lib.lib'),
             'zathras_lib.lib'
