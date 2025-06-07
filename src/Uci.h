@@ -311,7 +311,7 @@ namespace zathras::interface {
 
 			square_t to = static_cast<square_t> (Util::decode_square(moveString.substr(2, 4)));
 			string promotedTo = moveString.substr(4);
-			int promoted_to = 0;
+			[[maybe_unused]] int promoted_to = 0;
 			if (promotedTo != "") {
 				promoted_to = static_cast<piece_t> (Util::decode_piece(promotedTo));
 			}

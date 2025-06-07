@@ -93,7 +93,6 @@ namespace positions {
 	string Position::mailbox_board_debug_representation(const piece_t board[64]) {
 		string retval;
 		retval += "  +-----------------+\n";
-		const char* symbols = ".PNBRQKpnbrqk*";
 		for (int i = 0; i < 8; ++i) {
 			retval.append(to_string(8 - i));
 			retval.append(" |");

@@ -99,15 +99,9 @@ namespace zathras_lib::moves {
 
 
 
-	static std::string to_string(Move move) {
-		/*static const string pieces("-PNBRQK");
-		char p = pieces[moving > 0 ? moving : -moving];
-		string moving_string = string(1, p);*/
-
+	inline static std::string to_string(Move move) {
 		std::string retval = positions::Square::mailbox_index_to_square(get_from(move));
 		retval += positions::Square::mailbox_index_to_square(get_to(move));
-
-
 		return retval;
 	}
 

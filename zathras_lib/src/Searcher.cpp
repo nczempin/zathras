@@ -30,13 +30,9 @@ Move Searcher::findBestmove(move_container_t moves, Position position) {
 	int maxIdDepth = 0;
 	//TODOInfo::seldepth = 0;
 	//TODOInfo::nodes = 0;
-	Move lastIterationBestMove;
 	done = false;
 	deque<Move> lineDown;
-	
-	int movesSize = 0;
 	do {
-		lastIterationBestMove = bestMove;
 		oldBestValue = bestValue;
 		bestValue = -9999999;
 		
@@ -100,7 +96,6 @@ Move Searcher::findBestmove(move_container_t moves, Position position) {
 		//		moves.clear();
 				//static Move emptyMove;
 				//moves.fill(emptyMove);
-		movesSize = 0;
 		
 	} while (!done);
 	return bestMove;
@@ -124,7 +119,7 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	Move_container mc = mg.generate_legal_moves(position, 1);
 	auto moves = mc.get_moves();// AllMoves(position, moves);
 	int actualMoves = 0;
-	int moveCount = 0;
+	size_t moveCount = 0;
 	for (const Move& newMove : moves) {
 		if (moveCount++ >= mc.size()) {
 			break;
@@ -184,9 +179,6 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	return alpha;
 }
 
-static bool shouldBeIgnored(Position nextPos, Move newMove, int capture, int capturing) {
-	return false;//TODO (abs(capturing) > abs(capture)) && ((capturing != 3) || (capture != 2)); //TODO: && (!nextPos.enPrise(newMove));
-}
 
 int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
 	//ValidFlag bestMoveValidFlag = new ValidFlag();
