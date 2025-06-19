@@ -1,0 +1,48 @@
+# Zathras C++ Code Style
+# Based on Google style with customizations for chess engine development
+
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
+ColumnLimit: 120
+
+# Indentation
+IndentCaseLabels: false
+NamespaceIndentation: None
+
+# Spacing
+PointerAlignment: Left
+DerivePointerAlignment: false
+SpaceAfterCStyleCast: false
+SpacesInCStyleCastParentheses: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInAngles: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Breaking
+AlwaysBreakTemplateDeclarations: Yes
+BreakBeforeBraces: Attach
+BreakConstructorInitializers: BeforeColon
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Other
+SortIncludes: true
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex:           '^"zathras_lib\.h"'
+    Priority:        1
+  - Regex:           '^"[A-Z][a-zA-Z_]+\.h"'
+    Priority:        2
+  - Regex:           '^"'
+    Priority:        3
+  - Regex:           '^<[a-z]+>'
+    Priority:        4
+  - Regex:           '^<'
+    Priority:        5

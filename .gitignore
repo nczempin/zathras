@@ -108,3 +108,26 @@ libzathras.a
 zathras
 run_tests*
 
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+compile_commands.json
+.clangd/
+
+# Additional IDEs
+.idea/
+.vscode/
+*.code-workspace
+
+# Additional compiler artifacts
+*.dSYM/
+*.exp
+
+# Test coverage
+coverage/
+*.info
+htmlcov/
+*.gcov.html
+lcov-report/
+
