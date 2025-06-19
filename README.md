@@ -48,13 +48,14 @@ The program prints a short greeting and waits for UCI commands like
 
 ## Project Status
 
-Development is exploratory and incomplete. Core features work, but some
-areas remain experimental.
+⚠️ **Currently Under Repair** - The engine has critical bugs preventing basic functionality.
 
-| Feature                         | Status       |
-|---------------------------------|--------------|
-| UCI protocol basics             | Works        |
-| Move generation & perft command | Works        |
-| Search routines                 | Works        |
-| Asynchronous search             | Experimental |
-| Multithreading                  | Planned      |
+| Feature                         | Status       | Notes |
+|---------------------------------|--------------|-------|
+| UCI protocol basics             | Partial      | Basic commands work |
+| Move generation & perft command | **Broken**   | Crashes on perft (Issue #54) |
+| Search routines                 | Untestable   | Depends on move generation |
+| Asynchronous search             | Experimental | Not priority |
+| Multithreading                  | Planned      | Future work |
+
+See [ROADMAP.md](docs/ROADMAP.md) for the recovery plan and [Issue #57](https://github.com/nczempin/zathras/issues/57) for progress tracking.
