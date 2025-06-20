@@ -3,9 +3,8 @@
 #include <cassert>
 #include <string>
 
-int main() {
+void test_square_mailbox_conversion() {
     using namespace positions;
     assert(Square::mailbox_index_to_square(0) == std::string("a1"));
     assert(Square::mailbox_index_to_square(63) == std::string("h8"));
-    return 0;
 }
