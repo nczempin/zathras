@@ -3,7 +3,7 @@
 #include "Bitboard.h"
 #include "Square.h"
 
-using namespace Positions;
+using namespace positions;
 
 void test_ffs_functions();
 void test_extract_and_remove_square();
