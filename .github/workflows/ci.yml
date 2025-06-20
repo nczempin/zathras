@@ -13,26 +13,101 @@ jobs:
       - name: Detect code changes
         id: changes
         run: |
-          set -eo pipefail
+          set -e
+          
+          # Determine base commit
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             base="${{ github.event.pull_request.base.sha }}"
           else
             base="${{ github.event.before }}"
           fi
-          git fetch origin "$base" --depth=1
-          files=$(git diff --name-only "$base" "$GITHUB_SHA")
-          non_docs=$(echo "$files" | grep -vE '\.md$' || true)
-          if [ -z "$non_docs" ]; then
+          
+          echo "Base commit: $base"
+          echo "Current commit: $GITHUB_SHA"
+          
+          # Try to fetch the base commit with retries and fallbacks
+          fetch_success=false
+          
+          # First try: fetch with depth=1
+          if git fetch origin "$base" --depth=1 2>/dev/null; then
+            fetch_success=true
+            echo "Successfully fetched base commit with depth=1"
+          else
+            echo "Failed to fetch with depth=1, trying with depth=50"
+            # Second try: fetch with more depth
+            if git fetch origin "$base" --depth=50 2>/dev/null; then
+              fetch_success=true
+              echo "Successfully fetched base commit with depth=50"
+            else
+              echo "Failed to fetch with depth=50, trying unshallow"
+              # Third try: unshallow and fetch
+              if git fetch --unshallow 2>/dev/null && git fetch origin "$base" 2>/dev/null; then
+                fetch_success=true
+                echo "Successfully fetched base commit after unshallow"
+              fi
+            fi
+          fi
+          
+          # If we still can't fetch the base, try to use origin/main as fallback
+          if [ "$fetch_success" = "false" ]; then
+            echo "Could not fetch base commit $base, using origin/main as fallback"
+            if git fetch origin main 2>/dev/null; then
+              base="origin/main"
+              fetch_success=true
+              echo "Using origin/main as base"
+            else
+              echo "Failed to fetch origin/main, assuming code changed"
+              echo "code_changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          
+          # Check if we can access both commits
+          if ! git cat-file -e "$base" 2>/dev/null; then
+            echo "Base commit $base not accessible, assuming code changed"
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          if ! git cat-file -e "$GITHUB_SHA" 2>/dev/null; then
+            echo "Current commit $GITHUB_SHA not accessible, assuming code changed"
+            echo "code_changed=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          # Get list of changed files
+          files=$(git diff --name-only "$base" "$GITHUB_SHA" 2>/dev/null || echo "")
+          if [ -z "$files" ]; then
+            echo "No files changed, assuming no code changes"
             echo "code_changed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          diff_lines=$(git diff --unified=0 "$base" "$GITHUB_SHA" | \
+          
+          echo "Changed files:"
+          echo "$files"
+          
+          # Filter out documentation files
+          non_docs=$(echo "$files" | grep -vE '\.md$' || true)
+          if [ -z "$non_docs" ]; then
+            echo "Only documentation files changed"
+            echo "code_changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          
+          echo "Non-documentation files changed:"
+          echo "$non_docs"
+          
+          # Check for actual code changes (not just comments/whitespace)
+          diff_lines=$(git diff --unified=0 "$base" "$GITHUB_SHA" 2>/dev/null | \
             grep -E '^[+-]' | grep -vE '^[+-]{3}' | \
             grep -vE '^[+-][[:space:]]*(//|#|/\\*|\\*)' | \
             grep -vE '^[+-][[:space:]]*$' || true)
+          
           if [ -n "$diff_lines" ]; then
+            echo "Code changes detected"
             echo "code_changed=true" >> "$GITHUB_OUTPUT"
           else
+            echo "Only comments or whitespace changes detected"
             echo "code_changed=false" >> "$GITHUB_OUTPUT"
           fi
       - name: Install dependencies
@@ -48,12 +123,14 @@ jobs:
         if: steps.changes.outputs.code_changed == 'true'
         run: cppcheck --enable=warning --inconclusive --quiet src zathras_lib/src tests/unit
       - name: Upload zathras binary
+        if: steps.changes.outputs.code_changed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: zathras
           path: zathras
           retention-days: 7
       - name: Upload static library
+        if: steps.changes.outputs.code_changed == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: libzathras

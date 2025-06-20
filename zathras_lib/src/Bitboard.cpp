@@ -27,7 +27,6 @@ namespace positions {
 			return;
 		}
 		bb tmp = my_bb;
-		uint8_t coord = 0;
 		uint8_t l = 0;
 		while (tmp!=0) {
 			l = ffs(tmp);

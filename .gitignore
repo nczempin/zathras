@@ -107,7 +107,6 @@ UserInterfaceState.xcuserstate
 libzathras.a
 zathras
 run_tests*
-
 # CMake
 CMakeCache.txt
 CMakeFiles/
@@ -131,3 +130,4 @@ htmlcov/
 *.gcov.html
 lcov-report/
 
+simple_test
