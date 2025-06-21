@@ -131,3 +131,6 @@ htmlcov/
 lcov-report/
 
 simple_test
+bitboard_test
+libzathras_test.a
+test_assertion
