@@ -19,7 +19,7 @@ all: $(BIN)
 $(BIN): $(OBJ)
 	$(CC) -o $(BIN) $(CFLAGS)  $^
 %.o: %.cpp
-	$(CC) -o $@ -c $(CFLAGS) $^
+	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $^
 
 $(TEST_BIN): $(TEST_OBJS) $(LIB)
 	$(CC) $(CFLAGS) -o $@ $(TEST_OBJS) $(LIB)
