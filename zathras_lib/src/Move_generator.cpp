@@ -606,7 +606,7 @@ namespace zathras_lib::moves {
 			visit_capture_moves(white_knights, Bitboard::knight_moves, f, valid_black_targets, Piece::WHITE_KNIGHT);
 			visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
 			visit_capture_moves(white_kings, Bitboard::king_moves, f, valid_black_targets, Piece::WHITE_KING);
-			//visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
+			visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
 			add_non_capture_ray_moves(moves, white_queens | white_rooks, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, white_rooks, Bitboard::rook_moves, occupied);
 
@@ -618,7 +618,6 @@ namespace zathras_lib::moves {
 			//add_non_capture_ray_moves(moves, white_queens, Bitboard::bishop_moves, occupied);
 			generate_castling(f, true);
 			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, valid_black_targets, Piece::WHITE_PAWN);
-			visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
 		}
 		else {
 			// Exclude white king from valid capture targets

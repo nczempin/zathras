@@ -32,7 +32,7 @@ namespace positions {
 			l = ffs(tmp);
 			
 
-			f(square_t(l)); //TODO handle cast better
+			f(square_t(l - 1)); //TODO handle cast better - convert 1-based ffs to 0-based square index
 			tmp &= tmp - 1; //clear LS1B
 		}
 	}

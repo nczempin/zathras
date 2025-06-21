@@ -17,6 +17,7 @@
 
 #include "Info.h"
 #include "Perft_command.h"
+#include "Divide_command.h"
 
 
 extern Position p;
@@ -72,25 +73,15 @@ namespace zathras::interface {
 				//cout << "Done." << endl;
 
 			}
-			//else if (startsWith("divide ", toParse)) {
-			//	char perftDepthParameter = toParse[7];
-			//	int perftDepth = Character::getNumericValue(perftDepthParameter);
-			//	//TODO do this more elegantly
-			//	MoveGenerator mg;
-			//	vector<Move> moves = mg.generateLegalMoves(p);
-			//	int count = 0;
-			//	Position tmpPos = p;
-			//	for (Move moveString : moves) {
-			//		tmpPos = p; //simple but inefficient way to undo the moveString
-			//		tmpPos.makeMove(moveString);
-
-			//		count = perft(tmpPos, perftDepth - 1);
-			//		cout << moveString.toString() << ": " << count << endl;
-			//	}
-
-			//	cout << "Done." << endl;
-
-			//}
+			else if (startsWith("divide ", toParse)) {
+				string pattern = "divide ";
+				size_t index = toParse.find(pattern);
+				string depth_param = toParse.substr(index + pattern.length());
+				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 3;
+				
+				Divide_command dc{ p, static_cast<uint8_t>(depth) };
+				dc.execute();
+			}
 			else if (toParse == "isready") {
 				cout << "readyok" << endl;
 			}
