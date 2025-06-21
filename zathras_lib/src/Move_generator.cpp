@@ -599,38 +599,44 @@ namespace zathras_lib::moves {
 		const bb occupied = p->white | p->black;
 
 		if (p->white_to_move) {
+			// Exclude black king from valid capture targets
+			const bb valid_black_targets = p->black & ~black_kings;
+			
 			visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
-			visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
+			visit_capture_moves(white_knights, Bitboard::knight_moves, f, valid_black_targets, Piece::WHITE_KNIGHT);
 			visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
-			visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
+			visit_capture_moves(white_kings, Bitboard::king_moves, f, valid_black_targets, Piece::WHITE_KING);
 			//visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
 			add_non_capture_ray_moves(moves, white_queens | white_rooks, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, white_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(white_queens | white_rooks, Bitboard::rook_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_queens | white_rooks, Bitboard::rook_moves, f, occupied, valid_black_targets);
 			//visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black);
-			visit_capture_ray_moves(white_bishops | white_queens, Bitboard::bishop_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_bishops | white_queens, Bitboard::bishop_moves, f, occupied, valid_black_targets);
 			//visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black);
 			add_non_capture_ray_moves(moves, white_bishops | white_queens, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, white_queens, Bitboard::bishop_moves, occupied);
 			generate_castling(f, true);
-			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
+			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, valid_black_targets, Piece::WHITE_PAWN);
 			visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
 		}
 		else {
-			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
+			// Exclude white king from valid capture targets
+			const bb valid_white_targets = p->white & ~white_kings;
+			
+			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, valid_white_targets, Piece::BLACK_PAWN);
 			visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
 			//add_pawn_nocaps(moves, black_pawns, Bitboard::black_pawn_no_capture_moves, occupied, false);
-			visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
+			visit_capture_moves(black_knights, Bitboard::knight_moves, f, valid_white_targets, Piece::BLACK_KNIGHT);
 			visit_non_capture_moves(black_knights, Bitboard::knight_moves, f, occupied, Piece::BLACK_KNIGHT);
-			visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
+			visit_capture_moves(black_kings, Bitboard::king_moves, f, valid_white_targets, Piece::BLACK_KING);
 			visit_non_capture_moves(black_kings, Bitboard::king_moves, f, occupied, Piece::BLACK_KING);
 			add_non_capture_ray_moves(moves, black_queens | black_rooks, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, black_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(black_rooks| black_queens , Bitboard::rook_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_rooks| black_queens , Bitboard::rook_moves, f, occupied, valid_white_targets);
 			//visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white);
-			visit_capture_ray_moves(black_bishops | black_queens, Bitboard::bishop_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_bishops | black_queens, Bitboard::bishop_moves, f, occupied, valid_white_targets);
 			//visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white);
 			add_non_capture_ray_moves(moves, black_bishops | black_queens, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, black_queens, Bitboard::bishop_moves, occupied);
@@ -670,40 +676,46 @@ namespace zathras_lib::moves {
 		const bb occupied = p->white | p->black;
 
 		if (p->white_to_move) {
-			visit_capture_moves(white_knights, Bitboard::knight_moves, f, p->black, Piece::WHITE_KNIGHT);
+			// Exclude black king from valid capture targets
+			const bb valid_black_targets = p->black & ~black_kings;
+			
+			visit_capture_moves(white_knights, Bitboard::knight_moves, f, valid_black_targets, Piece::WHITE_KNIGHT);
 			//visit_non_capture_moves(white_knights, Bitboard::knight_moves, f, occupied, Piece::WHITE_KNIGHT);
-			visit_capture_moves(white_kings, Bitboard::king_moves, f, p->black, Piece::WHITE_KING);
+			visit_capture_moves(white_kings, Bitboard::king_moves, f, valid_black_targets, Piece::WHITE_KING);
 			//visit_non_capture_moves(white_kings, Bitboard::king_moves, f, occupied, Piece::WHITE_KING);
 			//add_non_capture_ray_moves(moves, Piece::WHITE_QUEEN, white_queens, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::WHITE_ROOK, white_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(white_queens, Bitboard::rook_moves, f, occupied, p->black);
-			visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, p->black);
-			visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, p->black);
-			visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, p->black);
+			visit_capture_ray_moves(white_queens, Bitboard::rook_moves, f, occupied, valid_black_targets);
+			visit_capture_ray_moves(white_rooks, Bitboard::rook_moves, f, occupied, valid_black_targets);
+			visit_capture_ray_moves(white_bishops, Bitboard::bishop_moves, f, occupied, valid_black_targets);
+			visit_capture_ray_moves(white_queens, Bitboard::bishop_moves, f, occupied, valid_black_targets);
 			//add_non_capture_ray_moves(moves, Piece::Piece::WHITE_BISHOP, white_bishops, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::WHITE_QUEEN, white_queens, Bitboard::bishop_moves, occupied);
 			//generate_castling(f, true);
-			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, p->black, Piece::WHITE_PAWN);
+			visit_pawn_caps(white_pawns, Bitboard::white_pawn_capture_moves, f, valid_black_targets, Piece::WHITE_PAWN);
 			//visit_pawn_nocaps(white_pawns, Bitboard::white_pawn_no_capture_moves, f, occupied, Piece::WHITE_PAWN, true);
 		}
 		else {
-			visit_capture_moves(black_knights, Bitboard::knight_moves, f, p->white, Piece::BLACK_KNIGHT);
+			// Exclude white king from valid capture targets
+			const bb valid_white_targets = p->white & ~white_kings;
+			
+			visit_capture_moves(black_knights, Bitboard::knight_moves, f, valid_white_targets, Piece::BLACK_KNIGHT);
 			//visit_non_capture_moves(black_knights, Bitboard::knight_moves, f, occupied, Piece::BLACK_KNIGHT);
-			visit_capture_moves(black_kings, Bitboard::king_moves, f, p->white, Piece::BLACK_KING);
+			visit_capture_moves(black_kings, Bitboard::king_moves, f, valid_white_targets, Piece::BLACK_KING);
 			//visit_non_capture_moves(black_kings, Bitboard::king_moves, f, occupied, Piece::BLACK_KING);
 			//add_non_capture_ray_moves(moves, Piece::BLACK_QUEEN, black_queens, Bitboard::rook_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::BLACK_ROOK, black_rooks, Bitboard::rook_moves, occupied);
 
-			visit_capture_ray_moves(black_queens, Bitboard::rook_moves, f, occupied, p->white);
-			visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, p->white);
-			visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, p->white);
-			visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, p->white);
+			visit_capture_ray_moves(black_queens, Bitboard::rook_moves, f, occupied, valid_white_targets);
+			visit_capture_ray_moves(black_rooks, Bitboard::rook_moves, f, occupied, valid_white_targets);
+			visit_capture_ray_moves(black_bishops, Bitboard::bishop_moves, f, occupied, valid_white_targets);
+			visit_capture_ray_moves(black_queens, Bitboard::bishop_moves, f, occupied, valid_white_targets);
 			//add_non_capture_ray_moves(moves, Piece::Piece::BLACK_BISHOP, black_bishops, Bitboard::bishop_moves, occupied);
 			//add_non_capture_ray_moves(moves, Piece::BLACK_QUEEN, black_queens, Bitboard::bishop_moves, occupied);
 
 			//generate_castling(f, false);
-			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, p->white, Piece::BLACK_PAWN);
+			visit_pawn_caps(black_pawns, Bitboard::black_pawn_capture_moves, f, valid_white_targets, Piece::BLACK_PAWN);
 			//visit_pawn_nocaps(black_pawns, Bitboard::black_pawn_no_capture_moves, f, occupied, Piece::BLACK_PAWN, false);
 
 		}

@@ -128,6 +128,16 @@ namespace positions {
 	void Position::handle_capture(const square_t& to, const int8_t& taken,
 		Move_state& move_state) {
 		move_state.captured = taken;
+		
+		// King captures should never happen in legal chess
+		if (taken == Piece::WHITE_KING || taken == Piece::BLACK_KING) {
+			cerr << "ERROR: Attempting to capture king!" << endl;
+			cerr << "Captured piece: " << (taken == Piece::WHITE_KING ? "WHITE_KING" : "BLACK_KING") << endl;
+			cerr << "At square: " << (int)to << " (" << Square::mailbox_index_to_square(to) << ")" << endl;
+			debug_position();
+			assert(false && "King capture is illegal!");
+		}
+		
 		switch (taken) {
 		case Piece::WHITE_PAWN:
 			Square::clear_bit(white, to);
