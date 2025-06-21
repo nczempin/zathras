@@ -132,8 +132,9 @@ namespace zathras_lib::moves {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO handle cast better
-			if (from == 255) {
-				break; //TODO
+			if (from >= 64) {
+				cerr << "ERROR: Invalid from square " << (int)from << " in visit_capture_moves" << endl;
+				break;
 			}
 			const bb raw_moves = all_moves[from];
 			bb moves = raw_moves & other_colour;
@@ -196,7 +197,8 @@ namespace zathras_lib::moves {
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t& from = static_cast<square_t>(Bitboard::extract_and_remove_square(position));
-			if (from == 255) { //TODO
+			if (from >= 64) {
+				cerr << "ERROR: Invalid from square " << (int)from << " in visit_non_capture_moves" << endl;
 				break;
 			}
 			const bb raw_moves = all_moves[from];
