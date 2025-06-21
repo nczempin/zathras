@@ -17,7 +17,7 @@
 #include "Move.h"
 #include "Evaluator.h"
 
-#include "info.h"
+#include "Info.h"
 #include "Perft_command.h"
 
 extern Position p;
@@ -263,7 +263,7 @@ namespace Interface {
 
 
 		void static makeMove(Position& p, string moveString) {
-			Move& m = convert_move(moveString);
+			Move m = convert_move(moveString);
 			int board[64];
 			for (int i = 0; i < 64; ++i) {
 				board[i] = 0;

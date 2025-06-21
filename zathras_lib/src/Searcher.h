@@ -1,6 +1,7 @@
 #pragma once
 #include <deque>
 #include <chrono>
+#include <climits>
 
 
 #include "Move.h"

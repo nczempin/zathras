@@ -1,14 +1,14 @@
 CC=g++
-CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto -fno-builtin -m64 -malign-data=cacheline -march=sandybridge -pthread
-CPPFLAGS=-Izathras_lib/src -Itests/external
+CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto  -fno-builtin -m64 -malign-data=cacheline -march=sandybridge -I./zathras_lib/src #-fno-inline-small-functions #-fno-omit-frame-pointer
 
 BIN= zathras
-SRC=$(wildcard **/*.cpp)
+SRC=$(wildcard src/*.cpp)
+LIB_OBJ=$(wildcard zathras_lib/src/*.o)
 GAS=$(wildcard *.s)
 NASM=$(wildcard *.asm)
 CPP_OBJ=$(SRC:.cpp=.o)
 
-OBJ=$(CPP_OBJ)
+OBJ=$(CPP_OBJ) $(LIB_OBJ)
 
 TEST_SRCS := $(wildcard tests/unit/*.cpp)
 TEST_OBJS := $(TEST_SRCS:.cpp=.o)
