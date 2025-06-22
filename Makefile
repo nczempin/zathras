@@ -3,7 +3,8 @@ CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto  -fno-builtin -m64 -ma
 
 BIN= zathras
 SRC=$(wildcard src/*.cpp)
-LIB_OBJ=$(wildcard zathras_lib/src/*.o)
+LIB_SRC=$(wildcard zathras_lib/src/*.cpp)
+LIB_OBJ=$(LIB_SRC:.cpp=.o)
 GAS=$(wildcard *.s)
 NASM=$(wildcard *.asm)
 CPP_OBJ=$(SRC:.cpp=.o)
