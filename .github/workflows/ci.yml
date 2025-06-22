@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**', 'rebuild-v0.1.0' ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+
+    - name: Cache build artifacts
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/*.o
+          zathras
+        key: ubuntu-build-${{ hashFiles('**/*.cpp', '**/*.h', 'Makefile') }}
+        restore-keys: |
+          ubuntu-build-
+
+    - name: Build
+      run: |
+        make clean
+        make
+
+    - name: Test basic functionality
+      run: |
+        echo "Testing basic UCI protocol..."
+        echo -e "uci\nquit" | timeout 10s ./zathras > /dev/null
+        
+        echo "Testing perft 3 (expected: 8902)..."
+        RESULT=$(echo -e "uci\nposition startpos\nperft 3\nquit" | timeout 30s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$RESULT" != "8902" ]; then
+          echo "ERROR: Perft 3 result was $RESULT, expected 8902"
+          exit 1
+        fi
+        echo "✓ Perft 3: $RESULT"
+        
+        echo "Testing perft 4 (expected: 197281)..."
+        RESULT=$(echo -e "uci\nposition startpos\nperft 4\nquit" | timeout 60s ./zathras | grep "Perft 4 result:" | awk '{print $4}')
+        
+        if [ "$RESULT" != "197281" ]; then
+          echo "ERROR: Perft 4 result was $RESULT, expected 197281"
+          exit 1
+        fi
+        echo "✓ Perft 4: $RESULT"
+        
+        echo "All basic tests passed!"
+
+    - name: Upload build artifacts on failure
+      uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: build-artifacts
+        path: |
+          zathras
+          **/*.o
+          *.log
+
+  perft-validation:
+    name: Extended Perft Validation
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build
+      run: |
+        make clean
+        make
+
+    - name: Run extended perft suite
+      run: |
+        cat > extended_perft.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "Running extended perft validation..."
+        
+        # Test perft depths 1-5 for starting position
+        declare -A expected_results=(
+          [1]=20
+          [2]=400  
+          [3]=8902
+          [4]=197281
+          [5]=4865609
+        )
+        
+        for depth in {1..5}; do
+          echo "Testing perft $depth (expected: ${expected_results[$depth]})..."
+          result=$(echo -e "uci\nposition startpos\nperft $depth\nquit" | timeout 120s ./zathras | grep "Perft $depth result:" | awk '{print $4}')
+          
+          if [ "$result" != "${expected_results[$depth]}" ]; then
+            echo "ERROR: Perft $depth result was $result, expected ${expected_results[$depth]}"
+            exit 1
+          fi
+          echo "✓ Perft $depth: $result"
+        done
+        
+        echo "All extended perft tests passed!"
+        EOF
+        chmod +x extended_perft.sh
+        ./extended_perft.sh
+
+    - name: Performance benchmark
+      run: |
+        echo "Running performance benchmark..."
+        echo -e "uci\nposition startpos\nperft 4\nquit" | ./zathras | grep "time:"
