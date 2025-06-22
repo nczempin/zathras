@@ -1,5 +1,9 @@
 #executable name
 zathras*.exe
+zathras
+libzathras.a
+simple_perft_test
+test_assertion
 !zathras_lib/*
 #cygwin app crashes
 *.stackdump
