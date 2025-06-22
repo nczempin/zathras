@@ -154,10 +154,24 @@ inline static uint8_t extract_square(const bb& my_bb) {
 - Explains why v0.0.6 crashed with "moving != 0" assertions
 
 #### Critical Insight:
-This bug may have existed in v0.0.5 baseline and only been exposed by optimization attempts. **We must verify our current baseline doesn't have this issue.**
+**✅ VERIFIED**: Our v0.0.5 baseline correctly handles ffs() 1-indexing through the `look_up()` function which does `index - 1` adjustment. The bug was introduced during optimization attempts that tried to remove the `look_up()` abstraction.
 
-#### Re-implementation Priority: **CRITICAL - IMMEDIATE**
-*This fix must be validated and applied to our v0.0.5 baseline before any optimizations*
+```cpp
+// v0.0.5 (CORRECT):
+inline static uint8_t extract_square(const bb& my_bb) {
+    return look_up(ffs(my_bb));  // look_up() handles the -1 adjustment
+}
+
+inline static constexpr uint8_t look_up(uint8_t index) {
+    uint8_t m = index - 1;  // Correctly handles ffs() 1-indexing
+    // ... coordinate transformation
+}
+```
+
+**Validation**: Our perft 3 = 8902 result confirms bitboard operations are working correctly in v0.0.5.
+
+#### Re-implementation Priority: **HIGH** 
+*When optimizing bitboard operations, we must preserve the ffs() index correction*
 
 ---
 
