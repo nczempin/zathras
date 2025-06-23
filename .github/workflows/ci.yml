@@ -18,12 +18,18 @@ jobs:
     - name: Setup build environment
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential
+        sudo apt-get install -y build-essential cppcheck
 
     - name: Check case sensitivity
       run: |
         chmod +x scripts/check_case_sensitivity.sh
         ./scripts/check_case_sensitivity.sh
+
+    - name: Run linting
+      run: |
+        echo "Running C++ linting checks..."
+        make lint-cppcheck
+      continue-on-error: true  # Don't fail the build on linting warnings for now
 
     - name: Cache build artifacts
       uses: actions/cache@v3
