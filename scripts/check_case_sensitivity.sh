@@ -6,7 +6,7 @@ set -e
 echo "Checking for case sensitivity issues..."
 
 # Get all header files
-header_files=$(find src/ zathras_lib/src/ -name "*.h" -type f 2>/dev/null | sed 's|.*/||' | sort -u)
+header_files=$(find src/ zathras_lib/src/ -name "*.h" -type f 2>/dev/null | sort -u)
 
 # Check all includes
 errors=0
