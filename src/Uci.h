@@ -19,6 +19,7 @@
 
 #include "Info.h"
 #include "Perft_command.h"
+#include "Divide_command.h"
 
 extern Position p;
 
@@ -74,25 +75,15 @@ namespace Interface {
 				//cout << "Done." << endl;
 
 			}
-			//else if (startsWith("divide ", toParse)) {
-			//	char perftDepthParameter = toParse[7];
-			//	int perftDepth = Character::getNumericValue(perftDepthParameter);
-			//	//TODO do this more elegantly
-			//	MoveGenerator mg;
-			//	vector<Move> moves = mg.generateLegalMoves(p);
-			//	int count = 0;
-			//	Position tmpPos = p;
-			//	for (Move move : moves) {
-			//		tmpPos = p; //simple but inefficient way to undo the move
-			//		tmpPos.makeMove(move);
-
-			//		count = perft(tmpPos, perftDepth - 1);
-			//		cout << move.toString() << ": " << count << endl;
-			//	}
-
-			//	cout << "Done." << endl;
-
-			//}
+			else if (startsWith("divide ", toParse)) {
+				string pattern = "divide ";
+				size_t index = toParse.find(pattern);
+				string depth_param = toParse.substr(index + pattern.length());
+				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 1;
+				
+				Divide_command dc{p, depth};
+				dc.execute();
+			}
 			else if (toParse == "isready") {
 				cout << "readyok" << endl;
 			}
