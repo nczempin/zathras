@@ -11,7 +11,11 @@ using namespace std;
 
 enum Move_type  {
 	NONE,
-	EN_PASSANT
+	EN_PASSANT,
+	PROMOTION_QUEEN,
+	PROMOTION_ROOK,
+	PROMOTION_BISHOP,
+	PROMOTION_KNIGHT
 };
 
 
