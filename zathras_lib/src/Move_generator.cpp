@@ -13,6 +13,8 @@
 
 #include "Position.h"
 #include "Square.h"
+
+using namespace Positions;
 #include "Piece.h"
 #include "Bitboard.h"
 
@@ -376,19 +378,19 @@ namespace Moves {
 				int8_t captured = has_captured_piece(to, moving);
 				if (captured) {
 					if (to >= 56) { // promoting white pawn
-						f(from, to, NONE); // Queen promotion
+						f(from, to, PROMOTION_QUEEN); // Queen promotion
 						if (generate_all_promotions) {
-							f(from, to, NONE); // Rook promotion
-							f(from, to, NONE); // Bishop promotion
-							f(from, to, NONE); // Knight promotion
+							f(from, to, PROMOTION_ROOK); // Rook promotion
+							f(from, to, PROMOTION_BISHOP); // Bishop promotion
+							f(from, to, PROMOTION_KNIGHT); // Knight promotion
 						}
 					}
 					else if (to <= 7) { // promoting black pawn
-						f(from, to, NONE); // Queen promotion
+						f(from, to, PROMOTION_QUEEN); // Queen promotion
 						if (generate_all_promotions) {
-							f(from, to, NONE); // Rook promotion
-							f(from, to, NONE); // Bishop promotion
-							f(from, to, NONE); // Knight promotion
+							f(from, to, PROMOTION_ROOK); // Rook promotion
+							f(from, to, PROMOTION_BISHOP); // Bishop promotion
+							f(from, to, PROMOTION_KNIGHT); // Knight promotion
 						}
 					}
 					else {
@@ -586,19 +588,19 @@ namespace Moves {
 			while (moves != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves));
 				if (to >= 56) { // promoting white pawn
-					f(from, to, NONE); // Queen promotion
+					f(from, to, PROMOTION_QUEEN); // Queen promotion
 					if (generate_all_promotions) {
-						f(from, to, NONE); // Rook promotion
-						f(from, to, NONE); // Bishop promotion
-						f(from, to, NONE); // Knight promotion
+						f(from, to, PROMOTION_ROOK); // Rook promotion
+						f(from, to, PROMOTION_BISHOP); // Bishop promotion
+						f(from, to, PROMOTION_KNIGHT); // Knight promotion
 					}
 				}
 				else if (to <= 7) { // promoting black pawn
-					f(from, to, NONE); // Queen promotion
+					f(from, to, PROMOTION_QUEEN); // Queen promotion
 					if (generate_all_promotions) {
-						f(from, to, NONE); // Rook promotion
-						f(from, to, NONE); // Bishop promotion
-						f(from, to, NONE); // Knight promotion
+						f(from, to, PROMOTION_ROOK); // Rook promotion
+						f(from, to, PROMOTION_BISHOP); // Bishop promotion
+						f(from, to, PROMOTION_KNIGHT); // Knight promotion
 					}
 				}
 				else {
@@ -617,19 +619,19 @@ namespace Moves {
 			while (moveses != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moveses));
 				if (to >= 56) { // promoting white pawn
-					moves.add_move(from, to, NONE); // Queen promotion
+					moves.add_move(from, to, PROMOTION_QUEEN); // Queen promotion
 					if (generate_all_promotions) {
-						moves.add_move(from, to, NONE); // Rook promotion
-						moves.add_move(from, to, NONE); // Bishop promotion
-						moves.add_move(from, to, NONE); // Knight promotion
+						moves.add_move(from, to, PROMOTION_ROOK); // Rook promotion
+						moves.add_move(from, to, PROMOTION_BISHOP); // Bishop promotion
+						moves.add_move(from, to, PROMOTION_KNIGHT); // Knight promotion
 					}
 				}
 				else if (to <= 7) { // promoting black pawn
-					moves.add_move(from, to, NONE); // Queen promotion
+					moves.add_move(from, to, PROMOTION_QUEEN); // Queen promotion
 					if (generate_all_promotions) {
-						moves.add_move(from, to, NONE); // Rook promotion
-						moves.add_move(from, to, NONE); // Bishop promotion
-						moves.add_move(from, to, NONE); // Knight promotion
+						moves.add_move(from, to, PROMOTION_ROOK); // Rook promotion
+						moves.add_move(from, to, PROMOTION_BISHOP); // Bishop promotion
+						moves.add_move(from, to, PROMOTION_KNIGHT); // Knight promotion
 					}
 				}
 				else {
