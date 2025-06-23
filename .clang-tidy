@@ -1,0 +1,53 @@
+---
+# Clang-tidy configuration for Zathras chess engine
+# Focus on C++ Core Guidelines and modernization
+
+Checks: >
+  -*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  bugprone-*,
+  clang-analyzer-*,
+  -modernize-use-trailing-return-type,
+  -readability-magic-numbers,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -readability-identifier-length,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -modernize-use-nodiscard,
+  -readability-convert-member-functions-to-static
+
+WarningsAsErrors: ''
+
+HeaderFilterRegex: '.*\.(h|hpp)$'
+
+CheckOptions:
+  - key: readability-function-cognitive-complexity.Threshold
+    value: '25'
+  - key: readability-function-size.LineThreshold
+    value: '100'
+  - key: readability-function-size.StatementThreshold
+    value: '50'
+  - key: readability-function-size.BranchThreshold
+    value: '20'
+  - key: readability-function-size.ParameterThreshold
+    value: '7'
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: '1'
+  - key: cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions
+    value: '1'
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: '0'
+  - key: modernize-use-override.IgnoreDestructors
+    value: '1'
+  - key: modernize-pass-by-value.IncludeStyle
+    value: 'llvm'
+  - key: modernize-loop-convert.MinConfidence
+    value: 'reasonable'
+  - key: modernize-use-auto.MinTypeNameLength
+    value: '5'
+
+FormatStyle: 'file'
