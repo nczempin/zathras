@@ -49,7 +49,7 @@ fi
 
 # Check for pragma once in .cpp files
 echo "Checking for misplaced #pragma once..."
-pragma_errors=$(grep -l "^#pragma once" src/*.cpp zathras_lib/src/*.cpp 2>/dev/null || true)
+pragma_errors=$(grep -r -l "^#pragma once" src/ zathras_lib/src/ --include="*.cpp" 2>/dev/null || true)
 if [[ -n "$pragma_errors" ]]; then
     echo "ERROR: Found #pragma once in .cpp files:"
     echo "$pragma_errors"
