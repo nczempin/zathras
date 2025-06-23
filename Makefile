@@ -18,7 +18,7 @@ $(BIN): $(OBJ)
 %.o: %.cpp
 	$(CC) -o $@ -c $(CFLAGS) $^
 
-.PHONY : clean lint lint-clang-tidy lint-cppcheck
+.PHONY : clean lint lint-clang-tidy lint-cppcheck lint-ci
 clean :
 	-rm -f $(BIN) $(OBJ)
 
