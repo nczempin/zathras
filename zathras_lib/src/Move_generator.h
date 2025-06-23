@@ -28,6 +28,10 @@ namespace Moves {
 		bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
 		bool is_in_check(bool side);
 		bool outside = true;
+		
+		// Control whether to generate all promotion types (for perft correctness)
+		// or just queen promotions (for performance in normal play)
+		static bool generate_all_promotions;
 
 
 	private:
