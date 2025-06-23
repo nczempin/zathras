@@ -7,23 +7,20 @@ echo "=== Zathras Development Environment Setup ==="
 echo ""
 
 # Parse arguments
-INSTALL_MODE="check"
+INSTALL_MODE="install"  # Default: install missing tools
 while [[ $# -gt 0 ]]; do
     case $1 in
-        --install)
-            INSTALL_MODE="install"
-            shift
-            ;;
         --check-only)
             INSTALL_MODE="check"
             shift
             ;;
         -h|--help)
-            echo "Usage: $0 [--install|--check-only]"
+            echo "Usage: $0 [options]"
+            echo ""
+            echo "By default, installs all missing development tools."
             echo ""
             echo "Options:"
-            echo "  --install     Install missing tools (requires sudo)"
-            echo "  --check-only  Only check what's installed (default)"
+            echo "  --check-only  Only check what's installed (don't install)"
             echo "  -h, --help    Show this help message"
             exit 0
             ;;
@@ -76,6 +73,9 @@ echo ""
 
 # Update package list if installing
 if [ "$INSTALL_MODE" = "install" ]; then
+    echo "This script will install missing development tools."
+    echo "You may be prompted for your sudo password."
+    echo ""
     echo "Updating package list..."
     sudo apt-get update
     echo ""
@@ -109,11 +109,14 @@ echo "============================================"
 if [ "$ALL_PRESENT" = true ]; then
     echo "✅ All development tools are installed!"
 else
-    echo "⚠️  Some tools are missing."
     if [ "$INSTALL_MODE" = "check" ]; then
+        echo "⚠️  Some tools are missing."
         echo ""
         echo "To install all missing tools, run:"
-        echo "  $0 --install"
+        echo "  $0"
+    else
+        echo "⚠️  Some tools could not be installed."
+        echo "Please check the output above for errors."
     fi
 fi
 

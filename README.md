@@ -6,11 +6,11 @@ A UCI-compliant chess engine written in C++17.
 
 ### Quick Start
 ```bash
-# Check development environment
+# Install development tools (Ubuntu/Debian)
 ./scripts/setup_dev_env.sh
 
-# Install missing tools (Ubuntu/Debian)
-./scripts/setup_dev_env.sh --install
+# Just check what's installed (don't install)
+./scripts/setup_dev_env.sh --check-only
 ```
 
 ## Building
