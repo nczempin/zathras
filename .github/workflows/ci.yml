@@ -147,15 +147,25 @@ jobs:
         fi
         echo "✓ Position 4 perft 3: $pos4_result"
         
-        # Position 5 - promotion at ply 1 (critical for early promotion bugs)
-        echo "Testing Position 5 perft 2 (expected: 1486)..."
-        pos5_result=$(echo -e "uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 2\nquit" | timeout 60s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
+        # Position 5 - promotion at ply 1 (critical for under-promotion validation)
+        echo "Testing Position 5 perft 3 (expected: 62379)..."
+        pos5_result=$(echo -e "uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 3\nquit" | timeout 90s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
         
-        if [ "$pos5_result" != "1486" ]; then
-          echo "ERROR: Position 5 perft 2 result was $pos5_result, expected 1486"
+        if [ "$pos5_result" != "62379" ]; then
+          echo "ERROR: Position 5 perft 3 result was $pos5_result, expected 62379"
           exit 1
         fi
-        echo "✓ Position 5 perft 2: $pos5_result"
+        echo "✓ Position 5 perft 3: $pos5_result"
+        
+        # Simple under-promotion test (catches fake under-promotion easily)
+        echo "Testing simple under-promotion perft 3 (expected: 20)..."
+        underpromo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/7k/7K w - - 0 1\nperft 3\nquit" | timeout 30s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$underpromo_result" != "20" ]; then
+          echo "ERROR: Simple under-promotion perft 3 result was $underpromo_result, expected 20"
+          exit 1
+        fi
+        echo "✓ Simple under-promotion perft 3: $underpromo_result"
         
         echo "All extended perft tests passed!"
         EOF

@@ -117,14 +117,16 @@ test_position "Position 4 - intensive promotion testing" \
     "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1" \
     1 6 \
     2 264 \
-    3 9467
+    3 9467 \
+    4 422333
 
-# Test 2c: Position 5 - promotion at ply 1
+# Test 2c: Position 5 - promotion at ply 1 (critical for under-promotion validation)
 test_position "Position 5 - promotion at ply 1" \
     "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8" \
     1 44 \
     2 1486 \
-    3 62379
+    3 62379 \
+    4 2103487
 
 # Test 3: En passant position
 test_position "En passant capture available" \
@@ -157,14 +159,25 @@ test_position "No castling rights" \
 test_position "Pawn promotion test" \
     "n1n5/PPPk4/8/8/8/8/4Kppp/5N1N b - - 0 1" \
     1 24 \
-    2 496
+    2 496 \
+    3 9483 \
+    4 182838
 
 # Test 8: Under-promotion possibilities
 test_position "Under-promotion possibilities" \
     "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1" \
     1 14 \
     2 191 \
-    3 2812
+    3 2812 \
+    4 43238
+
+# Test 8b: Simple under-promotion test
+test_position "Simple under-promotion validation" \
+    "8/P7/8/8/8/8/7k/7K w - - 0 1" \
+    1 4 \
+    2 16 \
+    3 20 \
+    4 89
 
 # Test 9: Check evasion
 test_position "Check evasion test" \
