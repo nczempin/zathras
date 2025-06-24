@@ -2,7 +2,7 @@
 #include <deque>
 #include <chrono>
 
-#include "Move.h"
+#include "../zathras_lib/src/Move.h"
 #include <iostream>
 
 namespace Interface {
