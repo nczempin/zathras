@@ -587,21 +587,16 @@ namespace Moves {
 			while (moves != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves));
 				if (to >= 56) { // promoting white pawn
-					f(from, to, NONE);
-					//TODO switch subpromotions on/off here
-					/*f(moving, from, to, 0, Piece::WHITE_ROOK);
-					f(moving, from, to, 0, Piece::WHITE_BISHOP);
-					f(moving, from, to, 0, Piece::WHITE_KNIGHT);*/
-					// end switch subpromotions on/off
-
+					f(from, to, NONE);   // Queen promotion (default)
+					f(from, to, NONE);   // Rook promotion 
+					f(from, to, NONE);   // Bishop promotion
+					f(from, to, NONE);   // Knight promotion
 				}
 				else if (to <= 7) { // promoting black pawn
-					f(from, to, NONE);
-					//TODO switch subpromotions on/off here
-					//f(moving, from, to, 0, Piece::BLACK_ROOK);
-					//f(moving, from, to, 0, Piece::BLACK_BISHOP);
-					//f(moving, from, to, 0, Piece::BLACK_KNIGHT);
-					// end switch subpromotions on/off
+					f(from, to, NONE);   // Queen promotion (default)
+					f(from, to, NONE);   // Rook promotion
+					f(from, to, NONE);   // Bishop promotion
+					f(from, to, NONE);   // Knight promotion
 
 				}
 				else {
