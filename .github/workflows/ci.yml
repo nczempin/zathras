@@ -183,26 +183,26 @@ jobs:
         echo ""
         echo "=== Critical Targeted Tests ==="
         
-        # Pure queen promotion test (Issue #92 diagnostic)
-        echo "Testing pure queen promotion perft 1 (expected: 1)..."
-        queen_promo_result=$(echo -e "uci\nposition fen 8/1P6/8/8/8/8/1k6/1K6 w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        # Simple promotion test - must generate all 4 promotion types (Issue #92 diagnostic)
+        echo "Testing simple promotion perft 1 (expected: 4 - Q,R,B,N)..."
+        simple_promo_result=$(echo -e "uci\nposition fen 8/1P6/8/8/8/8/1k6/1K6 w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
         
-        if [ "$queen_promo_result" != "1" ]; then
-          echo "❌ Pure queen promotion perft 1 result was $queen_promo_result, expected 1"
+        if [ "$simple_promo_result" != "4" ]; then
+          echo "❌ Simple promotion perft 1 result was $simple_promo_result, expected 4 (Q,R,B,N)"
           failed_tests=$((failed_tests + 1))
         else
-          echo "✅ Pure queen promotion perft 1: $queen_promo_result"
+          echo "✅ Simple promotion perft 1: $simple_promo_result (correctly generates all 4 types)"
         fi
         
-        # All promotion types test (Issue #92 core diagnostic)
-        echo "Testing all promotion types perft 1 (expected: 4)..."
-        all_promo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/7k/7K w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        # Alternative promotion position test (Issue #92 verification)
+        echo "Testing a7 promotion perft 1 (expected: 4 - Q,R,B,N)..."
+        a7_promo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/7k/7K w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
         
-        if [ "$all_promo_result" != "4" ]; then
-          echo "❌ All promotion types perft 1 result was $all_promo_result, expected 4"
+        if [ "$a7_promo_result" != "4" ]; then
+          echo "❌ A7 promotion perft 1 result was $a7_promo_result, expected 4 (Q,R,B,N)"
           failed_tests=$((failed_tests + 1))
         else
-          echo "✅ All promotion types perft 1: $all_promo_result"
+          echo "✅ A7 promotion perft 1: $a7_promo_result (correctly generates all 4 types)"
         fi
         
         echo ""

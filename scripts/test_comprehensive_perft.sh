@@ -217,21 +217,21 @@ echo "==========================================="
 echo "=== TARGETED MOVE TYPE TESTS ==="
 echo "==========================================="
 
-# Test 12: Pure promotion tests (addresses Issue #92)
-test_position "Pure queen promotion test" \
+# Test 12: Promotion tests (addresses Issue #92)
+test_position "Simple promotion - all 4 types required" \
     "8/1P6/8/8/8/8/1k6/1K6 w - - 0 1" \
-    1 1 \
-    2 4 \
-    3 4
+    1 4 \
+    2 16 \
+    3 20
 
-test_position "Pure knight promotion test" \
-    "8/6P1/8/8/8/8/6k1/6K1 w - - 0 1" \
-    1 1 \
-    2 4 \
-    3 4
-
-test_position "All promotion types test" \
+test_position "Simple promotion from a7" \
     "8/P7/8/8/8/8/7k/7K w - - 0 1" \
+    1 4 \
+    2 16 \
+    3 20
+
+test_position "Simple promotion from g7" \
+    "8/6P1/8/8/8/8/6k1/6K1 w - - 0 1" \
     1 4 \
     2 16 \
     3 20
