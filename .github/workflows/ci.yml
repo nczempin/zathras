@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, dev, develop, 'feature/**', 'rebuild-v0.1.0', 'dev-v0.0.5-exact' ]
+    branches: [ main, dev, develop, 'feature/**' ]
   pull_request:
     branches: [ main, dev, develop ]
   workflow_dispatch:
