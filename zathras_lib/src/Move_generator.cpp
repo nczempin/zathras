@@ -16,6 +16,7 @@
 #include "Piece.h"
 #include "Bitboard.h"
 
+using namespace Positions;
 
 namespace Moves {
 	Move_generator::Move_generator() {
@@ -375,22 +376,16 @@ namespace Moves {
 				int8_t captured = has_captured_piece(to, moving);
 				if (captured) {
 					if (to >= 56) { // promoting white pawn
-						f(from, to, NONE); //TODO find out how to use defaults on function objects
-						//TODO switch subpromotions on/off here
-	/*					f(moving, from, to, captured, Piece::WHITE_ROOK);
-						f(moving, from, to, captured, Piece::WHITE_BISHOP);
-						f(moving, from, to, captured, Piece::WHITE_KNIGHT);*/
-						// end switch subpromotions on/off
-
+						f(from, to, PROMOTION_QUEEN);
+						f(from, to, PROMOTION_ROOK);
+						f(from, to, PROMOTION_BISHOP);
+						f(from, to, PROMOTION_KNIGHT);
 					}
 					else if (to <= 7) { // promoting black pawn
-						f(from, to, NONE);
-						//TODO switch subpromotions on/off here
-						//f(moving, from, to, captured, Piece::BLACK_ROOK);
-						//f(moving, from, to, captured, Piece::BLACK_BISHOP);
-						//f(moving, from, to, captured, Piece::BLACK_KNIGHT);
-						// end switch subpromotions on/off
-
+						f(from, to, PROMOTION_QUEEN);
+						f(from, to, PROMOTION_ROOK);
+						f(from, to, PROMOTION_BISHOP);
+						f(from, to, PROMOTION_KNIGHT);
 					}
 					else {
 						f(from, to, NONE);
@@ -587,17 +582,16 @@ namespace Moves {
 			while (moves != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves));
 				if (to >= 56) { // promoting white pawn
-					f(from, to, NONE);   // Queen promotion (default)
-					f(from, to, NONE);   // Rook promotion 
-					f(from, to, NONE);   // Bishop promotion
-					f(from, to, NONE);   // Knight promotion
+					f(from, to, PROMOTION_QUEEN);
+					f(from, to, PROMOTION_ROOK);
+					f(from, to, PROMOTION_BISHOP);
+					f(from, to, PROMOTION_KNIGHT);
 				}
 				else if (to <= 7) { // promoting black pawn
-					f(from, to, NONE);   // Queen promotion (default)
-					f(from, to, NONE);   // Rook promotion
-					f(from, to, NONE);   // Bishop promotion
-					f(from, to, NONE);   // Knight promotion
-
+					f(from, to, PROMOTION_QUEEN);
+					f(from, to, PROMOTION_ROOK);
+					f(from, to, PROMOTION_BISHOP);
+					f(from, to, PROMOTION_KNIGHT);
 				}
 				else {
 					f(from, to, NONE);
@@ -615,22 +609,16 @@ namespace Moves {
 			while (moveses != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moveses));
 				if (to >= 56) { // promoting white pawn
-					moves.add_move(from, to, NONE);
-					//TODO switch subpromotions on/off here
-					/*f(moving, from, to, 0, Piece::WHITE_ROOK);
-					f(moving, from, to, 0, Piece::WHITE_BISHOP);
-					f(moving, from, to, 0, Piece::WHITE_KNIGHT);*/
-					// end switch subpromotions on/off
-
+					moves.add_move(from, to, PROMOTION_QUEEN);
+					moves.add_move(from, to, PROMOTION_ROOK);
+					moves.add_move(from, to, PROMOTION_BISHOP);
+					moves.add_move(from, to, PROMOTION_KNIGHT);
 				}
 				else if (to <= 7) { // promoting black pawn
-					moves.add_move(from, to, NONE);
-					//TODO switch subpromotions on/off here
-					//f(moving, from, to, 0, Piece::BLACK_ROOK);
-					//f(moving, from, to, 0, Piece::BLACK_BISHOP);
-					//f(moving, from, to, 0, Piece::BLACK_KNIGHT);
-					// end switch subpromotions on/off
-
+					moves.add_move(from, to, PROMOTION_QUEEN);
+					moves.add_move(from, to, PROMOTION_ROOK);
+					moves.add_move(from, to, PROMOTION_BISHOP);
+					moves.add_move(from, to, PROMOTION_KNIGHT);
 				}
 				else {
 					moves.add_move(from, to, NONE);
