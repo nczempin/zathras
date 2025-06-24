@@ -40,29 +40,13 @@ namespace Interface {
     }
 
     void Divide_command::execute() {
-        cout << "\n========================================" << endl;
-        cout << "DIVIDE COMMAND - Depth " << depth << endl;
-        cout << "========================================" << endl;
-        cout << "Position:" << endl;
-        position.print(cout);
-        cout << "----------------------------------------" << endl;
-        cout << "Move breakdown:" << endl;
-        cout << "----------------------------------------" << endl;
+        cout << "\nDivide " << depth << " result:" << endl;
 
         // Generate all legal moves at root
         Move_container move_container = mg.generate_legal_moves(position, 1);
         auto moves = move_container.get_moves();
         
         uint64_t total = 0;
-        
-        // Find longest move string for alignment
-        size_t max_len = 0;
-        for (size_t i = 0; i < move_container.size(); ++i) {
-            string move_str = to_string(moves[i]);
-            if (move_str.length() > max_len) {
-                max_len = move_str.length();
-            }
-        }
         
         for (size_t i = 0; i < move_container.size(); ++i) {
             Move& move = moves[i];
@@ -75,13 +59,11 @@ namespace Interface {
             
             position.unmake_move(move, ms);
             
-            // Display the move and its count with proper formatting
+            // Display the move and its count
             string move_str = to_string(move);
-            cout << setw(max_len + 1) << left << move_str << ": " << setw(10) << right << count << endl;
+            cout << move_str << ": " << count << endl;
         }
         
-        cout << "----------------------------------------" << endl;
-        cout << "Divide Total: " << total << endl;
-        cout << "========================================" << endl;
+        cout << "\nNodes searched: " << total << endl;
     }
 }

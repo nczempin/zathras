@@ -62,7 +62,7 @@ jobs:
         divide_output=$(echo -e "uci\nposition startpos\ndivide 2\nquit" | timeout 30s ./zathras)
         
         # Check if divide header is present
-        if echo "$divide_output" | grep -q "DIVIDE COMMAND"; then
+        if echo "$divide_output" | grep -q "Divide .* result:"; then
           echo "✅ Divide command header found"
         else
           echo "❌ Divide command header missing"
@@ -79,18 +79,18 @@ jobs:
         fi
         
         # Check total
-        divide_total=$(echo "$divide_output" | grep "Divide Total:" | awk '{print $3}')
+        divide_total=$(echo "$divide_output" | grep "Nodes searched:" | awk '{print $3}')
         if [ "$divide_total" != "400" ]; then
           echo "❌ Divide total was $divide_total, expected 400"
           exit 1
         else
-          echo "✅ Divide total correct: $divide_total"
+          echo "✅ Divide total correct: $divide_total (Nodes searched)"
         fi
         
         echo ""
         echo "Test 2: Simple position (King vs King)..."
         # Show a sample of the output for verification
-        echo -e "uci\nposition fen 8/8/8/4k3/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | timeout 30s ./zathras | grep -A 10 "DIVIDE COMMAND" | head -15
+        echo -e "uci\nposition fen 8/8/8/4k3/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | timeout 30s ./zathras | grep -A 10 "Divide .* result:" | head -10
         
         echo ""
         echo "✅ DIVIDE command working correctly - shows move-by-move perft breakdown"

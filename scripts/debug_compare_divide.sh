@@ -39,7 +39,7 @@ echo -e "uci\nposition fen $FEN\ndivide $DEPTH\nquit" | ./zathras | grep -E "^[a
 cat zathras_divide.txt
 
 # Get total from Zathras
-ZATHRAS_TOTAL=$(echo -e "uci\nposition fen $FEN\ndivide $DEPTH\nquit" | ./zathras | grep "Total:" | awk '{print $2}')
+ZATHRAS_TOTAL=$(echo -e "uci\nposition fen $FEN\ndivide $DEPTH\nquit" | ./zathras | grep "Nodes searched:" | awk '{print $3}')
 echo ""
 echo "Zathras total: $ZATHRAS_TOTAL"
 
