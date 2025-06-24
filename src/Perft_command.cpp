@@ -29,17 +29,17 @@ namespace Interface {
 		if (depth == 0) {
 			return 1;
 		}
-		
-		uint64_t nodes = 0;
 		Move_container move_container = mg.generate_pseudolegal_moves(*pp, depth);
 		move_container_t moves = move_container.get_moves();
+		uint64_t total_result = 0;
 		size_t size = move_container.size();
 
 		for (size_t i = 0; i < size; ++i) {
 			Move& move = moves[i];
 			Move_state ms;
-			
 			pp->make_move(move, ms);
+			assert(pp->get_piece_on(move.get_from()) == 0);
+			assert(pp->get_piece_on(move.get_to()) != 0);
 
 			if (pp->is_in_check(!pp->white_to_move)) {
 				pp->unmake_move(move, ms);
@@ -48,15 +48,19 @@ namespace Interface {
 
 			// the move was legal
 			if (depth == 1) {
-				nodes++;
-			} else {
-				nodes += perft(depth - 1);
+				++total_result;
 			}
-			
+			else {
+				uint64_t perft_result = perft(depth - 1);
+				total_result += perft_result;
+			}
+			assert(pp->get_piece_on(move.get_from()) == 0);
+			assert(pp->get_piece_on(move.get_to()) != 0);
 			pp->unmake_move(move, ms);
+			assert(pp->get_piece_on(move.get_from()) != 0);
 		}
 		
-		return nodes;
+		return total_result;
 	}
 
 	string Perft_command::format_large_number(int nps) {
