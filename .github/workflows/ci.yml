@@ -181,6 +181,31 @@ jobs:
         fi
         
         echo ""
+        echo "=== Critical Targeted Tests ==="
+        
+        # Pure queen promotion test (Issue #92 diagnostic)
+        echo "Testing pure queen promotion perft 1 (expected: 1)..."
+        queen_promo_result=$(echo -e "uci\nposition fen 8/1P6/8/8/8/8/1k6/1K6 w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$queen_promo_result" != "1" ]; then
+          echo "❌ Pure queen promotion perft 1 result was $queen_promo_result, expected 1"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Pure queen promotion perft 1: $queen_promo_result"
+        fi
+        
+        # All promotion types test (Issue #92 core diagnostic)
+        echo "Testing all promotion types perft 1 (expected: 4)..."
+        all_promo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/7k/7K w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$all_promo_result" != "4" ]; then
+          echo "❌ All promotion types perft 1 result was $all_promo_result, expected 4"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ All promotion types perft 1: $all_promo_result"
+        fi
+        
+        echo ""
         echo "=== PERFT TEST SUMMARY ==="
         if [ $failed_tests -eq 0 ]; then
           echo "✅ All perft tests passed! ($((failed_tests)) failures)"

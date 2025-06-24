@@ -214,6 +214,93 @@ test_position "Near-stalemate position" \
 
 echo ""
 echo "==========================================="
+echo "=== TARGETED MOVE TYPE TESTS ==="
+echo "==========================================="
+
+# Test 12: Pure promotion tests (addresses Issue #92)
+test_position "Pure queen promotion test" \
+    "8/1P6/8/8/8/8/1k6/1K6 w - - 0 1" \
+    1 1 \
+    2 4 \
+    3 4
+
+test_position "Pure knight promotion test" \
+    "8/6P1/8/8/8/8/6k1/6K1 w - - 0 1" \
+    1 1 \
+    2 4 \
+    3 4
+
+test_position "All promotion types test" \
+    "8/P7/8/8/8/8/7k/7K w - - 0 1" \
+    1 4 \
+    2 16 \
+    3 20
+
+test_position "Promotion with capture" \
+    "1r6/1P6/8/8/8/8/1k6/1K6 w - - 0 1" \
+    1 8 \
+    2 32 \
+    3 44
+
+# Test 13: Castling isolation tests  
+test_position "Pure castling test - both sides" \
+    "r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1" \
+    1 26 \
+    2 568
+
+test_position "Castling through check (illegal)" \
+    "r3k2r/8/8/8/8/8/8/R2QK2R w KQkq - 0 1" \
+    1 25
+
+test_position "Castling from check (illegal)" \
+    "r3k2r/8/8/8/4q3/8/8/R3K2R w KQkq - 0 1" \
+    1 5
+
+# Test 14: En passant isolation
+test_position "Simple en passant only" \
+    "8/8/8/3pP3/8/8/8/k6K w - d6 0 1" \
+    1 2 \
+    2 8
+
+test_position "En passant with king moves" \
+    "k7/8/8/3pP3/8/8/8/7K w - d6 0 1" \
+    1 3 \
+    2 12
+
+# Test 15: Capture-only tests
+test_position "Pawn captures only" \
+    "8/8/8/2p1p3/3P4/8/8/k6K w - - 0 1" \
+    1 3 \
+    2 9
+
+test_position "Knight captures" \
+    "8/8/8/3p4/5N2/8/8/k6K w - - 0 1" \
+    1 9 \
+    2 27
+
+# Test 16: Pin and discovery tests
+test_position "Simple pin test" \
+    "8/8/8/8/3k4/8/3Q4/3K4 w - - 0 1" \
+    1 8 \
+    2 25
+
+test_position "Discovered attack test" \
+    "8/8/8/8/2k5/8/2B1Q3/2K5 w - - 0 1" \
+    1 9 \
+    2 32
+
+# Test 17: Stalemate detection
+test_position "Actual stalemate" \
+    "k7/8/1K6/8/8/8/8/8 b - - 0 1" \
+    1 0
+
+test_position "Near stalemate - one move only" \
+    "k7/8/1K6/8/8/8/8/7Q b - - 0 1" \
+    1 1 \
+    2 8
+
+echo ""
+echo "==========================================="
 echo "=== FINAL RESULTS ==="
 echo "==========================================="
 echo "Total tests run: $TOTAL_TESTS"
