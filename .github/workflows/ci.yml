@@ -169,7 +169,7 @@ jobs:
           echo "✅ Position 5 perft 3: $pos5_result"
         fi
         
-        # Simple under-promotion test (valid position)
+        # Simple under-promotion test
         echo "Testing simple under-promotion perft 2 (expected: 400)..."
         underpromo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/k7/K7 w - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
         
@@ -183,26 +183,26 @@ jobs:
         echo ""
         echo "=== Critical Targeted Tests ==="
         
-        # Simple promotion test - must generate all 4 promotion types (Issue #92 diagnostic)
-        echo "Testing simple promotion perft 2 (expected: 400 with correct promotions)..."
+        # Simple promotion test
+        echo "Testing simple promotion perft 2 (expected: 400)..."
         simple_promo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/k7/8/K7 w - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
         
         if [ "$simple_promo_result" != "400" ]; then
-          echo "❌ Simple promotion perft 2 result was $simple_promo_result, expected 400 (promotion bug detected)"
+          echo "❌ Simple promotion perft 2 result was $simple_promo_result, expected 400"
           failed_tests=$((failed_tests + 1))
         else
-          echo "✅ Simple promotion perft 2: $simple_promo_result (correctly generates 4 promotions)"
+          echo "✅ Simple promotion perft 2: $simple_promo_result"
         fi
         
-        # Alternative promotion position test (Issue #92 verification)  
-        echo "Testing promotion only perft 2 (expected: 64 with correct promotions)..."
+        # Alternative promotion position test  
+        echo "Testing promotion only perft 2 (expected: 64)..."
         promo_only_result=$(echo -e "uci\nposition fen 8/P7/K7/8/8/8/8/k7 w - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
         
         if [ "$promo_only_result" != "64" ]; then
-          echo "❌ Promotion only perft 2 result was $promo_only_result, expected 64 (promotion bug detected)"
+          echo "❌ Promotion only perft 2 result was $promo_only_result, expected 64"
           failed_tests=$((failed_tests + 1))
         else
-          echo "✅ Promotion only perft 2: $promo_only_result (correctly generates all 4 types)"
+          echo "✅ Promotion only perft 2: $promo_only_result"
         fi
         
         echo ""
