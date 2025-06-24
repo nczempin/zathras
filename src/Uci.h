@@ -19,6 +19,7 @@
 
 #include "Info.h"
 #include "Perft_command.h"
+#include "Divide_command.h"
 
 extern Position p;
 
@@ -73,6 +74,14 @@ namespace Interface {
 				//}
 				//cout << "Done." << endl;
 
+			}
+			else if (startsWith("divide ", toParse)) {
+				string pattern = "divide ";
+				size_t index = toParse.find(pattern);
+				string depth_param = toParse.substr(index + pattern.length());
+				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 1;
+				Divide_command dc{p, depth};
+				dc.execute();
 			}
 			//else if (startsWith("divide ", toParse)) {
 			//	char perftDepthParameter = toParse[7];
