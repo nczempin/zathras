@@ -104,6 +104,7 @@ jobs:
         echo "Running extended perft validation..."
         
         # Test perft depths 1-5 for starting position
+        echo "=== Testing Starting Position ==="
         declare -A expected_results=(
           [1]=20
           [2]=400  
@@ -113,15 +114,28 @@ jobs:
         )
         
         for depth in {1..5}; do
-          echo "Testing perft $depth (expected: ${expected_results[$depth]})..."
+          echo "Testing starting position perft $depth (expected: ${expected_results[$depth]})..."
           result=$(echo -e "uci\nposition startpos\nperft $depth\nquit" | timeout 120s ./zathras | grep "Perft $depth result:" | awk '{print $4}')
           
           if [ "$result" != "${expected_results[$depth]}" ]; then
-            echo "ERROR: Perft $depth result was $result, expected ${expected_results[$depth]}"
+            echo "ERROR: Starting position perft $depth result was $result, expected ${expected_results[$depth]}"
             exit 1
           fi
-          echo "✓ Perft $depth: $result"
+          echo "✓ Starting position perft $depth: $result"
         done
+        
+        # Test additional standard perft positions
+        echo "=== Testing Standard Perft Positions ==="
+        
+        # Kiwipete position - tests complex move generation
+        echo "Testing Kiwipete position perft 3 (expected: 9467)..."
+        kiwipete_result=$(echo -e "uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 3\nquit" | timeout 60s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$kiwipete_result" != "9467" ]; then
+          echo "ERROR: Kiwipete position perft 3 result was $kiwipete_result, expected 9467"
+          exit 1
+        fi
+        echo "✓ Kiwipete position perft 3: $kiwipete_result"
         
         echo "All extended perft tests passed!"
         EOF
