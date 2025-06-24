@@ -51,6 +51,27 @@ jobs:
         echo "Testing basic UCI protocol..."
         echo -e "uci\nquit" | timeout 10s ./zathras > /dev/null
 
+    - name: Test divide command
+      run: |
+        echo "Testing divide command functionality..."
+        # Test divide at depth 2 for starting position
+        divide_result=$(echo -e "uci\nposition startpos\ndivide 2\nquit" | timeout 30s ./zathras | grep "Total:" | awk '{print $2}')
+        if [ "$divide_result" != "400" ]; then
+          echo "❌ Divide 2 for starting position was $divide_result, expected 400"
+          exit 1
+        else
+          echo "✅ Divide 2 for starting position: $divide_result"
+        fi
+        
+        # Test divide with a simple position
+        divide_simple=$(echo -e "uci\nposition fen 8/8/8/4k3/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | timeout 30s ./zathras | grep "Total:" | awk '{print $2}')
+        if [ "$divide_simple" != "5" ]; then
+          echo "❌ Divide 1 for simple king position was $divide_simple, expected 5"
+          exit 1
+        else
+          echo "✅ Divide 1 for simple king position: $divide_simple"
+        fi
+
     - name: Run extended perft suite
       run: |
         cat > extended_perft.sh << 'EOF'
