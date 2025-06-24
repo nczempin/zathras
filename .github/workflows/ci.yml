@@ -1,0 +1,226 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev, develop, 'feature/**', 'rebuild-v0.1.0' ]
+  pull_request:
+    branches: [ main, dev, develop ]
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential cppcheck
+
+    - name: Check case sensitivity
+      run: |
+        chmod +x scripts/check_case_sensitivity.sh
+        ./scripts/check_case_sensitivity.sh
+
+    - name: Run linting
+      run: |
+        echo "Running C++ linting checks..."
+        make lint-cppcheck
+      continue-on-error: true  # Don't fail the build on linting warnings for now
+
+    - name: Cache build artifacts
+      uses: actions/cache@v3
+      with:
+        path: |
+          **/*.o
+          zathras
+        key: ubuntu-build-${{ hashFiles('**/*.cpp', '**/*.h', 'Makefile') }}
+        restore-keys: |
+          ubuntu-build-
+
+    - name: Build
+      run: |
+        make clean
+        make
+
+    - name: Test basic functionality
+      run: |
+        echo "Testing basic UCI protocol..."
+        echo -e "uci\nquit" | timeout 10s ./zathras > /dev/null
+        
+        basic_failures=0
+        echo "Testing perft 3 (expected: 8902)..."
+        RESULT=$(echo -e "uci\nposition startpos\nperft 3\nquit" | timeout 30s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$RESULT" != "8902" ]; then
+          echo "❌ Perft 3 result was $RESULT, expected 8902"
+          basic_failures=$((basic_failures + 1))
+        else
+          echo "✅ Perft 3: $RESULT"
+        fi
+        
+        echo "Testing perft 4 (expected: 197281)..."
+        RESULT=$(echo -e "uci\nposition startpos\nperft 4\nquit" | timeout 60s ./zathras | grep "Perft 4 result:" | awk '{print $4}')
+        
+        if [ "$RESULT" != "197281" ]; then
+          echo "❌ Perft 4 result was $RESULT, expected 197281"
+          basic_failures=$((basic_failures + 1))
+        else
+          echo "✅ Perft 4: $RESULT"
+        fi
+        
+        if [ $basic_failures -eq 0 ]; then
+          echo "✅ All basic tests passed!"
+        else
+          echo "❌ $basic_failures basic test(s) failed"
+        fi
+
+    - name: Upload build artifacts on failure
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-artifacts
+        path: |
+          zathras
+          **/*.o
+          *.log
+
+  perft-validation:
+    name: Extended Perft Validation
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build
+      run: |
+        make clean
+        make
+
+    - name: Run extended perft suite
+      run: |
+        cat > extended_perft.sh << 'EOF'
+        #!/bin/bash
+        set -e
+        
+        echo "Running extended perft validation..."
+        
+        # Test perft depths 1-5 for starting position
+        echo "=== Testing Starting Position ==="
+        declare -A expected_results=(
+          [1]=20
+          [2]=400  
+          [3]=8902
+          [4]=197281
+          [5]=4865609
+        )
+        
+        failed_tests=0
+        for depth in {1..5}; do
+          echo "Testing starting position perft $depth (expected: ${expected_results[$depth]})..."
+          result=$(echo -e "uci\nposition startpos\nperft $depth\nquit" | timeout 120s ./zathras | grep "Perft $depth result:" | awk '{print $4}')
+          
+          if [ "$result" != "${expected_results[$depth]}" ]; then
+            echo "❌ Starting position perft $depth result was $result, expected ${expected_results[$depth]}"
+            failed_tests=$((failed_tests + 1))
+          else
+            echo "✅ Starting position perft $depth: $result"
+          fi
+        done
+        
+        # Test additional standard perft positions
+        echo "=== Testing Standard Perft Positions ==="
+        
+        # Kiwipete position - tests complex move generation
+        echo "Testing Kiwipete position perft 3 (expected: 9467)..."
+        kiwipete_result=$(echo -e "uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 3\nquit" | timeout 60s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$kiwipete_result" != "9467" ]; then
+          echo "❌ Kiwipete position perft 3 result was $kiwipete_result, expected 9467"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Kiwipete position perft 3: $kiwipete_result"
+        fi
+        
+        # Position 4 - intensive promotion testing  
+        echo "Testing Position 4 perft 3 (expected: 9467)..."
+        pos4_result=$(echo -e "uci\nposition fen r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1\nperft 3\nquit" | timeout 60s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$pos4_result" != "9467" ]; then
+          echo "❌ Position 4 perft 3 result was $pos4_result, expected 9467"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Position 4 perft 3: $pos4_result"
+        fi
+        
+        # Position 5 - promotion at ply 1 (critical for under-promotion validation)
+        echo "Testing Position 5 perft 3 (expected: 62379)..."
+        pos5_result=$(echo -e "uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 3\nquit" | timeout 90s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$pos5_result" != "62379" ]; then
+          echo "❌ Position 5 perft 3 result was $pos5_result, expected 62379"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Position 5 perft 3: $pos5_result"
+        fi
+        
+        # Simple under-promotion test (catches fake under-promotion easily)
+        echo "Testing simple under-promotion perft 3 (expected: 20)..."
+        underpromo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/7k/7K w - - 0 1\nperft 3\nquit" | timeout 30s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$underpromo_result" != "20" ]; then
+          echo "❌ Simple under-promotion perft 3 result was $underpromo_result, expected 20"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Simple under-promotion perft 3: $underpromo_result"
+        fi
+        
+        echo ""
+        echo "=== Critical Targeted Tests ==="
+        
+        # Simple promotion test - must generate all 4 promotion types (Issue #92 diagnostic)
+        echo "Testing simple promotion perft 1 (expected: 4 - Q,R,B,N)..."
+        simple_promo_result=$(echo -e "uci\nposition fen 8/1P6/8/8/8/8/1k6/1K6 w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$simple_promo_result" != "4" ]; then
+          echo "❌ Simple promotion perft 1 result was $simple_promo_result, expected 4 (Q,R,B,N)"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Simple promotion perft 1: $simple_promo_result (correctly generates all 4 types)"
+        fi
+        
+        # Alternative promotion position test (Issue #92 verification)
+        echo "Testing a7 promotion perft 1 (expected: 4 - Q,R,B,N)..."
+        a7_promo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/7k/7K w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$a7_promo_result" != "4" ]; then
+          echo "❌ A7 promotion perft 1 result was $a7_promo_result, expected 4 (Q,R,B,N)"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ A7 promotion perft 1: $a7_promo_result (correctly generates all 4 types)"
+        fi
+        
+        echo ""
+        echo "=== PERFT TEST SUMMARY ==="
+        if [ $failed_tests -eq 0 ]; then
+          echo "✅ All perft tests passed! ($((failed_tests)) failures)"
+        else
+          echo "❌ $failed_tests perft test(s) failed"
+          echo "Move generation accuracy needs investigation"
+        fi
+        
+        # Exit with failure if any tests failed
+        exit $failed_tests
+        EOF
+        chmod +x extended_perft.sh
+        ./extended_perft.sh
+
+    - name: Performance benchmark
+      run: |
+        echo "Running performance benchmark..."
+        echo -e "uci\nposition startpos\nperft 4\nquit" | ./zathras | grep "time:"
