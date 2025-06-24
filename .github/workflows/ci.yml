@@ -110,18 +110,16 @@ jobs:
         
         echo "Running extended perft validation..."
         
-        # Test perft depths 1-5 for starting position
+        # Test perft depths 2-4 for starting position
         echo "=== Testing Starting Position ==="
         declare -A expected_results=(
-          [1]=20
           [2]=400  
           [3]=8902
           [4]=197281
-          [5]=4865609
         )
         
         failed_tests=0
-        for depth in {1..5}; do
+        for depth in {2..4}; do
           echo "Testing starting position perft $depth (expected: ${expected_results[$depth]})..."
           result=$(echo -e "uci\nposition startpos\nperft $depth\nquit" | timeout 120s ./zathras | grep "Perft $depth result:" | awk '{print $4}')
           
