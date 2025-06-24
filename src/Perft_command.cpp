@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <ctime>
+#include <iomanip>
 
 #include "Position.h"
 #include "Move_generator.h"
@@ -20,28 +21,44 @@
 namespace Interface {
 	using namespace Moves;
 
+	struct PerftMetrics {
+		uint64_t nodes = 0;
+		uint64_t captures = 0;
+		uint64_t en_passant = 0;
+		uint64_t castles = 0;
+		uint64_t promotions = 0;
+		uint64_t checks = 0;
+		uint64_t discovery_checks = 0;
+		uint64_t double_checks = 0;
+		uint64_t checkmates = 0;
+	};
 
 	Perft_command::~Perft_command() {
 		// TODO Auto-generated destructor stub
 	}
 
 	uint64_t Perft_command::perft(uint8_t depth) {
+		PerftMetrics metrics;
+		perft_with_metrics(depth, metrics);
+		return metrics.nodes;
+	}
+
+	void Perft_command::perft_with_metrics(uint8_t depth, PerftMetrics& metrics) {
 		if (depth == 0) {
-			return 1;
+			metrics.nodes = 1;
+			return;
 		}
 		Move_container move_container = mg.generate_pseudolegal_moves(*pp, depth);
 		move_container_t moves = move_container.get_moves();
-		uint64_t total_result = 0;
 		size_t size = move_container.size();
-
-		////Only works when all moves are legal
-		//if (depth == 1) {
-		//	return size;
-		//}
 
 		for (size_t i = 0; i < size; ++i) {
 			Move& move = moves[i];
 			Move_state ms;
+			
+			// Save state before move for checks detection
+			bool was_in_check = pp->is_in_check(pp->white_to_move);
+			
 			pp->make_move(move, ms);
 			assert(pp->get_piece_on(move.get_from()) == 0);
 			assert(pp->get_piece_on(move.get_to()) != 0);
@@ -53,18 +70,65 @@ namespace Interface {
 
 			// the move was legal
 			if (depth == 1) {
-				++total_result;
+				metrics.nodes++;
+				
+				// Count move types
+				if (ms.captured_piece != 0) {
+					metrics.captures++;
+				}
+				
+				Move::move_t move_type = move.get_move_type();
+				if (move_type == Move::EN_PASSANT) {
+					metrics.en_passant++;
+					metrics.captures++; // En passant is also a capture
+				} else if (move_type == Move::CASTLE_KINGSIDE || move_type == Move::CASTLE_QUEENSIDE) {
+					metrics.castles++;
+				} else if (move_type == Move::PROMOTION_QUEEN || move_type == Move::PROMOTION_ROOK ||
+				           move_type == Move::PROMOTION_BISHOP || move_type == Move::PROMOTION_KNIGHT) {
+					metrics.promotions++;
+				}
+				
+				// Check if opponent is in check or checkmate
+				bool gives_check = pp->is_in_check(pp->white_to_move);
+				if (gives_check) {
+					metrics.checks++;
+					
+					// Check if it's checkmate
+					Move_container check_moves = mg.generate_pseudolegal_moves(*pp, 1);
+					bool has_legal_move = false;
+					for (size_t j = 0; j < check_moves.size(); ++j) {
+						Move_state temp_ms;
+						pp->make_move(check_moves.get_moves()[j], temp_ms);
+						if (!pp->is_in_check(!pp->white_to_move)) {
+							has_legal_move = true;
+							pp->unmake_move(check_moves.get_moves()[j], temp_ms);
+							break;
+						}
+						pp->unmake_move(check_moves.get_moves()[j], temp_ms);
+					}
+					if (!has_legal_move) {
+						metrics.checkmates++;
+					}
+				}
 			}
 			else {
-				uint64_t perft_result = perft(depth - 1);
-				total_result += perft_result;
+				PerftMetrics sub_metrics;
+				perft_with_metrics(depth - 1, sub_metrics);
+				metrics.nodes += sub_metrics.nodes;
+				metrics.captures += sub_metrics.captures;
+				metrics.en_passant += sub_metrics.en_passant;
+				metrics.castles += sub_metrics.castles;
+				metrics.promotions += sub_metrics.promotions;
+				metrics.checks += sub_metrics.checks;
+				metrics.discovery_checks += sub_metrics.discovery_checks;
+				metrics.double_checks += sub_metrics.double_checks;
+				metrics.checkmates += sub_metrics.checkmates;
 			}
 			assert(pp->get_piece_on(move.get_from()) == 0);
 			assert(pp->get_piece_on(move.get_to()) != 0);
 			pp->unmake_move(move, ms);
 			assert(pp->get_piece_on(move.get_from()) != 0);
 		}
-		return total_result;
 	}
 
 	string Perft_command::format_large_number(int nps) {

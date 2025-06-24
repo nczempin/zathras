@@ -17,7 +17,7 @@
 #include "Move.h"
 #include "Evaluator.h"
 
-#include "info.h"
+#include "Info.h"
 #include "Perft_command.h"
 
 extern Position p;
@@ -274,7 +274,7 @@ namespace Interface {
 				board[i] = 0;
 			}
 			p.mailbox_from_bitboard(board);
-			Move& m = convert_move(moveString, board, p);
+			Move m = convert_move(moveString, board, p);
 
 			//TODO make this more elegant
 			int from = m.get_from();
