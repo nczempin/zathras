@@ -147,6 +147,16 @@ jobs:
         fi
         echo "✓ Position 4 perft 3: $pos4_result"
         
+        # Position 5 - promotion at ply 1 (critical for early promotion bugs)
+        echo "Testing Position 5 perft 2 (expected: 1486)..."
+        pos5_result=$(echo -e "uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 2\nquit" | timeout 60s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
+        
+        if [ "$pos5_result" != "1486" ]; then
+          echo "ERROR: Position 5 perft 2 result was $pos5_result, expected 1486"
+          exit 1
+        fi
+        echo "✓ Position 5 perft 2: $pos5_result"
+        
         echo "All extended perft tests passed!"
         EOF
         chmod +x extended_perft.sh

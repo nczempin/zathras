@@ -119,6 +119,13 @@ test_position "Position 4 - intensive promotion testing" \
     2 264 \
     3 9467
 
+# Test 2c: Position 5 - promotion at ply 1
+test_position "Position 5 - promotion at ply 1" \
+    "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8" \
+    1 44 \
+    2 1486 \
+    3 62379
+
 # Test 3: En passant position
 test_position "En passant capture available" \
     "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1" \
