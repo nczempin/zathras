@@ -109,6 +109,14 @@ test_position "Kiwipete - exercises most move types" \
     "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" \
     1 6 \
     2 264 \
+    3 9467 \
+    4 422333
+
+# Test 2b: Position 4 from Chess Programming Wiki (promotion intensive)
+test_position "Position 4 - intensive promotion testing" \
+    "r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1" \
+    1 6 \
+    2 264 \
     3 9467
 
 # Test 3: En passant position

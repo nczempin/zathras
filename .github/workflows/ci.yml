@@ -137,6 +137,16 @@ jobs:
         fi
         echo "✓ Kiwipete position perft 3: $kiwipete_result"
         
+        # Position 4 - intensive promotion testing  
+        echo "Testing Position 4 perft 3 (expected: 9467)..."
+        pos4_result=$(echo -e "uci\nposition fen r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1\nperft 3\nquit" | timeout 60s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$pos4_result" != "9467" ]; then
+          echo "ERROR: Position 4 perft 3 result was $pos4_result, expected 9467"
+          exit 1
+        fi
+        echo "✓ Position 4 perft 3: $pos4_result"
+        
         echo "All extended perft tests passed!"
         EOF
         chmod +x extended_perft.sh
