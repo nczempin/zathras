@@ -8,7 +8,7 @@
 namespace Interface {
     class Divide_command {
     public:
-        Divide_command(Positions::Position position, size_t depth) 
+        Divide_command(const Positions::Position& position, size_t depth) 
             : position(position), depth(depth) {}
         
         void execute();

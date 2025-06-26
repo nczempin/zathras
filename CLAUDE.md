@@ -84,8 +84,7 @@ $(BUILD_DIR)/%.o: %.cpp
 ## Testing and Validation
 
 ### Expected Perft Results (after promotion fix)
-- Simple promotion perft 2: 400 moves
-- Promotion-only perft 2: 64 moves
+- Simple promotion perft 2: 41 moves (position: 4k3/P7/8/8/8/8/8/4K3 w - - 0 1)
 - Starting position perft 3: 8,902 moves
 - Starting position perft 4: 197,281 moves
 

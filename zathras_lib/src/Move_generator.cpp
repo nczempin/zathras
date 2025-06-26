@@ -16,9 +16,8 @@
 #include "Piece.h"
 #include "Bitboard.h"
 
-using namespace Positions;
-
 namespace Moves {
+	using namespace Positions;
 	Move_generator::Move_generator() {
 	}
 

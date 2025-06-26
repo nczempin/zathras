@@ -54,7 +54,14 @@ namespace Interface {
 
 				string depth_param = toParse.substr(index + pattern.length());
 
-				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
+				size_t depth = 6;
+				if (depth_param.length() > 0) {
+					try {
+						depth = std::stoi(depth_param);
+					} catch (const std::exception& e) {
+						cout << "Invalid depth parameter. Using depth 6." << endl;
+					}
+				}
 				Perft_command pc{p,  depth };
 				pc.execute();
 				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
@@ -79,7 +86,14 @@ namespace Interface {
 				string pattern = "divide ";
 				size_t index = toParse.find(pattern);
 				string depth_param = toParse.substr(index + pattern.length());
-				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 1;
+				size_t depth = 1;
+				if (depth_param.length() > 0) {
+					try {
+						depth = std::stoi(depth_param);
+					} catch (const std::exception& e) {
+						cout << "Invalid depth parameter. Using depth 1." << endl;
+					}
+				}
 				Divide_command dc{p, depth};
 				dc.execute();
 			}
