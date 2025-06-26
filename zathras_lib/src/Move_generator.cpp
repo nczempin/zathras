@@ -44,13 +44,14 @@ namespace Moves {
 
 	// TODO move these outside
 	void Move_generator::set_square(const int& file_to, const int& rank_to, bitset<64> & bbs) {
-		const unsigned int to = file_to + rank_to * 8;
-		Square::set_square(bbs, square_t(to));
+		const unsigned int to_twisted = 7 - file_to + rank_to * 8;
+		Square::set_square(bbs, square_t(to_twisted));
 	}
 
 	int Move_generator::clear_square(int file_to, int rank_to, bitset<64> & bbs) {
+		int to_twisted = 7 - file_to + rank_to * 8;
 		int to = file_to + rank_to * 8;
-		Square::clear_square(bbs, square_t(to));
+		Square::clear_square(bbs, square_t(to_twisted));
 		return to;
 	}
 
