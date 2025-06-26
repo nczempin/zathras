@@ -15,20 +15,18 @@ namespace Interface {
         }
 
         Move_container move_container = mg.generate_legal_moves(pos, depth);
-        uint64_t total_result = move_container.size();
         
         if (depth == 1) {
-            return total_result;
+            return move_container.size();
         }
 
         // For depth > 1, recurse
-        total_result = 0;
+        uint64_t total_result = 0;
         auto moves = move_container.get_moves();
         
         for (size_t i = 0; i < move_container.size(); ++i) {
             Move& move = moves[i];
             Move_state ms;
-            
             
             pos.make_move(move, ms);
             
