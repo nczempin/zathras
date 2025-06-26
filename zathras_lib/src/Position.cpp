@@ -1097,38 +1097,28 @@ namespace Positions {
 				Square::set_bit(pbb, to);
 				Square::clear_bit(pbb, from);
 
-				cerr << "DEBUG: About to switch on moving=" << (int)moving << " for move from " << (int)from << " to " << (int)to << " type " << move.get_move_type() << endl;
 				switch (moving) {
 				case Piece::WHITE_PAWN: {
 					//clear_bit(pawns, from);
-					cerr << "DEBUG: In WHITE_PAWN case, to=" << (int)to << " is_in_back_rank_black(to)=" << is_in_back_rank_black(to) << endl;
 
 					if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
 						Square::clear_bit(pawns, to);
-						cerr << "DEBUG make_move: Promoting at " << (int)to << ", move_type = " << move.get_move_type() << endl;
-						cerr << "  Before switch, board[to] = " << (int)board[to] << endl;
-						cerr << "  PROMOTION_QUEEN=" << PROMOTION_QUEEN << " PROMOTION_ROOK=" << PROMOTION_ROOK;
-						cerr << " PROMOTION_BISHOP=" << PROMOTION_BISHOP << " PROMOTION_KNIGHT=" << PROMOTION_KNIGHT << endl;
 						switch (move.get_move_type()) {
 							case PROMOTION_QUEEN:
 								Square::set_bit(queens, to);
 								board[to] = Piece::WHITE_QUEEN;
-								cerr << "  Set to WHITE_QUEEN" << endl;
 								break;
 							case PROMOTION_ROOK:
 								Square::set_bit(rooks, to);
 								board[to] = Piece::WHITE_ROOK;
-								cerr << "  Set to WHITE_ROOK" << endl;
 								break;
 							case PROMOTION_BISHOP:
 								Square::set_bit(bishops, to);
 								board[to] = Piece::WHITE_BISHOP;
-								cerr << "  Set to WHITE_BISHOP" << endl;
 								break;
 							case PROMOTION_KNIGHT:
 								Square::set_bit(knights, to);
 								board[to] = Piece::WHITE_KNIGHT;
-								cerr << "  Set to WHITE_KNIGHT" << endl;
 								break;
 							default:
 								// Should not happen - promotion without proper type
@@ -1137,7 +1127,6 @@ namespace Positions {
 								board[to] = Piece::WHITE_QUEEN;
 								break;
 						}
-						cerr << "  After promotion switch, board[to] = " << (int)board[to] << endl;
 					}
 					else {
 						// handle capturing by e. p.
@@ -1310,12 +1299,6 @@ namespace Positions {
 					break;
 				}
 			}
-		}
-		
-		// Debug promotion result
-		if (white_or_not && move.get_from() >= 48 && move.get_from() <= 55 && move.get_to() >= 56 && move.get_to() <= 63) {
-			cerr << "DEBUG make_move END: After move " << (int)move.get_from() << "->" << (int)move.get_to() 
-			     << " with type " << move.get_move_type() << ", board[" << (int)move.get_to() << "] = " << (int)board[move.get_to()] << endl;
 		}
 
 	}
