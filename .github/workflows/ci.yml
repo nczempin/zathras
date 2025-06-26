@@ -114,14 +114,15 @@ jobs:
           exit 1
         fi
         
-        # Verify each promotion move has the same perft count (5 - all king moves)
+        # Verify each promotion move has the correct perft count
+        # At depth 1, each promotion is just 1 move
         for piece in q r b n; do
           count=$(echo "$divide_promo_output" | grep "^a7a8${piece}:" | awk '{print $2}')
-          if [ "$count" != "5" ]; then
-            echo "❌ Promotion a7a8${piece} has incorrect count: $count (expected 5)"
+          if [ "$count" != "1" ]; then
+            echo "❌ Promotion a7a8${piece} has incorrect count: $count (expected 1)"
             exit 1
           else
-            echo "✅ Promotion a7a8${piece} correctly shows 5 moves"
+            echo "✅ Promotion a7a8${piece} correctly shows 1 move"
           fi
         done
 
