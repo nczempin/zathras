@@ -303,6 +303,28 @@ namespace Positions {
 	void Position::print(ostream& stream) const {
 		// TODO: Being a little inconsistent here with the types (int vs. uint_fastbla etc.)
 
+		// Check for piece overlaps (debugging aid)
+		const std::array<std::string, 6> piece_names = {"PAWNS", "KNIGHTS", "BISHOPS", "ROOKS", "QUEENS", "KINGS"};
+		bool found_overlap = false;
+		for (size_t i = 0; i < piece_names.size(); ++i) {
+			for (size_t j = i + 1; j < piece_names.size(); ++j) {
+				bb overlap = piece_bb[i] & piece_bb[j];
+				if (overlap) {
+					if (!found_overlap) {
+						stream << "\n*** WARNING: Piece overlap detected! ***" << endl;
+						found_overlap = true;
+					}
+					stream << piece_names[i] << " overlap with " << piece_names[j] << " at bit(s): ";
+					for (int sq = 0; sq < 64; ++sq) {
+						if (overlap & (1ULL << sq)) {
+							stream << sq << " ";
+						}
+					}
+					stream << endl;
+				}
+			}
+		}
+
 		piece_t board[64];
 		for (int i = 0; i < 64; ++i) {
 			board[i] = 0;
@@ -934,6 +956,42 @@ namespace Positions {
 		//	mboard[i] = 0;
 		//}
 
+		// Check for overlapping pieces
+		const char* piece_names[] = {"PAWNS", "KNIGHTS", "BISHOPS", "ROOKS", "QUEENS", "KINGS"};
+		bool has_overlap = false;
+		
+		for (int i = 0; i < 6; i++) {
+			for (int j = i + 1; j < 6; j++) {
+				bb overlap = piece_bb[i] & piece_bb[j];
+				if (overlap) {
+					cout << "ERROR: " << piece_names[i] << " overlap with " << piece_names[j] << " on squares: ";
+					for (int sq = 0; sq < 64; sq++) {
+						if (overlap & (1ULL << sq)) {
+							char file = 'a' + (sq % 8);
+							int rank = (sq / 8) + 1;
+							cout << file << rank << " ";
+						}
+					}
+					cout << endl;
+					has_overlap = true;
+				}
+			}
+		}
+		
+		if (has_overlap) {
+			cout << "WARNING: Piece overlap detected - position is invalid!" << endl;
+		}
+
+		// Print individual piece bitboards for debugging
+		cout << "=== Piece Bitboards ===" << endl;
+		cout << "PAWNS:   " << print_bitboard(pawns);
+		cout << "KNIGHTS: " << print_bitboard(knights);
+		cout << "BISHOPS: " << print_bitboard(bishops);
+		cout << "ROOKS:   " << print_bitboard(rooks);
+		cout << "QUEENS:  " << print_bitboard(queens);
+		cout << "KINGS:   " << print_bitboard(kings);
+		cout << endl;
+
 		cout << print_board();
 		cout << print_bitboard(white);
 		cout << print_bitboard(black);
@@ -1278,7 +1336,7 @@ namespace Positions {
 
 
 					if (from == E8 && to == C8) { //queenside castle
-						Square::update_bits(black, rooks, A8, C8);
+						Square::update_bits(black, rooks, A8, D8);
 						board[A8] = 0;
 						board[D8] = Piece::BLACK_ROOK;
 					}
