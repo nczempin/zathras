@@ -44,14 +44,13 @@ namespace Moves {
 
 	// TODO move these outside
 	void Move_generator::set_square(const int& file_to, const int& rank_to, bitset<64> & bbs) {
-		const unsigned int to_twisted = 7 - file_to + rank_to * 8;
-		Square::set_square(bbs, square_t(to_twisted));
+		const unsigned int to = file_to + rank_to * 8;
+		Square::set_square(bbs, square_t(to));
 	}
 
 	int Move_generator::clear_square(int file_to, int rank_to, bitset<64> & bbs) {
-		int to_twisted = 7 - file_to + rank_to * 8;
 		int to = file_to + rank_to * 8;
-		Square::clear_square(bbs, square_t(to_twisted));
+		Square::clear_square(bbs, square_t(to));
 		return to;
 	}
 
@@ -210,8 +209,12 @@ namespace Moves {
 		int8_t direction) {
 		bitset<64> bs[64];
 
-		for (int i = start; i != 64 - start; i += direction) {
+		// For black pawns (direction = -1), we need to include square 8
+		// For white pawns (direction = 1), we need to include square 55  
+		int end_square = (direction == 1) ? 56 : 7;
+		for (int i = start; i != end_square; i += direction) {
 			int candidate = i + 8 * direction; // single step
+			if (candidate < 0 || candidate >= 64) continue;
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
 			set_square(file_to, rank_to, bs[i]);

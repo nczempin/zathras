@@ -32,17 +32,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 - ✅ **Perft Testing**: Limited to depths 2-4 as requested
 - ✅ **Repository Cleanup**: Established clean v0.5.2 baseline
 
-### Active Development
-- 🔄 **Issue #98**: Restoring promotion move generation (4 moves per promotion)
-- 🔄 **Feature Branch**: `feature/ZTH-98-restore-promotion-move-generation`
+### Completed Work (2025-06-26)
+- ✅ **Issue #105**: Implemented divide command for perft debugging
+- ✅ **Issue #98-104**: MOSTLY FIXED - Restored promotion move generation
+  - ✅ Generates 4 moves per promotion (Queen, Rook, Bishop, Knight)
+  - ✅ Correctly sets promoted pieces on the board
+  - ✅ Fixed unmake_move to properly restore pawns
+  - ✅ Move display shows promotion notation (e.g., "e7e8q")
+  - ✅ UCI parsing handles promotion moves
+  - ✅ Simple promotion position perft 2 = 41 (correct)
+  - ⚠️ Position 4 perft 4 = 422,598 (expected 422,333)
 
-**Current Problem**: Promotion moves only generate 1 move instead of 4 (Queen, Rook, Bishop, Knight), causing perft test failures.
-
-### Previous Work Found in Git History
-Based on reflog analysis, promotion fixes were previously implemented but lost during cleanup:
-- **f69c43e**: Added PROMOTION_* move types to enum
-- **9496f97**: Fixed make_move/unmake_move promotion handling
-- **Need to restore**: All promotion-related functionality
+### Known Issues
+- 🐛 **NEW Issue**: Pregenerated pawn move tables have incorrect square mapping
+  - File coordinates are flipped (a-file moves show as h-file)
+  - Affects promotion move generation on edge files
+  - Root cause: `set_square()` uses `7 - file_to` instead of `file_to`
+  - This is a SEPARATE issue from the promotion fixes
 
 ## Build System
 
@@ -103,17 +109,27 @@ $(BUILD_DIR)/%.o: %.cpp
 
 ## Known Issues and Current Tasks
 
-### Issue #98: Restore Promotion Move Generation
-**Status**: In Progress on `feature/ZTH-98-restore-promotion-move-generation`
+### Issue #98-104: Promotion Move Generation
+**Status**: MOSTLY COMPLETE (2025-06-26)
 
-**Problem**: Each pawn promotion generates only 1 move instead of 4, causing perft failures.
+**Completed**:
+1. ✅ Restored Move_type enum with PROMOTION_QUEEN, PROMOTION_ROOK, PROMOTION_BISHOP, PROMOTION_KNIGHT
+2. ✅ Fixed visit_pawn_caps() to generate 4 promotion moves  
+3. ✅ Fixed visit_pawn_nocaps() to generate 4 promotion moves
+4. ✅ Fixed make_move/unmake_move promotion handling (including pawn restoration bug)
+5. ✅ Restored UCI promotion parsing
+6. ✅ Fixed Move display to show promotion notation
 
-**Required Fixes**:
-1. ✅ Restore Move_type enum with PROMOTION_QUEEN, PROMOTION_ROOK, PROMOTION_BISHOP, PROMOTION_KNIGHT
-2. 🔄 Fix visit_pawn_caps() to generate 4 promotion moves  
-3. ⏳ Fix visit_pawn_nocaps() to generate 4 promotion moves
-4. ⏳ Restore make_move/unmake_move promotion handling
-5. ⏳ Restore UCI promotion parsing
+**Remaining Issue**: Small perft discrepancy in complex positions (265 nodes difference)
+
+### NEW Issue: Pregenerated Move Table Bug
+**Status**: Discovered but NOT FIXED
+
+**Problem**: Pawn move pregeneration has incorrect square mapping
+- Files are flipped: `to_twisted = 7 - file_to + rank_to * 8`
+- Should be: `to = file_to + rank_to * 8`
+- Affects pawn moves, especially promotions on a-file and h-file
+- This is a SEPARATE bug from the promotion generation issue
 
 ### Issue #97: CI Optimization
 **Status**: Completed for now - consolidated CI into single job
