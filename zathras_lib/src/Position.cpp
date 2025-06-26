@@ -634,6 +634,7 @@ namespace Positions {
 		bool set_en_passant = false;
 		const square_t& from = move.get_from();
 		const square_t& to = move.get_to();
+		
 		int8_t moving = get_piece_on(from);
 		//if (moving == 0) {
 		//	debugPosition();
@@ -675,18 +676,46 @@ namespace Positions {
 		if (white_to_move) {
 			Square::clear_bit(white, to);
 			Square::set_bit(white, from);
-			bb& pbb = piece_bb[moving - 1];
-			Square::clear_bit(pbb, to);
-			Square::set_bit(pbb, from);
-			switch (moving) {
+			
+			// Check if this is a promotion - if so, we need to handle it specially
+			bool is_promotion = move.get_move_type() >= PROMOTION_QUEEN && move.get_move_type() <= PROMOTION_KNIGHT;
+			if (is_promotion) {
+				// For promotions, clear the promoted piece bit and restore the pawn
+				board[from] = Piece::WHITE_PAWN;
+				// The promoted piece bitboard will be cleared in the switch statement below
+			} else {
+				bb& pbb = piece_bb[moving - 1];
+				Square::clear_bit(pbb, to);
+				Square::set_bit(pbb, from);
+			}
+			
+			// For promotions, we need to handle the promoted piece type
+			piece_t piece_to_check = is_promotion ? Piece::WHITE_PAWN : moving;
+			switch (piece_to_check) {
 			case Piece::WHITE_PAWN: {
 				// move pawn back
 				//TODO clearing can be saved when move was a capture. find out which is faster
 				if (is_in_back_rank_black(to)) {
-					//TODO move_type = promotion
-					//piece_t promoted_to = Piece::WHITE_QUEEN; //TODO allow underpromotion
-					//un_promote(promoted_to, to);
-					Square::clear_bit(queens, to);
+					// Clear the appropriate piece bit based on promotion type
+					switch (move.get_move_type()) {
+						case PROMOTION_QUEEN:
+							Square::clear_bit(queens, to);
+							break;
+						case PROMOTION_ROOK:
+							Square::clear_bit(rooks, to);
+							break;
+						case PROMOTION_BISHOP:
+							Square::clear_bit(bishops, to);
+							break;
+						case PROMOTION_KNIGHT:
+							Square::clear_bit(knights, to);
+							break;
+						default:
+							// Should not happen - unmaking promotion without proper type
+							assert(false && "Invalid promotion type when unmaking white pawn promotion");
+							break;
+					}
+					Square::set_bit(pawns, from);
 				}
 				else {
 					// handle capturing by e. p.
@@ -743,15 +772,45 @@ namespace Positions {
 		else {
 			Square::clear_bit(black, to); //TODO unnecessary when capture
 			Square::set_bit(black, from);
-			bb& pbb = piece_bb[-moving - 1];
-			Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
-			Square::set_bit(pbb, from);
-			switch (moving) {
+			
+			// Check if this is a promotion - if so, we need to handle it specially
+			bool is_promotion = move.get_move_type() >= PROMOTION_QUEEN && move.get_move_type() <= PROMOTION_KNIGHT;
+			if (is_promotion) {
+				// For promotions, clear the promoted piece bit and restore the pawn
+				board[from] = Piece::BLACK_PAWN;
+				// The promoted piece bitboard will be cleared in the switch statement below
+			} else {
+				bb& pbb = piece_bb[-moving - 1];
+				Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
+				Square::set_bit(pbb, from);
+			}
+			
+			// For promotions, we need to handle the promoted piece type
+			piece_t piece_to_check = is_promotion ? Piece::BLACK_PAWN : moving;
+			switch (piece_to_check) {
 			case Piece::BLACK_PAWN: {
 
 				if (is_in_back_rank_white(to)) {
-					//un_promote(Piece::BLACK_QUEEN, to);
-					Square::clear_bit(queens, to);
+					// Clear the appropriate piece bit based on promotion type
+					switch (move.get_move_type()) {
+						case PROMOTION_QUEEN:
+							Square::clear_bit(queens, to);
+							break;
+						case PROMOTION_ROOK:
+							Square::clear_bit(rooks, to);
+							break;
+						case PROMOTION_BISHOP:
+							Square::clear_bit(bishops, to);
+							break;
+						case PROMOTION_KNIGHT:
+							Square::clear_bit(knights, to);
+							break;
+						default:
+							// Should not happen - unmaking promotion without proper type
+							assert(false && "Invalid promotion type when unmaking black pawn promotion");
+							break;
+					}
+					Square::set_bit(pawns, from);
 				}
 				else {
 					// handle capturing by e. p.
@@ -1043,10 +1102,31 @@ namespace Positions {
 					//clear_bit(pawns, from);
 
 					if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
-													 //promote(Piece::WHITE_QUEEN, to);
-						Square::set_bit(queens, to);
 						Square::clear_bit(pawns, to);
-						board[to] = Piece::WHITE_QUEEN;
+						switch (move.get_move_type()) {
+							case PROMOTION_QUEEN:
+								Square::set_bit(queens, to);
+								board[to] = Piece::WHITE_QUEEN;
+								break;
+							case PROMOTION_ROOK:
+								Square::set_bit(rooks, to);
+								board[to] = Piece::WHITE_ROOK;
+								break;
+							case PROMOTION_BISHOP:
+								Square::set_bit(bishops, to);
+								board[to] = Piece::WHITE_BISHOP;
+								break;
+							case PROMOTION_KNIGHT:
+								Square::set_bit(knights, to);
+								board[to] = Piece::WHITE_KNIGHT;
+								break;
+							default:
+								// Should not happen - promotion without proper type
+								cerr << "WARNING: Invalid promotion type " << move.get_move_type() << " for white pawn, defaulting to queen!" << endl;
+								Square::set_bit(queens, to);
+								board[to] = Piece::WHITE_QUEEN;
+								break;
+						}
 					}
 					else {
 						// handle capturing by e. p.
@@ -1125,9 +1205,29 @@ namespace Positions {
 					/*int8_t promoted_to = move.get_promoted_to();
 					if (promoted_to != 0) {*/
 					if (is_in_back_rank_white(to)) {
-						Square::set_bit(queens, to);
 						Square::clear_bit(pawns, to); // that was eagerly set previously
-													  //							promote(Piece::BLACK_QUEEN, to); // TODO underpromote
+						switch (move.get_move_type()) {
+							case PROMOTION_QUEEN:
+								Square::set_bit(queens, to);
+								board[to] = Piece::BLACK_QUEEN;
+								break;
+							case PROMOTION_ROOK:
+								Square::set_bit(rooks, to);
+								board[to] = Piece::BLACK_ROOK;
+								break;
+							case PROMOTION_BISHOP:
+								Square::set_bit(bishops, to);
+								board[to] = Piece::BLACK_BISHOP;
+								break;
+							case PROMOTION_KNIGHT:
+								Square::set_bit(knights, to);
+								board[to] = Piece::BLACK_KNIGHT;
+								break;
+							default:
+								// Should not happen - promotion without proper type
+								assert(false && "Invalid promotion type for black pawn");
+								break;
+						}
 					}
 					else {
 

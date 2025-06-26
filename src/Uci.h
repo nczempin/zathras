@@ -54,7 +54,14 @@ namespace Interface {
 
 				string depth_param = toParse.substr(index + pattern.length());
 
-				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 6;
+				size_t depth = 6;
+				if (depth_param.length() > 0) {
+					try {
+						depth = std::stoi(depth_param);
+					} catch (const std::exception& e) {
+						cout << "Invalid depth parameter. Using depth 6." << endl;
+					}
+				}
 				Perft_command pc{p,  depth };
 				pc.execute();
 				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
@@ -79,7 +86,14 @@ namespace Interface {
 				string pattern = "divide ";
 				size_t index = toParse.find(pattern);
 				string depth_param = toParse.substr(index + pattern.length());
-				size_t depth = depth_param.length() > 0 ? std::stoi(depth_param) : 1;
+				size_t depth = 1;
+				if (depth_param.length() > 0) {
+					try {
+						depth = std::stoi(depth_param);
+					} catch (const std::exception& e) {
+						cout << "Invalid depth parameter. Using depth 1." << endl;
+					}
+				}
 				Divide_command dc{p, depth};
 				dc.execute();
 			}
@@ -175,7 +189,8 @@ namespace Interface {
 					}
 				}
 			}
-			else if (toParse == "sp") {
+			else if (toParse == "sp" || toParse == "d") {
+				// Both "sp" (show position) and "d" (display) show the current position
 				p.print(cout);
 			}
 			/*else if (toParse == "sm") {
@@ -187,7 +202,8 @@ namespace Interface {
 				}
 			}*/
 			else {
-				cout << "???" << endl;
+				cout << "Unknown command: '" << toParse << "'" << endl;
+				cout << "Available commands: uci, isready, position, go, perft, divide, d (display), sp (show position), quit" << endl;
 			}
 		}
 	private:
@@ -331,6 +347,32 @@ namespace Interface {
 			move_type_t mt = NONE;
 			piece_t moving = board[from];
 			piece_t captured = board[to];
+			
+			// Check for promotion
+			if (promotedTo != "") {
+				char promo = promotedTo[0];
+				switch (promo) {
+					case 'q':
+					case 'Q':
+						mt = PROMOTION_QUEEN;
+						break;
+					case 'r':
+					case 'R':
+						mt = PROMOTION_ROOK;
+						break;
+					case 'b':
+					case 'B':
+						mt = PROMOTION_BISHOP;
+						break;
+					case 'n':
+					case 'N':
+						mt = PROMOTION_KNIGHT;
+						break;
+					default:
+						// Invalid promotion piece
+						break;
+				}
+			}
 
 			// TODO stupid way of doing this
 			if (moving == Piece::WHITE_PAWN) {

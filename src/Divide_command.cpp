@@ -28,6 +28,8 @@ namespace Interface {
         for (size_t i = 0; i < move_container.size(); ++i) {
             Move& move = moves[i];
             Move_state ms;
+            
+            
             pos.make_move(move, ms);
             
             uint64_t perft_result = perft(pos, depth - 1);
@@ -51,6 +53,7 @@ namespace Interface {
         for (size_t i = 0; i < move_container.size(); ++i) {
             Move& move = moves[i];
             Move_state ms;
+            
             position.make_move(move, ms);
             
             // Calculate perft for this move

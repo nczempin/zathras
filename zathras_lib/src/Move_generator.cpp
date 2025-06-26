@@ -16,8 +16,8 @@
 #include "Piece.h"
 #include "Bitboard.h"
 
-
 namespace Moves {
+	using namespace Positions;
 	Move_generator::Move_generator() {
 	}
 
@@ -209,8 +209,12 @@ namespace Moves {
 		int8_t direction) {
 		bitset<64> bs[64];
 
-		for (int i = start; i != 64 - start; i += direction) {
+		// For black pawns (direction = -1), we need to include square 8
+		// For white pawns (direction = 1), we need to include square 55  
+		int end_square = (direction == 1) ? 56 : 7;
+		for (int i = start; i != end_square; i += direction) {
 			int candidate = i + 8 * direction; // single step
+			if (candidate < 0 || candidate >= 64) continue;
 			int file_to = candidate % 8;
 			int rank_to = candidate / 8;
 			set_square(file_to, rank_to, bs[i]);
@@ -375,22 +379,16 @@ namespace Moves {
 				int8_t captured = has_captured_piece(to, moving);
 				if (captured) {
 					if (to >= 56) { // promoting white pawn
-						f(from, to, NONE); //TODO find out how to use defaults on function objects
-						//TODO switch subpromotions on/off here
-	/*					f(moving, from, to, captured, Piece::WHITE_ROOK);
-						f(moving, from, to, captured, Piece::WHITE_BISHOP);
-						f(moving, from, to, captured, Piece::WHITE_KNIGHT);*/
-						// end switch subpromotions on/off
-
+						f(from, to, PROMOTION_QUEEN);
+						f(from, to, PROMOTION_ROOK);
+						f(from, to, PROMOTION_BISHOP);
+						f(from, to, PROMOTION_KNIGHT);
 					}
 					else if (to <= 7) { // promoting black pawn
-						f(from, to, NONE);
-						//TODO switch subpromotions on/off here
-						//f(moving, from, to, captured, Piece::BLACK_ROOK);
-						//f(moving, from, to, captured, Piece::BLACK_BISHOP);
-						//f(moving, from, to, captured, Piece::BLACK_KNIGHT);
-						// end switch subpromotions on/off
-
+						f(from, to, PROMOTION_QUEEN);
+						f(from, to, PROMOTION_ROOK);
+						f(from, to, PROMOTION_BISHOP);
+						f(from, to, PROMOTION_KNIGHT);
 					}
 					else {
 						f(from, to, NONE);
@@ -587,17 +585,16 @@ namespace Moves {
 			while (moves != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moves));
 				if (to >= 56) { // promoting white pawn
-					f(from, to, NONE);   // Queen promotion (default)
-					f(from, to, NONE);   // Rook promotion 
-					f(from, to, NONE);   // Bishop promotion
-					f(from, to, NONE);   // Knight promotion
+					f(from, to, PROMOTION_QUEEN);
+					f(from, to, PROMOTION_ROOK);
+					f(from, to, PROMOTION_BISHOP);
+					f(from, to, PROMOTION_KNIGHT);
 				}
 				else if (to <= 7) { // promoting black pawn
-					f(from, to, NONE);   // Queen promotion (default)
-					f(from, to, NONE);   // Rook promotion
-					f(from, to, NONE);   // Bishop promotion
-					f(from, to, NONE);   // Knight promotion
-
+					f(from, to, PROMOTION_QUEEN);
+					f(from, to, PROMOTION_ROOK);
+					f(from, to, PROMOTION_BISHOP);
+					f(from, to, PROMOTION_KNIGHT);
 				}
 				else {
 					f(from, to, NONE);
@@ -615,22 +612,16 @@ namespace Moves {
 			while (moveses != 0x00) {
 				square_t to = square_t(Bitboard::extract_and_remove_square(moveses));
 				if (to >= 56) { // promoting white pawn
-					moves.add_move(from, to, NONE);
-					//TODO switch subpromotions on/off here
-					/*f(moving, from, to, 0, Piece::WHITE_ROOK);
-					f(moving, from, to, 0, Piece::WHITE_BISHOP);
-					f(moving, from, to, 0, Piece::WHITE_KNIGHT);*/
-					// end switch subpromotions on/off
-
+					moves.add_move(from, to, PROMOTION_QUEEN);
+					moves.add_move(from, to, PROMOTION_ROOK);
+					moves.add_move(from, to, PROMOTION_BISHOP);
+					moves.add_move(from, to, PROMOTION_KNIGHT);
 				}
 				else if (to <= 7) { // promoting black pawn
-					moves.add_move(from, to, NONE);
-					//TODO switch subpromotions on/off here
-					//f(moving, from, to, 0, Piece::BLACK_ROOK);
-					//f(moving, from, to, 0, Piece::BLACK_BISHOP);
-					//f(moving, from, to, 0, Piece::BLACK_KNIGHT);
-					// end switch subpromotions on/off
-
+					moves.add_move(from, to, PROMOTION_QUEEN);
+					moves.add_move(from, to, PROMOTION_ROOK);
+					moves.add_move(from, to, PROMOTION_BISHOP);
+					moves.add_move(from, to, PROMOTION_KNIGHT);
 				}
 				else {
 					moves.add_move(from, to, NONE);
