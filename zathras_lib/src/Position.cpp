@@ -634,6 +634,7 @@ namespace Positions {
 		bool set_en_passant = false;
 		const square_t& from = move.get_from();
 		const square_t& to = move.get_to();
+		
 		int8_t moving = get_piece_on(from);
 		//if (moving == 0) {
 		//	debugPosition();
@@ -675,10 +676,22 @@ namespace Positions {
 		if (white_to_move) {
 			Square::clear_bit(white, to);
 			Square::set_bit(white, from);
-			bb& pbb = piece_bb[moving - 1];
-			Square::clear_bit(pbb, to);
-			Square::set_bit(pbb, from);
-			switch (moving) {
+			
+			// Check if this is a promotion - if so, we need to handle it specially
+			bool is_promotion = move.get_move_type() >= PROMOTION_QUEEN && move.get_move_type() <= PROMOTION_KNIGHT;
+			if (is_promotion) {
+				// For promotions, clear the promoted piece bit and restore the pawn
+				board[from] = Piece::WHITE_PAWN;
+				// The promoted piece bitboard will be cleared in the switch statement below
+			} else {
+				bb& pbb = piece_bb[moving - 1];
+				Square::clear_bit(pbb, to);
+				Square::set_bit(pbb, from);
+			}
+			
+			// For promotions, we need to handle the promoted piece type
+			piece_t piece_to_check = is_promotion ? Piece::WHITE_PAWN : moving;
+			switch (piece_to_check) {
 			case Piece::WHITE_PAWN: {
 				// move pawn back
 				//TODO clearing can be saved when move was a capture. find out which is faster
@@ -759,10 +772,22 @@ namespace Positions {
 		else {
 			Square::clear_bit(black, to); //TODO unnecessary when capture
 			Square::set_bit(black, from);
-			bb& pbb = piece_bb[-moving - 1];
-			Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
-			Square::set_bit(pbb, from);
-			switch (moving) {
+			
+			// Check if this is a promotion - if so, we need to handle it specially
+			bool is_promotion = move.get_move_type() >= PROMOTION_QUEEN && move.get_move_type() <= PROMOTION_KNIGHT;
+			if (is_promotion) {
+				// For promotions, clear the promoted piece bit and restore the pawn
+				board[from] = Piece::BLACK_PAWN;
+				// The promoted piece bitboard will be cleared in the switch statement below
+			} else {
+				bb& pbb = piece_bb[-moving - 1];
+				Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
+				Square::set_bit(pbb, from);
+			}
+			
+			// For promotions, we need to handle the promoted piece type
+			piece_t piece_to_check = is_promotion ? Piece::BLACK_PAWN : moving;
+			switch (piece_to_check) {
 			case Piece::BLACK_PAWN: {
 
 				if (is_in_back_rank_white(to)) {
@@ -1072,34 +1097,47 @@ namespace Positions {
 				Square::set_bit(pbb, to);
 				Square::clear_bit(pbb, from);
 
+				cerr << "DEBUG: About to switch on moving=" << (int)moving << " for move from " << (int)from << " to " << (int)to << " type " << move.get_move_type() << endl;
 				switch (moving) {
 				case Piece::WHITE_PAWN: {
 					//clear_bit(pawns, from);
+					cerr << "DEBUG: In WHITE_PAWN case, to=" << (int)to << " is_in_back_rank_black(to)=" << is_in_back_rank_black(to) << endl;
 
 					if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
 						Square::clear_bit(pawns, to);
+						cerr << "DEBUG make_move: Promoting at " << (int)to << ", move_type = " << move.get_move_type() << endl;
+						cerr << "  Before switch, board[to] = " << (int)board[to] << endl;
+						cerr << "  PROMOTION_QUEEN=" << PROMOTION_QUEEN << " PROMOTION_ROOK=" << PROMOTION_ROOK;
+						cerr << " PROMOTION_BISHOP=" << PROMOTION_BISHOP << " PROMOTION_KNIGHT=" << PROMOTION_KNIGHT << endl;
 						switch (move.get_move_type()) {
 							case PROMOTION_QUEEN:
 								Square::set_bit(queens, to);
 								board[to] = Piece::WHITE_QUEEN;
+								cerr << "  Set to WHITE_QUEEN" << endl;
 								break;
 							case PROMOTION_ROOK:
 								Square::set_bit(rooks, to);
 								board[to] = Piece::WHITE_ROOK;
+								cerr << "  Set to WHITE_ROOK" << endl;
 								break;
 							case PROMOTION_BISHOP:
 								Square::set_bit(bishops, to);
 								board[to] = Piece::WHITE_BISHOP;
+								cerr << "  Set to WHITE_BISHOP" << endl;
 								break;
 							case PROMOTION_KNIGHT:
 								Square::set_bit(knights, to);
 								board[to] = Piece::WHITE_KNIGHT;
+								cerr << "  Set to WHITE_KNIGHT" << endl;
 								break;
 							default:
 								// Should not happen - promotion without proper type
-								assert(false && "Invalid promotion type for white pawn");
+								cerr << "WARNING: Invalid promotion type " << move.get_move_type() << " for white pawn, defaulting to queen!" << endl;
+								Square::set_bit(queens, to);
+								board[to] = Piece::WHITE_QUEEN;
 								break;
 						}
+						cerr << "  After promotion switch, board[to] = " << (int)board[to] << endl;
 					}
 					else {
 						// handle capturing by e. p.
@@ -1272,6 +1310,12 @@ namespace Positions {
 					break;
 				}
 			}
+		}
+		
+		// Debug promotion result
+		if (white_or_not && move.get_from() >= 48 && move.get_from() <= 55 && move.get_to() >= 56 && move.get_to() <= 63) {
+			cerr << "DEBUG make_move END: After move " << (int)move.get_from() << "->" << (int)move.get_to() 
+			     << " with type " << move.get_move_type() << ", board[" << (int)move.get_to() << "] = " << (int)board[move.get_to()] << endl;
 		}
 
 	}

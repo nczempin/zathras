@@ -28,6 +28,13 @@ namespace Interface {
         for (size_t i = 0; i < move_container.size(); ++i) {
             Move& move = moves[i];
             Move_state ms;
+            
+            // Debug promotion moves
+            string move_str = to_string(move);
+            if (move_str.find("a8") != string::npos && move_str.length() > 4) {
+                cerr << "DEBUG perft: About to make move " << move_str << " with move_type " << move.get_move_type() << endl;
+            }
+            
             pos.make_move(move, ms);
             
             uint64_t perft_result = perft(pos, depth - 1);
@@ -51,7 +58,19 @@ namespace Interface {
         for (size_t i = 0; i < move_container.size(); ++i) {
             Move& move = moves[i];
             Move_state ms;
+            // Debug before making move
+            string move_str = to_string(move);
+            if (move_str.find("a8") != string::npos && move_str.length() > 4) {
+                cerr << "DEBUG divide execute: About to make " << move_str << " with move_type " << move.get_move_type() << endl;
+            }
+            
             position.make_move(move, ms);
+            
+            // Debug: Check piece on destination for promotions
+            if (move_str.find("a8") != string::npos && move_str.length() > 4) {
+                piece_t piece_on_a8 = position.get_piece_on(static_cast<square_t>(56)); // a8
+                cerr << "DEBUG divide execute: After " << move_str << ", piece on a8 = " << (int)piece_on_a8 << endl;
+            }
             
             // Calculate perft for this move
             uint64_t count = perft(position, depth - 1);
@@ -60,7 +79,6 @@ namespace Interface {
             position.unmake_move(move, ms);
             
             // Display the move and its count
-            string move_str = to_string(move);
             cout << move_str << ": " << count << endl;
         }
         

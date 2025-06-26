@@ -89,6 +89,24 @@ int8_t get_captured() const {
 		std::string retval = Positions::Square::mailbox_index_to_square(move.get_from());
 		retval += Positions::Square::mailbox_index_to_square(move.get_to());
 
+		// Add promotion notation
+		switch (move.get_move_type()) {
+			case PROMOTION_QUEEN:
+				retval += "q";
+				break;
+			case PROMOTION_ROOK:
+				retval += "r";
+				break;
+			case PROMOTION_BISHOP:
+				retval += "b";
+				break;
+			case PROMOTION_KNIGHT:
+				retval += "n";
+				break;
+			default:
+				// No suffix for normal moves
+				break;
+		}
 
 		return retval;
 	}

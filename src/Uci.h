@@ -175,7 +175,8 @@ namespace Interface {
 					}
 				}
 			}
-			else if (toParse == "sp") {
+			else if (toParse == "sp" || toParse == "d") {
+				// Both "sp" (show position) and "d" (display) show the current position
 				p.print(cout);
 			}
 			/*else if (toParse == "sm") {
@@ -187,7 +188,8 @@ namespace Interface {
 				}
 			}*/
 			else {
-				cout << "???" << endl;
+				cout << "Unknown command: '" << toParse << "'" << endl;
+				cout << "Available commands: uci, isready, position, go, perft, divide, d (display), sp (show position), quit" << endl;
 			}
 		}
 	private:
@@ -331,6 +333,32 @@ namespace Interface {
 			move_type_t mt = NONE;
 			piece_t moving = board[from];
 			piece_t captured = board[to];
+			
+			// Check for promotion
+			if (promotedTo != "") {
+				char promo = promotedTo[0];
+				switch (promo) {
+					case 'q':
+					case 'Q':
+						mt = PROMOTION_QUEEN;
+						break;
+					case 'r':
+					case 'R':
+						mt = PROMOTION_ROOK;
+						break;
+					case 'b':
+					case 'B':
+						mt = PROMOTION_BISHOP;
+						break;
+					case 'n':
+					case 'N':
+						mt = PROMOTION_KNIGHT;
+						break;
+					default:
+						// Invalid promotion piece
+						break;
+				}
+			}
 
 			// TODO stupid way of doing this
 			if (moving == Piece::WHITE_PAWN) {
