@@ -94,6 +94,36 @@ jobs:
         
         echo ""
         echo "✅ DIVIDE command working correctly - shows move-by-move perft breakdown"
+        
+    - name: Test divide command with promotions
+      run: |
+        echo "=== Testing DIVIDE command with promotion positions ==="
+        
+        # Test divide with a promotion position
+        echo "Testing divide on promotion position..."
+        divide_promo_output=$(echo -e "uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | timeout 30s ./zathras)
+        
+        # Count promotion moves (should show 4 moves for the pawn: a7a8q, a7a8r, a7a8b, a7a8n)
+        promo_move_count=$(echo "$divide_promo_output" | grep -E "^a7a8[qrbn]:" | wc -l)
+        if [ "$promo_move_count" -eq 4 ]; then
+          echo "✅ Divide correctly shows 4 promotion moves"
+        else
+          echo "❌ Expected 4 promotion moves, found $promo_move_count"
+          echo "Output:"
+          echo "$divide_promo_output" | grep -E "^a7a8"
+          exit 1
+        fi
+        
+        # Verify each promotion move has the same perft count (5 - all king moves)
+        for piece in q r b n; do
+          count=$(echo "$divide_promo_output" | grep "^a7a8${piece}:" | awk '{print $2}')
+          if [ "$count" != "5" ]; then
+            echo "❌ Promotion a7a8${piece} has incorrect count: $count (expected 5)"
+            exit 1
+          else
+            echo "✅ Promotion a7a8${piece} correctly shows 5 moves"
+          fi
+        done
 
     - name: Run extended perft suite
       run: |
@@ -138,69 +168,112 @@ jobs:
           echo "✅ Kiwipete position perft 3: $kiwipete_result"
         fi
         
-        # TEMPORARILY DISABLED: Positions with promotions
-        # TODO: Re-enable once promotion is fixed
+        # Position 4 - intensive promotion testing  
+        echo "Testing Position 4 perft 3 (expected: 9467)..."
+        pos4_result=$(echo -e "uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 3\nquit" | timeout 60s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
         
-        # # Position 4 - intensive promotion testing  
-        # echo "Testing Position 4 perft 3 (expected: 9467)..."
-        # pos4_result=$(echo -e "uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 3\nquit" | timeout 60s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
-        # 
-        # if [ "$pos4_result" != "9467" ]; then
-        #   echo "❌ Position 4 perft 3 result was $pos4_result, expected 9467"
-        #   failed_tests=$((failed_tests + 1))
-        # else
-        #   echo "✅ Position 4 perft 3: $pos4_result"
-        # fi
-        # 
-        # # Position 5 - promotion at ply 1 (critical for under-promotion validation)
-        # echo "Testing Position 5 perft 3 (expected: 62379)..."
-        # pos5_result=$(echo -e "uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 3\nquit" | timeout 90s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
-        # 
-        # if [ "$pos5_result" != "62379" ]; then
-        #   echo "❌ Position 5 perft 3 result was $pos5_result, expected 62379"
-        #   failed_tests=$((failed_tests + 1))
-        # else
-        #   echo "✅ Position 5 perft 3: $pos5_result"
-        # fi
+        if [ "$pos4_result" != "9467" ]; then
+          echo "❌ Position 4 perft 3 result was $pos4_result, expected 9467"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Position 4 perft 3: $pos4_result"
+        fi
         
-        # TEMPORARILY DISABLED: Promotion tests failing due to ongoing promotion fix
-        # TODO: Re-enable these tests once promotion move generation is fixed
+        # Also test Position 4 at depth 4 for more comprehensive validation
+        echo "Testing Position 4 perft 4 (expected: 422333)..."
+        pos4_d4_result=$(echo -e "uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 4\nquit" | timeout 120s ./zathras | grep "Perft 4 result:" | awk '{print $4}')
         
-        # # Simple under-promotion test
-        # echo "Testing simple under-promotion perft 2 (expected: 400)..."
-        # underpromo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/8/k7/K7 w - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
-        # 
-        # if [ "$underpromo_result" != "400" ]; then
-        #   echo "❌ Simple under-promotion perft 2 result was $underpromo_result, expected 400"
-        #   failed_tests=$((failed_tests + 1))
-        # else
-        #   echo "✅ Simple under-promotion perft 2: $underpromo_result"
-        # fi
-        # 
-        # echo ""
-        # echo "=== Critical Targeted Tests ==="
-        # 
-        # # Simple promotion test
-        # echo "Testing simple promotion perft 2 (expected: 400)..."
-        # simple_promo_result=$(echo -e "uci\nposition fen 8/P7/8/8/8/k7/8/K7 w - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
-        # 
-        # if [ "$simple_promo_result" != "400" ]; then
-        #   echo "❌ Simple promotion perft 2 result was $simple_promo_result, expected 400"
-        #   failed_tests=$((failed_tests + 1))
-        # else
-        #   echo "✅ Simple promotion perft 2: $simple_promo_result"
-        # fi
-        # 
-        # # Alternative promotion position test  
-        # echo "Testing promotion only perft 2 (expected: 64)..."
-        # promo_only_result=$(echo -e "uci\nposition fen 8/P7/K7/8/8/8/8/k7 w - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $2}')
-        # 
-        # if [ "$promo_only_result" != "64" ]; then
-        #   echo "❌ Promotion only perft 2 result was $promo_only_result, expected 64"
-        #   failed_tests=$((failed_tests + 1))
-        # else
-        #   echo "✅ Promotion only perft 2: $promo_only_result"
-        # fi
+        if [ "$pos4_d4_result" != "422333" ]; then
+          echo "❌ Position 4 perft 4 result was $pos4_d4_result, expected 422333"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Position 4 perft 4: $pos4_d4_result"
+        fi
+        
+        # Position 5 - promotion at ply 1 (critical for under-promotion validation)
+        echo "Testing Position 5 perft 3 (expected: 62379)..."
+        pos5_result=$(echo -e "uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 3\nquit" | timeout 90s ./zathras | grep "Perft 3 result:" | awk '{print $4}')
+        
+        if [ "$pos5_result" != "62379" ]; then
+          echo "❌ Position 5 perft 3 result was $pos5_result, expected 62379"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Position 5 perft 3: $pos5_result"
+        fi
+        
+        # Simple promotion tests
+        echo ""
+        echo "=== Critical Targeted Tests ==="
+        
+        # Simple under-promotion test (white pawn on 7th rank)
+        echo "Testing simple promotion perft 2 (expected: 41)..."
+        simple_promo_result=$(echo -e "uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
+        
+        if [ "$simple_promo_result" != "41" ]; then
+          echo "❌ Simple promotion perft 2 result was $simple_promo_result, expected 41"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Simple promotion perft 2: $simple_promo_result"
+        fi
+        
+        # Black pawn promotion test
+        echo "Testing black pawn promotion perft 2 (expected: 41)..."
+        black_promo_result=$(echo -e "uci\nposition fen 4k3/8/8/8/8/8/p7/4K3 b - - 0 1\nperft 2\nquit" | timeout 30s ./zathras | grep "Perft 2 result:" | awk '{print $4}')
+        
+        if [ "$black_promo_result" != "41" ]; then
+          echo "❌ Black pawn promotion perft 2 result was $black_promo_result, expected 41"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Black pawn promotion perft 2: $black_promo_result"
+        fi
+        
+        # Edge file promotion tests (to catch pregenerated move table bug)
+        echo ""
+        echo "=== Edge File Promotion Tests (a-file and h-file) ==="
+        
+        # White pawn on a-file
+        echo "Testing white pawn on a7 perft 1 (expected: 9)..."
+        a_file_white=$(echo -e "uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$a_file_white" != "9" ]; then
+          echo "❌ White pawn on a7 perft 1 result was $a_file_white, expected 9"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ White pawn on a7 perft 1: $a_file_white"
+        fi
+        
+        # Black pawn on a-file  
+        echo "Testing black pawn on a2 perft 1 (expected: 9)..."
+        a_file_black=$(echo -e "uci\nposition fen 4k3/8/8/8/8/8/p7/4K3 b - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$a_file_black" != "9" ]; then
+          echo "❌ Black pawn on a2 perft 1 result was $a_file_black, expected 9"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Black pawn on a2 perft 1: $a_file_black"
+        fi
+        
+        # White pawn on h-file
+        echo "Testing white pawn on h7 perft 1 (expected: 9)..."
+        h_file_white=$(echo -e "uci\nposition fen 4k3/7P/8/8/8/8/8/4K3 w - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$h_file_white" != "9" ]; then
+          echo "❌ White pawn on h7 perft 1 result was $h_file_white, expected 9"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ White pawn on h7 perft 1: $h_file_white"
+        fi
+        
+        # Black pawn on h-file
+        echo "Testing black pawn on h2 perft 1 (expected: 9)..."
+        h_file_black=$(echo -e "uci\nposition fen 4k3/8/8/8/8/8/7p/4K3 b - - 0 1\nperft 1\nquit" | timeout 30s ./zathras | grep "Perft 1 result:" | awk '{print $4}')
+        
+        if [ "$h_file_black" != "9" ]; then
+          echo "❌ Black pawn on h2 perft 1 result was $h_file_black, expected 9"
+          failed_tests=$((failed_tests + 1))
+        else
+          echo "✅ Black pawn on h2 perft 1: $h_file_black"
+        fi
         
         echo ""
         echo "=== PERFT TEST SUMMARY ==="
