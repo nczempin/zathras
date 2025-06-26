@@ -34,22 +34,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ### Completed Work (2025-06-26)
 - ✅ **Issue #105**: Implemented divide command for perft debugging
-- 🔄 **Issue #98-104**: PARTIALLY FIXED - Restored promotion move generation
+- ✅ **Issue #110**: Fixed divide command bug (was showing move count instead of perft)
+- ✅ **Issue #98-104**: COMPLETED - Restored promotion move generation
   - ✅ Generates 4 moves per promotion (Queen, Rook, Bishop, Knight)
   - ✅ Correctly sets promoted pieces on the board
   - ✅ Fixed unmake_move to properly restore pawns after promotions
   - ✅ Move display shows promotion notation (e.g., "e7e8q")
   - ✅ UCI parsing handles promotion moves
-  - ✅ Simple promotion position perft 2 = 41 (correct)
-  - ❌ Some edge cases still failing (e.g., promotions on a-file)
-  - ❌ Position 4 perft 4 still incorrect
+  - ✅ All promotion tests pass (simple, edge files, Position 5)
 
 ### Known Issues
-- 🐛 **NEW Issue**: Pregenerated pawn move tables have incorrect square mapping
-  - File coordinates are flipped (a-file moves show as h-file)
-  - Affects promotion move generation on edge files
-  - Root cause: `set_square()` uses `7 - file_to` instead of `file_to`
-  - This is a SEPARATE issue from the promotion fixes
+- 🐛 **Issue #109**: Position 4 perft 4 incorrect (422,598 instead of 422,333)
+  - This is the ONLY confirmed perft failure
+  - All promotion tests pass correctly
+  - Needs investigation using divide command
 
 ## Build System
 
@@ -110,7 +108,7 @@ $(BUILD_DIR)/%.o: %.cpp
 ## Known Issues and Current Tasks
 
 ### Issue #98-104: Promotion Move Generation
-**Status**: PARTIALLY COMPLETE (2025-06-26) - Ready for PR
+**Status**: COMPLETED (2025-06-26)
 
 **Completed**:
 1. ✅ Restored Move_type enum with PROMOTION_QUEEN, PROMOTION_ROOK, PROMOTION_BISHOP, PROMOTION_KNIGHT
@@ -119,20 +117,14 @@ $(BUILD_DIR)/%.o: %.cpp
 4. ✅ Fixed make_move/unmake_move promotion handling (including pawn restoration bug)
 5. ✅ Restored UCI promotion parsing
 6. ✅ Fixed Move display to show promotion notation
+7. ✅ All promotion tests pass including edge files
 
-**Known Issues**:
-- Black pawn promotions on a-file not working correctly
-- Position 4 perft 4 still shows discrepancies
-- Related to pregenerated move table bug below
+### Issue #109: Position 4 perft 4 incorrect
+**Status**: Open - Only confirmed bug
 
-### NEW Issue: Pregenerated Move Table Bug
-**Status**: Discovered but NOT FIXED
-
-**Problem**: Pawn move pregeneration has incorrect square mapping
-- Files are flipped: `to_twisted = 7 - file_to + rank_to * 8`
-- Should be: `to = file_to + rank_to * 8`
-- Affects pawn moves, especially promotions on a-file and h-file
-- This is a SEPARATE bug from the promotion generation issue
+**Problem**: Position 4 perft 4 returns 422,598 instead of 422,333 (+265 moves)
+- All 6 legal moves show slightly higher counts than Stockfish
+- Needs investigation using divide command to narrow down the issue
 
 ### Issue #97: CI Optimization
 **Status**: Completed for now - consolidated CI into single job
@@ -162,7 +154,7 @@ git push -u origin feature/ZTH-{issue}-{title}     # Push new branch
 - **Build system uses build/ directory** - don't put object files in src/
 
 ### Development Priorities
-1. **Fix promotion bug** (Issue #98) - critical for perft accuracy
+1. **Fix Position 4 perft 4** (Issue #109) - only remaining perft failure
 2. **Maintain v0.5.2 stability** - avoid breaking existing functionality
 3. **Systematic approach** - use GitHub issues and proper git flow
 4. **CI validation** - ensure all tests pass before merging
