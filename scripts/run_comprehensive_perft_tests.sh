@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Comprehensive perft test suite based on Chess Programming Wiki positions
 # https://www.chessprogramming.org/Perft_Results
 
