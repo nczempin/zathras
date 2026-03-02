@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Perft depth 5 tests - WARNING: These take a long time!
 # Only run selected positions that complete in reasonable time
 
