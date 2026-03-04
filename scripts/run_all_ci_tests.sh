@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # Run all CI tests locally
 
-set -e
-
 echo "=== Running All CI Tests Locally ==="
 echo ""
 

@@ -2,8 +2,6 @@
 # Perft depth 5 tests - WARNING: These take a long time!
 # Only run selected positions that complete in reasonable time
 
-set -e
-
 echo "=== Perft Depth 5 Test Suite ==="
 echo "WARNING: These tests may take several minutes each!"
 echo ""

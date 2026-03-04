@@ -2,8 +2,6 @@
 # Comprehensive perft test suite based on Chess Programming Wiki positions
 # https://www.chessprogramming.org/Perft_Results
 
-set -e
-
 echo "=== Comprehensive Perft Test Suite ==="
 echo "Testing all standard perft positions from Chess Programming Wiki"
 echo ""
