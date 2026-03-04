@@ -49,28 +49,28 @@ echo "=== Perft Tests ==="
 
 # Starting position tests
 run_test "Starting position perft 2" "400" \
-    "echo -e 'uci\nposition startpos\nperft 2\nquit' | ./zathras 2>/dev/null | grep 'Perft 2 result:' | awk '{print \$4}'"
+    "echo -e 'uci\nposition startpos\nperft 2\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 2 result:' | awk '{print \$4}'"
 
 run_test "Starting position perft 3" "8902" \
-    "echo -e 'uci\nposition startpos\nperft 3\nquit' | ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+    "echo -e 'uci\nposition startpos\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
 
 run_test "Starting position perft 4" "197281" \
-    "echo -e 'uci\nposition startpos\nperft 4\nquit' | ./zathras 2>/dev/null | grep 'Perft 4 result:' | awk '{print \$4}'"
+    "echo -e 'uci\nposition startpos\nperft 4\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 4 result:' | awk '{print \$4}'"
 
 # Kiwipete position
 run_test "Kiwipete position perft 3" "97862" \
-    "echo -e 'uci\nposition fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -\nperft 3\nquit' | ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+    "echo -e 'uci\nposition fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
 
 # Position 4 tests
 run_test "Position 4 perft 3" "9467" \
-    "echo -e 'uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 3\nquit' | ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+    "echo -e 'uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
 
 run_test "Position 4 perft 4" "422333" \
-    "echo -e 'uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 4\nquit' | ./zathras 2>/dev/null | grep 'Perft 4 result:' | awk '{print \$4}'"
+    "echo -e 'uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 4\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 4 result:' | awk '{print \$4}'"
 
 # Position 5 test
 run_test "Position 5 perft 3" "62379" \
-    "echo -e 'uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 3\nquit' | ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+    "echo -e 'uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
 
 echo ""
 echo "=== Promotion Tests ==="
