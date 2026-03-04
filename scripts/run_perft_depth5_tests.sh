@@ -2,8 +2,6 @@
 # Perft depth 5 tests - WARNING: These take a long time!
 # Only run selected positions that complete in reasonable time
 
-set -e
-
 echo "=== Perft Depth 5 Test Suite ==="
 echo "WARNING: These tests may take several minutes each!"
 echo ""
@@ -24,7 +22,11 @@ run_perft_test() {
     local fen="$2"
     local depth="$3"
     local expected="$4"
-    
+    local result
+    local test_start
+    local test_end
+    local test_duration
+
     total_tests=$((total_tests + 1))
     echo -n "Testing $position_name perft $depth (expected: $expected)... "
     

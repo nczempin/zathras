@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # Run all CI tests locally
 
-set -e
-
 echo "=== Running All CI Tests Locally ==="
 echo ""
 
@@ -14,17 +12,19 @@ NC='\033[0m' # No Color
 failed_tests=0
 total_tests=0
 
-# Function to run a test and check result
-run_test() {
+# Function to run a perft test - accepts position_str (e.g. "startpos" or "fen <FEN>"), depth, expected
+run_perft_test() {
     local test_name="$1"
-    local expected="$2"
-    local command="$3"
-    
+    local position_str="$2"
+    local depth="$3"
+    local expected="$4"
+    local result
+
     total_tests=$((total_tests + 1))
     echo -n "Testing $test_name (expected: $expected)... "
-    
-    result=$(eval "$command")
-    
+
+    result=$(echo -e "uci\nposition $position_str\nperft $depth\nquit" | timeout 10s ./zathras 2>/dev/null | grep "Perft $depth result:" | awk '{print $4}')
+
     if [ "$result" = "$expected" ]; then
         echo -e "${GREEN}✅ PASS${NC} ($result)"
     else
@@ -48,55 +48,42 @@ echo ""
 echo "=== Perft Tests ==="
 
 # Starting position tests
-run_test "Starting position perft 2" "400" \
-    "echo -e 'uci\nposition startpos\nperft 2\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 2 result:' | awk '{print \$4}'"
+run_perft_test "Starting position perft 2" "startpos" 2 "400"
 
-run_test "Starting position perft 3" "8902" \
-    "echo -e 'uci\nposition startpos\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+run_perft_test "Starting position perft 3" "startpos" 3 "8902"
 
-run_test "Starting position perft 4" "197281" \
-    "echo -e 'uci\nposition startpos\nperft 4\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 4 result:' | awk '{print \$4}'"
+run_perft_test "Starting position perft 4" "startpos" 4 "197281"
 
 # Kiwipete position
-run_test "Kiwipete position perft 3" "97862" \
-    "echo -e 'uci\nposition fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+run_perft_test "Kiwipete position perft 3" "fen r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -" 3 "97862"
 
 # Position 4 tests
-run_test "Position 4 perft 3" "9467" \
-    "echo -e 'uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+run_perft_test "Position 4 perft 3" "fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 3 "9467"
 
-run_test "Position 4 perft 4" "422333" \
-    "echo -e 'uci\nposition fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1\nperft 4\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 4 result:' | awk '{print \$4}'"
+run_perft_test "Position 4 perft 4" "fen r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 4 "422333"
 
 # Position 5 test
-run_test "Position 5 perft 3" "62379" \
-    "echo -e 'uci\nposition fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8\nperft 3\nquit' | timeout 10s ./zathras 2>/dev/null | grep 'Perft 3 result:' | awk '{print \$4}'"
+run_perft_test "Position 5 perft 3" "fen rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8" 3 "62379"
 
 echo ""
 echo "=== Promotion Tests ==="
 
 # Simple promotion tests
-run_test "White pawn promotion perft 2" "41" \
-    "echo -e 'uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\nperft 2\nquit' | ./zathras 2>/dev/null | grep 'Perft 2 result:' | awk '{print \$4}'"
+run_perft_test "White pawn promotion perft 2" "fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1" 2 "41"
 
-run_test "Black pawn promotion perft 2" "41" \
-    "echo -e 'uci\nposition fen 4k3/8/8/8/8/8/p7/4K3 b - - 0 1\nperft 2\nquit' | ./zathras 2>/dev/null | grep 'Perft 2 result:' | awk '{print \$4}'"
+run_perft_test "Black pawn promotion perft 2" "fen 4k3/8/8/8/8/8/p7/4K3 b - - 0 1" 2 "41"
 
 echo ""
 echo "=== Edge File Promotion Tests ==="
 
 # Edge file promotions
-run_test "White pawn on a7 perft 1" "9" \
-    "echo -e 'uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\nperft 1\nquit' | ./zathras 2>/dev/null | grep 'Perft 1 result:' | awk '{print \$4}'"
+run_perft_test "White pawn on a7 perft 1" "fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1" 1 "9"
 
-run_test "Black pawn on a2 perft 1" "9" \
-    "echo -e 'uci\nposition fen 4k3/8/8/8/8/8/p7/4K3 b - - 0 1\nperft 1\nquit' | ./zathras 2>/dev/null | grep 'Perft 1 result:' | awk '{print \$4}'"
+run_perft_test "Black pawn on a2 perft 1" "fen 4k3/8/8/8/8/8/p7/4K3 b - - 0 1" 1 "9"
 
-run_test "White pawn on h7 perft 1" "9" \
-    "echo -e 'uci\nposition fen 4k3/7P/8/8/8/8/8/4K3 w - - 0 1\nperft 1\nquit' | ./zathras 2>/dev/null | grep 'Perft 1 result:' | awk '{print \$4}'"
+run_perft_test "White pawn on h7 perft 1" "fen 4k3/7P/8/8/8/8/8/4K3 w - - 0 1" 1 "9"
 
-run_test "Black pawn on h2 perft 1" "9" \
-    "echo -e 'uci\nposition fen 4k3/8/8/8/8/8/7p/4K3 b - - 0 1\nperft 1\nquit' | ./zathras 2>/dev/null | grep 'Perft 1 result:' | awk '{print \$4}'"
+run_perft_test "Black pawn on h2 perft 1" "fen 4k3/8/8/8/8/8/7p/4K3 b - - 0 1" 1 "9"
 
 echo ""
 echo "=== Divide Command Tests ==="
