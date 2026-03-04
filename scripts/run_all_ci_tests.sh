@@ -103,7 +103,7 @@ total_tests=$((total_tests + 1))
 
 # Test divide with promotions
 echo -n "Testing divide command with promotions... "
-promo_count=$(echo -e "uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | ./zathras 2>/dev/null | grep -E "^a7a8[qrbn]:" | wc -l)
+promo_count=$(echo -e "uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | timeout 30s ./zathras 2>/dev/null | grep -E "^a7a8[qrbn]:" | wc -l)
 if [ "$promo_count" -eq 4 ]; then
     echo -e "${GREEN}✅ PASS${NC}"
 else
