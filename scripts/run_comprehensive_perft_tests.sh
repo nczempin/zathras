@@ -2,8 +2,6 @@
 # Comprehensive perft test suite based on Chess Programming Wiki positions
 # https://www.chessprogramming.org/Perft_Results
 
-set -e
-
 echo "=== Comprehensive Perft Test Suite ==="
 echo "Testing all standard perft positions from Chess Programming Wiki"
 echo ""
@@ -24,7 +22,8 @@ run_perft_test() {
     local fen="$2"
     local depth="$3"
     local expected="$4"
-    
+    local result
+
     total_tests=$((total_tests + 1))
     echo -n "Testing $position_name perft $depth (expected: $expected)... "
     
@@ -69,6 +68,7 @@ echo "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"
 run_perft_test "Position 4" "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 1 6
 run_perft_test "Position 4" "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 2 264
 run_perft_test "Position 4" "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 3 9467
+# NOTE: Position 4 perft 4 is a known failure (engine returns 422,598 instead of 422,333 - tracked in issue #109)
 run_perft_test "Position 4" "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 4 422333
 
 echo ""
