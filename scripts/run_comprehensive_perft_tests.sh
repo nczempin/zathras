@@ -27,6 +27,7 @@ run_perft_test() {
     total_tests=$((total_tests + 1))
     echo -n "Testing $position_name perft $depth (expected: $expected)... "
     
+    local result
     # Capture full engine output (stdout + stderr) for diagnostics
     engine_output=$(echo -e "uci\nposition fen $fen\nperft $depth\nquit" | timeout 300s ./zathras 2>&1)
     result=$(echo "$engine_output" | grep "Perft $depth result:" | awk '{print $4}')
