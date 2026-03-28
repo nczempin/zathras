@@ -7,6 +7,7 @@ echo ""
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 failed_tests=0
@@ -18,17 +19,22 @@ run_perft_test() {
     local position_str="$2"
     local depth="$3"
     local expected="$4"
+    local engine_output
     local result
 
     total_tests=$((total_tests + 1))
     echo -n "Testing $test_name (expected: $expected)... "
 
-    result=$(echo -e "uci\nposition $position_str\nperft $depth\nquit" | timeout 10s ./zathras 2>/dev/null | grep "Perft $depth result:" | awk '{print $4}')
+    engine_output=$(echo -e "uci\nposition $position_str\nperft $depth\nquit" | timeout 10s ./zathras 2>&1)
+    result=$(echo "$engine_output" | grep "Perft $depth result:" | awk '{print $4}')
 
     if [ "$result" = "$expected" ]; then
         echo -e "${GREEN}✅ PASS${NC} ($result)"
     else
-        echo -e "${RED}❌ FAIL${NC} (got $result, expected $expected)"
+        echo -e "${RED}❌ FAIL${NC} (got ${result:-"<empty>"}, expected $expected)"
+        echo -e "${YELLOW}--- Engine output ---${NC}"
+        echo "$engine_output"
+        echo -e "${YELLOW}--- End of engine output ---${NC}"
         failed_tests=$((failed_tests + 1))
     fi
 }
@@ -90,7 +96,7 @@ echo "=== Divide Command Tests ==="
 
 # Test divide command
 echo -n "Testing divide command output format... "
-divide_output=$(echo -e "uci\nposition startpos\ndivide 2\nquit" | timeout 30s ./zathras 2>/dev/null)
+divide_output=$(echo -e "uci\nposition startpos\ndivide 2\nquit" | timeout 30s ./zathras 2>&1)
 if echo "$divide_output" | grep -q "Divide .* result:" && \
    [ "$(echo "$divide_output" | grep -E "^[a-h][1-8][a-h][1-8].*:" | wc -l)" -eq 20 ] && \
    [ "$(echo "$divide_output" | grep "Nodes searched:" | awk '{print $3}')" = "400" ]; then
@@ -103,7 +109,7 @@ total_tests=$((total_tests + 1))
 
 # Test divide with promotions
 echo -n "Testing divide command with promotions... "
-promo_count=$(echo -e "uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | timeout 30s ./zathras 2>/dev/null | grep -E "^a7a8[qrbn]:" | wc -l)
+promo_count=$(echo -e "uci\nposition fen 4k3/P7/8/8/8/8/8/4K3 w - - 0 1\ndivide 1\nquit" | timeout 30s ./zathras 2>&1 | grep -E "^a7a8[qrbn]:" | wc -l)
 if [ "$promo_count" -eq 4 ]; then
     echo -e "${GREEN}✅ PASS${NC}"
 else
