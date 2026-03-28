@@ -41,6 +41,7 @@ namespace Positions {
 		virtual ~Square();
 		static void print_square(uint8_t square);
 		static std::string mailbox_index_to_square(uint8_t x);
+		static std::string bitboard_index_to_square(uint8_t x);
 		
 		static void set_square(bitset<64> & bs, square_t to);
 		static void clear_square(bitset<64> & bs, square_t to);

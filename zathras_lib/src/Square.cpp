@@ -39,9 +39,25 @@ namespace Positions {
 
 	}
 
+	// Converts a standard index (a1=0, b1=1, ..., h8=63) to algebraic notation.
+	// NOTE: The engine internally uses file-flipped indices (7-file+rank*8),
+	// so raw bitboard positions will display incorrectly with this function.
+	// Use bitboard_index_to_square() for internal/bitboard indices.
 	string Square::mailbox_index_to_square(uint8_t x)
 	{
 		const char column = 'a' + x % 8;
+		string columnString(1, column);
+		const char row = '1' + x / 8;
+		string rowString(1, row);
+		string square = columnString + rowString;
+		return square;
+	}
+
+	// Converts an internal file-flipped index to algebraic notation.
+	// Internal layout: index = (7 - file) + rank * 8, so file = 7 - (index % 8).
+	string Square::bitboard_index_to_square(uint8_t x)
+	{
+		const char column = 'a' + (7 - x % 8);
 		string columnString(1, column);
 		const char row = '1' + x / 8;
 		string rowString(1, row);

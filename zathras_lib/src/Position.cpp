@@ -372,7 +372,7 @@ namespace Positions {
 		cout << "wtm: " << white_to_move << endl;
 		cout << "ep: ";
 		Bitboard::visit_bitboard(en_passant_square, [](uint8_t y) {
-			cout << Square::mailbox_index_to_square(y) << endl;
+			cout << Square::bitboard_index_to_square(y) << endl;
 			});
 		cout << endl;
 		cout << "Castling: ";
