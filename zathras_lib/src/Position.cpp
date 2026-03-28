@@ -385,7 +385,7 @@ namespace Positions {
 		cout << endl;
 	}
 
-	void Position::mailbox_from_bitboard(piece_t board[64]) const {
+	void Position::populate_mailbox_from_bitboards(piece_t board[64]) const {
 		Bitboard::visit_bitboard(white & pawns, [&board](int x) {
 			board[x] = 1;
 			}
@@ -464,7 +464,7 @@ namespace Positions {
 		for (int i = 0; i < 64; ++i) {
 			mboard[i] = 0;
 		}
-		mailbox_from_bitboard(mboard);
+		populate_mailbox_from_bitboards(mboard);
 		retval += mailbox_board_simple_representation(mboard);
 		retval += mailbox_board_debug_representation(board);
 		retval += "wtm: " + to_string(white_to_move) + "\n";
