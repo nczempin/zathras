@@ -22,7 +22,6 @@ namespace Interface {
 
 	private:
 		uint64_t perft(uint8_t depth);
-		string format_large_number(int nps);
 
 		shared_ptr<Positions::Position> pp;
 		Moves::Move_generator mg;

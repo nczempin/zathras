@@ -618,7 +618,7 @@ namespace Eval {
 		static bool isInsufficientMaterial(PieceCount pc) {
 			return (pc.loneKing()) || (pc.oneLight()) || (pc.isNN());
 		}
-		static bool isEndgame(PieceCount wpc) {
+		static bool isEndgame(const PieceCount& wpc) {
 			//    		if ((isEndGame != null) && (isEndGame.equals(bool.TRUE)))
 			//    			return true;
 			int lightPiecesCount = wpc.knightsCount + wpc.bishopsCount;

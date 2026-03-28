@@ -63,16 +63,6 @@ namespace Interface {
 		return total_result;
 	}
 
-	string Perft_command::format_large_number(int nps) {
-		string nps_wc = to_string(nps);
-		int8_t insert_position = static_cast<int8_t>(nps_wc.length()) - 3;
-		while (insert_position > 0) {
-			nps_wc.insert(insert_position, ",");
-			insert_position -= 3;
-		}
-		return nps_wc;
-	}
-
 	void Perft_command::execute() {
 		cout << "Perft " << to_string(depth) << " for this position:\n";
 		cout << position.print_board();
