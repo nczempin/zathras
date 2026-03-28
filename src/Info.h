@@ -24,7 +24,7 @@ namespace Interface {
 			double seconds = (elapsed_seconds.count());
 			Info::nps = static_cast<int>(Info::nodes / seconds);
 		}
-		static void printInfo(int bestValue, int oldBestValue, int idDepth, deque<Move> pv) {
+		static void printInfo(int bestValue, int oldBestValue, int idDepth, const deque<Move>& pv) {
 			cout << "info depth " << idDepth;
 			cout << " seldepth " << Info::seldepth;
 			cout << " currmove " << Moves::to_string(Info::currmove);
@@ -36,11 +36,8 @@ namespace Interface {
 			if (bestValue > 80000) {
 				cout << "mate " << idDepth / 2;
 			}
-			else if (bestValue < 900000) {
-				cout << "cp " << oldBestValue;
-			}
 			else {
-				cout << "cp " << bestValue;
+				cout << "cp " << oldBestValue;
 			}
 			cout << " pv ";
 			for (const Move& m : pv) {
