@@ -86,8 +86,8 @@ int8_t get_captured() const {
 		char p = pieces[moving > 0 ? moving : -moving];
 		string moving_string = string(1, p);*/
 
-		std::string retval = Positions::Square::mailbox_index_to_square(move.get_from());
-		retval += Positions::Square::mailbox_index_to_square(move.get_to());
+		std::string retval = Positions::Square::index_to_algebraic(move.get_from());
+		retval += Positions::Square::index_to_algebraic(move.get_to());
 
 		// Add promotion notation
 		switch (move.get_move_type()) {

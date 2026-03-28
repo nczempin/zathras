@@ -248,8 +248,8 @@ namespace Moves {
 	//	const bitboard_set all_moves, const Position position) {
 	//	visit_moves_raw(sub_position, all_moves,
 	//		[](int8_t pc, uint8_t x, uint8_t y, int8_t cpt, int8_t promoted_to) {
-	//			string from = Square::mailbox_index_to_square(x);
-	//			string to = Square::mailbox_index_to_square(y);
+	//			string from = Square::index_to_algebraic(x);
+	//			string to = Square::index_to_algebraic(y);
 	//			cout << from << to << endl;
 	//		}, position.is_white_to_move());
 	//}

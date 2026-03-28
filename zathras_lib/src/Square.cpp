@@ -34,12 +34,12 @@ namespace Positions {
 
 	void Square::print_square(uint8_t x)
 	{
-		string square = mailbox_index_to_square(x);
+		string square = index_to_algebraic(x);
 		cout << x << " = " << square << endl;
 
 	}
 
-	string Square::mailbox_index_to_square(uint8_t x)
+	string Square::index_to_algebraic(uint8_t x)
 	{
 		const char column = 'a' + x % 8;
 		string columnString(1, column);

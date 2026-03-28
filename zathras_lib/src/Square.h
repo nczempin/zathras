@@ -40,7 +40,11 @@ namespace Positions {
 		static void init_squares();
 		virtual ~Square();
 		static void print_square(uint8_t square);
-		static std::string mailbox_index_to_square(uint8_t x);
+		// Converts a square index to algebraic notation (e.g. 0->"a1", 63->"h8").
+		// Uses standard file ordering (a=0). Note: the engine internally stores
+		// positions with flipped files (7-file), so bitboard bit positions will
+		// not match the algebraic output of this function for files.
+		static std::string index_to_algebraic(uint8_t x);
 		
 		static void set_square(bitset<64> & bs, square_t to);
 		static void clear_square(bitset<64> & bs, square_t to);
