@@ -128,18 +128,22 @@ test_position "Position 5 - promotion at ply 1" \
     3 62379 \
     4 2103487
 
-# Test 3: En passant position
+# Test 3: En passant position (after 1.e4 — ep square e3 set for black to potentially capture)
+# This is NOT the starting position: white's queen/bishop/king have more mobility
+# Verified values: divide 3 from startpos shows e2e4 -> 600 at depth 2, 13160 at depth 3
 test_position "En passant capture available" \
     "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1" \
     1 20 \
-    2 400 \
-    3 8902
+    2 600 \
+    3 13160
 
 # Test 4: Complex en passant
+# 30 moves: 14 pawn moves + d5d6 + d5xc6ep + 5 knight + 5 bishop + 3 queen + 1 king = 30
+# Verified via divide 1; previous expected 31 was incorrect
 test_position "Complex en passant position" \
     "rnbqkb1r/pp1p1ppp/5n2/2pPp3/8/8/PPP1PPPP/RNBQKBNR w KQkq c6 0 3" \
-    1 31 \
-    2 570
+    1 30 \
+    2 784
 
 # Test 5: Castling test - both sides available
 test_position "Castling availability test" \
