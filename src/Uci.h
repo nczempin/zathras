@@ -298,7 +298,7 @@ namespace Interface {
 			for (int i = 0; i < 64; ++i) {
 				board[i] = 0;
 			}
-			p.mailbox_from_bitboard(board);
+			p.populate_mailbox_from_bitboards(board);
 			Move m = convert_move(moveString, board, p);
 
 			//TODO make this more elegant
