@@ -102,7 +102,7 @@ namespace Positions {
 		bitset<4> castling;
 		bool white_to_move = true; //TODO public for now
 
-		void mailbox_from_bitboard(piece_t board[64]) const;
+		void populate_mailbox_from_bitboards(piece_t board[64]) const;
 
 		string debug_board() const;
 

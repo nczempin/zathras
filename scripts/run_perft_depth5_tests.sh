@@ -23,21 +23,21 @@ run_perft_test() {
     local depth="$3"
     local expected="$4"
     local result
+    local engine_output
     local test_start
     local test_end
     local test_duration
 
     total_tests=$((total_tests + 1))
     echo -n "Testing $position_name perft $depth (expected: $expected)... "
-    
-    local engine_output
+
     test_start=$(date +%s)
     # Capture full engine output (stdout + stderr) for diagnostics
     engine_output=$(echo -e "uci\nposition fen $fen\nperft $depth\nquit" | timeout 600s ./zathras 2>&1)
     result=$(echo "$engine_output" | grep "Perft $depth result:" | awk '{print $4}')
     test_end=$(date +%s)
     test_duration=$((test_end - test_start))
-    
+
     if [ "$result" = "$expected" ]; then
         echo -e "${GREEN}✅ PASS${NC} ($result) - ${test_duration}s"
         return 0

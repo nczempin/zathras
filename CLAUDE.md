@@ -8,7 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 **Technology Stack**: C++17, Make build system, UCI protocol  
 **Current Version**: 0.5.2 baseline (stable)  
-**Working Directory**: `/home/nczempin/git/zathras/`  
 **Platform**: Linux (WSL2)
 
 ## Project Status and Branch Strategy

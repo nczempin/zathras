@@ -298,7 +298,7 @@ namespace Interface {
 			for (int i = 0; i < 64; ++i) {
 				board[i] = 0;
 			}
-			p.mailbox_from_bitboard(board);
+			p.populate_mailbox_from_bitboards(board);
 			Move m = convert_move(moveString, board, p);
 
 			//TODO make this more elegant
@@ -338,10 +338,6 @@ namespace Interface {
 
 			square_t to = static_cast<square_t> (Util::decodeSquare(move.substr(2, 4)));
 			string promotedTo = move.substr(4);
-			int promoted_to = 0;
-			if (promotedTo != "") {
-				promoted_to = static_cast<piece_t> (Util::decodePiece(promotedTo));
-			}
 
 			
 			move_type_t mt = NONE;

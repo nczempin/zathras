@@ -9,7 +9,7 @@ namespace Interface {
 	public:
 		Abstract_command() {}
 		virtual ~Abstract_command() {};
-		virtual void execute() = 0;
+		void execute() override = 0;
 
 	};
 }

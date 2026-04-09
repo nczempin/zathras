@@ -19,7 +19,7 @@ namespace Interface {
 	public:
 		Command_receiver();
 		virtual ~Command_receiver();
-		void setArguments(vector<string> arguments) {
+		void setArguments(const vector<string>& arguments) {
 			this->arguments = arguments;
 		}
 		vector<string> getArguments() {
