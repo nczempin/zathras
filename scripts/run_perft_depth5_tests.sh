@@ -30,9 +30,8 @@ run_perft_test() {
 
     total_tests=$((total_tests + 1))
     echo -n "Testing $position_name perft $depth (expected: $expected)... "
-
+    
     test_start=$(date +%s)
-    # Capture full engine output (stdout + stderr) for diagnostics
     engine_output=$(echo -e "uci\nposition fen $fen\nperft $depth\nquit" | timeout 600s ./zathras 2>&1)
     result=$(echo "$engine_output" | grep "Perft $depth result:" | awk '{print $4}')
     test_end=$(date +%s)
@@ -43,7 +42,7 @@ run_perft_test() {
         return 0
     else
         echo -e "${RED}❌ FAIL${NC} (got ${result:-"<empty>"}, expected $expected) - ${test_duration}s"
-        echo -e "${YELLOW}--- Engine output for $position_name perft $depth ---${NC}"
+        echo -e "${YELLOW}--- Engine output ---${NC}"
         echo "$engine_output"
         echo -e "${YELLOW}--- End of engine output ---${NC}"
         failed_tests=$((failed_tests + 1))
