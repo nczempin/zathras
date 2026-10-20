@@ -311,15 +311,90 @@ namespace Eval {
 			//	}
 			//	return retValue;
 			//}
-		static int countSetBits(bb n) //TODO use builtin-popcount
+		static int countSetBits(bb n)
 		{
-			// base case 
-			if (n == 0)
-				return 0;
-			else
-				return 1 + countSetBits(n & (n - 1));
+#if defined(__GNUC__) || defined(__clang__)
+			return __builtin_popcountll(n);
+#else
+			int count = 0;
+			while (n) {
+				n &= (n - 1);
+				++count;
+			}
+			return count;
+#endif
 		}
-		static int getMidgameValue(Position position) {
+		static int getMidgameValue(const Position& position) {
+			static const int pawn_pst[64] = {
+				  0,   0,   0,   0,   0,   0,   0,   0,
+				 50,  50,  50,  50,  50,  50,  50,  50,
+				 10,  10,  20,  30,  30,  20,  10,  10,
+				  5,   5,  10,  25,  25,  10,   5,   5,
+				  0,   0,   0,  20,  20,   0,   0,   0,
+				  5,  -5, -10,   0,   0, -10,  -5,   5,
+				  5,  10,  10, -20, -20,  10,  10,   5,
+				  0,   0,   0,   0,   0,   0,   0,   0
+			};
+			static const int knight_pst[64] = {
+				-50, -40, -30, -30, -30, -30, -40, -50,
+				-40, -20,   0,   0,   0,   0, -20, -40,
+				-30,   0,  10,  15,  15,  10,   0, -30,
+				-30,   5,  15,  20,  20,  15,   5, -30,
+				-30,   0,  15,  20,  20,  15,   0, -30,
+				-30,   5,  10,  15,  15,  10,   5, -30,
+				-40, -20,   0,   5,   5,   0, -20, -40,
+				-50, -40, -30, -30, -30, -30, -40, -50
+			};
+			static const int bishop_pst[64] = {
+				-20, -10, -10, -10, -10, -10, -10, -20,
+				-10,   0,   0,   0,   0,   0,   0, -10,
+				-10,   0,   5,  10,  10,   5,   0, -10,
+				-10,   5,   5,  10,  10,   5,   5, -10,
+				-10,   0,  10,  10,  10,  10,   0, -10,
+				-10,  10,  10,  10,  10,  10,  10, -10,
+				-10,   5,   0,   0,   0,   0,   5, -10,
+				-20, -10, -10, -10, -10, -10, -10, -20
+			};
+			static const int rook_pst[64] = {
+				  0,   0,   0,   0,   0,   0,   0,   0,
+				  5,  10,  10,  10,  10,  10,  10,   5,
+				 -5,   0,   0,   0,   0,   0,   0,  -5,
+				 -5,   0,   0,   0,   0,   0,   0,  -5,
+				 -5,   0,   0,   0,   0,   0,   0,  -5,
+				 -5,   0,   0,   0,   0,   0,   0,  -5,
+				 -5,   0,   0,   0,   0,   0,   0,  -5,
+				  0,   0,   0,   5,   5,   0,   0,   0
+			};
+			static const int queen_pst[64] = {
+				-20, -10, -10,  -5,  -5, -10, -10, -20,
+				-10,   0,   0,   0,   0,   0,   0, -10,
+				-10,   0,   5,   5,   5,   5,   0, -10,
+				 -5,   0,   5,   5,   5,   5,   0,  -5,
+				  0,   0,   5,   5,   5,   5,   0,  -5,
+				-10,   5,   5,   5,   5,   5,   0, -10,
+				-10,   0,   5,   0,   0,   0,   0, -10,
+				-20, -10, -10,  -5,  -5, -10, -10, -20
+			};
+			static const int king_mg_pst[64] = {
+				-30, -40, -40, -50, -50, -40, -40, -30,
+				-30, -40, -40, -50, -50, -40, -40, -30,
+				-30, -40, -40, -50, -50, -40, -40, -30,
+				-30, -40, -40, -50, -50, -40, -40, -30,
+				-20, -30, -30, -40, -40, -30, -30, -20,
+				-10, -20, -20, -20, -20, -20, -20, -10,
+				 20,  20,   0,   0,   0,   0,  20,  20,
+				 20,  30,  10,   0,   0,  10,  30,  20
+			};
+			static const int king_eg_pst[64] = {
+				-50, -40, -30, -20, -20, -30, -40, -50,
+				-30, -20, -10,   0,   0, -10, -20, -30,
+				-30, -10,  20,  30,  30,  20, -10, -30,
+				-30, -10,  30,  40,  40,  30, -10, -30,
+				-30, -10,  30,  40,  40,  30, -10, -30,
+				-30, -10,  20,  30,  30,  20, -10, -30,
+				-30, -30,   0,   0,   0,   0, -30, -30,
+				-50, -30, -30, -30, -30, -30, -30, -50
+			};
 
 			const Position* p = &position;
 			const bb white_pawns = p->pawns & p->white;
@@ -334,83 +409,77 @@ namespace Eval {
 			const bb black_rooks = p->rooks & p->black;
 			const bb black_queens = p->queens & p->black;
 			const bb black_kings = p->kings & p->black;
-			const bb occupied = p->white | p->black;
-			int whiteValue = 0;
-			int blackValue = 0;
-			int whiteMValue = 0;
-			int blackMValue = 0;
-			whiteMValue += 100 * countSetBits(white_pawns);
-			whiteMValue += 320 * countSetBits(white_knights);
-			whiteMValue += 330 * countSetBits(white_bishops);
-			whiteMValue += 500 * countSetBits(white_rooks);
-			whiteMValue += 900 * countSetBits(white_queens);
 
-			blackMValue += 100 * countSetBits(black_pawns);
-			blackMValue += 320 * countSetBits(black_knights);
-			blackMValue += 330 * countSetBits(black_bishops);
-			blackMValue += 500 * countSetBits(black_rooks);
-			blackMValue += 900 * countSetBits(black_queens);
+			int wp = countSetBits(white_pawns), bp = countSetBits(black_pawns);
+			int wn = countSetBits(white_knights), bn = countSetBits(black_knights);
+			int wb = countSetBits(white_bishops), bb_cnt = countSetBits(black_bishops);
+			int wr = countSetBits(white_rooks), br = countSetBits(black_rooks);
+			int wq = countSetBits(white_queens), bq = countSetBits(black_queens);
 
-			//int whiteCValue = 0;
-			//int blackCValue = 0;
-			//bool possibleBishopPairWhite = false;
-			//bool possibleBishopPairBlack = false;
-			//int pawnStructureValue = evaluatePawnStructureMidgame();
+			if (wp == 0 && bp == 0 && wr == 0 && br == 0 && wq == 0 && bq == 0) {
+				if (wn + wb <= 1 && bn + bb_cnt <= 1) {
+					return 0;
+				}
+			}
 
-			//int p;
-			//for (int i = 11; i < 89; ++i) {
-			//	int file = i % 10;
-			//	p = position.board[i];
-			//	if (p == 0) {
-			//		continue;
-			//	}
-			//	else if (p > 1) { //WHITE
-			//		whiteMValue += getPieceMaterialValue(p);
-			//		whiteCValue += getPieceMidgameValue(i, p, file);
-			//		if (p == 3) {
-			//			if (possibleBishopPairWhite) {
-			//				whiteCValue += 50;
-			//			}
-			//			possibleBishopPairWhite = true;
-			//		}
-			//	}
-			//	else if (p < -1) { //BLACK
-			//		blackMValue += getPieceMaterialValue(p);
-			//		blackCValue += getPieceMidgameValue(i, p, file);
-			//		if (p == -3) {
-			//			if (possibleBishopPairBlack) {
-			//				blackCValue += 50;
-			//			}
-			//			possibleBishopPairBlack = true;
-			//		}
-			//	}
-			//	else {
-			//		//pawns, already dealt with elsewhere
-			//	}
-			//}
+			int whiteMValue = 100 * wp + 320 * wn + 330 * wb + 500 * wr + 900 * wq;
+			int blackMValue = 100 * bp + 320 * bn + 330 * bb_cnt + 500 * br + 900 * bq;
+			if (wb >= 2) whiteMValue += 30;
+			if (bb_cnt >= 2) blackMValue += 30;
 
+			int phase = (wn + bn + wb + bb_cnt) + 2 * (wr + br) + 4 * (wq + bq);
+			if (phase > 24) phase = 24;
 
-			//blackValue += blackCValue;
-			//whiteValue += whiteCValue;
+			auto sum_pst_w = [](bb b, const int* table) {
+				int s = 0;
+				while (b) {
+					uint8_t sq = Positions::Bitboard::extract_and_remove_square(b);
+					s += table[sq ^ 56];
+				}
+				return s;
+			};
+			auto sum_pst_b = [](bb b, const int* table) {
+				int s = 0;
+				while (b) {
+					uint8_t sq = Positions::Bitboard::extract_and_remove_square(b);
+					s += table[sq];
+				}
+				return s;
+			};
 
-			///*if (!position.hasCastledBlack)
-			//	blackValue -= 61;
-			//if (!position.hasCastledWhite)
-			//	whiteValue -= 61;*/
-			//if (whiteMValue > blackMValue + 105) {
-			//	int diff = whiteMValue + blackMValue - 500;
-			//	int bonus = (8000 - diff) / 100;
-			//	if (bonus > 74)
-			//		bonus = 74;
-			//	whiteValue += bonus;
-			//}
-			//else if (blackMValue > whiteMValue + 105) {
-			//	int diff = blackMValue + whiteMValue - 500;
-			//	int bonus = (8000 - diff) / 100;
-			//	if (bonus > 74)
-			//		bonus = 74;
-			//	blackValue += bonus;
-			//}
+			int whitePos = sum_pst_w(white_pawns, pawn_pst)
+				+ sum_pst_w(white_knights, knight_pst)
+				+ sum_pst_w(white_bishops, bishop_pst)
+				+ sum_pst_w(white_rooks, rook_pst)
+				+ sum_pst_w(white_queens, queen_pst);
+			int blackPos = sum_pst_b(black_pawns, pawn_pst)
+				+ sum_pst_b(black_knights, knight_pst)
+				+ sum_pst_b(black_bishops, bishop_pst)
+				+ sum_pst_b(black_rooks, rook_pst)
+				+ sum_pst_b(black_queens, queen_pst);
+
+			uint8_t wk_sq = white_kings ? Positions::Bitboard::extract_square(white_kings) : 4;
+			uint8_t bk_sq = black_kings ? Positions::Bitboard::extract_square(black_kings) : 60;
+			int wk_score = (king_mg_pst[wk_sq ^ 56] * phase + king_eg_pst[wk_sq ^ 56] * (24 - phase)) / 24;
+			int bk_score = (king_mg_pst[bk_sq] * phase + king_eg_pst[bk_sq] * (24 - phase)) / 24;
+
+			int whiteValue = whitePos + wk_score;
+			int blackValue = blackPos + bk_score;
+
+			// Endgame mop-up when clearly winning
+			if (phase <= 6) {
+				int wk_r = wk_sq / 8, wk_f = wk_sq % 8;
+				int bk_r = bk_sq / 8, bk_f = bk_sq % 8;
+				int king_dist = std::abs(wk_r - bk_r) + std::abs(wk_f - bk_f);
+				if (whiteMValue >= blackMValue + 300) {
+					int bk_center = std::max(3 - bk_r, bk_r - 4) + std::max(3 - bk_f, bk_f - 4);
+					whiteValue += bk_center * 15 + (14 - king_dist) * 8;
+				} else if (blackMValue >= whiteMValue + 300) {
+					int wk_center = std::max(3 - wk_r, wk_r - 4) + std::max(3 - wk_f, wk_f - 4);
+					blackValue += wk_center * 15 + (14 - king_dist) * 8;
+				}
+			}
+
 			int retVal = whiteValue + whiteMValue - blackValue - blackMValue;
 			if (!position.is_white_to_move())
 				retVal = -retVal;
@@ -776,17 +845,7 @@ namespace Eval {
 		static bool isInsufficientMaterial(PieceCount we, PieceCount other) {
 			return (isInsufficientMaterial(we)) && (isInsufficientMaterial(other));
 		}
-		static int getValue(Position p) {
-			//position = p;
-		/*	PieceCount wpc = countWhitePieces();
-			PieceCount bpc = countBlackPieces();
-			if (isInsufficientMaterial(wpc, bpc))
-				return 0;
-			if (isInsufficientMaterial(bpc, wpc))
-				return 0;
-			if (isEndgame(wpc) || isEndgame(bpc)) {
-				return getEndgameValue(wpc, bpc);
-			}*/
+		static int getValue(const Position& p) {
 			return getMidgameValue(p);
 		}
 

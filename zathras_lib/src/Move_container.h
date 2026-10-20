@@ -16,8 +16,8 @@
 #include <array>
 
 namespace Moves {
-	const size_t CONTAINER_COUNT = 32; //TODO this needs to be the maximum depth
-	const size_t CONTAINER_SIZE = 127;
+	const size_t CONTAINER_COUNT = 64; //TODO this needs to be the maximum depth
+	const size_t CONTAINER_SIZE = 256;
 	using Positions::square_t;
 	using move_container_t = array<Move, CONTAINER_SIZE>;
 	//using move_container_t = vector<Move>; //TODO make this work? or make the array safer
@@ -27,7 +27,7 @@ namespace Moves {
 	{
 	public:
 		Move_container();
-		virtual ~Move_container();
+		~Move_container();
 
 		
 
@@ -49,6 +49,8 @@ namespace Moves {
 		void reset();
 		size_t size()const;
 		move_container_t get_moves() const;
+		const move_container_t& get_moves_ref() const { return container; }
+		move_container_t& get_moves_ref() { return container; }
 	private:
 		static array<Move_container, CONTAINER_COUNT> container_pool;
 		move_container_t container;

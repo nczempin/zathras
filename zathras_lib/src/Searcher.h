@@ -2,11 +2,12 @@
 #include <deque>
 #include <chrono>
 #include <climits>
+#include <cstdint>
+#include <vector>
 
 #include "Move.h"
 #include "Position.h"
 #include "Move_generator.h"
-//#include "Info.h"
 
 using namespace Moves;
 class Searcher
@@ -18,11 +19,27 @@ public:
 	int bestValue = INT_MIN;
 	int oldBestValue = INT_MIN;
 	bool done = false;
-	int idDepth = -1; //TODO find good init value
+	int idDepth = 1;
+	int maxIdDepth = 64;
+	long long softTimeLimitMs = 0;
+	long long hardTimeLimitMs = 0;
+	long long nodes = 0;
+	int seldepth = 0;
+	std::chrono::steady_clock::time_point startTime;
+	std::vector<uint64_t> gameHistory;
+	std::vector<uint64_t> searchPath;
 	bool kingCapture = false;
 	deque<Move> pv;
+
+	static uint64_t hashPosition(const Position& pos);
+	void clearHistory();
+	void pushHistory(const Position& pos);
+	void startTimer(long long softMs, long long hardMs, int maxDepth);
+	long long elapsedMs() const;
+	bool isHardTimeUp() const;
+	bool isSoftTimeUp() const;
 	
-	Move findBestmove(move_container_t moves, Position p);
+	Move findBestmove(const Move_container& move_container, Position p);
 
 	int alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp);
 
@@ -34,17 +51,15 @@ public:
 			return Move();
 		}
 		const Move_container move_container = mg.generate_legal_moves(p, 1);
-		auto moves = move_container.get_moves();
+		const auto& moves = move_container.get_moves_ref();
 		if (move_container.size() == 0) {
-			return Move();// -1, -1, 0); //TODO
+			return Move();
 		}
 		else if (move_container.size() == 1) {
-			auto move = moves[0];
-			cout << to_string(move) << endl;
-			return move;
+			return moves[0];
 		}
 		else {
-			Move m = findBestmove(moves, p);
+			Move m = findBestmove(move_container, p);
 			return m;
 		}
 	}

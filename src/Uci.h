@@ -1,14 +1,11 @@
 #pragma once
 
-
-//  main.cpp
-
-
 #include <iostream>
 #include <chrono>
 #include <future>
 #include <thread>
-
+#include <sstream>
+#include <algorithm>
 
 #include "Character.h"
 #include "Position.h"
@@ -22,8 +19,6 @@
 #include "Divide_command.h"
 
 extern Position p;
-
-
 extern future<Move> fut;
 extern Searcher searcher;
 extern const std::string VERSION;
@@ -36,6 +31,9 @@ namespace Interface {
 	public:
 
 		static void parse(string toParse) {
+			if (toParse.empty()) {
+				return;
+			}
 			// for debugging
 			if (toParse == ".") {
 				toParse = "position fen r3r1k1/1p3nqp/2pp4/p4p2/Pn3P1Q/2N4P/1PPR2P1/3R1BK1 w - - 0 1";
@@ -48,39 +46,21 @@ namespace Interface {
 				cout << "id author Nicolai Czempin" << endl;
 				cout << "uciok" << endl;
 			}
-			else if (startsWith("perft ", toParse)) { //TODO not really UCI
-				string pattern = "perft ";
+			else if (startsWith("perft ", toParse) || startsWith("go perft ", toParse)) {
+				string pattern = startsWith("go perft ", toParse) ? "go perft " : "perft ";
 				size_t index = toParse.find(pattern);
-
 				string depth_param = toParse.substr(index + pattern.length());
 
 				size_t depth = 6;
 				if (depth_param.length() > 0) {
 					try {
 						depth = std::stoi(depth_param);
-					} catch (const std::exception& e) {
+					} catch (const std::exception&) {
 						cout << "Invalid depth parameter. Using depth 6." << endl;
 					}
 				}
-				Perft_command pc{p,  depth };
+				Perft_command pc{p, depth};
 				pc.execute();
-				//char perftDepthParameter = toParse[6];//'4'; //TODO extract from toParse
-				//int perftDepth = Character::getNumericValue(perftDepthParameter);
-
-				//chrono::time_point<chrono::system_clock> end;
-
-
-				////TODO do this more elegantly
-				//for (int i = 0; i < perftDepth; ++i) {
-				//	Info::start = chrono::system_clock::now();
-				//	int nodes = perft(p, i + 1);
-				//	end = chrono::system_clock::now();
-				//	chrono::duration<double> elapsed_seconds = end - Info::start;
-				//	cout << i + 1 << ", " << nodes << " @ " << elapsed_seconds.count() << endl;
-				//	//time_t end_time = chrono::system_clock::to_time_t(end);
-				//}
-				//cout << "Done." << endl;
-
 			}
 			else if (startsWith("divide ", toParse)) {
 				string pattern = "divide ";
@@ -90,32 +70,13 @@ namespace Interface {
 				if (depth_param.length() > 0) {
 					try {
 						depth = std::stoi(depth_param);
-					} catch (const std::exception& e) {
+					} catch (const std::exception&) {
 						cout << "Invalid depth parameter. Using depth 1." << endl;
 					}
 				}
 				Divide_command dc{p, depth};
 				dc.execute();
 			}
-			//else if (startsWith("divide ", toParse)) {
-			//	char perftDepthParameter = toParse[7];
-			//	int perftDepth = Character::getNumericValue(perftDepthParameter);
-			//	//TODO do this more elegantly
-			//	MoveGenerator mg;
-			//	vector<Move> moves = mg.generateLegalMoves(p);
-			//	int count = 0;
-			//	Position tmpPos = p;
-			//	for (Move move : moves) {
-			//		tmpPos = p; //simple but inefficient way to undo the move
-			//		tmpPos.makeMove(move);
-
-			//		count = perft(tmpPos, perftDepth - 1);
-			//		cout << move.toString() << ": " << count << endl;
-			//	}
-
-			//	cout << "Done." << endl;
-
-			//}
 			else if (toParse == "isready") {
 				cout << "readyok" << endl;
 			}
@@ -124,83 +85,86 @@ namespace Interface {
 				cout << "Value: " << v << endl;
 			}
 			else if (startsWith("go", toParse)) {
-				/*int wtime = extractIntValue(toParse, "wtime");
-				int btime = extractIntValue(toParse, "btime");
-				int winc = extractIntValue(toParse, "winc");
-				int binc = extractIntValue(toParse, "binc");
-				int mtg = extractIntValue(toParse, "movestogo");
-				if (mtg == 0) {
-					mtg = 25;
+				long long wtime = -1, btime = -1, winc = 0, binc = 0, movetime = -1;
+				int movestogo = 0, depth = 0;
+
+				std::istringstream iss(toParse);
+				std::string token;
+				iss >> token; // "go"
+				while (iss >> token) {
+					if (token == "wtime") iss >> wtime;
+					else if (token == "btime") iss >> btime;
+					else if (token == "winc") iss >> winc;
+					else if (token == "binc") iss >> binc;
+					else if (token == "movestogo") iss >> movestogo;
+					else if (token == "movetime") iss >> movetime;
+					else if (token == "depth") iss >> depth;
 				}
 
-				long tpm;
-				if (p.white_to_move) {
-					tpm = calculateTimePerMove(wtime, winc, mtg);
+				long long softMs = 0;
+				long long hardMs = 0;
+				long long myTime = p.white_to_move ? wtime : btime;
+				long long myInc = p.white_to_move ? winc : binc;
+
+				if (movetime > 0) {
+					softMs = std::max(1LL, movetime - 15);
+					hardMs = std::max(1LL, movetime - 10);
+				} else if (myTime > 0) {
+					long long overhead = std::min(25LL, std::max(5LL, myTime / 10));
+					long long avail = std::max(1LL, myTime - overhead);
+					int mtg = (movestogo > 0) ? movestogo : 30;
+					long long target = avail / mtg + (myInc * 3) / 4;
+					softMs = std::max(1LL, std::min(target, avail / 3));
+					hardMs = std::max(1LL, std::min(target * 2, avail / 2));
+				} else if (depth <= 0) {
+					softMs = 500;
+					hardMs = 1000;
 				}
-				else {
-					tpm = calculateTimePerMove(btime, binc, mtg);
-				}*/
 
-				auto tpm = 5000;
-
-				Info::timePerMove = tpm;
-
-				cout << "tpm: " << tpm << endl;
-
-
-				/*    this.engine.setMovesToGo(mtg);
-				this.engine.setTimes(wtime, btime, winc, binc);
-				int depth = extractIntValue(parameters, "depth");
-				this.engine.setDepth(depth);*/
-				startBrain();
+				Info::timePerMove = static_cast<int>(hardMs);
+				searcher.startTimer(softMs, hardMs, depth);
+				Move best = searcher.analyze(p);
+				cout << "bestmove " << Moves::to_string(best) << endl;
 			}
 			else if (startsWith("stop", toParse)) {
-				stopBrain();
+				searcher.done = true;
 			}
 			else if (startsWith("quit", toParse)) {
-				exit(0); //TODO more elegance
+				searcher.done = true;
+				exit(0);
 			}
 			else if (startsWith("ucinewgame", toParse)) {
-				p = p.create_start_position(); //TODO warning C26444 avoid unnamed objects with custom construction
-				//cout << "!" << endl;
+				p = Position::create_start_position();
+				searcher.clearHistory();
+				searcher.pushHistory(p);
 			}
 			else if (startsWith("position", toParse)) {
-				//p.clear();//TODO hopefully the other methods will have taken care of this
 				string positionString = extractPosition(toParse);
 				if (startsWith("startpos", positionString)) {
-					p = p.create_start_position();
+					p = Position::create_start_position();
 				}
 				else if (startsWith("fen", positionString)) {
 					string positionFen = extractFen(positionString);
-					p = p.create_position(positionFen);//TODO warning C26444 avoid unnamed objects with custom construction
-					p.print(cout);
+					p = Position::create_position(positionFen);
 				}
+				searcher.clearHistory();
+				searcher.pushHistory(p);
+
 				string movesString = extractMoves(toParse);
 				vector<string> moves = Position::split(movesString, ' ');
-				//p.clearThreeDraws();
-				if ((movesString != "") && (moves.size() != 0))
+				if (!movesString.empty() && !moves.empty())
 				{
-					for (string move : moves) {
-						//p.print();
-
-
-						//cout << "making move: "<<move<<endl;
-						makeMove(p, move);
+					for (const string& move : moves) {
+						if (!move.empty()) {
+							makeMove(p, move);
+							searcher.pushHistory(p);
+						}
 					}
 				}
 			}
 			else if (toParse == "sp" || toParse == "d") {
-				// Both "sp" (show position) and "d" (display) show the current position
 				p.print(cout);
 			}
-			/*else if (toParse == "sm") {
-				cout << "Moves: " << endl;
-				MoveGenerator mg;
-				vector<Move> moves = mg.generateLegalMoves(p);
-				for (Move move : moves) {
-					move.print(cout);
-				}
-			}*/
 			else {
 				cout << "Unknown command: '" << toParse << "'" << endl;
 				cout << "Available commands: uci, isready, position, go, perft, divide, d (display), sp (show position), quit" << endl;
@@ -211,47 +175,13 @@ namespace Interface {
 			return bigString.compare(0, smallString.length(), smallString) == 0;
 		}
 
-
-		static void stopBrain()
-		{
-			if (!searcher.done) {
-				searcher.done = true; // ask the thread to finish
-				Move move = fut.get(); //wait until the thread is finished
-				cout << "hurz!" << endl;
-				cout << "bestmove " << to_string(move) << endl;
-
-			}
-			else {
-				cout << "engine already stopped" << endl;
-			}
-		}
-		static void finishBrain() {
-			cout << "schnurzel" << endl;
-			this_thread::sleep_for(chrono::milliseconds(Info::timePerMove));
-			if (!searcher.done) {
-				searcher.done = true; // ask the searcher to finish
-				cout << "purzel" << endl;
-				Move move = fut.get(); //wait until the thread is finished
-				cout << "hurzel" << endl;
-				cout << "bestmove " << to_string(move) << endl;
-			}
-		}
-		static void startBrain() {
-
-			searcher.done = false;
-			fut = async(asyncAnalyze);
-			thread(finishBrain).detach();
-
-
-		}
-
 		static string extractMoves(string parameters)
 		{
 			string pattern = " moves ";
 			size_t index = parameters.find(pattern);
 			if (index == string::npos)
 			{
-				return ""; //not found
+				return "";
 			}
 			string moves = parameters.substr(index + pattern.length());
 			return moves;
@@ -262,90 +192,44 @@ namespace Interface {
 			size_t index = parameters.find(pattern);
 			if (index == string::npos)
 			{
-				return ""; //not found
+				return "";
 			}
 			string retVal = parameters.substr(index + pattern.length());
 			return retVal;
 		}
 
-
 		static string extractFen(string positionString) {
 			static string command = "fen ";
-			string retValue = positionString.substr(command.length()); // remove "fen " TODO: more fail-safe / defensive
-			//remove moves
+			string retValue = positionString.substr(command.length());
 			size_t movesFoundAt = retValue.find("moves ");
 			if (movesFoundAt != string::npos) {
 				retValue = retValue.substr(0, movesFoundAt);
 			}
+			while (!retValue.empty() && (retValue.back() == ' ' || retValue.back() == '\r' || retValue.back() == '\n')) {
+				retValue.pop_back();
+			}
 			return retValue;
 		}
 
-		void static resetClock() {
-			Interface::Info::start = chrono::system_clock::now();
-		}
-		static Move asyncAnalyze() {
-			resetClock();
-
-
-			Move bestmove = searcher.analyze(p);
-
-			return bestmove;
-		}
-
-
-		void static makeMove(Position& p, string moveString) {
-			piece_t board[64];
-			for (int i = 0; i < 64; ++i) {
-				board[i] = 0;
+		static void makeMove(Position& pos, string moveString) {
+			if (moveString.length() < 4) {
+				return;
 			}
-			p.populate_mailbox_from_bitboards(board);
-			Move m = convert_move(moveString, board, p);
-
-			//TODO make this more elegant
-			int from = m.get_from();
-			uint8_t moving = board[from];
-			if (moving > 6) {
-				moving = -(moving - 6);
-			}
-			p.visualize_mailbox_board(board, cout);
-			//m.set_moving_piece(moving);
-			int to = m.get_to();
-			//cout << "to: " << to << endl;
-			int captured = board[to];
-			//cout << "captured: " << captured << endl;
-			if (captured > 6) {
-				captured = -(captured - 6);
-			}
-			//cout << "captured: " << captured << endl;
-
-			//cout << "from: " << from << endl;
-			//cout << "moving piece: " << moving << endl;
-			//cout << "makeMove: " << moveString << endl;
+			Move m = convert_move(moveString, pos);
 			Move_state ms;
-			ms.captured = captured;
-			p.make_move(m, ms);// m.from, m.to, m.captured, m.promoted);
-
-
-	//			++Interface::Info::nodes;
-
-				//isGivingCheck = null;
-				//isReceivingCheck = null;
-			p.print(cout);
+			pos.make_move(m, ms);
 		}
-		//
-		static Move convert_move(string move, piece_t * board, const Position& p) {
-			square_t from = static_cast<square_t> (Util::decodeSquare(move.substr(0, 2)));
 
-			square_t to = static_cast<square_t> (Util::decodeSquare(move.substr(2, 4)));
-			string promotedTo = move.substr(4);
+		static Move convert_move(string move, const Position& pos) {
+			square_t from = static_cast<square_t>(Util::decodeSquare(move.substr(0, 2)));
+			square_t to = static_cast<square_t>(Util::decodeSquare(move.substr(2, 2)));
+			string promotedTo = (move.length() > 4) ? move.substr(4) : "";
 
-			
 			move_type_t mt = NONE;
-			piece_t moving = board[from];
-			piece_t captured = board[to];
-			
-			// Check for promotion
-			if (promotedTo != "") {
+			piece_t moving = pos.get_piece_on(from);
+			piece_t captured = pos.get_piece_on(to);
+
+			if (!promotedTo.empty()) {
 				char promo = promotedTo[0];
 				switch (promo) {
 					case 'q':
@@ -365,35 +249,25 @@ namespace Interface {
 						mt = PROMOTION_KNIGHT;
 						break;
 					default:
-						// Invalid promotion piece
 						break;
 				}
 			}
 
-			// TODO stupid way of doing this
 			if (moving == Piece::WHITE_PAWN) {
-				if (board[to] == 0) {
+				if (captured == 0) {
 					if (to - from == 9 || to - from == 7) {
 						mt = EN_PASSANT;
 					}
 				}
-				//if (to == Bitboard::extract_square(p.en_passant_square)) {
-				//	mt = EN_PASSANT;
-				//}
 			}
-			if (moving == Piece::BLACK_PAWN) {
-				if (board[to] == 0) {
-					if (from -to == 9 || from -to == 7) {
+			else if (moving == Piece::BLACK_PAWN) {
+				if (captured == 0) {
+					if (from - to == 9 || from - to == 7) {
 						mt = EN_PASSANT;
 					}
 				}
-				//if (to == Bitboard::extract_square(p.en_passant_square)) {
-				//	mt = EN_PASSANT;
-				//}
 			}
-			Move m(from, to, mt);/// , captured, false);
-			//m.set_promoted_to(promoted_to);
-			return m;
+			return Move(from, to, mt);
 		}
 	};
 }

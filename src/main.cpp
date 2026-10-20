@@ -3,10 +3,8 @@
 #include <iostream>
 #include <string>
 
-
 #include "zathras_lib.h"
 #include "Uci.h"
-
 
 using namespace std;
 
@@ -18,12 +16,14 @@ extern const std::string VERSION;
 
 int main()
 {
-	cout << "Welcome to Zathras, a chess engine by Nicolai Czempin. This is version " << VERSION << endl;
-
 	string mystr;
 	Zathras_lib::init();
-	while (true) {
-		getline(cin, mystr);
+	p = Position::create_start_position();
+	searcher.pushHistory(p);
+	while (getline(cin, mystr)) {
+		if (!mystr.empty() && mystr.back() == '\r') {
+			mystr.pop_back();
+		}
 		Interface::Uci::parse(mystr);
 	}
 	return 0;

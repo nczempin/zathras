@@ -728,8 +728,8 @@ namespace Moves {
 		//TODO this is all terrible
 		Move_container pseudolegal_moves = generate_pseudolegal_captures(position, depth);
 		Move_container legal_moves;
-		auto moves = pseudolegal_moves.get_moves();
-		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
+		const auto& moves = pseudolegal_moves.get_moves_ref();
+		for (int i = 0; i < (int)pseudolegal_moves.size(); ++i) {
 			Move move = moves[i];
 			//Position pos2 = position; //copied //TODO inefficient
 			Move_state ms;
@@ -747,8 +747,8 @@ namespace Moves {
 		//TODO this is all terrible
 		Move_container pseudolegal_moves = generate_pseudolegal_moves(position, depth);
 		Move_container legal_moves;
-		auto moves = pseudolegal_moves.get_moves();
-		for (int i = 0; i < pseudolegal_moves.size(); ++i) {
+		const auto& moves = pseudolegal_moves.get_moves_ref();
+		for (int i = 0; i < (int)pseudolegal_moves.size(); ++i) {
 			Move move = moves[i];
 			//Position pos2 = position; //copied //TODO inefficient
 			Move_state ms;
@@ -764,10 +764,10 @@ namespace Moves {
 	}
 
 	Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
+		(void)depth;
 		p = &position;
 
-		Move_container moves = Move_container::get(depth);
-		//moves.reserve(35);
+		Move_container moves;
 		moves.reset();
 		const move_visitor& f =
 			[&moves](const square_t& from, const square_t& to, const Move_type& move_type) {
@@ -834,10 +834,10 @@ namespace Moves {
 		return moves;
 	}
 	Move_container Move_generator::generate_pseudolegal_captures(Position position, size_t depth) {
+		(void)depth;
 		p = &position;
 
-		Move_container& moves = Move_container::get(depth);
-		//moves.reserve(35);
+		Move_container moves;
 		moves.reset();
 		const move_visitor& f =
 			[&moves](const square_t& from, const square_t& to, const move_type_t& move_type) {
@@ -979,10 +979,8 @@ namespace Moves {
 	}
 
 	bool Move_generator::is_attacked_by_pawn(const bb movers, const bitboard_set& all_moves, const square_t square, bool side_to_move) {
+		(void)side_to_move;
 		bb raw_moves = all_moves[square];
-		if ((side_to_move && square > 31) || (!side_to_move && square < 31)) { //TODO bit test rather than lt/gt
-			raw_moves |= p->en_passant_square;
-		}
 		bb moves = raw_moves & movers;
 		return moves != 0x00;
 	}

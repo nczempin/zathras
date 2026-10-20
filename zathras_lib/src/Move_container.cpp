@@ -25,7 +25,7 @@ namespace Moves {
 
 	Move_container& Move_container::get(size_t index)
 	{
-		return container_pool[index];
+		return container_pool[index % CONTAINER_COUNT];
 	}
 
 	/*void Move_container::add_move(const int8_t& moving, const uint8_t& from, const uint8_t& to,

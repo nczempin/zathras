@@ -65,7 +65,7 @@ namespace Positions {
 			return Squares::A1 <= square && square <= Squares::H1;
 
 		}
-		piece_t get_piece_on(square_t sq) {
+		piece_t get_piece_on(square_t sq) const {
 			return board[sq];
 		}
 		friend ostream& operator<<(ostream& stream, const Position& position);

@@ -522,14 +522,11 @@ namespace Positions {
 
 
 	inline void Position::save_en_passant_square(Move_state& move_state) {
-		if (en_passant_square != 0x00) {
-			uint8_t eps = Bitboard::extract_square(en_passant_square);
-			move_state.set_en_passant_square(eps);
-			en_passant_square = 0x00;
-		}
+		(void)move_state;
+		en_passant_square = 0x00;
 	}
 	void Position::restore_en_passant_square(const Move_state& move_state) {
-		en_passant_square = move_state.get_en_passant_square();
+		en_passant_square = move_state.prev_en_passant_square;
 	}
 
 	void Position::promote(int8_t promoted_to, square_t to) {
@@ -654,6 +651,9 @@ namespace Positions {
 
 	void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
 		bool set_en_passant = false;
+		move_state.prev_en_passant_square = en_passant_square;
+		move_state.prev_castling = castling;
+		move_state.captured = 0;
 		const square_t& from = move.get_from();
 		const square_t& to = move.get_to();
 		
@@ -945,6 +945,8 @@ namespace Positions {
 			}
 		}
 
+		en_passant_square = move_state.prev_en_passant_square;
+		castling = move_state.prev_castling;
 
 		assert(get_piece_on(move.get_from()) != 0);
 		// TODO update 3 repetitions
@@ -1039,7 +1041,7 @@ namespace Positions {
 			debugPosition();
 			throw king_pos;
 		}
-		if (white_to_move) {
+		if (!side) {
 			const bb white_knights = knights & white;
 			if (is_attacked_by_hopper(white_knights, Bitboard::knight_moves, king_pos)) {
 				return true;

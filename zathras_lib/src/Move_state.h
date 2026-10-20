@@ -8,13 +8,14 @@
 #ifndef MOVE_STATE_H_
 #define MOVE_STATE_H_
 
+#include <bitset>
 #include "typedefs.h"
 
 namespace Moves {
 	class Move_state {
 	public:
 		Move_state();
-		virtual ~Move_state();
+		~Move_state();
 
 		bool is_cleared_kingside_castling() const {
 			return cleared_kingside_castling;
@@ -39,6 +40,8 @@ namespace Moves {
 			this->en_passant_square = en_passant;
 		}
 		piece_t captured = 0; //TODO public for now
+		bb prev_en_passant_square = 0;
+		std::bitset<4> prev_castling;
 	private:
 		int en_passant_square = -1; //TODO file would be sufficient //TODO handle square_t vs. -1 (invalid/nonexistant) more elegantly
 		bool cleared_kingside_castling = false;

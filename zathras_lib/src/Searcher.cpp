@@ -8,239 +8,340 @@
 #include "Searcher.h"
 #include "Evaluator.h"
 #include "Move.h"
-
-
 #include "misc.h"
-//using namespace Interface; //TODO
+
+namespace {
+	constexpr int INF_SCORE = 1000000;
+	constexpr int MATE_SCORE = 100000;
+	constexpr int MATE_THRESHOLD = 90000;
+
+	inline int scoreMove(const Position& pos, const Move& m) {
+		int score = 0;
+		piece_t captured = pos.get_piece_on(m.get_to());
+		if (captured != 0) {
+			int victim = std::abs(static_cast<int>(captured));
+			int attacker = std::abs(static_cast<int>(pos.get_piece_on(m.get_from())));
+			score += 10000 + victim * 100 - attacker;
+		} else if (m.get_move_type() == EN_PASSANT) {
+			score += 10090;
+		}
+		if (m.get_move_type() >= PROMOTION_QUEEN && m.get_move_type() <= PROMOTION_KNIGHT) {
+			score += (m.get_move_type() == PROMOTION_QUEEN) ? 9000 : 5000;
+		}
+		return score;
+	}
+
+	struct PathGuard {
+		std::vector<uint64_t>& path;
+		~PathGuard() {
+			path.pop_back();
+		}
+	};
+}
 
 Searcher::Searcher(void)
 {
 }
 
-
 Searcher::~Searcher(void)
 {
 }
 
+uint64_t Searcher::hashPosition(const Position& pos) {
+	auto mix = [](uint64_t x) {
+		x ^= x >> 30;
+		x *= 0xbf58476d1ce4e5b9ULL;
+		x ^= x >> 27;
+		x *= 0x94d049bb133111ebULL;
+		x ^= x >> 31;
+		return x;
+	};
+	uint64_t h = pos.white_to_move ? 0x9e3779b97f4a7c15ULL : 0ULL;
+	h ^= mix(pos.white ^ 0x1111111111111111ULL);
+	h ^= mix(pos.black ^ 0x2222222222222222ULL);
+	for (int i = 0; i < 6; ++i) {
+		h ^= mix(pos.piece_bb[i] + (static_cast<uint64_t>(i + 1) << 48));
+	}
+	return h;
+}
 
-Move Searcher::findBestmove(move_container_t moves, Position position) {
-	// assumption: moves.size() > 1
-	
-	idDepth = 1;
-	int maxIdDepth = 0;
-	//TODOInfo::seldepth = 0;
-	//TODOInfo::nodes = 0;
-	Move lastIterationBestMove;
+void Searcher::clearHistory() {
+	gameHistory.clear();
+}
+
+void Searcher::pushHistory(const Position& pos) {
+	gameHistory.push_back(hashPosition(pos));
+}
+
+void Searcher::startTimer(long long softMs, long long hardMs, int maxDepth) {
+	startTime = std::chrono::steady_clock::now();
+	softTimeLimitMs = softMs;
+	hardTimeLimitMs = hardMs;
+	maxIdDepth = (maxDepth > 0) ? maxDepth : 64;
+	nodes = 0;
+	seldepth = 0;
 	done = false;
-	deque<Move> lineDown;
-	
-	int movesSize = 0;
+}
+
+long long Searcher::elapsedMs() const {
+	auto now = std::chrono::steady_clock::now();
+	return std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
+}
+
+bool Searcher::isHardTimeUp() const {
+	if (hardTimeLimitMs <= 0) return false;
+	return elapsedMs() >= hardTimeLimitMs;
+}
+
+bool Searcher::isSoftTimeUp() const {
+	if (softTimeLimitMs <= 0) return false;
+	return elapsedMs() >= softTimeLimitMs;
+}
+
+Move Searcher::findBestmove(const Move_container& move_container, Position position) {
+	int moveCount = static_cast<int>(move_container.size());
+	const auto& rawMoves = move_container.get_moves_ref();
+	std::vector<Move> rootMoves(rawMoves.begin(), rawMoves.begin() + moveCount);
+
+	// Initial root ordering by MVV-LVA
+	std::stable_sort(rootMoves.begin(), rootMoves.end(), [&position](const Move& a, const Move& b) {
+		return scoreMove(position, a) > scoreMove(position, b);
+	});
+
+	idDepth = 1;
+	done = false;
+	bestMove = rootMoves[0];
+	bestValue = -INF_SCORE;
+	deque<Move> bestPv;
+	bestPv.push_back(bestMove);
+
 	do {
-		lastIterationBestMove = bestMove;
-		oldBestValue = bestValue;
-		bestValue = -9999999;
-		
-
-		//TODOInfo::currmovenumber = 0;
-		for (Move& move : moves) {
-			// TODO this is a workaround because of garbage
-			/*if (move.get_moving_piece() == 0) {
-				break;
-			}*/
-			//Position newPos = position;
-			Move_state ms;
-			position.make_move(move, ms);
-
-
-
-			//++Info::nodes;
-			//Info::currmove = move;
-			//Info::currmovenumber++;
-			//
-			//
-			////printInfo();
-
-			//cout << "trying " << move.toString() << endl;
-			int value = -alphabeta(1, position, -9999999, -bestValue, lineDown);
-			//TODO
-			//if (Util::timeUp()) {
-			//	//return lastIterationBestMove;
-			//	done = true;
-			//	break;
-			//}
-			//TODO move with value move.value = value;
-			if (value > bestValue) {
-				//cout << "inserting " << move.toString() << "@" << value << endl;
-				
-
-				bestValue = value;
-				bestMove = move;
-				pv = lineDown;
-				pv.push_front(move);
-				
-				//printInfo();
-				
-				if (bestValue > 80000) {
-					done = true;
-					break;
-				}
-			}
-			
-
-			position.unmake_move(move, ms);
+		searchPath = gameHistory;
+		if (searchPath.empty() || searchPath.back() != hashPosition(position)) {
+			searchPath.push_back(hashPosition(position));
 		}
 
-		//printInfo();
-		
-		
-		if (maxIdDepth > 0 && idDepth > maxIdDepth) {
+		// Put previous iteration's bestMove first
+		for (size_t i = 1; i < rootMoves.size(); ++i) {
+			if (rootMoves[i].get_from() == bestMove.get_from() &&
+			    rootMoves[i].get_to() == bestMove.get_to() &&
+			    rootMoves[i].get_move_type() == bestMove.get_move_type()) {
+				std::rotate(rootMoves.begin(), rootMoves.begin() + i, rootMoves.begin() + i + 1);
+				break;
+			}
+		}
+
+		int iterBestValue = -INF_SCORE;
+		Move iterBestMove = rootMoves[0];
+		deque<Move> iterBestPv;
+		deque<Move> lineDown;
+		bool completedAtLeastOneMove = false;
+
+		for (const Move& move : rootMoves) {
+			Move_state ms;
+			position.make_move(move, ms);
+			++nodes;
+
+			lineDown.clear();
+			int value = -alphabeta(1, position, -INF_SCORE, -iterBestValue, lineDown);
+			position.unmake_move(move, ms);
+
+			if (done) {
+				break;
+			}
+
+			completedAtLeastOneMove = true;
+			if (value > iterBestValue) {
+				iterBestValue = value;
+				iterBestMove = move;
+				iterBestPv = lineDown;
+				iterBestPv.push_front(move);
+			}
+		}
+
+		if (completedAtLeastOneMove) {
+			bestMove = iterBestMove;
+			bestValue = iterBestValue;
+			pv = iterBestPv;
+
+			long long ms = std::max(1LL, elapsedMs());
+			long long nps = (nodes * 1000LL) / ms;
+			std::cout << "info depth " << idDepth
+			          << " seldepth " << std::max(idDepth, seldepth)
+			          << " score cp " << bestValue
+			          << " nodes " << nodes
+			          << " nps " << nps
+			          << " time " << ms
+			          << " pv";
+			for (const Move& m : pv) {
+				std::cout << " " << Moves::to_string(m);
+			}
+			std::cout << std::endl;
+
+			if (bestValue > MATE_THRESHOLD || bestValue < -MATE_THRESHOLD) {
+				done = true;
+			}
+		}
+
+		if (idDepth >= maxIdDepth || isSoftTimeUp() || isHardTimeUp()) {
 			done = true;
 		}
 		++idDepth;
-		//		moves.clear();
-				//static Move emptyMove;
-				//moves.fill(emptyMove);
-		movesSize = 0;
-		
 	} while (!done);
+
 	return bestMove;
 }
 
 int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
-	if (done /* ||(Util::timeUp())*/) {
-		//	timeIsUp = true;
+	if ((nodes & 127) == 0 && isHardTimeUp()) {
 		done = true;
-		const int& value = Eval::Evaluator::getValue(position);
-		return value;
 	}
-	int value = 0;
+	if (done) {
+		return 0;
+	}
+	if (depth > seldepth) {
+		seldepth = depth;
+	}
+
+	uint64_t h = hashPosition(position);
+	for (int i = static_cast<int>(searchPath.size()) - 2; i >= 0; --i) {
+		if (searchPath[i] == h) {
+			return 0; // Repetition draw
+		}
+	}
+
 	if (depth >= idDepth) {
 		deque<Move> lineDown;
-		value = quiescence_alphabeta(depth, position, alpha, beta, lineDown);
+		int value = quiescence_alphabeta(depth, position, alpha, beta, lineDown);
 		lineUp = lineDown;
 		return value;
 	}
+
 	Move_generator mg;
-	Move_container mc = mg.generate_legal_moves(position, 1);
-	auto moves = mc.get_moves();// AllMoves(position, moves);
-	int actualMoves = 0;
-	int moveCount = 0;
-	for (const Move& newMove : moves) {
-		if (moveCount++ >= mc.size()) {
-			break;
+	Move_container mc = mg.generate_legal_moves(position, depth);
+	int count = static_cast<int>(mc.size());
+	if (count == 0) {
+		if (position.is_in_check(position.is_white_to_move())) {
+			return -MATE_SCORE + depth;
+		}
+		return 0;
+	}
+
+	searchPath.push_back(h);
+	PathGuard guard{searchPath};
+
+	auto& moves = mc.get_moves_ref();
+	int scores[CONTAINER_SIZE];
+	for (int i = 0; i < count; ++i) {
+		scores[i] = scoreMove(position, moves[i]);
+	}
+
+	for (int i = 0; i < count; ++i) {
+		int bestIdx = i;
+		for (int j = i + 1; j < count; ++j) {
+			if (scores[j] > scores[bestIdx]) {
+				bestIdx = j;
+			}
+		}
+		if (bestIdx != i) {
+			std::swap(moves[i], moves[bestIdx]);
+			std::swap(scores[i], scores[bestIdx]);
 		}
 
-		//expensive way to make next move
-		//Position nextPos = position;// .copyPosition();
+		const Move& newMove = moves[i];
 		Move_state ms;
 		position.make_move(newMove, ms);
-		//TODO++Info::nodes;
-		//cout << "making " << newMove.toString() << endl;
+		++nodes;
+
 		deque<Move> lineDown;
-		value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown);
+		int value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown);
 		position.unmake_move(newMove, ms);
 
-
-
-		++actualMoves;
+		if (done) {
+			return 0;
+		}
 
 		if (value >= beta) {
-			//cout << "beta cutoff " << value<< " >= "<< beta <<": "<<newMove.toString()<<endl;
 			return beta;
 		}
 		if (value > alpha) {
-			//cout << "new best: " << newMove.toString() << ", " << value << " > " << alpha << endl;
 			alpha = value;
 			lineUp = lineDown;
 			lineUp.push_front(newMove);
-
-
-			//bestMove = newMove;
-			if (value > 800000) {
-				return value;
-			}
 		}
-		//}
-
-		if (done ) /*||Util::timeUp()*/ {
-			done = true;
-			return alpha;
-		}
-
 	}
-	//if (actualMoves == 0) {
-	//	//auto moves = mg.generate_legal_moves(position, 1).get_moves();// generateLegalMoves(position);
-	//	//if (moves.size() == 0) {
-	//		//cout << "no more moves!" << endl;
-	//		//position.print();
-	//	if (position.is_in_check(!position.is_white_to_move())) {
-	//		return -888888; // Checkmate
-	//	}
-	//	else {
-	//		return 0; // Stalemate
-	//	}
-	//	//}
-	//}
+
 	return alpha;
 }
 
-static bool shouldBeIgnored(Position nextPos, Move newMove, int capture, int capturing) {
-	return false;//TODO (abs(capturing) > abs(capture)) && ((capturing != 3) || (capture != 2)); //TODO: && (!nextPos.enPrise(newMove));
-}
-
 int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
-	//ValidFlag bestMoveValidFlag = new ValidFlag();
+	if ((nodes & 127) == 0 && isHardTimeUp()) {
+		done = true;
+	}
+	if (done) {
+		return 0;
+	}
+	if (depth > seldepth) {
+		seldepth = depth;
+	}
+
 	int v = Eval::Evaluator::getValue(position);
-
-	//if (depth > Info::seldepth) {
-	//	Info::seldepth = depth;
-	//	
-	//	//printInfo();
-	//}
-
-	if (v >= beta)
+	if (v >= beta) {
 		return beta;
+	}
 	if (v > alpha) {
-		//bestMoveValidFlag.setNr(1);
 		alpha = v;
 	}
-	//kingCapture = false;
-	
+	if (depth - idDepth >= 6) {
+		return alpha;
+	}
+
 	Move_generator mg;
+	Move_container mc = mg.generate_legal_captures(position, depth);
+	int count = static_cast<int>(mc.size());
+	if (count == 0) {
+		return alpha;
+	}
 
-	auto mc = mg.generate_legal_captures(position, 1);
-	auto moves = mc.get_moves();
+	auto& moves = mc.get_moves_ref();
+	int scores[CONTAINER_SIZE];
+	for (int i = 0; i < count; ++i) {
+		scores[i] = scoreMove(position, moves[i]);
+	}
 
-	//vector<Move> legalMoves = MoveGenerator::removeIllegalMoves(moves);
-	for (const Move& newMove : moves) {
-		//if (newMove.get_moving_piece() == 0) {
-		//	break;
-		//}
-		//const int& capture = newMove.get_captured();
-		//assert(capture != 0);
-		//const int& capturing = newMove.get_moving_piece();// abs(position.board[newMove.get_from()]);
-
-		//if (!shouldBeIgnored(position, newMove, capture, capturing)) {
-
-			Move_state ms;
-			position.make_move(newMove, ms);
-			//TODO++Info::nodes;
-			deque<Move> lineDown;
-			const int value = -quiescence_alphabeta(depth + 1, position, -beta, -alpha, lineDown);
-			position.unmake_move(newMove, ms);
-
-
-			if (value >= beta) {
-				return beta;
+	for (int i = 0; i < count; ++i) {
+		int bestIdx = i;
+		for (int j = i + 1; j < count; ++j) {
+			if (scores[j] > scores[bestIdx]) {
+				bestIdx = j;
 			}
-			if (value > alpha) {
-				alpha = value;
-				lineUp = lineDown;
-				lineUp.push_front(newMove);
+		}
+		if (bestIdx != i) {
+			std::swap(moves[i], moves[bestIdx]);
+			std::swap(scores[i], scores[bestIdx]);
+		}
 
-			}
+		const Move& newMove = moves[i];
+		Move_state ms;
+		position.make_move(newMove, ms);
+		++nodes;
 
-	//	}
+		deque<Move> lineDown;
+		const int value = -quiescence_alphabeta(depth + 1, position, -beta, -alpha, lineDown);
+		position.unmake_move(newMove, ms);
+
+		if (done) {
+			return 0;
+		}
+
+		if (value >= beta) {
+			return beta;
+		}
+		if (value > alpha) {
+			alpha = value;
+			lineUp = lineDown;
+			lineUp.push_front(newMove);
+		}
 	}
 	return alpha;
 }
