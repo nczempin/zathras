@@ -66,5 +66,6 @@ namespace Interface {
         }
         
         cout << "\nNodes searched: " << total << endl;
+        cout << "Total: " << total << endl;
     }
 }

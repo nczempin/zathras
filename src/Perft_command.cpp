@@ -100,7 +100,7 @@ namespace Interface {
 
 		clock_t end = clock();
 		double elapsed_secs = (static_cast<double>(end) - static_cast<double>(begin)) / CLOCKS_PER_SEC;
-		int nps = static_cast<int>(total_result / elapsed_secs);
+		int nps = (elapsed_secs > 0.0) ? static_cast<int>(total_result / elapsed_secs) : 0;
 		cout << endl << "Perft " << to_string(depth) << " result: " << total_result << endl;
 		cout << "time: " << elapsed_secs << ", nps: " << nps << endl;
 	}
