@@ -19,11 +19,11 @@ namespace Moves {
 		Move_generator();
 		virtual ~Move_generator();
 		static void pregenerate_moves();
-		Move_container generate_legal_moves(Position position, size_t depth);
-		Move_container generate_pseudolegal_moves(Position position, size_t depth);
-		Move_container generate_pseudolegal_captures(Position position, size_t depth);
+		Move_container generate_legal_moves(Position& position, size_t depth);
+		Move_container generate_pseudolegal_moves(Position& position, size_t depth);
+		Move_container generate_pseudolegal_captures(Position& position, size_t depth);
 		void add_non_capture_ray_moves1(Move_container& moves, bb position, const bitboard_set& pieceMoves, const bb& occupied);
-		Move_container generate_legal_captures(Position position, int depth);
+		Move_container generate_legal_captures(Position& position, int depth);
 
 		bool is_attacked_by_slider(bb position, const bitboard_set& all_moves, const square_t& square, const bb& occupied);
 		bool is_in_check(bool side);

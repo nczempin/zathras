@@ -447,16 +447,66 @@ namespace Eval {
 				return s;
 			};
 
-			int whitePos = sum_pst_w(white_pawns, pawn_pst)
+			static constexpr bb FILE_A = 0x0101010101010101ULL;
+			static const int passed_bonus[8] = { 0, 5, 10, 20, 35, 60, 100, 0 };
+
+			int w_doubled = countSetBits(white_pawns & (white_pawns << 8));
+			int b_doubled = countSetBits(black_pawns & (black_pawns >> 8));
+			int whitePos = -w_doubled * 12
 				+ sum_pst_w(white_knights, knight_pst)
 				+ sum_pst_w(white_bishops, bishop_pst)
-				+ sum_pst_w(white_rooks, rook_pst)
 				+ sum_pst_w(white_queens, queen_pst);
-			int blackPos = sum_pst_b(black_pawns, pawn_pst)
+			int blackPos = -b_doubled * 12
 				+ sum_pst_b(black_knights, knight_pst)
 				+ sum_pst_b(black_bishops, bishop_pst)
-				+ sum_pst_b(black_rooks, rook_pst)
 				+ sum_pst_b(black_queens, queen_pst);
+
+			bb b = white_pawns;
+			while (b) {
+				uint8_t sq = Positions::Bitboard::extract_and_remove_square(b);
+				whitePos += pawn_pst[sq ^ 56];
+				int rank = sq >> 3;
+				int file = sq & 7;
+				bb adj_files = (FILE_A << file)
+					| (file > 0 ? (FILE_A << (file - 1)) : 0ULL)
+					| (file < 7 ? (FILE_A << (file + 1)) : 0ULL);
+				bb ahead_mask = (rank < 7) ? (~0ULL << ((rank + 1) * 8)) : 0ULL;
+				if ((black_pawns & adj_files & ahead_mask) == 0) {
+					whitePos += passed_bonus[rank];
+				}
+			}
+			b = black_pawns;
+			while (b) {
+				uint8_t sq = Positions::Bitboard::extract_and_remove_square(b);
+				blackPos += pawn_pst[sq];
+				int rank = sq >> 3;
+				int file = sq & 7;
+				bb adj_files = (FILE_A << file)
+					| (file > 0 ? (FILE_A << (file - 1)) : 0ULL)
+					| (file < 7 ? (FILE_A << (file + 1)) : 0ULL);
+				bb ahead_mask = (rank > 0) ? ((1ULL << (rank * 8)) - 1ULL) : 0ULL;
+				if ((white_pawns & adj_files & ahead_mask) == 0) {
+					blackPos += passed_bonus[7 - rank];
+				}
+			}
+			b = white_rooks;
+			while (b) {
+				uint8_t sq = Positions::Bitboard::extract_and_remove_square(b);
+				whitePos += rook_pst[sq ^ 56];
+				bb fmask = FILE_A << (sq & 7);
+				if ((white_pawns & fmask) == 0) {
+					whitePos += ((black_pawns & fmask) == 0) ? 20 : 10;
+				}
+			}
+			b = black_rooks;
+			while (b) {
+				uint8_t sq = Positions::Bitboard::extract_and_remove_square(b);
+				blackPos += rook_pst[sq];
+				bb fmask = FILE_A << (sq & 7);
+				if ((black_pawns & fmask) == 0) {
+					blackPos += ((white_pawns & fmask) == 0) ? 20 : 10;
+				}
+			}
 
 			uint8_t wk_sq = white_kings ? Positions::Bitboard::extract_square(white_kings) : 4;
 			uint8_t bk_sq = black_kings ? Positions::Bitboard::extract_square(black_kings) : 60;

@@ -31,6 +31,18 @@ public:
 	bool kingCapture = false;
 	deque<Move> pv;
 
+	struct TTEntry {
+		uint64_t key = 0;
+		int score = 0;
+		int16_t depth = -1;
+		uint8_t flag = 0; // 0=none, 1=exact, 2=lowerbound, 3=upperbound
+		Move bestMove;
+	};
+	static constexpr size_t TT_SIZE = 65536;
+	std::vector<TTEntry> tt{TT_SIZE};
+	Move killers[64][2];
+	int historyTable[64][64]{};
+
 	static uint64_t hashPosition(const Position& pos);
 	void clearHistory();
 	void pushHistory(const Position& pos);
@@ -43,7 +55,7 @@ public:
 
 	int alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp);
 
-	int quiescence_alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp);
+	int quiescence_alphabeta(int depth, Position& position, int alpha, int beta);
 
 	Move analyze(Position p) {
 		Move_generator mg;

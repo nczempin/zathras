@@ -309,6 +309,7 @@ namespace Moves {
 		return captured;
 	}
 	bool Move_generator::has_captured_piece(square_t square, int8_t moving) {
+		(void)moving;
 
 		//		const bb pieces = p->pawns | p->knights | p->bishops | p->rooks | p->queens | p->kings;
 
@@ -342,6 +343,7 @@ namespace Moves {
 	}
 
 	void Move_generator::visit_capture_moves(const bb& sub_position, const bitboard_set& all_moves, const move_visitor& f, const bb& other_colour, const int8_t& moving) {
+		(void)moving;
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO handle cast better
@@ -400,6 +402,7 @@ namespace Moves {
 	void Move_generator::visit_non_capture_moves(const bb& sub_position,
 		const bitboard_set& all_moves, const move_visitor& f,
 		const bb& other_colour, const int8_t& moving) {
+		(void)moving;
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t& from = static_cast<square_t>(Bitboard::extract_and_remove_square(position));
@@ -508,6 +511,7 @@ namespace Moves {
 	void Move_generator::visit_non_capture_ray_moves(const bb& sub_position,
 		const bitboard_set& all_moves, const move_visitor& f,
 		const bb& occupied, const int8_t& moving) {
+		(void)moving;
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position)); // TODO proper cast
@@ -541,11 +545,11 @@ namespace Moves {
 	}
 	void Move_generator::visit_moves_raw(const bb sub_position,
 		const bitboard_set all_moves, move_visitor f, int8_t moving) {
+		(void)moving;
 
 		Bitboard::visit_bitboard(sub_position,
-			[&all_moves, &f, &moving](square_t x) {
-				Bitboard::visit_bitboard(all_moves[x], [&x, &f, &moving](square_t y) {
-					int8_t captured = -98;
+			[&all_moves, &f](square_t x) {
+				Bitboard::visit_bitboard(all_moves[x], [&x, &f](square_t y) {
 					f(x, y, NONE);
 					});
 
@@ -577,6 +581,7 @@ namespace Moves {
 	void Move_generator::visit_pawn_nocaps(const bb& sub_position,
 		const bitboard_set& all_moves, const move_visitor& f,
 		const bb& occupied, const int8_t& moving, const bool& white_to_move) {
+		(void)moving;
 		bb position = sub_position;
 		while (position != 0) {
 			const square_t from = square_t(Bitboard::extract_and_remove_square(position));
@@ -632,6 +637,7 @@ namespace Moves {
 
 	void Move_generator::attempt_castle(const move_visitor f, const int8_t piece,
 		const square_t king_square, const int8_t direction) {
+		(void)piece;
 		//1. check if squares between king and rook are free.
 		square_t next_square = square_t(uint8_t(king_square) + direction); //TODO proper cast
 		square_t target_square = square_t(uint8_t(king_square) + direction * 2);//TODO proper cast
@@ -692,6 +698,9 @@ namespace Moves {
 	void Move_generator::f(Move_container& moves, const int8_t moving,
 		const square_t from, const square_t to, const int8_t captured,
 		const int8_t promoted_to) {
+		(void)moving;
+		(void)captured;
+		(void)promoted_to;
 		//bool en_passant_capture = will_be_en_passant(to, moving);
 
 //		moves.add_move(moving, from, to, captured, en_passant_capture, promoted_to);
@@ -724,7 +733,7 @@ namespace Moves {
 			}
 		}
 	}
-	Move_container Move_generator::generate_legal_captures(Position position, int depth) {
+	Move_container Move_generator::generate_legal_captures(Position& position, int depth) {
 		//TODO this is all terrible
 		Move_container pseudolegal_moves = generate_pseudolegal_captures(position, depth);
 		Move_container legal_moves;
@@ -743,7 +752,7 @@ namespace Moves {
 		}
 		return legal_moves;
 	}
-	Move_container Move_generator::generate_legal_moves(Position position, size_t depth) {
+	Move_container Move_generator::generate_legal_moves(Position& position, size_t depth) {
 		//TODO this is all terrible
 		Move_container pseudolegal_moves = generate_pseudolegal_moves(position, depth);
 		Move_container legal_moves;
@@ -763,7 +772,7 @@ namespace Moves {
 		return legal_moves;
 	}
 
-	Move_container Move_generator::generate_pseudolegal_moves(Position position, size_t depth) {
+	Move_container Move_generator::generate_pseudolegal_moves(Position& position, size_t depth) {
 		(void)depth;
 		p = &position;
 
@@ -833,7 +842,7 @@ namespace Moves {
 		}
 		return moves;
 	}
-	Move_container Move_generator::generate_pseudolegal_captures(Position position, size_t depth) {
+	Move_container Move_generator::generate_pseudolegal_captures(Position& position, size_t depth) {
 		(void)depth;
 		p = &position;
 

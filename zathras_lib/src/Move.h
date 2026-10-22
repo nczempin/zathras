@@ -81,7 +81,7 @@ int8_t get_captured() const {
 
 	};
 
-	static std::string to_string(Move move) {
+	inline std::string to_string(Move move) {
 		/*static const string pieces("-PNBRQK");
 		char p = pieces[moving > 0 ? moving : -moving];
 		string moving_string = string(1, p);*/
