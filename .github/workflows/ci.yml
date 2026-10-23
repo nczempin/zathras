@@ -8,7 +8,7 @@ on:
 
 jobs:
   perft-validation:
-    name: Build, Shallow Tricky Perft Gate, and Extended Perft Validation
+    name: Build and Extended Perft Validation
     runs-on: ubuntu-latest
 
     steps:

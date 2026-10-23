@@ -29,6 +29,7 @@ public:
 	std::vector<uint64_t> gameHistory;
 	std::vector<uint64_t> searchPath;
 	int rootLastIrreversible = 0;
+	bool repetitionSeen = false;
 	deque<Move> pv;
 
 	struct TTEntry {

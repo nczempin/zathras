@@ -220,6 +220,7 @@ Move Searcher::findBestmove(const Move_container& move_container, Position posit
 				: baseIrreversible;
 
 			lineDown.clear();
+			repetitionSeen = false;
 			int value;
 			if (i == 0) {
 				value = -alphabeta(1, position, -INF_SCORE, -iterBestValue, lineDown, childIrrev, rootIndex);
@@ -304,10 +305,12 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	for (int i = static_cast<int>(searchPath.size()) - 2; i >= lastIrreversible; i -= 2) {
 		if (searchPath[i] == h) {
 			if (i >= rootIndex) {
+				repetitionSeen = true;
 				return 0; // Repetition within search tree (or returning to root)
 			}
 			++preRootMatches;
 			if (preRootMatches >= 2) {
+				repetitionSeen = true;
 				return 0; // Threefold repetition with pre-root game history
 			}
 		}
@@ -357,6 +360,9 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	Move bestLocalMove;
 	bool hasBestMove = false;
 	int legalMovesCount = 0;
+	bool savedRepetitionSeen = repetitionSeen;
+	repetitionSeen = false;
+	bool localRepetitionSeen = false;
 
 	for (int i = 0; i < count; ++i) {
 		int bestIdx = i;
@@ -408,8 +414,13 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 			}
 		}
 		position.unmake_move(newMove, ms);
+		if (repetitionSeen) {
+			localRepetitionSeen = true;
+			repetitionSeen = false;
+		}
 
 		if (done) {
+			repetitionSeen = savedRepetitionSeen || localRepetitionSeen;
 			return 0;
 		}
 
@@ -423,11 +434,14 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 				uint8_t t = static_cast<uint8_t>(newMove.get_to()) & 63;
 				historyTable[f][t] = std::min(6000, historyTable[f][t] + remDepth * remDepth);
 			}
-			tte.key = h;
-			tte.score = beta;
-			tte.depth = static_cast<int16_t>(remDepth);
-			tte.flag = TT_BETA;
-			tte.bestMove = newMove;
+			if (!localRepetitionSeen) {
+				tte.key = h;
+				tte.score = beta;
+				tte.depth = static_cast<int16_t>(remDepth);
+				tte.flag = TT_BETA;
+				tte.bestMove = newMove;
+			}
+			repetitionSeen = savedRepetitionSeen || localRepetitionSeen;
 			return beta;
 		}
 		if (value > alpha) {
@@ -440,13 +454,14 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	}
 
 	if (legalMovesCount == 0) {
+		repetitionSeen = savedRepetitionSeen || localRepetitionSeen;
 		if (inCheck) {
 			return -MATE_SCORE + depth;
 		}
 		return 0;
 	}
 
-	if (!done) {
+	if (!done && !localRepetitionSeen) {
 		tte.key = h;
 		tte.score = alpha;
 		tte.depth = static_cast<int16_t>(remDepth);
@@ -456,6 +471,7 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 		}
 	}
 
+	repetitionSeen = savedRepetitionSeen || localRepetitionSeen;
 	return alpha;
 }
 

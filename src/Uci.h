@@ -102,7 +102,7 @@ namespace Interface {
 				long long wtime = -1, btime = -1, winc = 0, binc = 0, movetime = -1;
 				int movestogo = 0, depth = 0;
 				bool infinite = false;
-				bool hasWtime = false, hasBtime = false, hasWinc = false, hasBinc = false;
+				bool hasWtime = false, hasBtime = false, hasWinc = false, hasBinc = false, hasMovetime = false;
 
 				std::istringstream iss(toParse);
 				std::string token;
@@ -113,7 +113,7 @@ namespace Interface {
 					else if (token == "winc" && (iss >> winc)) hasWinc = true;
 					else if (token == "binc" && (iss >> binc)) hasBinc = true;
 					else if (token == "movestogo") iss >> movestogo;
-					else if (token == "movetime") iss >> movetime;
+					else if (token == "movetime" && (iss >> movetime)) hasMovetime = true;
 					else if (token == "depth") iss >> depth;
 					else if (token == "infinite") infinite = true;
 				}
@@ -127,7 +127,7 @@ namespace Interface {
 				if (infinite) {
 					softMs = 0;
 					hardMs = 0;
-				} else if (movetime > 0) {
+				} else if (hasMovetime) {
 					softMs = std::max(1LL, movetime - 15);
 					hardMs = std::max(1LL, movetime - 10);
 				} else if (clockProvided) {
