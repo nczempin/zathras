@@ -20,6 +20,7 @@ $(BIN): $(OBJ)
 	$(CC) -o $(BIN) $(CFLAGS) $^
 
 $(BUILD_DIR)/%.o: %.cpp
+	@mkdir -p $(@D)
 	$(CC) -o $@ -c $(CFLAGS) $<
 
 test: $(BUILD_DIR) $(LIB_OBJ) $(BUILD_DIR)/tests/test_main.o
