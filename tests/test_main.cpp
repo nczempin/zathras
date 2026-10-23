@@ -17,7 +17,7 @@ static uint64_t run_perft(Position& pos, Move_generator& mg, size_t depth) {
     if (depth == 0) {
         return 1;
     }
-    Move_container mc = mg.generate_legal_moves(pos, depth);
+    Move_container mc = mg.generate_legal_moves(pos);
     if (depth == 1) {
         return mc.size();
     }
@@ -33,13 +33,19 @@ static uint64_t run_perft(Position& pos, Move_generator& mg, size_t depth) {
     return total;
 }
 
+static int g_failures = 0;
+
 static void verify_perft(const std::string& name, const std::string& fen, size_t depth, uint64_t expected) {
     Position pos = Position::create_position(fen);
     Move_generator mg;
     uint64_t actual = run_perft(pos, mg, depth);
     std::cout << "[TEST] " << name << " perft(" << depth << ") = " << actual
               << " (expected " << expected << ")" << std::endl;
-    assert(actual == expected);
+    if (actual != expected) {
+        std::cerr << "[FAIL] " << name << " perft(" << depth << ") got " << actual
+                  << ", expected " << expected << std::endl;
+        ++g_failures;
+    }
 }
 
 int main() {
@@ -67,6 +73,10 @@ int main() {
     verify_perft("TalkChess Pos 5", "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", 1, 44);
     verify_perft("TalkChess Pos 5", "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8", 2, 1486);
 
+    if (g_failures != 0) {
+        std::cerr << g_failures << " unit test(s) failed!" << std::endl;
+        return 1;
+    }
     std::cout << "All unit tests passed!" << std::endl;
     return 0;
 }

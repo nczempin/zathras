@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <deque>
 #include <chrono>
 #include <climits>
@@ -17,8 +18,7 @@ public:
 	~Searcher(void);
 	Move bestMove;
 	int bestValue = INT_MIN;
-	int oldBestValue = INT_MIN;
-	bool done = false;
+	std::atomic<bool> done{false};
 	int idDepth = 1;
 	int maxIdDepth = 64;
 	long long softTimeLimitMs = 0;
@@ -28,7 +28,7 @@ public:
 	std::chrono::steady_clock::time_point startTime;
 	std::vector<uint64_t> gameHistory;
 	std::vector<uint64_t> searchPath;
-	bool kingCapture = false;
+	int rootLastIrreversible = 0;
 	deque<Move> pv;
 
 	struct TTEntry {
@@ -45,7 +45,8 @@ public:
 
 	static uint64_t hashPosition(const Position& pos);
 	void clearHistory();
-	void pushHistory(const Position& pos);
+	void resetGameHistory();
+	void pushHistory(const Position& pos, bool irreversible = false);
 	void startTimer(long long softMs, long long hardMs, int maxDepth);
 	long long elapsedMs() const;
 	bool isHardTimeUp() const;
@@ -53,21 +54,18 @@ public:
 	
 	Move findBestmove(const Move_container& move_container, Position p);
 
-	int alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp);
+	int alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp, int lastIrreversible, int rootIndex);
 
 	int quiescence_alphabeta(int depth, Position& position, int alpha, int beta);
 
 	Move analyze(Position p) {
 		Move_generator mg;
-		if (done) {
-			return Move();
-		}
-		const Move_container move_container = mg.generate_legal_moves(p, 1);
+		const Move_container move_container = mg.generate_legal_moves(p);
 		const auto& moves = move_container.get_moves_ref();
 		if (move_container.size() == 0) {
 			return Move();
 		}
-		else if (move_container.size() == 1) {
+		else if (move_container.size() == 1 || done) {
 			return moves[0];
 		}
 		else {

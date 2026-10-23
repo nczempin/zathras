@@ -11,7 +11,6 @@ using namespace std;
 //TODO deal with these globals
 Position p;
 Searcher searcher;
-future<Move> fut;
 extern const std::string VERSION;
 
 int main()
@@ -26,5 +25,6 @@ int main()
 		}
 		Interface::Uci::parse(mystr);
 	}
+	Interface::Uci::waitForSearch();
 	return 0;
 }

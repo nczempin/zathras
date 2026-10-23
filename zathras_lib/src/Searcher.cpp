@@ -8,7 +8,8 @@
 #include "Searcher.h"
 #include "Evaluator.h"
 #include "Move.h"
-#include "misc.h"
+#include "Bitboard.h"
+#include "Piece.h"
 
 namespace {
 	constexpr int INF_SCORE = 1000000;
@@ -22,6 +23,14 @@ namespace {
 		return a.get_from() == b.get_from() &&
 		       a.get_to() == b.get_to() &&
 		       a.get_move_type() == b.get_move_type();
+	}
+
+	inline bool isIrreversibleMove(const Position& posBefore, const Move& m) {
+		if (posBefore.get_piece_on(m.get_to()) != 0 || m.get_move_type() == EN_PASSANT || m.is_promotion()) {
+			return true;
+		}
+		piece_t moving = posBefore.get_piece_on(m.get_from());
+		return moving == Piece::WHITE_PAWN || moving == Piece::BLACK_PAWN;
 	}
 
 	inline int scoreMove(const Position& pos, const Move& m, const Move* ttMove = nullptr, const Move* k0 = nullptr, const Move* k1 = nullptr, const int (*hist)[64] = nullptr) {
@@ -47,7 +56,7 @@ namespace {
 				score += std::min(6000, hist[f][t]);
 			}
 		}
-		if (m.get_move_type() >= PROMOTION_QUEEN && m.get_move_type() <= PROMOTION_KNIGHT) {
+		if (m.is_promotion()) {
 			score += (m.get_move_type() == PROMOTION_QUEEN) ? 9000 : 5000;
 		}
 		return score;
@@ -88,12 +97,29 @@ uint64_t Searcher::hashPosition(const Position& pos) {
 		| (pos.castling[1] ? 2ULL : 0ULL)
 		| (pos.castling[2] ? 4ULL : 0ULL)
 		| (pos.castling[3] ? 8ULL : 0ULL);
-	h ^= mix(castlingMask ^ (pos.en_passant_square * 0x517cc1b727220a95ULL));
+	uint64_t epHash = 0ULL;
+	if (pos.en_passant_square != 0) {
+		uint8_t epSq = Bitboard::extract_square(pos.en_passant_square);
+		if (epSq < 64) {
+			bb attackers = pos.white_to_move
+				? (Bitboard::black_pawn_capture_moves[epSq] & (pos.piece_bb[0] & pos.white))
+				: (Bitboard::white_pawn_capture_moves[epSq] & (pos.piece_bb[0] & pos.black));
+			if (attackers != 0) {
+				epHash = pos.en_passant_square;
+			}
+		}
+	}
+	h ^= mix((castlingMask + 0x10ULL) ^ (epHash * 0x517cc1b727220a95ULL));
 	return h;
 }
 
-void Searcher::clearHistory() {
+void Searcher::resetGameHistory() {
 	gameHistory.clear();
+	rootLastIrreversible = 0;
+}
+
+void Searcher::clearHistory() {
+	resetGameHistory();
 	std::fill(tt.begin(), tt.end(), TTEntry{});
 	for (int d = 0; d < 64; ++d) {
 		killers[d][0] = Move();
@@ -104,7 +130,10 @@ void Searcher::clearHistory() {
 	}
 }
 
-void Searcher::pushHistory(const Position& pos) {
+void Searcher::pushHistory(const Position& pos, bool irreversible) {
+	if (irreversible) {
+		rootLastIrreversible = static_cast<int>(gameHistory.size());
+	}
 	gameHistory.push_back(hashPosition(pos));
 }
 
@@ -151,16 +180,18 @@ Move Searcher::findBestmove(const Move_container& move_container, Position posit
 	});
 
 	idDepth = 1;
-	done = false;
 	bestMove = rootMoves[0];
 	bestValue = -INF_SCORE;
-	deque<Move> bestPv;
-	bestPv.push_back(bestMove);
 
 	do {
 		searchPath = gameHistory;
+		int baseIrreversible = rootLastIrreversible;
 		if (searchPath.empty() || searchPath.back() != hashPosition(position)) {
 			searchPath.push_back(hashPosition(position));
+		}
+		int rootIndex = static_cast<int>(searchPath.size()) - 1;
+		if (baseIrreversible > rootIndex) {
+			baseIrreversible = rootIndex;
 		}
 
 		// Put previous iteration's bestMove first
@@ -179,19 +210,24 @@ Move Searcher::findBestmove(const Move_container& move_container, Position posit
 
 		for (size_t i = 0; i < rootMoves.size(); ++i) {
 			const Move& move = rootMoves[i];
+			bool irrev = isIrreversibleMove(position, move);
 			Move_state ms;
 			position.make_move(move, ms);
 			++nodes;
 
+			int childIrrev = (irrev || position.castling != ms.prev_castling)
+				? static_cast<int>(searchPath.size())
+				: baseIrreversible;
+
 			lineDown.clear();
 			int value;
 			if (i == 0) {
-				value = -alphabeta(1, position, -INF_SCORE, -iterBestValue, lineDown);
+				value = -alphabeta(1, position, -INF_SCORE, -iterBestValue, lineDown, childIrrev, rootIndex);
 			} else {
-				value = -alphabeta(1, position, -iterBestValue - 1, -iterBestValue, lineDown);
+				value = -alphabeta(1, position, -iterBestValue - 1, -iterBestValue, lineDown, childIrrev, rootIndex);
 				if (value > iterBestValue && !done) {
 					lineDown.clear();
-					value = -alphabeta(1, position, -INF_SCORE, -iterBestValue, lineDown);
+					value = -alphabeta(1, position, -INF_SCORE, -iterBestValue, lineDown, childIrrev, rootIndex);
 				}
 			}
 			position.unmake_move(move, ms);
@@ -217,9 +253,19 @@ Move Searcher::findBestmove(const Move_container& move_container, Position posit
 			long long ms = std::max(1LL, elapsedMs());
 			long long nps = (nodes * 1000LL) / ms;
 			std::cout << "info depth " << idDepth
-			          << " seldepth " << std::max(idDepth, seldepth)
-			          << " score cp " << bestValue
-			          << " nodes " << nodes
+			          << " seldepth " << std::max(idDepth, seldepth);
+			if (bestValue > MATE_THRESHOLD) {
+				int matePly = MATE_SCORE - bestValue;
+				int mateMoves = (matePly + 1) / 2;
+				std::cout << " score mate " << mateMoves;
+			} else if (bestValue < -MATE_THRESHOLD) {
+				int matePly = MATE_SCORE + bestValue;
+				int mateMoves = -((matePly + 1) / 2);
+				std::cout << " score mate " << mateMoves;
+			} else {
+				std::cout << " score cp " << bestValue;
+			}
+			std::cout << " nodes " << nodes
 			          << " nps " << nps
 			          << " time " << ms
 			          << " pv";
@@ -228,7 +274,7 @@ Move Searcher::findBestmove(const Move_container& move_container, Position posit
 			}
 			std::cout << std::endl;
 
-			if (bestValue > MATE_THRESHOLD || bestValue < -MATE_THRESHOLD) {
+			if (bestValue > MATE_THRESHOLD) {
 				done = true;
 			}
 		}
@@ -242,7 +288,7 @@ Move Searcher::findBestmove(const Move_container& move_container, Position posit
 	return bestMove;
 }
 
-int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp) {
+int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp, int lastIrreversible, int rootIndex) {
 	if ((nodes & 255) == 0 && isHardTimeUp()) {
 		done = true;
 	}
@@ -254,9 +300,16 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	}
 
 	uint64_t h = hashPosition(position);
-	for (int i = static_cast<int>(searchPath.size()) - 2; i >= 0; --i) {
+	int preRootMatches = 0;
+	for (int i = static_cast<int>(searchPath.size()) - 2; i >= lastIrreversible; i -= 2) {
 		if (searchPath[i] == h) {
-			return 0; // Repetition draw
+			if (i >= rootIndex) {
+				return 0; // Repetition within search tree (or returning to root)
+			}
+			++preRootMatches;
+			if (preRootMatches >= 2) {
+				return 0; // Threefold repetition with pre-root game history
+			}
 		}
 	}
 
@@ -285,8 +338,10 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 		}
 	}
 
+	bool inCheck = position.is_in_check(position.is_white_to_move());
+
 	Move_generator mg;
-	Move_container mc = mg.generate_pseudolegal_moves(position, depth);
+	Move_container mc = mg.generate_pseudolegal_moves(position);
 	int count = static_cast<int>(mc.size());
 
 	searchPath.push_back(h);
@@ -317,7 +372,8 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 
 		const Move& newMove = moves[i];
 		bool isCapture = (position.get_piece_on(newMove.get_to()) != 0) || (newMove.get_move_type() == EN_PASSANT);
-		bool isPromo = (newMove.get_move_type() >= PROMOTION_QUEEN && newMove.get_move_type() <= PROMOTION_KNIGHT);
+		bool isPromo = newMove.is_promotion();
+		bool irrev = isIrreversibleMove(position, newMove);
 
 		Move_state ms;
 		position.make_move(newMove, ms);
@@ -328,23 +384,27 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 		++legalMovesCount;
 		++nodes;
 
+		int childIrrev = (irrev || position.castling != ms.prev_castling)
+			? static_cast<int>(searchPath.size())
+			: lastIrreversible;
+
 		deque<Move> lineDown;
 		int value;
 		if (legalMovesCount == 1) {
-			value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown);
+			value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown, childIrrev, rootIndex);
 		} else {
 			int nextDepth = depth + 1;
-			if (remDepth >= 3 && legalMovesCount > 3 && !isCapture && !isPromo && !position.is_in_check(position.is_white_to_move())) {
+			if (remDepth >= 3 && legalMovesCount > 3 && !inCheck && !isCapture && !isPromo && !position.is_in_check(position.is_white_to_move())) {
 				nextDepth = depth + 2; // LMR
 			}
-			value = -alphabeta(nextDepth, position, -alpha - 1, -alpha, lineDown);
+			value = -alphabeta(nextDepth, position, -alpha - 1, -alpha, lineDown, childIrrev, rootIndex);
 			if (value > alpha && nextDepth > depth + 1 && !done) {
 				lineDown.clear();
-				value = -alphabeta(depth + 1, position, -alpha - 1, -alpha, lineDown);
+				value = -alphabeta(depth + 1, position, -alpha - 1, -alpha, lineDown, childIrrev, rootIndex);
 			}
 			if (value > alpha && value < beta && !done) {
 				lineDown.clear();
-				value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown);
+				value = -alphabeta(depth + 1, position, -beta, -alpha, lineDown, childIrrev, rootIndex);
 			}
 		}
 		position.unmake_move(newMove, ms);
@@ -380,7 +440,7 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	}
 
 	if (legalMovesCount == 0) {
-		if (position.is_in_check(position.is_white_to_move())) {
+		if (inCheck) {
 			return -MATE_SCORE + depth;
 		}
 		return 0;
@@ -422,7 +482,7 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 	}
 
 	Move_generator mg;
-	Move_container mc = mg.generate_pseudolegal_captures(position, depth);
+	Move_container mc = mg.generate_pseudolegal_captures(position);
 	int count = static_cast<int>(mc.size());
 	if (count == 0) {
 		return alpha;

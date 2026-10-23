@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto -fno-builtin -m64 -malign-data=cacheline -march=sandybridge -I./zathras_lib/src
+CFLAGS=-Ofast -g -std=c++17 -Wall -Wextra -pedantic -flto -fno-builtin -m64 -malign-data=cacheline -march=sandybridge -pthread -I./zathras_lib/src
 
 BIN=zathras
 TEST_BIN=zathras_tests

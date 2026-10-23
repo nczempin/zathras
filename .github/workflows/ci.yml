@@ -47,30 +47,6 @@ jobs:
         make
         make test
 
-    - name: Fast Shallow Tricky-Position Perft Gate (Depth 1-2)
-      run: |
-        check_shallow() {
-          local name="$1"
-          local fen="$2"
-          local depth="$3"
-          local expected="$4"
-          echo "Checking $name perft $depth (expected $expected)..."
-          out=$(printf "uci\nposition fen %s\nperft %s\nquit\n" "$fen" "$depth" | timeout 10s ./zathras)
-          result=$(echo "$out" | grep "Perft $depth result:" | awk '{print $4}')
-          if [ "$result" != "$expected" ]; then
-            echo "FAIL: $name perft $depth got '$result', expected '$expected'"
-            exit 1
-          fi
-        }
-        check_shallow "Kiwipete" "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" 1 48
-        check_shallow "Kiwipete" "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1" 2 2039
-        check_shallow "CPW Pos 3 (EP Pin)" "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1" 1 14
-        check_shallow "CPW Pos 3 (EP Pin)" "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1" 2 191
-        check_shallow "CPW Pos 4 (Promotions & Castling)" "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 1 6
-        check_shallow "CPW Pos 4 (Promotions & Castling)" "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1" 2 264
-        check_shallow "TalkChess Pos 5" "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8" 1 44
-        check_shallow "TalkChess Pos 5" "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8" 2 1486
-
     - name: Run CI test suite
       run: |
         chmod +x scripts/run_all_ci_tests.sh
