@@ -54,6 +54,9 @@ namespace Positions {
 	Position Position::create_position(const string& fen) {
 		Position position;
 		vector<string> split_fen = split(fen, ' ');
+		if (split_fen.size() < 4) {
+			return create_start_position();
+		}
 		string to_move = split_fen[1];
 		string castling_string = split_fen[2];
 		for (int i = 0; i < 4; ++i) {
@@ -272,7 +275,6 @@ namespace Positions {
 	string Position::mailbox_board_debug_representation(const piece_t board[64]) {
 		string retval;
 		retval += "  +-----------------+\n";
-		const char* symbols = ".PNBRQKpnbrqk*";
 		for (int i = 0; i < 8; ++i) {
 			retval.append(to_string(8 - i));
 			retval.append(" |");
@@ -521,17 +523,6 @@ namespace Positions {
 
 
 
-	inline void Position::save_en_passant_square(Move_state& move_state) {
-		if (en_passant_square != 0x00) {
-			uint8_t eps = Bitboard::extract_square(en_passant_square);
-			move_state.set_en_passant_square(eps);
-			en_passant_square = 0x00;
-		}
-	}
-	void Position::restore_en_passant_square(const Move_state& move_state) {
-		en_passant_square = move_state.get_en_passant_square();
-	}
-
 	void Position::promote(int8_t promoted_to, square_t to) {
 		//TODO no idea whether this is faster or simply using absolute value is
 		switch (promoted_to) {
@@ -593,14 +584,11 @@ namespace Positions {
 			break;
 		case Piece::WHITE_ROOK:
 			Square::clear_bit(white, to);
-			//TODO use constants, not magics
 			if (castling[0] && to == 7) {
 				castling[0] = false;
-				move_state.set_cleared_kingside_castling(true);
 			}
 			else if (castling[1] && to == 0) {
 				castling[1] = false;
-				move_state.set_cleared_queenside_castling(true);
 			}
 
 			Square::clear_bit(rooks, to);
@@ -627,14 +615,11 @@ namespace Positions {
 			break;
 		case Piece::BLACK_ROOK:
 			Square::clear_bit(black, to);
-			//TODO use constants, not magics
 			if (castling[2] && to == 63) {
 				castling[2] = false;
-				move_state.set_cleared_kingside_castling(true);
 			}
 			else if (castling[3] && to == 56) {
 				castling[3] = false;
-				move_state.set_cleared_queenside_castling(true);
 			}
 			Square::clear_bit(rooks, to);
 			break;
@@ -652,73 +637,60 @@ namespace Positions {
 		}
 	}
 
-	void Position::make_move(const Move& move, Move_state& move_state) { //TODO move state as return value?
+	void Position::make_move(const Move& move, Move_state& move_state) {
 		bool set_en_passant = false;
+		move_state.prev_en_passant_square = en_passant_square;
+		move_state.prev_castling = castling;
+		move_state.captured = 0;
 		const square_t& from = move.get_from();
 		const square_t& to = move.get_to();
 		
 		int8_t moving = get_piece_on(from);
-		//if (moving == 0) {
-		//	debugPosition();
-		//}
 		assert(moving != 0);
 
 		const int8_t& taken = get_piece_on(to);
 		if (taken != 0) {
-			//cout << "capturing: " << taken << endl;
 			handleCapture(to, taken, move_state);
 		}
 		if (white_to_move) {
-			make_move_for_colour<true>(from, to, moving, move, move_state, set_en_passant);
+			make_move_for_colour<true>(from, to, moving, move, set_en_passant);
 		}
 		else {
-			make_move_for_colour<false>(from, to, moving, move, move_state, set_en_passant);
-
+			make_move_for_colour<false>(from, to, moving, move, set_en_passant);
 		}
 		if (!set_en_passant) {
 			en_passant_square = 0x00;
 		}
-		// TODO update 3 repetitions
-		// TODO update 50 moves
 		white_to_move = !white_to_move;
 	}
 
 
 	void Position::unmake_move(const Move& move, const Move_state& move_state) {
-		//TODO such a mess
 		square_t from = move.get_from();
 		square_t to = move.get_to();
 		piece_t moving = get_piece_on(to);
 		assert(moving != 0);
 
 		board[from] = moving;
-		restore_en_passant_square(move_state);
 		white_to_move = !white_to_move;
 
 		if (white_to_move) {
 			Square::clear_bit(white, to);
 			Square::set_bit(white, from);
 			
-			// Check if this is a promotion - if so, we need to handle it specially
-			bool is_promotion = move.get_move_type() >= PROMOTION_QUEEN && move.get_move_type() <= PROMOTION_KNIGHT;
+			bool is_promotion = move.is_promotion();
 			if (is_promotion) {
-				// For promotions, clear the promoted piece bit and restore the pawn
 				board[from] = Piece::WHITE_PAWN;
-				// The promoted piece bitboard will be cleared in the switch statement below
 			} else {
 				bb& pbb = piece_bb[moving - 1];
 				Square::clear_bit(pbb, to);
 				Square::set_bit(pbb, from);
 			}
 			
-			// For promotions, we need to handle the promoted piece type
 			piece_t piece_to_check = is_promotion ? Piece::WHITE_PAWN : moving;
 			switch (piece_to_check) {
 			case Piece::WHITE_PAWN: {
-				// move pawn back
-				//TODO clearing can be saved when move was a capture. find out which is faster
 				if (is_in_back_rank_black(to)) {
-					// Clear the appropriate piece bit based on promotion type
 					switch (move.get_move_type()) {
 						case PROMOTION_QUEEN:
 							Square::clear_bit(queens, to);
@@ -733,38 +705,24 @@ namespace Positions {
 							Square::clear_bit(knights, to);
 							break;
 						default:
-							// Should not happen - unmaking promotion without proper type
 							assert(false && "Invalid promotion type when unmaking white pawn promotion");
 							break;
 					}
 					Square::set_bit(pawns, from);
 				}
-				else {
-					// handle capturing by e. p.
-					if (move.get_move_type() == EN_PASSANT) {
-						square_t target = square_t(to - 8); //TODO
-						en_passant_square = 0;
-						Square::set_bit(en_passant_square, to);
-						Square::set_bit(pawns, target);
-						Square::set_bit(black, target);
-						board[target] = Piece::BLACK_PAWN;
-						board[to] = 0;
-					}
-
+				else if (move.get_move_type() == EN_PASSANT) {
+					square_t target = square_t(to - 8);
+					Square::set_bit(pawns, target);
+					Square::set_bit(black, target);
+					board[target] = Piece::BLACK_PAWN;
+					board[to] = 0;
 				}
 				break;
 			}
 			case Piece::WHITE_KNIGHT:
 			case Piece::WHITE_BISHOP:
-			case Piece::WHITE_QUEEN:
-				break;
 			case Piece::WHITE_ROOK:
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[0] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[1] = true;
-				}
+			case Piece::WHITE_QUEEN:
 				break;
 			case Piece::WHITE_KING:
 				if (from == E1 && to == C1) { //queenside castle
@@ -777,12 +735,6 @@ namespace Positions {
 					board[F1] = 0;
 					board[H1] = Piece::WHITE_ROOK;
 				}
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[0] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[1] = true;
-				}
 				break;
 			default:
 				debugPosition();
@@ -792,28 +744,22 @@ namespace Positions {
 			}
 		}
 		else {
-			Square::clear_bit(black, to); //TODO unnecessary when capture
+			Square::clear_bit(black, to);
 			Square::set_bit(black, from);
 			
-			// Check if this is a promotion - if so, we need to handle it specially
-			bool is_promotion = move.get_move_type() >= PROMOTION_QUEEN && move.get_move_type() <= PROMOTION_KNIGHT;
+			bool is_promotion = move.is_promotion();
 			if (is_promotion) {
-				// For promotions, clear the promoted piece bit and restore the pawn
 				board[from] = Piece::BLACK_PAWN;
-				// The promoted piece bitboard will be cleared in the switch statement below
 			} else {
 				bb& pbb = piece_bb[-moving - 1];
-				Square::clear_bit(pbb, to); //TODO clear and set in one op when capture?
+				Square::clear_bit(pbb, to);
 				Square::set_bit(pbb, from);
 			}
 			
-			// For promotions, we need to handle the promoted piece type
 			piece_t piece_to_check = is_promotion ? Piece::BLACK_PAWN : moving;
 			switch (piece_to_check) {
 			case Piece::BLACK_PAWN: {
-
 				if (is_in_back_rank_white(to)) {
-					// Clear the appropriate piece bit based on promotion type
 					switch (move.get_move_type()) {
 						case PROMOTION_QUEEN:
 							Square::clear_bit(queens, to);
@@ -828,55 +774,35 @@ namespace Positions {
 							Square::clear_bit(knights, to);
 							break;
 						default:
-							// Should not happen - unmaking promotion without proper type
 							assert(false && "Invalid promotion type when unmaking black pawn promotion");
 							break;
 					}
 					Square::set_bit(pawns, from);
 				}
-				else {
-					// handle capturing by e. p.
-					if (move.get_move_type() == EN_PASSANT) {
-						square_t target = square_t(to + 8); //TODO
-						en_passant_square = 0;
-						Square::set_bit(en_passant_square, to);
-						Square::set_bit(pawns, target);
-						Square::set_bit(white, target);
-						board[target] = Piece::WHITE_PAWN;
-						board[to] = 0;
-					}
+				else if (move.get_move_type() == EN_PASSANT) {
+					square_t target = square_t(to + 8);
+					Square::set_bit(pawns, target);
+					Square::set_bit(white, target);
+					board[target] = Piece::WHITE_PAWN;
+					board[to] = 0;
 				}
+				break;
 			}
-
-									break;
 			case Piece::BLACK_KNIGHT:
 			case Piece::BLACK_BISHOP:
-			case Piece::BLACK_QUEEN:
-				break;
 			case Piece::BLACK_ROOK:
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[2] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[3] = true;
-				}
+			case Piece::BLACK_QUEEN:
 				break;
 			case Piece::BLACK_KING:
 				if (from == E8 && to == C8) { //queenside castle
-					Square::update_bits(black, rooks, D8, A8);//TODO constants, not magics
+					Square::update_bits(black, rooks, D8, A8);
 					board[D8] = 0;
 					board[A8] = Piece::BLACK_ROOK;
 				}
 				else if (from == E8 && to == G8) { // kingside castle
-					Square::update_bits(black, rooks, F8, H8);//TODO constants, not magics
+					Square::update_bits(black, rooks, F8, H8);
 					board[F8] = 0;
 					board[H8] = Piece::BLACK_ROOK;
-				}
-				if (move_state.is_cleared_kingside_castling()) {
-					castling[2] = true;
-				}
-				if (move_state.is_cleared_queenside_castling()) {
-					castling[3] = true;
 				}
 				break;
 			default:
@@ -890,12 +816,10 @@ namespace Positions {
 		assert(get_piece_on(move.get_from()) != 0);
 		if (move.get_move_type() != EN_PASSANT) {
 
-			int8_t captured = move_state.captured;// get_captured();
-			//board[from] = moving; //TODO encapsulate
-			board[to] = captured; //TODO encapsulate
+			int8_t captured = move_state.captured;
+			board[to] = captured;
 
 			if (captured != 0) {
-				//cout << "untaken: " << (int)captured << endl;
 				bool colour = determine_colour(captured);
 				if (colour) {
 					Square::set_bit(white, to);
@@ -915,19 +839,6 @@ namespace Positions {
 					Square::set_bit(bishops, to);
 					break;
 				case Piece::ROOK:
-					//TODO use constants, not magics
-					if (move_state.is_cleared_kingside_castling() && to == 63) {
-						castling[2] = true;
-					}
-					else if (move_state.is_cleared_queenside_castling()) {
-						castling[3] = true;
-					}
-					else if (move_state.is_cleared_kingside_castling() && to == 7) {
-						castling[0] = true;
-					}
-					else if (move_state.is_cleared_queenside_castling() && to == 0) {
-						castling[1] = true;
-					}
 					Square::set_bit(rooks, to);
 					break;
 				case 5:
@@ -945,10 +856,10 @@ namespace Positions {
 			}
 		}
 
+		en_passant_square = move_state.prev_en_passant_square;
+		castling = move_state.prev_castling;
 
 		assert(get_piece_on(move.get_from()) != 0);
-		// TODO update 3 repetitions
-		// TODO update 50 moves
 	}
 
 	void Position::debugPosition() {
@@ -1039,7 +950,7 @@ namespace Positions {
 			debugPosition();
 			throw king_pos;
 		}
-		if (white_to_move) {
+		if (!side) {
 			const bb white_knights = knights & white;
 			if (is_attacked_by_hopper(white_knights, Bitboard::knight_moves, king_pos)) {
 				return true;
@@ -1143,7 +1054,7 @@ namespace Positions {
 	bb Position::between[BETWEEN_ARRAY_SIZE];
 	const bitboard_set Position::rook_moves = Move_generator::pregenerate_rook_moves();
 	template<bool white_or_not>
-	inline void Position::make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant) {
+	inline void Position::make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, bool& set_en_passant) {
 		{
 			board[from] = 0; //TODO encapsulate
 			board[to] = moving; //TODO encapsulate
@@ -1157,8 +1068,6 @@ namespace Positions {
 
 				switch (moving) {
 				case Piece::WHITE_PAWN: {
-					//clear_bit(pawns, from);
-
 					if (is_in_back_rank_black(to)) { // target is rank 8 -> promote
 						Square::clear_bit(pawns, to);
 						switch (move.get_move_type()) {
@@ -1179,54 +1088,37 @@ namespace Positions {
 								board[to] = Piece::WHITE_KNIGHT;
 								break;
 							default:
-								// Should not happen - promotion without proper type
 								cerr << "WARNING: Invalid promotion type " << move.get_move_type() << " for white pawn, defaulting to queen!" << endl;
 								Square::set_bit(queens, to);
 								board[to] = Piece::WHITE_QUEEN;
 								break;
 						}
 					}
-					else {
-						// handle capturing by e. p.
-
-						//TODO: find out which method is faster
-						//if (get_piece_on(to) == 0xff) { // en passant capture
-						if (move.get_move_type() == EN_PASSANT) { // en passant capture
-							square_t target = square_t(to - 8);
-							Square::clear_bit(pawns, target);
-							Square::clear_bit(black, target);
-							board[target] = 0;
-						}
-						else {
-							save_en_passant_square(move_state);
-							// handle double step preparing the e. p.
-							if (to - from == 16) {
-								square_t target = square_t(to - 8);
-								set_en_passant = true;
-								Square::set_bit(en_passant_square, target);
-							}
-						}
+					else if (move.get_move_type() == EN_PASSANT) {
+						square_t target = square_t(to - 8);
+						Square::clear_bit(pawns, target);
+						Square::clear_bit(black, target);
+						board[target] = 0;
+					}
+					else if (to - from == 16) {
+						square_t target = square_t(to - 8);
+						set_en_passant = true;
+						en_passant_square = 0x00;
+						Square::set_bit(en_passant_square, target);
 					}
 					break;
 				}
 				case Piece::WHITE_KNIGHT:
 				case Piece::WHITE_BISHOP:
 				case Piece::WHITE_QUEEN:
-				{
-
-					save_en_passant_square(move_state);
 					break;
-				}
 				case Piece::WHITE_ROOK:
-					if (from == 7 && castling[0]) { // H1 //TODO
+					if (from == 7 && castling[0]) {
 						castling[0] = false;
-						move_state.set_cleared_kingside_castling(true);
 					}
-					else if (from == 0 && castling[1]) { //A1 // TODO
+					else if (from == 0 && castling[1]) {
 						castling[1] = false;
-						move_state.set_cleared_queenside_castling(true);
 					}
-					save_en_passant_square(move_state);
 					break;
 				case Piece::WHITE_KING:
 					if (from == E1 && to == C1) { //queenside castle
@@ -1239,15 +1131,8 @@ namespace Positions {
 						board[H1] = 0;
 						board[F1] = Piece::WHITE_ROOK;
 					}
-					if (castling[0]) {
-						move_state.set_cleared_kingside_castling(true);
-						castling[0] = false;
-					}
-					if (castling[1]) {
-						move_state.set_cleared_queenside_castling(true);
-						castling[1] = false;
-					}
-					save_en_passant_square(move_state);
+					castling[0] = false;
+					castling[1] = false;
 					break;
 				}
 			}
@@ -1259,11 +1144,8 @@ namespace Positions {
 				Square::clear_bit(pbb, from);
 				switch (moving) {
 				case Piece::BLACK_PAWN: {
-					//clear_bit(pawns, from);
-					/*int8_t promoted_to = move.get_promoted_to();
-					if (promoted_to != 0) {*/
 					if (is_in_back_rank_white(to)) {
-						Square::clear_bit(pawns, to); // that was eagerly set previously
+						Square::clear_bit(pawns, to);
 						switch (move.get_move_type()) {
 							case PROMOTION_QUEEN:
 								Square::set_bit(queens, to);
@@ -1282,32 +1164,21 @@ namespace Positions {
 								board[to] = Piece::BLACK_KNIGHT;
 								break;
 							default:
-								// Should not happen - promotion without proper type
 								assert(false && "Invalid promotion type for black pawn");
 								break;
 						}
 					}
 					else {
-
-						// handle capturing by e. p.
 						square_t target = square_t(to + 8);
-
-
-						//TODO: find out which method is faster
-						//if (get_piece_on(to) == 0xff) { // en passant capture
-						if (move.get_move_type() == EN_PASSANT) { // en passant capture
+						if (move.get_move_type() == EN_PASSANT) {
 							Square::clear_bit(pawns, target);
 							Square::clear_bit(white, target);
-
 							board[target] = 0;
 						}
-						else {
-							// handle double step preparing the e. p.
-							save_en_passant_square(move_state);
-							if (to - from == -16) {
-								Square::set_bit(en_passant_square, target);
-								set_en_passant = true;
-							}
+						else if (to - from == -16) {
+							en_passant_square = 0x00;
+							Square::set_bit(en_passant_square, target);
+							set_en_passant = true;
 						}
 					}
 					break;
@@ -1315,26 +1186,16 @@ namespace Positions {
 				case Piece::BLACK_KNIGHT:
 				case Piece::BLACK_BISHOP:
 				case Piece::BLACK_QUEEN:
-				{
-
-					save_en_passant_square(move_state);
 					break;
-				}
 				case Piece::BLACK_ROOK:
-
-					if (from == 63 && castling[2]) { // H8 //TODO
-						move_state.set_cleared_kingside_castling(true);
+					if (from == 63 && castling[2]) {
 						castling[2] = false;
 					}
-					else if (from == 56 && castling[3]) { //A8 // TODO
-						move_state.set_cleared_queenside_castling(true);
+					else if (from == 56 && castling[3]) {
 						castling[3] = false;
 					}
-					save_en_passant_square(move_state);
 					break;
 				case Piece::BLACK_KING:
-
-
 					if (from == E8 && to == C8) { //queenside castle
 						Square::update_bits(black, rooks, A8, D8);
 						board[A8] = 0;
@@ -1345,15 +1206,8 @@ namespace Positions {
 						board[H8] = 0;
 						board[F8] = Piece::BLACK_ROOK;
 					}
-					if (castling[2]) {
-						move_state.set_cleared_kingside_castling(true);
-						castling[2] = false;
-					}
-					if (castling[3]) {
-						move_state.set_cleared_queenside_castling(true);
-						castling[3] = false;
-					}
-					save_en_passant_square(move_state);
+					castling[2] = false;
+					castling[3] = false;
 					break;
 				}
 			}

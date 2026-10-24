@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, dev, develop, 'feature/**', 'rebuild-v0.1.0' ]
+    branches: [ main, dev, develop, 'feature/**', 'feat/**', 'rebuild-v0.1.0' ]
   pull_request:
     branches: [ main, dev, develop ]
 
@@ -29,10 +29,10 @@ jobs:
       run: |
         echo "Running C++ linting checks..."
         make lint-cppcheck
-      continue-on-error: true  # Don't fail the build on linting warnings for now
+      continue-on-error: true
 
     - name: Cache build artifacts
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           build/
@@ -41,10 +41,11 @@ jobs:
         restore-keys: |
           ubuntu-build-
 
-    - name: Build
+    - name: Build and run unit tests
       run: |
         make clean
         make
+        make test
 
     - name: Run CI test suite
       run: |
@@ -54,7 +55,7 @@ jobs:
     - name: Performance benchmark
       run: |
         echo "Running performance benchmark..."
-        echo -e "uci\nposition startpos\nperft 4\nquit" | ./zathras | grep "time:"
+        echo -e "uci\nposition startpos\nperft 4\nquit" | timeout 15s ./zathras | grep "time:"
 
     - name: Upload build artifacts on failure
       uses: actions/upload-artifact@v4

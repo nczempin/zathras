@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -94,10 +94,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\clock.cpp" />
     <ClCompile Include="src\Command.cpp" />
     <ClCompile Include="src\Command_receiver.cpp" />
-    <ClCompile Include="src\Info.cpp" />
+    <ClCompile Include="src\Divide_command.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Perft_command.cpp" />
   </ItemGroup>
@@ -105,9 +104,8 @@
     <ClInclude Include="src\Abstract_command.h" />
     <ClInclude Include="src\Command.h" />
     <ClInclude Include="src\Command_receiver.h" />
-    <ClInclude Include="src\Info.h" />
+    <ClInclude Include="src\Divide_command.h" />
     <ClInclude Include="src\Perft_command.h" />
-    <ClInclude Include="src\Sf.h" />
     <ClInclude Include="src\Uci.h" />
   </ItemGroup>
   <ItemGroup>

@@ -14,7 +14,7 @@ namespace Interface {
             return 1;
         }
 
-        Move_container move_container = mg.generate_legal_moves(pos, depth);
+        Move_container move_container = mg.generate_legal_moves(pos);
         
         if (depth == 1) {
             return move_container.size();
@@ -43,7 +43,7 @@ namespace Interface {
         cout << "\nDivide " << depth << " result:" << endl;
 
         // Generate all legal moves at root
-        Move_container move_container = mg.generate_legal_moves(position, 1);
+        Move_container move_container = mg.generate_legal_moves(position);
         auto moves = move_container.get_moves();
         
         uint64_t total = 0;
@@ -66,5 +66,6 @@ namespace Interface {
         }
         
         cout << "\nNodes searched: " << total << endl;
+        cout << "Total: " << total << endl;
     }
 }

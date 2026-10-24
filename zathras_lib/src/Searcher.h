@@ -1,12 +1,14 @@
 #pragma once
+#include <atomic>
 #include <deque>
 #include <chrono>
 #include <climits>
+#include <cstdint>
+#include <vector>
 
 #include "Move.h"
 #include "Position.h"
 #include "Move_generator.h"
-//#include "Info.h"
 
 using namespace Moves;
 class Searcher
@@ -16,35 +18,63 @@ public:
 	~Searcher(void);
 	Move bestMove;
 	int bestValue = INT_MIN;
-	int oldBestValue = INT_MIN;
-	bool done = false;
-	int idDepth = -1; //TODO find good init value
-	bool kingCapture = false;
+	std::atomic<bool> done{false};
+	int idDepth = 1;
+	int maxIdDepth = 64;
+	long long softTimeLimitMs = 0;
+	long long hardTimeLimitMs = 0;
+	long long nodes = 0;
+	int seldepth = 0;
+	std::chrono::steady_clock::time_point startTime;
+	std::vector<uint64_t> gameHistory;
+	std::vector<uint64_t> searchPath;
+	int rootLastIrreversible = 0;
+	bool repetitionSeen = false;
+	// PV is currently tracked via std::deque<Move> (see Issue #141 for triangular PV array).
 	deque<Move> pv;
+
+	// Fixed-size always-replace TT; mate-score ply normalization, depth/age replacement,
+	// and configurable UCI Hash size are tracked in Issue #140.
+	struct TTEntry {
+		uint64_t key = 0;
+		int score = 0;
+		int16_t depth = -1;
+		uint8_t flag = 0; // 0=none, 1=exact, 2=lowerbound, 3=upperbound
+		Move bestMove;
+	};
+	static constexpr size_t TT_SIZE = 65536;
+	std::vector<TTEntry> tt{TT_SIZE};
+	Move killers[64][2];
+	int historyTable[64][64]{};
+
+	// Full-board SplitMix64 hash; incremental Zobrist hashing in Position is tracked in Issue #139.
+	static uint64_t hashPosition(const Position& pos);
+	void clearHistory();
+	void resetGameHistory();
+	void pushHistory(const Position& pos, bool irreversible = false);
+	void startTimer(long long softMs, long long hardMs, int maxDepth);
+	long long elapsedMs() const;
+	bool isHardTimeUp() const;
+	bool isSoftTimeUp() const;
 	
-	Move findBestmove(move_container_t moves, Position p);
+	Move findBestmove(const Move_container& move_container, Position p);
 
-	int alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp);
+	int alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp, int lastIrreversible, int rootIndex);
 
-	int quiescence_alphabeta(int depth, Position& position, int alpha, int beta, deque<Move>& lineUp);
+	int quiescence_alphabeta(int depth, Position& position, int alpha, int beta);
 
 	Move analyze(Position p) {
 		Move_generator mg;
-		if (done) {
+		const Move_container move_container = mg.generate_legal_moves(p);
+		const auto& moves = move_container.get_moves_ref();
+		if (move_container.size() == 0) {
 			return Move();
 		}
-		const Move_container move_container = mg.generate_legal_moves(p, 1);
-		auto moves = move_container.get_moves();
-		if (move_container.size() == 0) {
-			return Move();// -1, -1, 0); //TODO
-		}
-		else if (move_container.size() == 1) {
-			auto move = moves[0];
-			cout << to_string(move) << endl;
-			return move;
+		else if (move_container.size() == 1 || done) {
+			return moves[0];
 		}
 		else {
-			Move m = findBestmove(moves, p);
+			Move m = findBestmove(move_container, p);
 			return m;
 		}
 	}

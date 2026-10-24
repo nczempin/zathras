@@ -29,7 +29,7 @@ namespace Interface {
 		if (depth == 0) {
 			return 1;
 		}
-		Move_container move_container = mg.generate_pseudolegal_moves(*pp, depth);
+		Move_container move_container = mg.generate_pseudolegal_moves(*pp);
 		move_container_t moves = move_container.get_moves();
 		uint64_t total_result = 0;
 		size_t size = move_container.size();
@@ -71,7 +71,7 @@ namespace Interface {
 
 		uint64_t total_result = 0;
 		pp = make_shared < Position >(position);
-		Move_container move_container = mg.generate_pseudolegal_moves(position, depth);
+		Move_container move_container = mg.generate_pseudolegal_moves(position);
 		size_t move_count = move_container.size();
 
 		if (depth == 0) {
@@ -100,7 +100,7 @@ namespace Interface {
 
 		clock_t end = clock();
 		double elapsed_secs = (static_cast<double>(end) - static_cast<double>(begin)) / CLOCKS_PER_SEC;
-		int nps = static_cast<int>(total_result / elapsed_secs);
+		int nps = (elapsed_secs > 0.0) ? static_cast<int>(total_result / elapsed_secs) : 0;
 		cout << endl << "Perft " << to_string(depth) << " result: " << total_result << endl;
 		cout << "time: " << elapsed_secs << ", nps: " << nps << endl;
 	}
