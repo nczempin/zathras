@@ -35,11 +35,11 @@ echo "Stockfish total: $STOCKFISH_TOTAL"
 # Get Zathras results
 echo ""
 echo "=== Zathras divide $DEPTH ==="
-echo -e "uci\nposition fen $FEN\ndivide $DEPTH\nquit" | ./zathras | grep -E "^[a-h][1-8][a-h][1-8]" | awk '{print $1 ": " $2}' | sort > zathras_divide.txt
+echo -e "uci\nposition fen $FEN\ndivide $DEPTH\nquit" | timeout 30s ./zathras | grep -E "^[a-h][1-8][a-h][1-8]" | awk '{print $1 ": " $2}' | sort > zathras_divide.txt
 cat zathras_divide.txt
 
 # Get total from Zathras
-ZATHRAS_TOTAL=$(echo -e "uci\nposition fen $FEN\ndivide $DEPTH\nquit" | ./zathras | grep "Nodes searched:" | awk '{print $3}')
+ZATHRAS_TOTAL=$(echo -e "uci\nposition fen $FEN\ndivide $DEPTH\nquit" | timeout 30s ./zathras | grep "Nodes searched:" | awk '{print $3}')
 echo ""
 echo "Zathras total: $ZATHRAS_TOTAL"
 

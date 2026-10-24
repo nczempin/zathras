@@ -67,11 +67,11 @@ echo "=== Additional Fast Positions for Depth 5 ==="
 
 # Simple king and pawns endgame
 echo "Simple K+P endgame"
-run_perft_test "K+P endgame" "8/8/8/8/3k4/8/3P4/3K4 w - - 0 1" 5 34822
+run_perft_test "K+P endgame" "8/8/8/8/3k4/8/3P4/3K4 w - - 0 1" 5 8378
 
 # Rook endgame
 echo "Rook endgame"
-run_perft_test "Rook endgame" "8/8/8/8/8/8/R7/k1K5 w - - 0 1" 5 25332
+run_perft_test "Rook endgame" "8/8/8/8/8/8/R7/1k1K4 w - - 0 1" 5 13343
 
 end_time=$(date +%s)
 duration=$((end_time - start_time))

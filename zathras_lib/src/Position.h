@@ -65,7 +65,7 @@ namespace Positions {
 			return Squares::A1 <= square && square <= Squares::H1;
 
 		}
-		piece_t get_piece_on(square_t sq) {
+		piece_t get_piece_on(square_t sq) const {
 			return board[sq];
 		}
 		friend ostream& operator<<(ostream& stream, const Position& position);
@@ -112,8 +112,6 @@ namespace Positions {
 
 		static string extract_row_string(uint_fast8_t row, string set);
 		static void display_all_moves(const bitboard_set& moves);
-		void save_en_passant_square(Move_state& move_state);
-		void restore_en_passant_square(const Move_state& move_state);
 		void promote(int8_t promoted_to, square_t to);
 		void un_promote(int8_t promoted_to, square_t to);
 		void handleCapture(const square_t& to, const int8_t& taken, Move_state& move_state);
@@ -125,7 +123,7 @@ namespace Positions {
 			return x + 64 * y;
 		}
 
-		template<bool white_or_not> void make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, Move_state& move_state, bool& set_en_passant);
+		template<bool white_or_not> void make_move_for_colour(const square_t& from, const square_t& to, const int8_t& moving, const Move& move, bool& set_en_passant);
 
 
 	};
