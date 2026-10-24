@@ -30,11 +30,10 @@ public:
 	std::vector<uint64_t> searchPath;
 	int rootLastIrreversible = 0;
 	bool repetitionSeen = false;
-	// PV is currently tracked via std::deque<Move> (see Issue #141 for triangular PV array).
+	// PV is currently tracked via std::deque<Move> rather than a stack-allocated triangular PV array.
 	deque<Move> pv;
 
-	// Fixed-size always-replace TT; mate-score ply normalization, depth/age replacement,
-	// and configurable UCI Hash size are tracked in Issue #140.
+	// Fixed-size always-replace TT without mate-score ply normalization or depth/age replacement.
 	struct TTEntry {
 		uint64_t key = 0;
 		int score = 0;
@@ -47,7 +46,7 @@ public:
 	Move killers[64][2];
 	int historyTable[64][64]{};
 
-	// Full-board SplitMix64 hash; incremental Zobrist hashing in Position is tracked in Issue #139.
+	// Full-board SplitMix64 hash recomputed per node (not yet incrementally maintained in Position).
 	static uint64_t hashPosition(const Position& pos);
 	void clearHistory();
 	void resetGameHistory();
