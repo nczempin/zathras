@@ -142,6 +142,12 @@ namespace Interface {
 						softMs = std::max(1LL, std::min(target, avail / 3));
 						hardMs = std::max(1LL, std::min(target * 2, avail / 2));
 					}
+				} else if (wtime >= 0 || btime >= 0) {
+					// A clock was sent but we have no time left (or only the
+					// opponent's clock was given): spend only a few ms instead
+					// of falling through to the fixed no-clock default below.
+					softMs = 1;
+					hardMs = 5;
 				} else if (depth <= 0) {
 					softMs = 500;
 					hardMs = 1000;
