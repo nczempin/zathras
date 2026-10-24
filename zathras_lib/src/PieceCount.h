@@ -1,6 +1,6 @@
 #pragma once
 namespace Eval {
-	// Legacy piece-count summary ported from Eden (see Issue #142).
+	// Legacy piece-count summary ported from Eden.
 	// Note on FIDE dead positions vs. practical draw heuristics:
 	//   - loneKing() (K) and oneLight() (K+N or K+B) cannot force mate and,
 	//     against a lone king, are strict FIDE dead positions (Art. 5.2.2).

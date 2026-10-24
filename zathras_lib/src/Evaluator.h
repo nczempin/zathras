@@ -7,7 +7,7 @@
 #include "PieceCount.h"
 namespace Eval {
 	// NOTE: Commented-out 10x10 mailbox evaluation blocks in this header are legacy
-	// remnants from the Java Eden port; tracked for cleanup in Issue #138.
+	// remnants from the Java Eden port.
 	class Evaluator
 	{
 	public:
@@ -417,7 +417,7 @@ namespace Eval {
 			int wr = countSetBits(white_rooks), br = countSetBits(black_rooks);
 			int wq = countSetBits(white_queens), bq = countSetBits(black_queens);
 
-			// Practical minor-piece draw shortcut (see Issue #142):
+			// Practical minor-piece draw shortcut:
 			// When neither side has any pawns, rooks, or queens and each side has at most
 			// one minor piece, return 0.
 			// Note that under FIDE Laws of Chess (Art. 5.2.2), only K vs K, KN vs K,
@@ -745,7 +745,7 @@ namespace Eval {
 			PieceCount wpc(pawnsCount, knightsCount, bishopsCount, rookCount, queensCount);
 			return wpc;
 		}*/
-		// Legacy Eden helper (currently unused by getMidgameValue; see Issue #142).
+		// Legacy Eden helper (currently unused by getMidgameValue).
 		// Treats K, KN, KB, and KNN (`isNN()`) as insufficient mating material on a
 		// single-side basis. Note that KNN vs K is a practical draw heuristic rather
 		// than a FIDE dead position (helpmate is legal), and KNN vs KN/KB is not even
