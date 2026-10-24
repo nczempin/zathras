@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
@@ -8,13 +8,10 @@
     <ClCompile Include="src\Command_receiver.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
-    <ClCompile Include="src\Info.cpp">
+    <ClCompile Include="src\Divide_command.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
     <ClCompile Include="src\Perft_command.cpp">
-      <Filter>Interface</Filter>
-    </ClCompile>
-    <ClCompile Include="src\clock.cpp">
       <Filter>Interface</Filter>
     </ClCompile>
   </ItemGroup>
@@ -31,13 +28,10 @@
     <ClInclude Include="src\Command_receiver.h">
       <Filter>Interface</Filter>
     </ClInclude>
-    <ClInclude Include="src\Info.h">
+    <ClInclude Include="src\Divide_command.h">
       <Filter>Interface</Filter>
     </ClInclude>
     <ClInclude Include="src\Perft_command.h">
-      <Filter>Interface</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Sf.h">
       <Filter>Interface</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 
 #include <algorithm>
 
@@ -7,6 +6,8 @@
 
 #include "PieceCount.h"
 namespace Eval {
+	// NOTE: Commented-out 10x10 mailbox evaluation blocks in this header are legacy
+	// remnants from the Java Eden port; tracked for cleanup in Issue #138.
 	class Evaluator
 	{
 	public:
@@ -416,6 +417,16 @@ namespace Eval {
 			int wr = countSetBits(white_rooks), br = countSetBits(black_rooks);
 			int wq = countSetBits(white_queens), bq = countSetBits(black_queens);
 
+			// Practical minor-piece draw shortcut (see Issue #142):
+			// When neither side has any pawns, rooks, or queens and each side has at most
+			// one minor piece, return 0.
+			// Note that under FIDE Laws of Chess (Art. 5.2.2), only K vs K, KN vs K,
+			// KB vs K, and KB vs KB with same-colored bishops are strictly dead positions;
+			// KN vs KN, KB vs KN, and opposite-colored bishops have legal corner helpmates
+			// (and rare 1-ply mates if a king is already self-trapped in a corner).
+			// Scoring all <=1-minor-per-side pawnless positions as 0 is a practical
+			// "99.999999% draw" heuristic so the engine does not hallucinate a +-320/330 cp
+			// winning advantage in unwinnable minor-piece endgames.
 			if (wp == 0 && bp == 0 && wr == 0 && br == 0 && wq == 0 && bq == 0) {
 				if (wn + wb <= 1 && bn + bb_cnt <= 1) {
 					return 0;
@@ -734,7 +745,13 @@ namespace Eval {
 			PieceCount wpc(pawnsCount, knightsCount, bishopsCount, rookCount, queensCount);
 			return wpc;
 		}*/
-		static bool isInsufficientMaterial(PieceCount pc) {
+		// Legacy Eden helper (currently unused by getMidgameValue; see Issue #142).
+		// Treats K, KN, KB, and KNN (`isNN()`) as insufficient mating material on a
+		// single-side basis. Note that KNN vs K is a practical draw heuristic rather
+		// than a FIDE dead position (helpmate is legal), and KNN vs KN/KB is not even
+		// a guaranteed tablebase draw in all positions because the defender's minor
+		// piece can prevent stalemate and allow forced mate.
+		static bool isInsufficientMaterial(const PieceCount& pc) {
 			return (pc.loneKing()) || (pc.oneLight()) || (pc.isNN());
 		}
 		static bool isEndgame(const PieceCount& wpc) {
@@ -892,7 +909,7 @@ namespace Eval {
 		//}
 
 
-		static bool isInsufficientMaterial(PieceCount we, PieceCount other) {
+		static bool isInsufficientMaterial(const PieceCount& we, const PieceCount& other) {
 			return (isInsufficientMaterial(we)) && (isInsufficientMaterial(other));
 		}
 		static int getValue(const Position& p) {

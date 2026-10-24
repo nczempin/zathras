@@ -326,6 +326,7 @@ int Searcher::alphabeta(int depth, Position& position, int alpha, int beta, dequ
 	const Move* ttMovePtr = nullptr;
 	if (tte.flag != 0 && tte.key == h) {
 		ttMovePtr = &tte.bestMove;
+		// Skip TT score cutoffs on mate scores until mate-ply normalization is added (Issue #140).
 		if (tte.depth >= remDepth && tte.score < MATE_THRESHOLD && tte.score > -MATE_THRESHOLD) {
 			if (tte.flag == TT_EXACT) {
 				lineUp.clear();
@@ -486,6 +487,7 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 		seldepth = depth;
 	}
 
+	// NOTE: Stand-pat and capture-only generation when in check is tracked in Issue #137.
 	int v = Eval::Evaluator::getValue(position);
 	if (v >= beta) {
 		return beta;
@@ -493,6 +495,7 @@ int Searcher::quiescence_alphabeta(int depth, Position& position, int alpha, int
 	if (v > alpha) {
 		alpha = v;
 	}
+	// Hard 6-ply qsearch cap to bound capture explosions until SEE pruning is added (Issue #141).
 	if (depth - idDepth >= 6) {
 		return alpha;
 	}

@@ -142,12 +142,6 @@ namespace Interface {
 						softMs = std::max(1LL, std::min(target, avail / 3));
 						hardMs = std::max(1LL, std::min(target * 2, avail / 2));
 					}
-				} else if (wtime >= 0 || btime >= 0) {
-					// A clock was sent but we have no time left (or only the
-					// opponent's clock was given): spend only a few ms instead
-					// of falling through to the fixed no-clock default below.
-					softMs = 1;
-					hardMs = 5;
 				} else if (depth <= 0) {
 					softMs = 500;
 					hardMs = 1000;
@@ -182,13 +176,12 @@ namespace Interface {
 				else if (startsWith("fen", positionString)) {
 					string positionFen = extractFen(positionString);
 					if (positionFen.empty()) {
-				else if (startsWith("fen", positionString)) {
-					string positionFen = startsWith("fen ", positionString) ? extractFen(positionString) : "";
-					if (positionFen.empty()) {
 						cout << "info string ignoring 'position fen' without a FEN string, keeping current position" << endl;
 						return;
 					}
 					p = Position::create_position(positionFen);
+				} else {
+					return;
 				}
 				searcher.resetGameHistory();
 				searcher.pushHistory(p);
