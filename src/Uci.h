@@ -176,11 +176,13 @@ namespace Interface {
 				else if (startsWith("fen", positionString)) {
 					string positionFen = extractFen(positionString);
 					if (positionFen.empty()) {
+				else if (startsWith("fen", positionString)) {
+					string positionFen = startsWith("fen ", positionString) ? extractFen(positionString) : "";
+					if (positionFen.empty()) {
+						cout << "info string ignoring 'position fen' without a FEN string, keeping current position" << endl;
 						return;
 					}
 					p = Position::create_position(positionFen);
-				} else {
-					return;
 				}
 				searcher.resetGameHistory();
 				searcher.pushHistory(p);
