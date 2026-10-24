@@ -7,12 +7,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 **Zathras** is a chess engine written in C++17 that implements the UCI (Universal Chess Interface) protocol. The project focuses on correctness and educational value over performance optimization.
 
 **Technology Stack**: C++17, Make build system, UCI protocol  
-**Current Version**: 0.0.8-rc1  
+**Current Version**: 0.0.8  
 **Platform**: Linux (WSL2)
 
 ## Project Status and Branch Strategy
 
-### Current Version: 0.0.8-rc1
+### Current Version: 0.0.8
 
 **Branch Strategy**:
 - `main`: Production-ready releases 
@@ -23,11 +23,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 ## Current Work Status
 
-### Recent Milestones (0.0.7 / 0.0.8-rc1)
+### Recent Milestones (0.0.7 / 0.0.8)
 - ✅ **Build System**: Zero compiler warnings (`-Wall -Wextra -pedantic`), uses separate `build/` directory (`@mkdir -p $(@D)`) and `make test` (`zathras_tests`)
 - ✅ **CI Pipeline**: Consolidated job running `make test` and `scripts/run_all_ci_tests.sh`
 - ✅ **Issue #109**: COMPLETED - Position 4 perft 4 now returns the exact `422,333` moves (make/unmake castling and en-passant restoration fixed)
-- ✅ **Search & Eval (0.0.8-rc1)**: Asynchronous UCI search thread (`stop`/`isready`/`quit`/`go infinite` support), 65k transposition table, PVS, LMR, killer moves, history heuristic, tapered PST evaluation
+- ✅ **Search & Eval (0.0.8)**: Asynchronous UCI search thread (`stop`/`isready`/`quit`/`go infinite` support), 65k transposition table, PVS, LMR, killer moves, history heuristic, tapered PST evaluation
 
 ### Completed Work (2025-06-26)
 - ✅ **Issue #105**: Implemented divide command for perft debugging
@@ -112,7 +112,7 @@ $(BUILD_DIR)/%.o: %.cpp
 7. ✅ All promotion tests pass including edge files
 
 ### Issue #109: Position 4 perft 4 incorrect
-**Status**: COMPLETED (resolved in 0.0.7 / 0.0.8-rc1)
+**Status**: COMPLETED (resolved in 0.0.7 / 0.0.8)
 
 ### Issue #97: CI Optimization
 **Status**: Completed for now - consolidated CI into single job
