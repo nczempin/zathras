@@ -527,6 +527,23 @@ namespace Eval {
 			int whiteValue = whitePos + wk_score;
 			int blackValue = blackPos + bk_score;
 
+			// #179: Eden material trade-down bonus in endgame when ahead > 105 cp
+			PieceCount wpc(wp, wn, wb, wr, wq);
+			PieceCount bpc(bp, bn, bb_cnt, br, bq);
+			if (isEndgame(wpc) && isEndgame(bpc)) {
+				if (whiteMValue > blackMValue + 105) {
+					int diff = whiteMValue + blackMValue - 500;
+					int bonus = (8000 - diff) / 100;
+					if (bonus > 74) bonus = 74;
+					if (bonus > 0) whiteValue += bonus;
+				} else if (blackMValue > whiteMValue + 105) {
+					int diff = blackMValue + whiteMValue - 500;
+					int bonus = (8000 - diff) / 100;
+					if (bonus > 74) bonus = 74;
+					if (bonus > 0) blackValue += bonus;
+				}
+			}
+
 			// Endgame mop-up when clearly winning
 			if (phase <= 6) {
 				int wk_r = wk_sq / 8, wk_f = wk_sq % 8;
